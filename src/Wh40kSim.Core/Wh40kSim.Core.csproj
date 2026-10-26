@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Bibliothèque pure : modèles + moteur de simulation. Aucune dépendance UI ni IO (hors JSON). -->
+  <PropertyGroup>
+    <RootNamespace>Wh40kSim.Core</RootNamespace>
+  </PropertyGroup>
+
+</Project>

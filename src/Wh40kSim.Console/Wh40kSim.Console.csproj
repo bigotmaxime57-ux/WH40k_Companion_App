@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Wh40kSim.ConsoleApp</RootNamespace>
+    <AssemblyName>wh40ksim</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Wh40kSim.Core\Wh40kSim.Core.csproj" />
+  </ItemGroup>
+
+</Project>

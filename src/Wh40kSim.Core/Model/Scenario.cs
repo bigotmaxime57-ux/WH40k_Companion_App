@@ -1,0 +1,102 @@
+namespace Wh40kSim.Core.Model;
+
+/// <summary>Tout ce qu'il faut pour simuler : attaquant, défenseur et situation.</summary>
+public sealed record Scenario
+{
+    public AttackerUnit Attacker { get; init; } = new();
+
+    public DefenderUnit Defender { get; init; } = new();
+
+    public AttackContext Context { get; init; } = new();
+
+    /// <summary>Renvoie la liste des incohérences (vide si le scénario est valide).</summary>
+    public IReadOnlyList<string> Validate()
+    {
+        var errors = new List<string>();
+
+        if (Attacker.Weapons.Count == 0)
+        {
+            errors.Add("L'attaquant doit avoir au moins un profil d'arme.");
+        }
+
+        foreach (var group in Attacker.Weapons)
+        {
+            var weapon = group.Weapon;
+            string label = $"Arme '{weapon.Name}'";
+            if (group.ModelCount < 1) errors.Add($"{label} : le nombre de figurines doit être d'au moins 1.");
+            if (!weapon.Abilities.Torrent && (weapon.Skill < 2 || weapon.Skill > 6)) errors.Add($"{label} : CT/CC doit être entre 2 et 6.");
+            if (weapon.Strength < 1) errors.Add($"{label} : la Force doit être d'au moins 1.");
+            if (weapon.Abilities.CriticalHitOn is < 2 or > 6) errors.Add($"{label} : la touche critique doit être entre 2 et 6.");
+            if (weapon.Abilities.CriticalWoundOn is < 2 or > 6) errors.Add($"{label} : la blessure critique doit être entre 2 et 6.");
+            if (weapon.Abilities.RapidFire < 0 || weapon.Abilities.Melta < 0) errors.Add($"{label} : Rapid Fire et Melta ne peuvent pas être négatifs.");
+        }
+
+        if (Defender.Toughness < 1)
+        {
+            errors.Add("Le défenseur doit avoir une Endurance d'au moins 1.");
+        }
+
+        if (Defender.Groups.Count == 0)
+        {
+            errors.Add("Le défenseur doit avoir au moins un groupe de figurines.");
+        }
+
+        foreach (var group in Defender.Groups)
+        {
+            string label = $"Groupe '{group.Name}'";
+            if (group.Count < 1) errors.Add($"{label} : au moins 1 figurine.");
+            if (group.Wounds < 1) errors.Add($"{label} : au moins 1 PV.");
+            if (group.Save is < 2 or > 7) errors.Add($"{label} : la sauvegarde doit être entre 2 et 7 (7 = aucune).");
+            if (group.InvulnerableSave is < 2 or > 6) errors.Add($"{label} : l'invulnérable doit être entre 2 et 6.");
+            if (group.FeelNoPain is < 2 or > 6) errors.Add($"{label} : l'insensible à la douleur doit être entre 2 et 6.");
+            if (group.DamageReduction < 0) errors.Add($"{label} : la réduction de dégâts ne peut pas être négative.");
+            if (group.Toughness is < 1) errors.Add($"{label} : l'Endurance doit être d'au moins 1.");
+            if (group.IsCharacter && group.Count != 1) errors.Add($"{label} : un groupe PERSONNAGE contient exactement une figurine.");
+        }
+
+        if (Context.PrecisionTarget is string precisionTarget
+            && !Defender.Groups.Any(g => g.IsCharacter && g.Name == precisionTarget))
+        {
+            errors.Add($"Cible de Precision '{precisionTarget}' : aucun groupe PERSONNAGE de ce nom.");
+        }
+
+        // 05.03 : aucun PERSONNAGE avant un groupe non-PERSONNAGE
+        int firstCharacter = -1;
+        for (int g = 0; g < Defender.Groups.Count; g++)
+        {
+            if (Defender.Groups[g].IsCharacter && firstCharacter < 0)
+            {
+                firstCharacter = g;
+            }
+            else if (!Defender.Groups[g].IsCharacter && firstCharacter >= 0)
+            {
+                errors.Add($"Le PERSONNAGE '{Defender.Groups[firstCharacter].Name}' ne peut pas être alloué avant le groupe '{Defender.Groups[g].Name}'.");
+                break;
+            }
+        }
+
+        // 05.03 : les figurines non-PERSONNAGE aux mêmes PV/Sv/InSv forment un seul groupe
+        var regular = Defender.Groups.Where(g => !g.IsCharacter).ToList();
+        for (int i = 0; i < regular.Count; i++)
+        {
+            for (int j = i + 1; j < regular.Count; j++)
+            {
+                if (regular[i].Wounds == regular[j].Wounds && regular[i].Save == regular[j].Save && regular[i].InvulnerableSave == regular[j].InvulnerableSave)
+                {
+                    errors.Add($"Les groupes '{regular[i].Name}' et '{regular[j].Name}' ont les mêmes PV, Sv et InSv : ils forment un seul groupe.");
+                }
+            }
+        }
+
+        return errors;
+    }
+
+    public void EnsureValid()
+    {
+        var errors = Validate();
+        if (errors.Count > 0)
+        {
+            throw new ArgumentException("Scénario invalide :" + Environment.NewLine + string.Join(Environment.NewLine, errors.Select(e => "  - " + e)));
+        }
+    }
+}

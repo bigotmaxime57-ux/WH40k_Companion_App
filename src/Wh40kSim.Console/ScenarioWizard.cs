@@ -1,0 +1,146 @@
+using Wh40kSim.Core.Model;
+using static Wh40kSim.ConsoleApp.ConsoleInput;
+
+namespace Wh40kSim.ConsoleApp;
+
+/// <summary>Saisie guidée d'un scénario complet dans la console.</summary>
+internal static class ScenarioWizard
+{
+    private const string AbilitiesHelp =
+        "Mots-clés, séparés par des virgules (ex : lethal, sustained 1, dev, twin, torrent, blast, rapid 1, melta 2, heavy, lance, ignores cover, precision, anti 4+, crit hit 5+)";
+
+    public static Scenario Build()
+    {
+        var attacker = ReadAttacker();
+        var defender = ReadDefender();
+        var context = ReadContext(attacker, defender);
+        return new Scenario { Attacker = attacker, Defender = defender, Context = context };
+    }
+
+    private static AttackerUnit ReadAttacker()
+    {
+        WriteTitle("Attaquant");
+        string name = ReadString("Nom de l'unité", "Attaquant");
+        int profileCount = ReadInt("Nombre de profils d'armes différents", 1, 1, 20);
+
+        var weapons = new List<WeaponGroup>();
+        for (int i = 1; i <= profileCount; i++)
+        {
+            Console.WriteLine($"-- Profil d'arme {i} --");
+            string weaponName = ReadString("Nom de l'arme", $"Arme {i}");
+            bool melee = ReadString("Type (T = tir, M = mêlée)", "T").Trim().ToUpperInvariant().StartsWith('M');
+            int models = ReadInt("Nombre de figurines équipées", 1, 1, 100);
+            var attacks = ReadDice("Attaques (ex : 2, D6, D3+1)", 1);
+            var abilities = ReadAbilities(AbilitiesHelp);
+            int skill = abilities.Torrent ? 2 : ReadInt(melee ? "CC (ex : 3 pour 3+)" : "CT (ex : 3 pour 3+)", 3, 2, 6);
+            int strength = ReadInt("Force", 4, 1, 30);
+            int ap = ReadInt("PA (ex : -1)", 0, -6, 6);
+            var damage = ReadDice("Dégâts (ex : 1, D3, D6+1)", 1);
+
+            weapons.Add(new WeaponGroup
+            {
+                ModelCount = models,
+                Weapon = new WeaponProfile
+                {
+                    Name = weaponName,
+                    Type = melee ? WeaponType.Melee : WeaponType.Ranged,
+                    Attacks = attacks,
+                    Skill = skill,
+                    Strength = strength,
+                    Ap = ap,
+                    Damage = damage,
+                    Abilities = abilities,
+                },
+            });
+        }
+
+        return new AttackerUnit { Name = name, Weapons = weapons };
+    }
+
+    private static DefenderUnit ReadDefender()
+    {
+        WriteTitle("Défenseur");
+        string name = ReadString("Nom de l'unité", "Défenseur");
+        int toughness = ReadInt("Endurance de l'unité (des gardes du corps si un leader est attaché)", 4, 1, 30);
+        bool inCover = ReadBool("À couvert", false);
+        int hitModifier = ReadInt("Modificateur aux jets de touche subis (ex : -1 pour Stealth)", 0, -3, 3);
+        int woundModifier = ReadInt("Modificateur aux jets de blessure subis", 0, -3, 3);
+        int groupCount = ReadInt("Nombre de groupes de figurines (profils défensifs différents)", 1, 1, 10);
+        Console.WriteLine("Les groupes sont saisis dans l'ordre d'allocation : le groupe 1 encaisse en premier.");
+        Console.WriteLine("Un groupe par PERSONNAGE (après les autres), un groupe par combinaison PV/Sv/InSv pour les autres figurines.");
+
+        var groups = new List<ModelGroup>();
+        for (int i = 1; i <= groupCount; i++)
+        {
+            Console.WriteLine($"-- Groupe {i} --");
+            string groupName = ReadString("Nom du groupe", i == 1 ? "Gardes du corps" : $"Groupe {i}");
+            bool isCharacter = ReadBool("PERSONNAGE (leader)", false);
+            groups.Add(new ModelGroup
+            {
+                Name = groupName,
+                IsCharacter = isCharacter,
+                Count = isCharacter ? 1 : ReadInt("Nombre de figurines", 5, 1, 100),
+                Toughness = ReadOptionalInt($"Endurance du groupe (vide = {toughness})", 1, 30),
+                Wounds = ReadInt("PV par figurine", 1, 1, 50),
+                Save = ReadInt("Sauvegarde (ex : 3 pour 3+, 7 si aucune)", 3, 2, 7),
+                InvulnerableSave = ReadOptionalThreshold("Invulnérable"),
+                FeelNoPain = ReadOptionalThreshold("Insensible à la douleur"),
+                DamageReduction = ReadInt("Réduction de dégâts", 0, 0, 5),
+            });
+        }
+
+        return new DefenderUnit
+        {
+            Name = name,
+            Toughness = toughness,
+            InCover = inCover,
+            HitModifier = hitModifier,
+            WoundModifier = woundModifier,
+            Groups = groups,
+        };
+    }
+
+    private static AttackContext ReadContext(AttackerUnit attacker, DefenderUnit defender)
+    {
+        WriteTitle("Situation");
+        var abilities = attacker.Weapons.Select(w => w.Weapon.Abilities).ToList();
+
+        // On ne pose les questions de situation que si une arme est concernée
+        bool halfRange = abilities.Any(a => a.RapidFire > 0 || a.Melta > 0) && ReadBool("À demi-portée", false);
+        bool stationary = abilities.Any(a => a.Heavy) && ReadBool("Restée immobile", false);
+        bool charged = abilities.Any(a => a.Lance) && ReadBool("A chargé ce tour", false);
+
+        var characters = defender.Groups.Where(g => g.IsCharacter).Select(g => g.Name).ToList();
+        string? precisionTarget = null;
+        if (abilities.Any(a => a.Precision) && characters.Count > 1)
+        {
+            precisionTarget = ReadParsedName("PERSONNAGE visé par Precision (" + string.Join(" / ", characters) + ")", characters);
+        }
+
+        return new AttackContext
+        {
+            HalfRange = halfRange,
+            RemainedStationary = stationary,
+            Charged = charged,
+            HitModifier = ReadInt("Modificateur aux jets de touche de l'attaquant", 0, -3, 3),
+            WoundModifier = ReadInt("Modificateur aux jets de blessure de l'attaquant", 0, -3, 3),
+            HitReroll = ReadReroll("Relance des touches"),
+            WoundReroll = ReadReroll("Relance des blessures"),
+            PrecisionTarget = precisionTarget,
+        };
+    }
+
+    private static string ReadParsedName(string label, List<string> allowed)
+    {
+        while (true)
+        {
+            string name = ReadString(label, allowed[0]);
+            var match = allowed.FirstOrDefault(n => string.Equals(n, name, StringComparison.OrdinalIgnoreCase));
+            if (match is not null)
+            {
+                return match;
+            }
+            WriteError("Nom de PERSONNAGE inconnu.");
+        }
+    }
+}

@@ -1,0 +1,52 @@
+{
+  // Exemple : une escouade avec deux profils d'armes tire sur une unité avec leader attaché.
+  // Les groupes du défenseur sont dans l'ordre d'allocation (11e édition) :
+  // les gardes du corps encaissent d'abord, puis l'élite, puis le leader (PERSONNAGE, toujours en dernier).
+  "attacker": {
+    "name": "Escouade de tir",
+    "weapons": [
+      {
+        "modelCount": 9,
+        "weapon": {
+          "name": "Fusil",
+          "type": "Ranged",
+          "attacks": 2,
+          "skill": 3,
+          "strength": 4,
+          "ap": -1,
+          "damage": 1,
+          "abilities": { "rapidFire": 1 }
+        }
+      },
+      {
+        "modelCount": 1,
+        "weapon": {
+          "name": "Canon lourd",
+          "type": "Ranged",
+          "attacks": "D6",
+          "skill": 4,
+          "strength": 9,
+          "ap": -2,
+          "damage": "D3",
+          "abilities": { "blast": true, "heavy": true }
+        }
+      }
+    ]
+  },
+  "defender": {
+    "name": "Escouade + Leader",
+    "toughness": 4,
+    "inCover": false,
+    "groups": [
+      { "name": "Gardes du corps", "count": 8, "wounds": 2, "save": 4 },
+      { "name": "Gardes d'élite", "count": 2, "wounds": 2, "save": 3 },
+      { "name": "Leader", "isCharacter": true, "count": 1, "wounds": 4, "toughness": 4, "save": 2, "invulnerableSave": 4 }
+    ]
+  },
+  "context": {
+    "halfRange": false,
+    "remainedStationary": true,
+    "hitReroll": "None",
+    "woundReroll": "None"
+  }
+}

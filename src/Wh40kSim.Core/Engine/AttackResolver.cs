@@ -1,0 +1,328 @@
+using Wh40kSim.Core.Dice;
+using Wh40kSim.Core.Model;
+
+namespace Wh40kSim.Core.Engine;
+
+/// <summary>
+/// Résout une fois la séquence d'attaque complète de l'attaquant contre le défenseur (règles 05, 11e édition).
+/// <list type="bullet">
+/// <item>Les armes aux attaques identiques sont regroupées en un seul pool (ex. bolters + pistolets bolter) :
+/// leurs dés sont lancés ensemble, y compris les sauvegardes.</item>
+/// <item>Le couvert ne modifie plus la PA : il dégrade de 1 la CT des armes de tir (CT bornée entre 2+ et 6+).</item>
+/// <item>Les sauvegardes d'un pool sont jetées ensemble et résolues du plus petit au plus grand résultat,
+/// sur le groupe d'allocation courant, jusqu'à sa destruction.</item>
+/// <item>L'Endurance est recalculée avant chaque pool (05.02.01).</item>
+/// </list>
+/// Une instance n'est pas thread-safe : en créer une par thread.
+/// </summary>
+public sealed class AttackResolver
+{
+    private enum RollOutcome
+    {
+        Fail,
+        Success,
+        Critical,
+    }
+
+    private readonly Scenario _scenario;
+    private readonly DefenderState _target;
+    private readonly IReadOnlyList<AttackPool> _pools;
+    private readonly int[] _saveRollCounts = new int[7]; // index 1..6 = nombre de dés ayant fait cette valeur
+
+    public AttackResolver(Scenario scenario)
+    {
+        ArgumentNullException.ThrowIfNull(scenario);
+        scenario.EnsureValid();
+        _scenario = scenario;
+        _target = new DefenderState(scenario.Defender);
+        _pools = AttackPool.Build(scenario.Attacker.Weapons);
+    }
+
+    /// <summary>État du défenseur après le dernier appel à <see cref="Run"/>.</summary>
+    public DefenderState Target => _target;
+
+    /// <summary>Pools d'attaques identiques, dans l'ordre de résolution.</summary>
+    public IReadOnlyList<AttackPool> Pools => _pools;
+
+    /// <summary>Remet le défenseur à neuf puis résout tous les pools d'attaques, dans l'ordre.</summary>
+    public void Run(IDiceRoller dice)
+    {
+        _target.Reset();
+        int initialModels = _target.ModelsAlive;
+
+        foreach (var pool in _pools)
+        {
+            if (_target.IsDestroyed)
+            {
+                return;
+            }
+            ResolvePool(pool, initialModels, dice);
+        }
+    }
+
+    private void ResolvePool(AttackPool pool, int initialModels, IDiceRoller dice)
+    {
+        var weapon = pool.Profile;
+        int attacks = CountAttacks(pool, initialModels, dice);
+        ResolveHits(weapon, attacks, dice, out int hits, out int autoWounds);
+        ResolveWounds(weapon, hits, dice, out int normalWounds, out int devastatingWounds);
+
+        // Precision : le choix se fait au début de l'étape d'allocation (05.03), une fois par pool
+        int precisionGroup = weapon.Abilities.Precision ? SelectPrecisionGroup() : -1;
+
+        ResolveSaves(weapon, normalWounds + autoWounds, precisionGroup, dice);
+        ResolveDevastatingWounds(weapon, devastatingWounds, precisionGroup, dice);
+    }
+
+    /// <summary>Groupe PERSONNAGE visé par Precision : celui nommé dans le contexte, sinon le premier encore en jeu.</summary>
+    private int SelectPrecisionGroup()
+    {
+        var groups = _scenario.Defender.Groups;
+        string? wanted = _scenario.Context.PrecisionTarget;
+        for (int g = 0; g < groups.Count; g++)
+        {
+            if (groups[g].IsCharacter && _target.AliveInGroup(g) > 0 && (wanted is null || groups[g].Name == wanted))
+            {
+                return g;
+            }
+        }
+        return -1;
+    }
+
+    // --- 1. Nombre d'attaques -------------------------------------------------------------
+
+    private int CountAttacks(AttackPool pool, int initialModels, IDiceRoller dice)
+    {
+        int attacks = 0;
+        foreach (var member in pool.Members)
+        {
+            var abilities = member.Weapon.Abilities;
+            int bonusPerModel = 0;
+            if (abilities.Blast)
+            {
+                bonusPerModel += initialModels / 5;
+            }
+            if (abilities.RapidFire > 0 && _scenario.Context.HalfRange)
+            {
+                bonusPerModel += abilities.RapidFire;
+            }
+
+            for (int model = 0; model < member.ModelCount; model++)
+            {
+                // A ne peut pas être inférieur à 1 (02.02.01)
+                attacks += Math.Max(1, member.Weapon.Attacks.Roll(dice)) + bonusPerModel;
+            }
+        }
+        return attacks;
+    }
+
+    // --- 2. Jets de touche ----------------------------------------------------------------
+
+    private void ResolveHits(WeaponProfile weapon, int attacks, IDiceRoller dice, out int hits, out int autoWounds)
+    {
+        var abilities = weapon.Abilities;
+        hits = 0;
+        autoWounds = 0;
+
+        if (abilities.Torrent)
+        {
+            hits = attacks;
+            return;
+        }
+
+        var context = _scenario.Context;
+        var defender = _scenario.Defender;
+        bool ranged = weapon.Type == WeaponType.Ranged;
+
+        // Couvert (11e) : CT dégradée de 1. Modification de caractéristique, donc non plafonnée à ±1,
+        // mais la CT ne peut être ni 1+ ni 7+ (02.02.01).
+        int skill = weapon.Skill;
+        if (ranged && defender.InCover && !abilities.IgnoresCover)
+        {
+            skill += 1;
+        }
+        skill = Math.Clamp(skill, 2, 6);
+
+        int modifier = context.HitModifier + defender.HitModifier;
+        if (ranged && abilities.Heavy && context.RemainedStationary)
+        {
+            modifier += 1;
+        }
+        modifier = Math.Clamp(modifier, -1, 1);
+
+        for (int i = 0; i < attacks; i++)
+        {
+            int roll = dice.D6();
+            var outcome = Evaluate(roll, skill, modifier, abilities.CriticalHitOn);
+            if (ShouldReroll(context.HitReroll, roll, outcome))
+            {
+                roll = dice.D6();
+                outcome = Evaluate(roll, skill, modifier, abilities.CriticalHitOn);
+            }
+
+            if (outcome == RollOutcome.Fail)
+            {
+                continue;
+            }
+
+            if (outcome == RollOutcome.Critical)
+            {
+                if (!abilities.SustainedHits.IsZero)
+                {
+                    hits += abilities.SustainedHits.Roll(dice);
+                }
+                if (abilities.LethalHits)
+                {
+                    autoWounds++;
+                    continue;
+                }
+            }
+
+            hits++;
+        }
+    }
+
+    // --- 3. Jets de blessure --------------------------------------------------------------
+
+    private void ResolveWounds(WeaponProfile weapon, int hits, IDiceRoller dice, out int normalWounds, out int devastatingWounds)
+    {
+        var abilities = weapon.Abilities;
+        var context = _scenario.Context;
+        normalWounds = 0;
+        devastatingWounds = 0;
+
+        int target = WoundTable.RequiredRoll(weapon.Strength, _target.EffectiveToughness());
+
+        int modifier = context.WoundModifier + _scenario.Defender.WoundModifier;
+        if (abilities.Lance && context.Charged)
+        {
+            modifier += 1;
+        }
+        modifier = Math.Clamp(modifier, -1, 1);
+
+        // Twin-linked = relance des échecs ; on garde la relance la plus large disponible
+        var reroll = (RerollPolicy)Math.Max((int)context.WoundReroll, abilities.TwinLinked ? (int)RerollPolicy.Failed : 0);
+
+        for (int i = 0; i < hits; i++)
+        {
+            int roll = dice.D6();
+            var outcome = Evaluate(roll, target, modifier, abilities.CriticalWoundOn);
+            if (ShouldReroll(reroll, roll, outcome))
+            {
+                roll = dice.D6();
+                outcome = Evaluate(roll, target, modifier, abilities.CriticalWoundOn);
+            }
+
+            if (outcome == RollOutcome.Fail)
+            {
+                continue;
+            }
+
+            if (outcome == RollOutcome.Critical && abilities.DevastatingWounds)
+            {
+                devastatingWounds++;
+            }
+            else
+            {
+                normalWounds++;
+            }
+        }
+    }
+
+    // --- 4. Sauvegardes et dégâts (05.03 / 05.04) -----------------------------------------
+
+    private void ResolveSaves(WeaponProfile weapon, int wounds, int precisionGroup, IDiceRoller dice)
+    {
+        if (wounds == 0)
+        {
+            return;
+        }
+
+        // Tous les jets de sauvegarde sont lancés d'un coup puis traités du plus petit au plus grand.
+        Array.Clear(_saveRollCounts);
+        for (int i = 0; i < wounds; i++)
+        {
+            _saveRollCounts[dice.D6()]++;
+        }
+
+        int ap = -Math.Abs(weapon.Ap);
+        var groups = _scenario.Defender.Groups;
+
+        for (int face = 1; face <= 6; face++)
+        {
+            for (int n = _saveRollCounts[face]; n > 0; n--)
+            {
+                // Groupe d'allocation courant : le PERSONNAGE visé par Precision tant qu'il vit, sinon le premier en jeu
+                int g = _target.CurrentGroup(precisionGroup);
+                if (g < 0)
+                {
+                    return; // unité détruite : les attaques restantes sont perdues
+                }
+
+                var group = groups[g];
+                // 1 naturel = dégâts ; résultat ≥ InSv = échec de l'attaque ; résultat + PA ≥ Sv = échec de l'attaque
+                bool saved = face != 1
+                             && ((group.InvulnerableSave is int invuln && face >= invuln) || face + ap >= group.Save);
+                if (!saved)
+                {
+                    _target.ApplyDamage(g, RollDamage(weapon, dice), mortalWounds: false, dice);
+                }
+            }
+        }
+    }
+
+    // --- 5. Devastating Wounds ------------------------------------------------------------
+
+    /// <summary>
+    /// Devastating Wounds (24.10) : chaque blessure critique inflige D blessures mortelles, après les dégâts normaux.
+    /// Une seule figurine par blessure critique (excédent perdu), Feel No Pain applicable, pas de réduction de dégâts.
+    /// Avec Precision (24.28.01), elles vont d'abord sur le PERSONNAGE visé s'il est encore en jeu.
+    /// </summary>
+    private void ResolveDevastatingWounds(WeaponProfile weapon, int count, int precisionGroup, IDiceRoller dice)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            int g = _target.CurrentGroup(precisionGroup);
+            if (g < 0)
+            {
+                return;
+            }
+            _target.ApplyDamage(g, RollDamage(weapon, dice), mortalWounds: true, dice);
+        }
+    }
+
+    // --- Utilitaires ----------------------------------------------------------------------
+
+    private int RollDamage(WeaponProfile weapon, IDiceRoller dice)
+    {
+        // D ne peut pas être inférieur à 1 (02.02.01)
+        int damage = Math.Max(1, weapon.Damage.Roll(dice));
+        if (weapon.Abilities.Melta > 0 && _scenario.Context.HalfRange)
+        {
+            damage += weapon.Abilities.Melta;
+        }
+        return damage;
+    }
+
+    /// <summary>1 naturel = échec, résultat critique (non modifié) = réussite, sinon résultat modifié ≥ cible.</summary>
+    private static RollOutcome Evaluate(int roll, int target, int modifier, int criticalOn)
+    {
+        if (roll == 1)
+        {
+            return RollOutcome.Fail;
+        }
+        if (roll >= criticalOn)
+        {
+            return RollOutcome.Critical;
+        }
+        return roll + modifier >= target ? RollOutcome.Success : RollOutcome.Fail;
+    }
+
+    private static bool ShouldReroll(RerollPolicy policy, int roll, RollOutcome outcome) => policy switch
+    {
+        RerollPolicy.Ones => roll == 1,
+        RerollPolicy.Failed => outcome == RollOutcome.Fail,
+        RerollPolicy.NonCritical => outcome != RollOutcome.Critical,
+        _ => false,
+    };
+}

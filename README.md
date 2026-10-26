@@ -13,7 +13,7 @@ src/Wh40kSim.Core            Bibliothèque pure : modèles + moteur (réutilisé
   Serialization/             Lecture / écriture des scénarios en JSON
 src/Wh40kSim.Console         Appli console de test (saisie interactive ou fichier JSON)
 tests/Wh40kSim.Core.Tests    Tests xUnit
-scenarios/                   Scénarios d'exemple
+scenarios/                   Scénarios d'exemple et scénarios enregistrés depuis la saisie interactive
 ```
 
 ## Prérequis et commandes

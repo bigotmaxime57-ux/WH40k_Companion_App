@@ -24,8 +24,8 @@ public sealed record ModelGroup
     /// <summary>Figurine PERSONNAGE (leader) : groupe d'une seule figurine, alloué après les gardes du corps.</summary>
     public bool IsCharacter { get; init; }
 
-    /// <summary>Endurance de ce groupe (null = celle de l'unité, <see cref="DefenderUnit.Toughness"/>).</summary>
-    public int? Toughness { get; init; }
+    /// <summary>Endurance des figurines de ce groupe.</summary>
+    public int Toughness { get; init; } = 4;
 
     /// <summary>Points de vie par figurine.</summary>
     public int Wounds { get; init; } = 1;
@@ -48,23 +48,19 @@ public sealed record ModelGroup
         if (InvulnerableSave is int invuln) save += $" / {invuln}++";
         if (FeelNoPain is int fnp) save += $", FNP {fnp}+";
         if (DamageReduction > 0) save += $", -{DamageReduction} dégât";
-        string toughness = Toughness is int t ? $"E{t}, " : "";
         string character = IsCharacter ? " (PERSONNAGE)" : "";
-        return $"{Name}{character} : {Count} fig. × {Wounds} PV, {toughness}{save}";
+        return $"{Name}{character} : {Count} fig. × {Wounds} PV, E{Toughness}, {save}";
     }
 }
 
-/// <summary>Unité ciblée. <see cref="Groups"/> est dans l'ordre d'allocation (le premier encaisse en premier).</summary>
+/// <summary>
+/// Unité ciblée. <see cref="Groups"/> est dans l'ordre d'allocation (le premier encaisse en premier).
+/// Les caractéristiques des figurines (Endurance, PV, sauvegardes) sont portées par les groupes ;
+/// l'Endurance utilisée pour blesser est calculée par le moteur (règle 05.02.01).
+/// </summary>
 public sealed record DefenderUnit
 {
     public string Name { get; init; } = "Défenseur";
-
-    /// <summary>
-    /// Endurance par défaut des groupes qui n'en précisent pas.
-    /// L'Endurance utilisée pour blesser est calculée par le moteur (règle 05.02.01) :
-    /// la plus haute des gardes du corps encore en jeu, sinon la plus haute des figurines restantes.
-    /// </summary>
-    public int Toughness { get; init; } = 4;
 
     /// <summary>Règle 11e édition : le couvert dégrade la CT de l'attaquant de 1 (armes de tir uniquement).</summary>
     public bool InCover { get; init; }

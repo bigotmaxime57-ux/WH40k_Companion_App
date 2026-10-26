@@ -28,6 +28,8 @@ public static class ScenarioJson
             WriteIndented = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
             AllowTrailingCommas = true,
+            // Une propriété mal placée ou mal orthographiée (ex. "toughness" sur le défenseur) ne doit pas être ignorée en silence
+            UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
         };
         options.Converters.Add(new JsonStringEnumConverter());
         options.Converters.Add(new DiceExpressionJsonConverter());

@@ -34,7 +34,6 @@ internal static class Build
 
     public static DefenderUnit Horde(int toughness = 4, int save = 7, int models = 100) => new()
     {
-        Toughness = toughness,
-        Groups = [new ModelGroup { Name = "Horde", Count = models, Wounds = 1, Save = save }],
+        Groups = [new ModelGroup { Name = "Horde", Count = models, Toughness = toughness, Wounds = 1, Save = save }],
     };
 }

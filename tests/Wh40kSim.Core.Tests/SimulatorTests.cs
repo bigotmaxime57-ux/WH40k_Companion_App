@@ -110,6 +110,15 @@ public class SimulatorTests
     }
 
     [Fact]
+    public void Unknown_json_property_is_rejected()
+    {
+        // L'Endurance appartient aux groupes de figurines, pas à l'unité
+        const string json = """{ "defender": { "toughness": 5, "groups": [{ "count": 1 }] } }""";
+
+        Assert.Throws<System.Text.Json.JsonException>(() => ScenarioJson.Deserialize(json));
+    }
+
+    [Fact]
     public void Example_scenario_file_loads_and_runs()
     {
         string path = Path.Combine(FindRepositoryRoot(), "scenarios", "exemple-escouade-vs-leader.json");

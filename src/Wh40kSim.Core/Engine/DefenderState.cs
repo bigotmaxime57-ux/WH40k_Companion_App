@@ -12,18 +12,12 @@ public sealed class DefenderState
     private readonly IReadOnlyList<ModelGroup> _groups;
     private readonly int[] _alive;
     private readonly int[] _frontWounds;
-    private readonly int[] _toughness;
 
     public DefenderState(DefenderUnit unit)
     {
         _groups = unit.Groups;
         _alive = new int[_groups.Count];
         _frontWounds = new int[_groups.Count];
-        _toughness = new int[_groups.Count];
-        for (int g = 0; g < _groups.Count; g++)
-        {
-            _toughness[g] = _groups[g].Toughness ?? unit.Toughness;
-        }
         TotalModels = unit.TotalModels;
         Reset();
     }
@@ -73,10 +67,10 @@ public sealed class DefenderState
             {
                 continue;
             }
-            any = Math.Max(any, _toughness[g]);
+            any = Math.Max(any, _groups[g].Toughness);
             if (!_groups[g].IsCharacter)
             {
-                bodyguard = Math.Max(bodyguard, _toughness[g]);
+                bodyguard = Math.Max(bodyguard, _groups[g].Toughness);
             }
         }
         return bodyguard > 0 ? bodyguard : any;

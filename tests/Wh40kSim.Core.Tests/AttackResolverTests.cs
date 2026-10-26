@@ -25,7 +25,6 @@ public class AttackResolverTests
     {
         var defender = new DefenderUnit
         {
-            Toughness = 4,
             Groups =
             [
                 new ModelGroup { Name = "Gardes", Count = 3, Wounds = 1, Save = 4 },
@@ -49,7 +48,6 @@ public class AttackResolverTests
     {
         var defender = new DefenderUnit
         {
-            Toughness = 4,
             Groups =
             [
                 new ModelGroup { Name = "Garde", Count = 1, Wounds = 1, Save = 4 },
@@ -72,7 +70,6 @@ public class AttackResolverTests
     {
         var defender = new DefenderUnit
         {
-            Toughness = 4,
             Groups =
             [
                 new ModelGroup { Name = "Garde", Count = 1, Wounds = 1, Save = 3 },
@@ -91,7 +88,7 @@ public class AttackResolverTests
     [Fact]
     public void Excess_damage_is_lost_and_does_not_spill_to_the_next_model()
     {
-        var defender = new DefenderUnit { Toughness = 4, Groups = [new ModelGroup { Count = 3, Wounds = 1, Save = 7 }] };
+        var defender = new DefenderUnit { Groups = [new ModelGroup { Count = 3, Wounds = 1, Save = 7 }] };
         var resolver = new AttackResolver(Build.Scenario(TorrentWeapon(1, damage: 3), defender));
 
         resolver.Run(new ScriptedDiceRoller(2, 1));
@@ -103,7 +100,7 @@ public class AttackResolverTests
     [Fact]
     public void Devastating_wounds_bypass_saves()
     {
-        var defender = new DefenderUnit { Toughness = 4, Groups = [new ModelGroup { Count = 2, Wounds = 2, Save = 2 }] };
+        var defender = new DefenderUnit { Groups = [new ModelGroup { Count = 2, Wounds = 2, Save = 2 }] };
         var weapon = TorrentWeapon(2, strength: 4, damage: 2, extra: new WeaponAbilities { DevastatingWounds = true });
         var resolver = new AttackResolver(Build.Scenario(weapon, defender));
 
@@ -120,7 +117,6 @@ public class AttackResolverTests
     {
         var defender = new DefenderUnit
         {
-            Toughness = 4,
             Groups = [new ModelGroup { Count = 1, Wounds = 4, Save = 7, FeelNoPain = 5, DamageReduction = 1 }],
         };
         var resolver = new AttackResolver(Build.Scenario(TorrentWeapon(1, damage: 3), defender));

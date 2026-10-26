@@ -29,12 +29,11 @@ public class Rules11thEditionTests
         Defender = defender,
     };
 
-    private static DefenderUnit BodyguardAndLeader(int bodyguardSave = 4, int leaderSave = 2, int? leaderToughness = null) => new()
+    private static DefenderUnit BodyguardAndLeader(int bodyguardSave = 4, int leaderSave = 2, int leaderToughness = 4) => new()
     {
-        Toughness = 4,
         Groups =
         [
-            new ModelGroup { Name = "Garde", Count = 1, Wounds = 1, Save = bodyguardSave },
+            new ModelGroup { Name = "Garde", Count = 1, Toughness = 4, Wounds = 1, Save = bodyguardSave },
             new ModelGroup { Name = "Leader", IsCharacter = true, Count = 1, Wounds = 1, Save = leaderSave, Toughness = leaderToughness },
         ],
     };
@@ -179,7 +178,6 @@ public class Rules11thEditionTests
     {
         var defender = new DefenderUnit
         {
-            Toughness = 4,
             Groups =
             [
                 new ModelGroup { Name = "Garde", Count = 3, Wounds = 1, Save = 7 },
@@ -222,7 +220,6 @@ public class Rules11thEditionTests
     {
         var defender = new DefenderUnit
         {
-            Toughness = 4,
             Groups = [new ModelGroup { Count = 1, Wounds = 4, Save = 2, DamageReduction = 1, FeelNoPain = 5 }],
         };
         var weapon = Torrent("Dévastatrice", strength: 4) with

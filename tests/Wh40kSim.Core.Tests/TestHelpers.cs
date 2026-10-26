@@ -23,6 +23,34 @@ internal sealed class ScriptedDiceRoller : IDiceRoller
     }
 }
 
+/// <summary>
+/// Enregistre les valeurs de progression dès leur arrivée. <see cref="Progress{T}"/> ne convient pas aux tests :
+/// il transmet les valeurs plus tard, via le contexte de synchronisation.
+/// </summary>
+internal sealed class RecordingProgress : IProgress<double>
+{
+    private readonly List<double> _values = [];
+
+    public IReadOnlyList<double> Values
+    {
+        get
+        {
+            lock (_values)
+            {
+                return _values.ToList();
+            }
+        }
+    }
+
+    public void Report(double value)
+    {
+        lock (_values)
+        {
+            _values.Add(value);
+        }
+    }
+}
+
 internal static class Build
 {
     public static Scenario Scenario(WeaponProfile weapon, DefenderUnit defender, int models = 1, AttackContext? context = null) => new()

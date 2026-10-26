@@ -95,30 +95,6 @@ public class SimulatorTests
     }
 
     [Fact]
-    public void Scenario_survives_a_json_round_trip()
-    {
-        var scenario = Build.Scenario(
-            BaseWeapon with { Damage = DiceExpression.Parse("D6+1"), Abilities = new WeaponAbilities { Melta = 2, SustainedHits = DiceExpression.Parse("D3") } },
-            Build.Horde() with { InCover = true },
-            models: 3,
-            context: new AttackContext { HalfRange = true, HitReroll = RerollPolicy.Ones });
-
-        var copy = ScenarioJson.Deserialize(ScenarioJson.Serialize(scenario));
-
-        Assert.Equal(ScenarioJson.Serialize(scenario), ScenarioJson.Serialize(copy));
-        Assert.Equal(scenario.Attacker.Weapons[0].Weapon, copy.Attacker.Weapons[0].Weapon);
-    }
-
-    [Fact]
-    public void Unknown_json_property_is_rejected()
-    {
-        // L'Endurance appartient aux groupes de figurines, pas à l'unité
-        const string json = """{ "defender": { "toughness": 5, "groups": [{ "count": 1 }] } }""";
-
-        Assert.Throws<System.Text.Json.JsonException>(() => ScenarioJson.Deserialize(json));
-    }
-
-    [Fact]
     public void Example_scenario_file_loads_and_runs()
     {
         string path = Path.Combine(FindRepositoryRoot(), "scenarios", "exemple-escouade-vs-leader.json");

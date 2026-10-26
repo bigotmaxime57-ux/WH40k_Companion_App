@@ -61,7 +61,6 @@ internal static class ScenarioWizard
     {
         WriteTitle("Défenseur");
         string name = ReadString("Nom de l'unité", "Défenseur");
-        int toughness = ReadInt("Endurance de l'unité (des gardes du corps si un leader est attaché)", 4, 1, 30);
         bool inCover = ReadBool("À couvert", false);
         int hitModifier = ReadInt("Modificateur aux jets de touche subis (ex : -1 pour Stealth)", 0, -3, 3);
         int woundModifier = ReadInt("Modificateur aux jets de blessure subis", 0, -3, 3);
@@ -70,6 +69,7 @@ internal static class ScenarioWizard
         Console.WriteLine("Un groupe par PERSONNAGE (après les autres), un groupe par combinaison PV/Sv/InSv pour les autres figurines.");
 
         var groups = new List<ModelGroup>();
+        int toughness = 4;
         for (int i = 1; i <= groupCount; i++)
         {
             Console.WriteLine($"-- Groupe {i} --");
@@ -80,7 +80,8 @@ internal static class ScenarioWizard
                 Name = groupName,
                 IsCharacter = isCharacter,
                 Count = isCharacter ? 1 : ReadInt("Nombre de figurines", 5, 1, 100),
-                Toughness = ReadOptionalInt($"Endurance du groupe (vide = {toughness})", 1, 30),
+                // Endurance proposée par défaut : celle du groupe précédent
+                Toughness = toughness = ReadInt("Endurance", toughness, 1, 30),
                 Wounds = ReadInt("PV par figurine", 1, 1, 50),
                 Save = ReadInt("Sauvegarde (ex : 3 pour 3+, 7 si aucune)", 3, 2, 7),
                 InvulnerableSave = ReadOptionalThreshold("Invulnérable"),
@@ -92,7 +93,6 @@ internal static class ScenarioWizard
         return new DefenderUnit
         {
             Name = name,
-            Toughness = toughness,
             InCover = inCover,
             HitModifier = hitModifier,
             WoundModifier = woundModifier,

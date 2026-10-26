@@ -31,11 +31,6 @@ public sealed record Scenario
             if (weapon.Abilities.RapidFire < 0 || weapon.Abilities.Melta < 0) errors.Add($"{label} : Rapid Fire et Melta ne peuvent pas être négatifs.");
         }
 
-        if (Defender.Toughness < 1)
-        {
-            errors.Add("Le défenseur doit avoir une Endurance d'au moins 1.");
-        }
-
         if (Defender.Groups.Count == 0)
         {
             errors.Add("Le défenseur doit avoir au moins un groupe de figurines.");
@@ -50,7 +45,7 @@ public sealed record Scenario
             if (group.InvulnerableSave is < 2 or > 6) errors.Add($"{label} : l'invulnérable doit être entre 2 et 6.");
             if (group.FeelNoPain is < 2 or > 6) errors.Add($"{label} : l'insensible à la douleur doit être entre 2 et 6.");
             if (group.DamageReduction < 0) errors.Add($"{label} : la réduction de dégâts ne peut pas être négative.");
-            if (group.Toughness is < 1) errors.Add($"{label} : l'Endurance doit être d'au moins 1.");
+            if (group.Toughness < 1) errors.Add($"{label} : l'Endurance doit être d'au moins 1.");
             if (group.IsCharacter && group.Count != 1) errors.Add($"{label} : un groupe PERSONNAGE contient exactement une figurine.");
         }
 

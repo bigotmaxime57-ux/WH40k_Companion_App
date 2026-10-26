@@ -35,12 +35,11 @@
   },
   "defender": {
     "name": "Escouade + Leader",
-    "toughness": 4,
     "inCover": false,
     "groups": [
-      { "name": "Gardes du corps", "count": 8, "wounds": 2, "save": 4 },
-      { "name": "Gardes d'élite", "count": 2, "wounds": 2, "save": 3 },
-      { "name": "Leader", "isCharacter": true, "count": 1, "wounds": 4, "toughness": 4, "save": 2, "invulnerableSave": 4 }
+      { "name": "Gardes du corps", "count": 8, "toughness": 4, "wounds": 2, "save": 4 },
+      { "name": "Gardes d'élite", "count": 2, "toughness": 4, "wounds": 2, "save": 3 },
+      { "name": "Leader", "isCharacter": true, "count": 1, "toughness": 4, "wounds": 4, "save": 2, "invulnerableSave": 4 }
     ]
   },
   "context": {

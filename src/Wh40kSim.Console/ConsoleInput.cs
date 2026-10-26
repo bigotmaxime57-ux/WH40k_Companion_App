@@ -18,10 +18,6 @@ internal static class ConsoleInput
     public static int? ReadOptionalThreshold(string label) =>
         Ask<int?>(label + " (vide si aucun)", "", s => s.Length == 0 ? null : ParseInt(s, 2, 6));
 
-    /// <summary>Entier optionnel : vide = null.</summary>
-    public static int? ReadOptionalInt(string label, int min, int max) =>
-        Ask<int?>(label, "", s => s.Length == 0 ? null : ParseInt(s, min, max));
-
     public static bool ReadBool(string label, bool defaultValue) =>
         Ask(label + " (o/n)", defaultValue ? "o" : "n", s => s.ToLowerInvariant() switch
         {

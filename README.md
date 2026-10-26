@@ -62,4 +62,5 @@ Relances disponibles (touche et blessure) : aucune, les 1, les échecs, tout sau
 
 Voir `scenarios/exemple-escouade-vs-leader.json`. Les expressions de dés s'écrivent `2` ou `"D6+1"`,
 la PA `-1`, une sauvegarde `3` pour 3+ (`7` = aucune), `"isCharacter": true` pour un leader,
-`"toughness"` sur un groupe si son Endurance diffère de celle de l'unité. Les commentaires `//` sont autorisés.
+`"toughness"` (Endurance) et `"wounds"` (PV) sur chaque groupe de figurines. Les commentaires `//` sont autorisés ;
+une propriété inconnue ou mal placée est refusée au chargement.

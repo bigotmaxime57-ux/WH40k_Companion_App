@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <!--
+    Interface graphique partagée par les hôtes (desktop MAUI, puis web) : composants, services, modèles de formulaire.
+    Aucune règle de jeu ici : tout passe par Wh40kSim.Core.
+  -->
+  <PropertyGroup>
+    <RootNamespace>Wh40kSim.UI</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.14" />
+    <PackageReference Include="MudBlazor" Version="9.11.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Wh40kSim.Core\Wh40kSim.Core.csproj" />
+  </ItemGroup>
+
+</Project>

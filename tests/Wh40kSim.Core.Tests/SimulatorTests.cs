@@ -95,6 +95,64 @@ public class SimulatorTests
     }
 
     [Fact]
+    public void Progress_is_reported_once_per_chunk_in_increasing_order_up_to_one()
+    {
+        // 2,5 paquets → 3 rapports, le dernier paquet est incomplet
+        var progress = new RecordingProgress();
+
+        Simulator.Run(Build.Scenario(BaseWeapon, Build.Horde()), 2 * Simulator.ChunkSize + Simulator.ChunkSize / 2, seed: 1, progress);
+
+        Assert.Equal([1.0 / 3, 2.0 / 3, 1.0], progress.Values);
+    }
+
+    [Fact]
+    public void Progress_is_reported_once_when_there_is_a_single_chunk()
+    {
+        var progress = new RecordingProgress();
+
+        Simulator.Run(Build.Scenario(BaseWeapon, Build.Horde()), 10, seed: 1, progress);
+
+        Assert.Equal([1.0], progress.Values);
+    }
+
+    [Fact]
+    public void Progress_stays_increasing_with_many_chunks_in_parallel()
+    {
+        var progress = new RecordingProgress();
+
+        Simulator.Run(Build.Scenario(BaseWeapon, Build.Horde()), 50 * Simulator.ChunkSize, seed: 1, progress);
+
+        Assert.Equal(50, progress.Values.Count);
+        Assert.All(progress.Values.Zip(progress.Values.Skip(1)), pair => Assert.True(pair.First < pair.Second));
+        Assert.Equal(1.0, progress.Values[^1]);
+    }
+
+    [Fact]
+    public void Reporting_progress_does_not_change_the_results()
+    {
+        var scenario = Build.Scenario(BaseWeapon with { Damage = DiceExpression.Parse("D3") }, Build.Horde(), models: 10);
+
+        var without = Simulator.Run(scenario, 50_000, seed: 7);
+        var with = Simulator.Run(scenario, 50_000, seed: 7, new RecordingProgress());
+
+        Assert.Equal(without.KillsHistogram, with.KillsHistogram);
+        Assert.Equal(without.DamageHistogram, with.DamageHistogram);
+        Assert.Equal(without.MeanKilledInGroup(0), with.MeanKilledInGroup(0));
+    }
+
+    [Fact]
+    public void Cancelled_run_does_not_report_completion()
+    {
+        var progress = new RecordingProgress();
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+
+        Assert.ThrowsAny<OperationCanceledException>(() =>
+            Simulator.Run(Build.Scenario(BaseWeapon, Build.Horde()), 10 * Simulator.ChunkSize, seed: 1, progress, cancellation.Token));
+        Assert.DoesNotContain(1.0, progress.Values);
+    }
+
+    [Fact]
     public void Example_scenario_file_loads_and_runs()
     {
         string path = Path.Combine(FindRepositoryRoot(), "scenarios", "exemple-escouade-vs-leader.json");

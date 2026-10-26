@@ -60,12 +60,7 @@ static int Run(string[] args)
         scenario = ScenarioWizard.Build();
 
         ConsoleInput.WriteTitle("Simulation");
-        string savePath = ConsoleInput.ReadString("Sauvegarder ce scénario en JSON ? (chemin du fichier, vide pour ignorer)", "");
-        if (savePath.Length > 0)
-        {
-            ScenarioJson.Save(scenario, savePath);
-            Console.WriteLine($"Scénario sauvegardé dans {Path.GetFullPath(savePath)}");
-        }
+        SaveScenario(scenario);
     }
 
     int n = iterations ?? (scenarioPath is null
@@ -76,6 +71,42 @@ static int Run(string[] args)
     var summary = Simulator.Run(scenario, n, seed);
     ReportPrinter.Print(summary);
     return 0;
+}
+
+/// <summary>Enregistre le scénario sous un nom dans le dossier des scénarios, après confirmation s'il existe déjà.</summary>
+static void SaveScenario(Scenario scenario)
+{
+    string directory = ScenariosDirectory();
+    while (true)
+    {
+        string name = ConsoleInput.ReadFileName("Nom du scénario à enregistrer (vide pour ignorer)");
+        if (name.Length == 0)
+        {
+            return;
+        }
+
+        string path = Path.Combine(directory, name.EndsWith(".json", StringComparison.OrdinalIgnoreCase) ? name : name + ".json");
+        if (File.Exists(path) && !ConsoleInput.ReadBool($"Le scénario '{Path.GetFileName(path)}' existe déjà. L'écraser", false))
+        {
+            continue;
+        }
+
+        Directory.CreateDirectory(directory);
+        ScenarioJson.Save(scenario, path);
+        Console.WriteLine($"Scénario sauvegardé dans {path}");
+        return;
+    }
+}
+
+/// <summary>Dossier "scenarios" à la racine de la solution ; à défaut (appli publiée hors du dépôt), dans le dossier courant.</summary>
+static string ScenariosDirectory()
+{
+    var directory = new DirectoryInfo(AppContext.BaseDirectory);
+    while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Wh40kSim.sln")))
+    {
+        directory = directory.Parent;
+    }
+    return Path.Combine(directory?.FullName ?? Directory.GetCurrentDirectory(), "scenarios");
 }
 
 static int ParseIntArgument(string[] args, int index, string name)

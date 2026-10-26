@@ -18,6 +18,12 @@ internal static class ConsoleInput
     public static int? ReadOptionalThreshold(string label) =>
         Ask<int?>(label + " (vide si aucun)", "", s => s.Length == 0 ? null : ParseInt(s, 2, 6));
 
+    /// <summary>Nom de fichier sans dossier (vide accepté).</summary>
+    public static string ReadFileName(string label) =>
+        Ask(label, "", s => s.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 || s is "." or ".."
+            ? throw new FormatException("Nom de fichier invalide : un nom seul, sans dossier ni caractères spéciaux (\\ / : * ? \" < > |).")
+            : s);
+
     public static bool ReadBool(string label, bool defaultValue) =>
         Ask(label + " (o/n)", defaultValue ? "o" : "n", s => s.ToLowerInvariant() switch
         {

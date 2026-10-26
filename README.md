@@ -11,8 +11,12 @@ src/Wh40kSim.Core            Bibliothèque pure : modèles + moteur (réutilisé
   Model/                     Arme, unités, situation, scénario
   Engine/                    Séquence d'attaque, simulateur parallèle, statistiques
   Serialization/             Lecture / écriture des scénarios en JSON
-src/Wh40kSim.Console         Appli console de test (saisie interactive ou fichier JSON)
-tests/Wh40kSim.Core.Tests    Tests xUnit
+src/Wh40kSim.Console         Appli console de debug (saisie interactive ou fichier JSON)
+src/Wh40kSim.UI              Interface Blazor + MudBlazor partagée par les hôtes (aucune règle de jeu)
+  Forms/                     Modèles de formulaire modifiables, convertis vers / depuis les records du Core
+  Services/                  Simulation hors du thread de l'interface, ouverture / enregistrement des scénarios
+tests/Wh40kSim.Core.Tests    Tests xUnit du Core
+tests/Wh40kSim.UI.Tests      Tests xUnit de l'interface (formulaires, services)
 scenarios/                   Scénarios d'exemple et scénarios enregistrés depuis la saisie interactive
 ```
 

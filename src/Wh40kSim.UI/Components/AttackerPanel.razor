@@ -11,15 +11,7 @@
                              SaveDisabled="SaveDisabled" OnOpen="OnOpen" OnSave="OnSave" Part="attacker" />
         }
     </SectionHeader>
-    <MudGrid Spacing="3">
-        <MudItem xs="8">
-            <MudTextField T="string" Label="@L["Attacker_Name"]" @bind-Value="Attacker.Name" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="4">
-            <MudNumericField T="int?" Label="@L["Attacker_Points"]" Min="0" @bind-Value="Attacker.Points" @bind-Value:after="NotifyChanged"
-                             data-test="attacker-points" />
-        </MudItem>
-    </MudGrid>
+    <MudTextField T="string" Label="@L["Attacker_Name"]" @bind-Value="Attacker.Name" @bind-Value:after="NotifyChanged" />
 
     <AttackerBoostsEditor Boosts="Attacker.Boosts" Changed="NotifyChanged" />
 

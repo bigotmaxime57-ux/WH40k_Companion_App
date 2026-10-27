@@ -31,9 +31,6 @@
   <data name="Attacker_OpenHelp" xml:space="preserve">
     <value>Ouvrir un attaquant : celui d'un fichier attaquant ou d'un scénario complet remplace l'attaquant actuel</value>
   </data>
-  <data name="Attacker_Points" xml:space="preserve">
-    <value>Points</value>
-  </data>
   <data name="Attacker_SaveHelp" xml:space="preserve">
     <value>Enregistrer l'attaquant seul (boosts compris), pour le réutiliser dans d'autres scénarios</value>
   </data>
@@ -116,7 +113,7 @@
     <value>Groupes d'allocation</value>
   </data>
   <data name="Defender_GroupsHelp" xml:space="preserve">
-    <value>Dans l'ordre où ils encaissent : le premier groupe d'abord. Les PERSONNAGES restent toujours après les gardes du corps : cocher PERSONNAGE place le groupe en fin de liste, et les flèches ne permettent pas de le faire remonter devant un garde du corps. Points : coût du groupe entier (toutes ses figurines) ; les points détruits ne se calculent que si chaque groupe a les siens.</value>
+    <value>Dans l'ordre où ils encaissent : le premier groupe d'abord. Les PERSONNAGES restent toujours après les gardes du corps : cocher PERSONNAGE place le groupe en fin de liste, et les flèches ne permettent pas de le faire remonter devant un garde du corps.</value>
   </data>
   <data name="Defender_HitModifier" xml:space="preserve">
     <value>Jet de touche des attaquants</value>
@@ -210,9 +207,6 @@
   </data>
   <data name="Group_None" xml:space="preserve">
     <value>Aucune</value>
-  </data>
-  <data name="Group_Points" xml:space="preserve">
-    <value>Points du groupe</value>
   </data>
   <data name="Group_Save" xml:space="preserve">
     <value>Sauvegarde</value>

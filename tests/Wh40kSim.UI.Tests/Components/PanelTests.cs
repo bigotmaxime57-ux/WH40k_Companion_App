@@ -131,25 +131,6 @@ public class AttackerPanelTests : ComponentTestContext
     }
 
     [Fact]
-    public void Points_are_entered_on_the_attacker_and_on_each_group()
-    {
-        var attacker = new AttackerForm();
-        var defender = new DefenderForm(new DefenderUnit
-        {
-            Groups = [new ModelGroup { Name = "Gardes", Count = 5 }, new ModelGroup { Name = "Leader", IsCharacter = true, Wounds = 4 }],
-        });
-        var attackerPanel = Render<AttackerPanel>(p => p.Add(c => c.Attacker, attacker));
-        var defenderPanel = Render<DefenderPanel>(p => p.Add(c => c.Defender, defender));
-
-        attackerPanel.Find("input[data-test=attacker-points]").Change("180");
-        defenderPanel.FindAll("input[data-test=group-points]")[1].Change("65");
-
-        Assert.Equal(180, attacker.Points);
-        Assert.Equal([null, 65], defender.Groups.Select(g => g.Points));
-        Assert.Equal(180, attacker.ToAttackerUnit().Points);
-    }
-
-    [Fact]
     public void Weapons_can_be_added_and_removed()
     {
         var form = new AttackerForm();

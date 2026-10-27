@@ -359,7 +359,8 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
    l'attaquant). Décisions de l'utilisateur : points détruits **au prorata des PV retirés** (calcul lissé : un char à
    moitié détruit vaut la moitié de ses points), via les PV retirés par groupe (`DefenderState.DamageInGroup`, cumulés
    par le simulateur, aucun dé consommé : non-régression au bit près) ; indicateurs seulement si **tous** les groupes ont
-   des points ; résultats affichés **au Full sim seulement** (console en attendant), champs de saisie dans le Quick sim.
+   des points ; saisie et résultats **au Full sim seulement** (le Quick sim n'analyse pas les points : aucun champ, mais il
+   garde ceux d'un fichier ouvert) ; en attendant, points écrits dans le JSON et résultats affichés par la console.
    Marge exclue (on ne détruit pas plus que la valeur de l'unité). Ticket #2 commenté, pas fermé.
 5. **Dégâts bruts (#6).** Dégâts de chaque attaque non sauvegardée comptés en entier (après réduction de dégâts et FNP),
    sans plafond par figurine ni arrêt à la destruction de l'unité ; distribution et gaspillage (bruts - PV retirés)
@@ -524,7 +525,8 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
   fond uni du thème, et barre du démarrage enfin aux couleurs du thème mémorisé : fusionnées dans `main`. 327 tests
   verts (166 Core, 41 Simulation, 120 UI ; UI stables sur 6 exécutions).
 - Phase 3, étape 4 (points, #2 version légère) : branche `phase3/etape4-points`, en attente de validation.
-  341 tests verts (172 Core, 48 Simulation, 121 UI ; UI stables sur 6 exécutions) ; `NonRegressionTests` inchangés.
+  340 tests verts (172 Core, 48 Simulation, 120 UI) ; `NonRegressionTests` inchangés. Champs de points retirés du
+  Quick sim à la demande de l'utilisateur (saisie au Full sim).
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

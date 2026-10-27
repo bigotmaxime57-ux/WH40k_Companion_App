@@ -12,11 +12,10 @@
    Warhammer, rouge pour l'attaquant et vert pour le défenseur, dans tous les thèmes ; or (couleur principale) ailleurs.
    .wh-dark (posée par AppShell en sombre) éclaircit un peu les deux teintes pour qu'elles restent lisibles sur fond noir.
    Dans une carte de camp, la couleur principale de MudBlazor devient celle du camp : boutons, étiquettes, cases et
-   champs actifs la reprennent. --wh-gold garde l'or du thème (valeur calculée sur .wh-shell, avant redéfinition).
+   champs actifs la reprennent. --wh-character : teinte plus foncée du camp, pour les groupes PERSONNAGE.
 */
 .wh-shell {
     --wh-accent: var(--mud-palette-primary);
-    --wh-gold: var(--mud-palette-primary);
 }
 
 .wh-shell .wh-attacker {
@@ -47,6 +46,7 @@
     --mud-palette-primary-hover: rgba(var(--wh-accent-rgb), .08);
     --mud-palette-primary-darken: color-mix(in srgb, var(--wh-accent) 85%, black);
     --mud-palette-primary-lighten: color-mix(in srgb, var(--wh-accent) 85%, white);
+    --wh-character: color-mix(in srgb, var(--wh-accent) 65%, black);
 }
 
 .wh-shell .mud-main-content {
@@ -199,9 +199,18 @@
     background-color: var(--mud-palette-primary-darken) !important;
 }
 
-/* Groupe PERSONNAGE : filet or (le rouge est la couleur de l'attaquant), pour le distinguer des gardes du corps */
+/*
+   Groupe PERSONNAGE : filet plus large et étiquette dans une teinte plus foncée du camp, pour le distinguer des gardes
+   du corps (la teinte seule ressort mal sur fond sombre)
+*/
 .wh-subcard-character {
-    border-left-color: var(--wh-gold) !important;
+    border-left-color: var(--wh-character) !important;
+    border-left-width: 6px !important;
+}
+
+.wh-character-chip {
+    background-color: var(--wh-character) !important;
+    color: #ffffff !important;
 }
 
 /* Numéro d'ordre d'allocation d'un groupe */

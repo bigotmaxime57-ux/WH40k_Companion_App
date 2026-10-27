@@ -319,8 +319,10 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   `Resources/Strings.resx` (clé `Zone_Élément`), `StringsTests` vérifie qu'aucune clé ne manque ni ne traîne.
 - **Tests bUnit** : `ComponentTestContext` (services, culture, faux services, `MudPopoverProvider` rendu d'abord,
   JS en mode `Loose`, `IAsyncLifetime` car des services MudBlazor ne se libèrent qu'en asynchrone). Repérage par
-  attributs `data-test` : MudBlazor les pose sur l'`<input>` lui-même (sélecteur `input[data-test=…]`). Bouton placé
-  dans une infobulle MudBlazor (rendu asynchrone, clic parfois perdu) : cliquer avec `ClickUntil(sélecteur, effet)`.
+  attributs `data-test` : MudBlazor les pose sur l'`<input>` lui-même (sélecteur `input[data-test=…]`). Clic dans une carte
+  qui contient des infobulles MudBlazor (rendu asynchrone, clic parfois perdu) : `ClickUntil(sélecteur, effet)`.
+  Tests UI exécutés sans parallélisme (`TestAssemblyInfo.cs`) : en parallèle, la charge faisait perdre des
+  interactions (environ une exécution sur huit) ; 0 échec sur 15 exécutions ensuite.
 - **Aides à l'écran** : pas de `HelperText` ni de légende sous les champs ; explications dans `HelpBubble` (bulle
   « ? », infobulle après 1 s), via le paramètre `Help` de `SectionHeader` / `SubSection` (liste de textes du `.resx`).
 - **Ordre d'allocation (05.03)** : règle portée par le Core (`AllocationOrder` : `FindViolation`, `IsValid`, `Arrange`),

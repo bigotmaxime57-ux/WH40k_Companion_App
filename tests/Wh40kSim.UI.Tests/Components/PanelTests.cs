@@ -136,10 +136,9 @@ public class AttackerPanelTests : ComponentTestContext
         var form = new AttackerForm();
         var panel = Render<AttackerPanel>(p => p.Add(c => c.Attacker, form));
 
-        panel.Find("[data-test=add-weapon]").Click();
-        panel.Find("[data-test=add-weapon]").Click();
-        Assert.Equal(2, form.Weapons.Count);
-        // Bouton dans une infobulle MudBlazor : voir ClickUntil
+        // Rendu asynchrone de MudBlazor (infobulles de la carte) : clics via ClickUntil, voir ComponentTestContext
+        panel.ClickUntil("[data-test=add-weapon]", () => form.Weapons.Count == 1);
+        panel.ClickUntil("[data-test=add-weapon]", () => form.Weapons.Count == 2);
         panel.ClickUntil("[data-test=remove-weapon]", () => form.Weapons.Count == 1);
 
         Assert.Single(form.Weapons);

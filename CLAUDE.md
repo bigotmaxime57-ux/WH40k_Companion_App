@@ -322,12 +322,13 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   identiques au bit près) ; pas de surcoût mesurable (5 M simulations, unité détruite à 89 %), donc pas d'option.
 - Phase 2a, étape 5 (composants) : fusionnée dans `main`.
   211 tests verts (114 Core, 33 Simulation, 64 UI dont bUnit). Pas encore vue à l'écran : aucun hôte avant l'étape 6.
-- Phase 2a, étape 6 (Wh40kSim.Desktop) : terminée sur `phase2a/etape6-desktop`, en attente de validation avant
-  fusion et du tag `v0.2a`. 213 tests verts (114 Core, 33 Simulation, 66 UI). Application lancée et vérifiée à l'écran
+- Phase 2a, étape 6 (Wh40kSim.Desktop) : fusionnée dans `main`, **tag `v0.2a`** (fin de la phase 2a).
+  213 tests verts (114 Core, 33 Simulation, 66 UI). Application lancée et vérifiée à l'écran
   (captures) : fenêtre, thème, saisie, simulation et résultats ; deux défauts de mise en page corrigés (groupe
   d'allocation, valeurs de Sustained Hits / Rapid Fire / Melta). Numérotation des phases alignée dans le README et le
   code.
-- **Prochaine : phase 2b (API + client web)**, à détailler avant de commencer.
+- **Prochaine : amélioration du style et de l'ergonomie de l'interface** (demandée après la 2a : « encore un peu
+  austère »), à définir ensemble avant la phase 2b (API + client web).
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

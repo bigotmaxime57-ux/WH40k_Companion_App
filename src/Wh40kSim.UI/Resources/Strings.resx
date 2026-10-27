@@ -31,6 +31,30 @@
   <data name="Attacker_Title" xml:space="preserve">
     <value>Attaquant</value>
   </data>
+  <data name="Attacker_Weapons" xml:space="preserve">
+    <value>Armement</value>
+  </data>
+  <data name="Attacker_WeaponsHelp" xml:space="preserve">
+    <value>Les profils d'armes de l'unité, résolus dans l'ordre de la liste. Les boosts saisis au-dessus s'appliquent à toutes les armes.</value>
+  </data>
+  <data name="Boosts_Active" xml:space="preserve">
+    <value>{0} actif(s)</value>
+  </data>
+  <data name="Boosts_Hit" xml:space="preserve">
+    <value>Touche</value>
+  </data>
+  <data name="Boosts_Profile" xml:space="preserve">
+    <value>Attaques, PA et dégâts</value>
+  </data>
+  <data name="Boosts_Title" xml:space="preserve">
+    <value>Boosts</value>
+  </data>
+  <data name="Boosts_Wound" xml:space="preserve">
+    <value>Blessure</value>
+  </data>
+  <data name="Boosts_WoundAndDamage" xml:space="preserve">
+    <value>Blessure et dégâts</value>
+  </data>
   <data name="Confirm_Cancel" xml:space="preserve">
     <value>Annuler</value>
   </data>
@@ -50,10 +74,13 @@
     <value>À demi-portée</value>
   </data>
   <data name="Context_HitModifier" xml:space="preserve">
-    <value>Modificateur au jet de touche</value>
+    <value>Jet de touche</value>
   </data>
   <data name="Context_HitReroll" xml:space="preserve">
     <value>Relance des touches</value>
+  </data>
+  <data name="Context_None" xml:space="preserve">
+    <value>Aucune condition ne concerne ces armes (demi-portée, immobile, charge, Precision).</value>
   </data>
   <data name="Context_PrecisionFirst" xml:space="preserve">
     <value>Premier PERSONNAGE en jeu</value>
@@ -68,7 +95,7 @@
     <value>Situation</value>
   </data>
   <data name="Context_WoundModifier" xml:space="preserve">
-    <value>Modificateur au jet de blessure</value>
+    <value>Jet de blessure</value>
   </data>
   <data name="Context_WoundReroll" xml:space="preserve">
     <value>Relance des blessures</value>
@@ -80,10 +107,10 @@
     <value>Groupes d'allocation</value>
   </data>
   <data name="Defender_GroupsHelp" xml:space="preserve">
-    <value>Dans l'ordre où ils encaissent : le premier groupe d'abord, les PERSONNAGES en dernier.</value>
+    <value>Dans l'ordre où ils encaissent : le premier groupe d'abord. Les PERSONNAGES restent toujours après les gardes du corps : cocher PERSONNAGE place le groupe en fin de liste, et les flèches ne permettent pas de le faire remonter devant un garde du corps.</value>
   </data>
   <data name="Defender_HitModifier" xml:space="preserve">
-    <value>Modificateur aux jets de touche subis</value>
+    <value>Jet de touche des attaquants</value>
   </data>
   <data name="Defender_InCover" xml:space="preserve">
     <value>À couvert</value>
@@ -104,7 +131,7 @@
     <value>Défenseur</value>
   </data>
   <data name="Defender_WoundModifier" xml:space="preserve">
-    <value>Modificateur aux jets de blessure subis</value>
+    <value>Jet de blessure des attaquants</value>
   </data>
   <data name="Dice_Invalid" xml:space="preserve">
     <value>Expression de dés invalide (ex. 2, D6, 2D3, D6+1)</value>
@@ -153,6 +180,48 @@
   </data>
   <data name="Group_Wounds" xml:space="preserve">
     <value>PV</value>
+  </data>
+  <data name="Help_AttackerBoosts" xml:space="preserve">
+    <value>Boosts de l'attaquant (auras, stratagèmes…), pour toutes ses armes : +1 = mieux pour lui (CT 3+ → 2+, PA-1 → PA-2). Ils se cumulent avec ceux du défenseur.</value>
+  </data>
+  <data name="Help_Context" xml:space="preserve">
+    <value>Conditions qui changent quelque chose pour les armes saisies : demi-portée (Rapid Fire, Melta), restée immobile (Heavy), a chargé (Lance), cible de Precision. Les boosts (auras, stratagèmes, aptitudes…) se saisissent dans les cartes de l'attaquant et du défenseur.</value>
+  </data>
+  <data name="Help_Cover" xml:space="preserve">
+    <value>À couvert : la CT des armes de tir est dégradée de 1 (sauf Ignores Cover). C'est une modification de caractéristique, non plafonnée.</value>
+  </data>
+  <data name="Help_DefenderBoosts" xml:space="preserve">
+    <value>Boosts du défenseur contre les attaques qui le visent, du point de vue de l'attaquant : -1 = moins bon pour lui (CT 3+ → 4+, PA-2 → PA-1, un dégât de moins). Ils se cumulent avec ceux de l'attaquant.</value>
+  </data>
+  <data name="Help_DefenderDamage" xml:space="preserve">
+    <value>Dégâts des attaques reçues : appliqués comme la réduction de dégâts des groupes, après Melta, avec un minimum de 1 ; pas sur les blessures mortelles.</value>
+  </data>
+  <data name="Help_Profile" xml:space="preserve">
+    <value>Modifications de caractéristiques, sans plafond : A et D restent au moins à 1, la PA ne dépasse jamais 0.</value>
+  </data>
+  <data name="Help_Results" xml:space="preserve">
+    <value>80 % des cas : du 1er au 9e décile. Les tuiles et les pertes par groupe sont toujours les pertes réelles, plafonnées à l'effectif de l'unité.</value>
+  </data>
+  <data name="Help_Margin" xml:space="preserve">
+    <value>Une fois l'unité détruite, les attaques restantes continuent contre des figurines virtuelles, copies du premier garde du corps. La marge dit de combien l'unité est détruite : figurines virtuelles tuées et PV retirés en plus, en moyenne sur les simulations où elle est détruite.</value>
+  </data>
+  <data name="Help_MarginTable" xml:space="preserve">
+    <value>Dans les tableaux, sous le trait, « 5 + 2 » signifie : les 5 figurines de l'unité, plus 2 figurines virtuelles.</value>
+  </data>
+  <data name="Help_Roll" xml:space="preserve">
+    <value>Modificateurs au jet : cumulés entre attaquant et défenseur, plafonnés à ±1 au total, appliqués après les relances (ex. -1 pour Stealth).</value>
+  </data>
+  <data name="Help_Simulation" xml:space="preserve">
+    <value>Graine : laisser vide pour la tirer au hasard ; la même graine redonne exactement le même résultat. Ctrl+Entrée lance la simulation.</value>
+  </data>
+  <data name="Help_Skill" xml:space="preserve">
+    <value>CT / CC : modification de caractéristique, sans plafond, cumulée entre attaquant, défenseur et couvert ; le résultat reste entre 2+ et 6+.</value>
+  </data>
+  <data name="Help_Strength" xml:space="preserve">
+    <value>Force : modification de caractéristique, sans plafond ; la Force reste au moins à 1.</value>
+  </data>
+  <data name="Help_Wipe" xml:space="preserve">
+    <value>Unité détruite : en rouge sous {0}, couleur du thème jusqu'à {1}, en vert au-delà.</value>
   </data>
   <data name="Keyword_Blast" xml:space="preserve">
     <value>Blast</value>
@@ -268,8 +337,29 @@
   <data name="Keywords_Title" xml:space="preserve">
     <value>Mots-clés</value>
   </data>
-  <data name="Modifier_RollHelp" xml:space="preserve">
-    <value>Cumulé avec les autres, plafonné à ±1 (après relances)</value>
+  <data name="Modifier_Ap" xml:space="preserve">
+    <value>PA</value>
+  </data>
+  <data name="Modifier_Attacks" xml:space="preserve">
+    <value>Attaques (A)</value>
+  </data>
+  <data name="Modifier_Damage" xml:space="preserve">
+    <value>Dégâts (D)</value>
+  </data>
+  <data name="Modifier_DefenderAp" xml:space="preserve">
+    <value>PA des attaques reçues</value>
+  </data>
+  <data name="Modifier_DefenderDamage" xml:space="preserve">
+    <value>Dégâts des attaques reçues</value>
+  </data>
+  <data name="Modifier_DefenderSkill" xml:space="preserve">
+    <value>CT / CC des attaquants</value>
+  </data>
+  <data name="Modifier_Skill" xml:space="preserve">
+    <value>CT / CC</value>
+  </data>
+  <data name="Modifier_Strength" xml:space="preserve">
+    <value>Force (F)</value>
   </data>
   <data name="Reroll_Failed" xml:space="preserve">
     <value>Les échecs</value>
@@ -287,10 +377,22 @@
     <value>PV retirés</value>
   </data>
   <data name="Results_Extended" xml:space="preserve">
-    <value>Prolonger au-delà de l'unité (excédent)</value>
+    <value>Afficher la marge au-delà de l'unité</value>
   </data>
   <data name="Results_ExtendedHelp" xml:space="preserve">
-    <value>Après la destruction de l'unité, les attaques restantes continuent contre des figurines virtuelles : {0}.</value>
+    <value>Figurines virtuelles : {0}.</value>
+  </data>
+  <data name="Results_Beyond" xml:space="preserve">
+    <value>{0} + {1}</value>
+  </data>
+  <data name="Results_MarginDamageHelp" xml:space="preserve">
+    <value>PV retirés en plus, en moyenne, quand l'unité est détruite, à des figurines virtuelles : {0}.</value>
+  </data>
+  <data name="Results_MarginKillsHelp" xml:space="preserve">
+    <value>Figurines virtuelles tuées en plus, en moyenne, quand l'unité est détruite : {0}.</value>
+  </data>
+  <data name="Results_MarginValue" xml:space="preserve">
+    <value>{0} (Marge)</value>
   </data>
   <data name="Results_Header" xml:space="preserve">
     <value>{0} simulations en {1} s (graine {2})</value>
@@ -310,9 +412,6 @@
   <data name="Results_Wipe" xml:space="preserve">
     <value>Unité détruite</value>
   </data>
-  <data name="Results_WipeDetail" xml:space="preserve">
-    <value>rouge sous {0}, vert au-delà de {1}</value>
-  </data>
   <data name="Simulation_Cancel" xml:space="preserve">
     <value>Annuler</value>
   </data>
@@ -330,9 +429,6 @@
   </data>
   <data name="Simulation_Seed" xml:space="preserve">
     <value>Graine</value>
-  </data>
-  <data name="Simulation_SeedHelp" xml:space="preserve">
-    <value>Vide : tirée au hasard</value>
   </data>
   <data name="Simulation_Title" xml:space="preserve">
     <value>Simulation</value>

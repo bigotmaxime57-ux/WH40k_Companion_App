@@ -1,11 +1,16 @@
 @*
-    Situation de l'attaque. Les options qui ne concernent aucune arme sont masquées : ce choix vient du Core
-    (UsesHalfRange, UsesRemainedStationary, UsesCharged, PrecisionTargetMatters), aucune règle n'est écrite ici.
+    Situation de l'attaque : seulement les conditions qui changent quelque chose pour les armes saisies (demi-portée,
+    immobile, a chargé, cible de Precision). Ce choix vient du Core (UsesHalfRange, UsesRemainedStationary, UsesCharged,
+    PrecisionTargetMatters), aucune règle n'est écrite ici. Les boosts sont dans les cartes de l'attaquant et du défenseur.
 *@
 
 <MudPaper Elevation="3" Class="pa-4 wh-section" data-test="context">
-    <SectionHeader Icon="@Icons.Material.Filled.Terrain" Title="@L["Context_Title"]" />
+    <SectionHeader Icon="@Icons.Material.Filled.Terrain" Title="@L["Context_Title"]" Help="@([L["Help_Context"]])" />
 
+    @if (!HasConditions)
+    {
+        <MudText Typo="Typo.body2" Class="wh-muted" data-test="context-none">@L["Context_None"]</MudText>
+    }
     @if (Reference.Attacker.UsesHalfRange)
     {
         <MudCheckBox T="bool" Label="@L["Context_HalfRange"]" @bind-Value="Context.HalfRange" @bind-Value:after="NotifyChanged" data-test="half-range" />
@@ -19,38 +24,17 @@
     {
         <MudCheckBox T="bool" Label="@L["Context_Charged"]" @bind-Value="Context.Charged" @bind-Value:after="NotifyChanged" data-test="charged" />
     }
-
-    <MudGrid Spacing="2">
-        <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Context_HitModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3" @bind-Value="Context.HitModifier" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Context_WoundModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3" @bind-Value="Context.WoundModifier" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6">
-            <MudSelect T="RerollPolicy" Label="@L["Context_HitReroll"]" @bind-Value="Context.HitReroll" @bind-Value:after="NotifyChanged">
-                <RerollItems />
-            </MudSelect>
-        </MudItem>
-        <MudItem xs="6">
-            <MudSelect T="RerollPolicy" Label="@L["Context_WoundReroll"]" @bind-Value="Context.WoundReroll" @bind-Value:after="NotifyChanged">
-                <RerollItems />
-            </MudSelect>
-        </MudItem>
-        @if (ShowPrecisionTarget)
-        {
-            <MudItem xs="12">
-                <MudSelect T="string" Label="@L["Context_PrecisionTarget"]" @bind-Value="PrecisionChoice" @bind-Value:after="NotifyChanged"
-                           data-test="precision-target">
-                    <MudSelectItem T="string" Value="FirstCharacter">@L["Context_PrecisionFirst"]</MudSelectItem>
-                    @foreach (string name in PrecisionNames)
-                    {
-                        <MudSelectItem T="string" Value="name">@name</MudSelectItem>
-                    }
-                </MudSelect>
-            </MudItem>
-        }
-    </MudGrid>
+    @if (ShowPrecisionTarget)
+    {
+        <MudSelect T="string" Label="@L["Context_PrecisionTarget"]" @bind-Value="PrecisionChoice" @bind-Value:after="NotifyChanged"
+                   data-test="precision-target">
+            <MudSelectItem T="string" Value="FirstCharacter">@L["Context_PrecisionFirst"]</MudSelectItem>
+            @foreach (string name in PrecisionNames)
+            {
+                <MudSelectItem T="string" Value="name">@name</MudSelectItem>
+            }
+        </MudSelect>
+    }
 </MudPaper>
 
 @code {
@@ -66,6 +50,9 @@
 
     [Parameter]
     public EventCallback Changed { get; set; }
+
+    private bool HasConditions =>
+        Reference.Attacker.UsesHalfRange || Reference.Attacker.UsesRemainedStationary || Reference.Attacker.UsesCharged || ShowPrecisionTarget;
 
     /// <summary>Affichée aussi si une cible est encore choisie, pour pouvoir la retirer si elle n'a plus lieu d'être.</summary>
     private bool ShowPrecisionTarget => Reference.PrecisionTargetMatters || Context.PrecisionTarget is not null;

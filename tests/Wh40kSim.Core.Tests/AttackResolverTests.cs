@@ -158,7 +158,7 @@ public class AttackResolverTests
     public void Cover_worsens_ballistic_skill_by_one_in_11th_edition()
     {
         var weapon = new WeaponProfile { Skill = 3, Strength = 4 };
-        var defender = Build.Horde() with { InCover = true };
+        var defender = Build.Horde() with { Boosts = new DefenderBoosts { InCover = true } };
 
         // CT 3+ à couvert = 4+ : un 3 rate
         var missed = new ScriptedDiceRoller(3);
@@ -182,8 +182,8 @@ public class AttackResolverTests
     public void Hit_modifiers_are_capped_at_plus_one()
     {
         var weapon = new WeaponProfile { Skill = 4, Strength = 4, Abilities = new WeaponAbilities { Heavy = true } };
-        var context = new AttackContext { RemainedStationary = true, HitModifier = 1 };
-        var resolver = new AttackResolver(Build.Scenario(weapon, Build.Horde(), context: context));
+        var context = new AttackContext { RemainedStationary = true };
+        var resolver = new AttackResolver(Build.Scenario(weapon, Build.Horde(), context: context, boosts: new AttackerBoosts { HitRoll = 1 }));
 
         // 2 + 1 (plafonné) = 3 < 4 : raté
         resolver.Run(new ScriptedDiceRoller(2));
@@ -194,8 +194,7 @@ public class AttackResolverTests
     public void Reroll_ones_and_twin_linked_reroll_dice()
     {
         var weapon = new WeaponProfile { Skill = 3, Strength = 4, Abilities = new WeaponAbilities { TwinLinked = true } };
-        var context = new AttackContext { HitReroll = RerollPolicy.Ones };
-        var resolver = new AttackResolver(Build.Scenario(weapon, Build.Horde(), context: context));
+        var resolver = new AttackResolver(Build.Scenario(weapon, Build.Horde(), boosts: new AttackerBoosts { HitReroll = RerollPolicy.Ones }));
 
         // Touche 1 → relance 3 ; blessure 2 → relance (twin-linked) 4 ; sauvegarde 1
         var dice = new ScriptedDiceRoller(1, 3, 2, 4, 1);

@@ -26,6 +26,9 @@ Voir aussi `README.md` (structure de la solution, règles de jeu implémentées,
 - **Versions de paquets** : vérifier sur NuGet la dernière version stable compatible .NET 10 avant de référencer un paquet.
 - **Wh40kSim.Console** est conservé comme outil de debug : ne pas le supprimer, le garder compilable.
 - **Ne pas anticiper les phases suivantes** pendant une phase (ne pas la surcharger).
+- **« voir sc »** = regarder la capture d'écran que l'utilisateur a mise dans le presse-papiers. L'enregistrer dans le
+  scratchpad (PowerShell : `[System.Windows.Forms.Clipboard]::GetImage().Save(<chemin>.png, [System.Drawing.Imaging.ImageFormat]::Png)`
+  après `Add-Type -AssemblyName System.Windows.Forms, System.Drawing`), puis la lire comme une image.
 
 ## Git
 
@@ -258,13 +261,38 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
    n'est pas une modification de la CT / CC, non plafonnée ; seul le couvert était géré). Règles confirmées par
    l'utilisateur : pas de limite sur la modification de CT / CC (le résultat reste borné entre 2+ et 6+, 02.02.01, déjà
    appliqué au couvert), PA jamais au-dessus de 0, Force jamais sous 1.
-   - Core, convention +1 = mieux pour celui qui en bénéficie. Situation (attaquant) : CT / CC, A, F, PA, D. Défenseur
-     (attaques qui le visent) : CT / CC des attaquants (cumulée avec le couvert), PA des attaques reçues. Appliquées au
-     profil avant les jets ; A et D au moins 1 (déjà le cas). Modificateurs au jet inchangés.
-   - JSON : nouveaux champs à 0 par défaut (anciens fichiers lisibles). Non-régression au bit près sans modification.
-   - Tests : dés scriptés pour chaque modification, cumul non plafonné (couvert + aptitude du défenseur), bornes.
-   - UI : rangée « Modifications de caractéristiques » dans la Situation et le Défenseur, distincte des modificateurs
-     au jet, avec une aide. README : séquence d'attaque mise à jour.
+   - **Boosts de chaque côté** (choix final de l'utilisateur, après deux essais : tout dans la Situation, puis
+     défenseur sans boosts) : chacun saisit les siens, le moteur les cumule (ex. +2 dégâts de l'attaquant et -1 dégât
+     du défenseur interagissent, sans calcul à la main). Convention : valeurs du point de vue de l'attaquant (+1 =
+     mieux pour lui).
+     - Attaquant (`AttackerUnit.Boosts`, record `AttackerBoosts`) : CT / CC, jet de touche, relance des touches ;
+       Force, jet de blessure, relance des blessures ; A, PA, D.
+     - Défenseur (`DefenderUnit.Boosts`, record `DefenderBoosts`) : couvert, CT / CC des attaquants, jet de touche ;
+       jet de blessure, PA des attaques reçues, dégâts des attaques reçues (`Damage` : avec la réduction de dégâts
+       des groupes, après Melta, minimum 1, pas sur les blessures mortelles).
+     - `AttackContext` ne garde que la situation (demi-portée, immobile, a chargé, cible de Precision).
+     - Caractéristiques appliquées au profil avant les jets, sans plafond, dans leurs bornes (CT / CC 2+ à 6+ ; F, A,
+       D au moins 1 ; PA jamais au-dessus de 0) ; modificateurs au jet inchangés (±1 au total).
+   - JSON calqué sur l'interface (pas d'ancien fichier à préserver, choix de l'utilisateur) : `attacker.boosts`,
+     `defender.boosts`, `context` réduit à la situation ; les anciens champs (`context.hitReroll`,
+     `defender.inCover`…) sont refusés. Boosts absents = neutres. Non-régression au bit près.
+   - Tests : dés scriptés pour chaque boost des deux côtés, cumuls (couvert, attaquant + défenseur), bornes, JSON.
+   - UI : bloc **« Boosts »** repliable dans la carte de l'attaquant et dans celle du défenseur (replié tant qu'aucun
+     boost n'est saisi, nombre de boosts actifs dans l'en-tête), rangées Touche / Blessure / Profil. La **Situation**
+     ne garde que les conditions (demi-portée, immobile, a chargé, cible de Precision). **Aucune annotation sous les
+     champs** : explications dans des bulles « ? » (infobulle après 1 s de survol). README : séquence d'attaque.
+   - Retours de l'utilisateur : titre « Armement » entre les boosts et les armes (comme « Groupes d'allocation ») ;
+     bloc Boosts teinté ; **couleurs de camp** façon cartes de déploiement, dans tous les thèmes : rouge pour
+     l'attaquant, vert pour le défenseur (variable CSS `--wh-accent` des sections `.wh-attacker` / `.wh-defender`) ;
+     filet du PERSONNAGE passé en or (le rouge désigne l'attaquant) ; choix rapide du nombre de simulations en
+     surbrillance.
+   - **Marge (excédent de l'étape 4) clarifiée** : la moyenne des figurines tuées changeait avec le mode prolongé et
+     dépassait l'effectif. Les tuiles restent toujours les pertes réelles ; « Afficher la marge » ajoute sous leur moyenne
+     « +1,33 (Marge) », expliqué en infobulle, tiret si l'unité n'est jamais détruite (figurines et PV en plus, en
+     moyenne quand l'unité est détruite : `SimulationResult.KillMarginWhenWiped` /
+     `DamageMarginWhenWiped`, via `DiscreteDistribution.MeanExcessAbove`) et prolonge les tableaux, lignes au-delà
+     de l'unité notées « 5 + 2 » sous un trait. La console affiche aussi la marge. Explication de la marge dans une bulle « ? »
+     à côté de la valeur, comme ailleurs.
    - Fin d'étape : tag `v0.2a.1`.
 
 ## Décisions techniques
@@ -306,7 +334,17 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   `Resources/Strings.resx` (clé `Zone_Élément`), `StringsTests` vérifie qu'aucune clé ne manque ni ne traîne.
 - **Tests bUnit** : `ComponentTestContext` (services, culture, faux services, `MudPopoverProvider` rendu d'abord,
   JS en mode `Loose`, `IAsyncLifetime` car des services MudBlazor ne se libèrent qu'en asynchrone). Repérage par
-  attributs `data-test` : MudBlazor les pose sur l'`<input>` lui-même (sélecteur `input[data-test=…]`).
+  attributs `data-test` : MudBlazor les pose sur l'`<input>` lui-même (sélecteur `input[data-test=…]`). Clic dans une carte
+  qui contient des infobulles MudBlazor (rendu asynchrone, clic parfois perdu) : `ClickUntil(sélecteur, effet)`.
+  Tests UI exécutés sans parallélisme (`TestAssemblyInfo.cs`) : en parallèle, la charge faisait perdre des
+  interactions (environ une exécution sur huit) ; 0 échec sur 15 exécutions ensuite.
+- **Aides à l'écran** : pas de `HelperText` ni de légende sous les champs ; explications dans `HelpBubble` (bulle
+  « ? », infobulle après 1 s), via le paramètre `Help` de `SectionHeader` / `SubSection` (liste de textes du `.resx`).
+- **Ordre d'allocation (05.03)** : règle portée par le Core (`AllocationOrder` : `FindViolation`, `IsValid`, `Arrange`),
+  utilisée par `Scenario.Validate` et par l'interface. Le panneau du défenseur l'impose à la saisie : flèches désactivées
+  si un PERSONNAGE passerait devant un garde du corps, groupes remis en ordre après chaque modification (cocher
+  PERSONNAGE envoie le groupe en fin de liste), nouveau groupe inséré avant les PERSONNAGES. Un fichier JSON mal ordonné
+  reste signalé par la validation.
 - **Mise en page** : les points de rupture de MudGrid (`sm`, `md`, `lg`) suivent la largeur de la *fenêtre*, pas du
   panneau ; dans un panneau en demi-largeur, n'utiliser que `xs` / `sm`.
 - **Hôte desktop (Wh40kSim.Desktop)** : réduit au minimum. Toute l'interface est `AppShell` (Wh40kSim.UI) :
@@ -314,7 +352,9 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   lue par la WebView) et bascule, puis `SimulatorPage` ; réutilisable tel quel par l'hôte web (2b). L'hôte fournit
   `MauiProgram` (services), la fenêtre (`App` : titre lu dans `Strings.resx`, 1400 × 900 centrée, minimum 900 × 600),
   `DesktopScenarioFileService` et `wwwroot/index.html` (CSS / JS de MudBlazor). Pas de `Package.appxmanifest`
-  (application non empaquetée).
+  (application non empaquetée). Démarrage sans flash : l'hôte passe le thème du système à
+  `AppShell` (`SystemDarkMode`, sinon lu par le navigateur après le premier rendu) ; fond de la page MAUI et de
+  `index.html` aux couleurs du thème, barre de chargement dans `index.html`, WebView2 transparente jusqu'au premier rendu.
 - **Vérification visuelle** : pas de test automatique du rendu. Captures d'écran de la fenêtre par un script PowerShell
   (`CopyFromScreen`, clic et molette via `user32`) dans le scratchpad de Claude, lues comme des images.
 
@@ -364,8 +404,10 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   code.
 - Phase 2a, étape 7 (finitions de l'interface) : fusionnée dans `main` (sans tag : `v0.2a.1` à la fin de l'étape 8).
   234 tests verts (114 Core, 33 Simulation, 87 UI). Vérifiée à l'écran par l'utilisateur au fil de l'eau.
-- **En cours : phase 2a, étape 8 (modifications de caractéristiques)**. Prochaine ensuite : phase 2b (API + client
-  web).
+- Phase 2a, étape 8 (modifications de caractéristiques) : fusionnée dans `main`, **tag `v0.2a.1`**.
+  275 tests verts (145 Core, 35 Simulation, 95 UI) ;
+  `NonRegressionTests` inchangés (sans modification, résultats identiques au bit près).
+- Prochaine ensuite : phase 2b (API + client web).
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

@@ -63,7 +63,7 @@ public class SimulatorTests
     public void Cover_matches_the_analytic_mean()
     {
         // CT 3+ à couvert = 4+
-        AssertMeanKills(10 * 0.5 * 0.5, Build.Scenario(BaseWeapon, Build.Horde() with { InCover = true }, models: 10));
+        AssertMeanKills(10 * 0.5 * 0.5, Build.Scenario(BaseWeapon, Build.Horde() with { Boosts = new DefenderBoosts { InCover = true } }, models: 10));
     }
 
     [Fact]

@@ -7,6 +7,9 @@ public sealed record AttackerUnit
 {
     public string Name { get; init; } = "Attaquant";
 
+    /// <summary>Boosts appliqués à toutes les armes de l'unité.</summary>
+    public AttackerBoosts Boosts { get; init; } = new();
+
     public IReadOnlyList<WeaponGroup> Weapons { get; init; } = [];
 
     /// <summary>Au moins une arme est concernée par la demi-portée (voir <see cref="WeaponProfile.UsesHalfRange"/>).</summary>
@@ -74,14 +77,8 @@ public sealed record DefenderUnit
 {
     public string Name { get; init; } = "Défenseur";
 
-    /// <summary>Règle 11e édition : le couvert dégrade la CT de l'attaquant de 1 (armes de tir uniquement).</summary>
-    public bool InCover { get; init; }
-
-    /// <summary>Modificateur appliqué aux jets de touche contre cette unité (ex. -1 pour Stealth).</summary>
-    public int HitModifier { get; init; }
-
-    /// <summary>Modificateur appliqué aux jets de blessure contre cette unité.</summary>
-    public int WoundModifier { get; init; }
+    /// <summary>Couvert et boosts contre les attaques qui visent cette unité.</summary>
+    public DefenderBoosts Boosts { get; init; } = new();
 
     public IReadOnlyList<ModelGroup> Groups { get; init; } = [];
 

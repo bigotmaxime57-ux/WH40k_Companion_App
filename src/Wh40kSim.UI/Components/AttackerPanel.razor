@@ -1,8 +1,15 @@
-@* Attaquant : nom et profils d'armes, résolus dans l'ordre de la liste. *@
+@* Attaquant : nom, boosts (pour toutes ses armes) et profils d'armes, résolus dans l'ordre de la liste. *@
 
-<MudPaper Elevation="3" Class="pa-4 wh-section">
+<MudPaper Elevation="3" Class="pa-4 wh-section wh-attacker" data-test="attacker-panel">
     <SectionHeader Icon="@Icons.Material.Filled.GpsFixed" Title="@L["Attacker_Title"]" />
     <MudTextField T="string" Label="@L["Attacker_Name"]" @bind-Value="Attacker.Name" @bind-Value:after="NotifyChanged" />
+
+    <AttackerBoostsEditor Boosts="Attacker.Boosts" Changed="NotifyChanged" />
+
+    <div class="wh-subsection-title mt-4" data-test="weapons-title">
+        <MudText Typo="Typo.subtitle1">@L["Attacker_Weapons"]</MudText>
+        <HelpBubble Lines="@([L["Attacker_WeaponsHelp"]])" />
+    </div>
 
     @foreach (var weapon in Attacker.Weapons)
     {

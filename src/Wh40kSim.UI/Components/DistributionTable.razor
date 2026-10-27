@@ -15,8 +15,10 @@
     <tbody>
         @foreach (var row in _rows)
         {
-            <tr>
-                <td class="wh-number">@row.Value</td>
+            bool beyond = row.Value > UnitSize;
+            <tr class="@(beyond ? (row.Value == _firstBeyond ? "wh-row-beyond wh-row-beyond-first" : "wh-row-beyond") : null)"
+                data-test="@(beyond ? "beyond" : null)">
+                <td class="wh-number">@(beyond ? L["Results_Beyond", UnitSize!.Value, row.Value - UnitSize.Value].Value : row.Value.ToString())</td>
                 <td>
                     <div class="wh-bar-cell">
                         <span class="wh-number">@row.Exactly.ToString("P1")</span>
@@ -39,10 +41,20 @@
     [Parameter, EditorRequired]
     public DiscreteDistribution Distribution { get; set; } = null!;
 
+    /// <summary>
+    /// Effectif de l'unité (figurines ou PV) pour une distribution prolongée : les lignes au-delà sont des pertes
+    /// virtuelles, séparées par un trait et notées « effectif + n ». Null pour une distribution réelle.
+    /// </summary>
+    [Parameter]
+    public int? UnitSize { get; set; }
+
+    private int? _firstBeyond;
+
     protected override void OnParametersSet()
     {
         _rows = Distribution.Rows();
         _max = _rows.Max(r => r.Exactly);
+        _firstBeyond = _rows.Select(r => (int?)r.Value).FirstOrDefault(v => v > UnitSize);
     }
 
     /// <summary>Largeur CSS de la barre, en pourcentage (culture invariante : « 37.5% »).</summary>

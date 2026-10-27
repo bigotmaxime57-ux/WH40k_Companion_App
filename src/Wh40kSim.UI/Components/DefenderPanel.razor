@@ -1,31 +1,22 @@
 @* Défenseur : ses groupes d'allocation, dans l'ordre où ils encaissent (le premier d'abord). *@
 
-<MudPaper Elevation="3" Class="pa-4 wh-section">
+<MudPaper Elevation="3" Class="pa-4 wh-section wh-defender" data-test="defender-panel">
     <SectionHeader Icon="@Icons.Material.Filled.Shield" Title="@L["Defender_Title"]" />
-    <MudGrid Spacing="2">
-        <MudItem xs="12" sm="6">
-            <MudTextField T="string" Label="@L["Defender_Name"]" @bind-Value="Defender.Name" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="12" sm="6">
-            <MudCheckBox T="bool" Label="@L["Defender_InCover"]" @bind-Value="Defender.InCover" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Defender_HitModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3" @bind-Value="Defender.HitModifier" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Defender_WoundModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3" @bind-Value="Defender.WoundModifier" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-    </MudGrid>
+    <MudTextField T="string" Label="@L["Defender_Name"]" @bind-Value="Defender.Name" @bind-Value:after="NotifyChanged" />
 
-    <MudText Typo="Typo.subtitle1" Class="mt-4">@L["Defender_Groups"]</MudText>
-    <MudText Typo="Typo.caption">@L["Defender_GroupsHelp"]</MudText>
+    <DefenderBoostsEditor Boosts="Defender.Boosts" Changed="NotifyChanged" />
+
+    <div class="wh-subsection-title mt-4">
+        <MudText Typo="Typo.subtitle1">@L["Defender_Groups"]</MudText>
+        <HelpBubble Lines="@([L["Defender_GroupsHelp"]])" />
+    </div>
 
     @for (int i = 0; i < Defender.Groups.Count; i++)
     {
         int index = i;
         var group = Defender.Groups[index];
         <ModelGroupEditor @key="group" Group="group" Number="index + 1" Changed="NotifyChanged"
-                          CanMoveUp="index > 0" CanMoveDown="index < Defender.Groups.Count - 1"
+                          CanMoveUp="CanMove(index, -1)" CanMoveDown="CanMove(index, 1)"
                           OnMoveUp="() => Move(index, -1)" OnMoveDown="() => Move(index, 1)" OnRemove="() => Remove(group)" />
     }
 
@@ -40,22 +31,48 @@
     [Parameter]
     public EventCallback Changed { get; set; }
 
-    private Task NotifyChanged() => Changed.InvokeAsync();
+    /// <summary>
+    /// Après chaque modification, les PERSONNAGES sont remis après les gardes du corps (règle 05.03, portée par le Core) :
+    /// cocher PERSONNAGE envoie le groupe en fin de liste, décocher le replace avant les PERSONNAGES.
+    /// </summary>
+    private Task NotifyChanged()
+    {
+        Defender.Groups = AllocationOrder.Arrange(Defender.Groups, g => g.IsCharacter);
+        return Changed.InvokeAsync();
+    }
 
-    /// <summary>Nouveau groupe : valeurs par défaut du Core, et l'Endurance du groupe précédent.</summary>
+    /// <summary>Nouveau groupe : valeurs par défaut du Core, et l'Endurance du dernier garde du corps (à défaut, du dernier groupe).</summary>
     private Task Add()
     {
         var group = new ModelGroupForm();
-        if (Defender.Groups.Count > 0)
+        var previous = Defender.Groups.LastOrDefault(g => !g.IsCharacter) ?? Defender.Groups.LastOrDefault();
+        if (previous is not null)
         {
-            group.Toughness = Defender.Groups[^1].Toughness;
+            group.Toughness = previous.Toughness;
         }
         Defender.Groups.Add(group);
         return NotifyChanged();
     }
 
+    /// <summary>Déplacement possible : dans la liste, et sans faire passer un PERSONNAGE devant un garde du corps.</summary>
+    private bool CanMove(int index, int offset)
+    {
+        int target = index + offset;
+        if (target < 0 || target >= Defender.Groups.Count)
+        {
+            return false;
+        }
+        var isCharacter = Defender.Groups.Select(g => g.IsCharacter).ToArray();
+        (isCharacter[index], isCharacter[target]) = (isCharacter[target], isCharacter[index]);
+        return AllocationOrder.IsValid(isCharacter);
+    }
+
     private Task Move(int index, int offset)
     {
+        if (!CanMove(index, offset))
+        {
+            return Task.CompletedTask;
+        }
         int target = index + offset;
         (Defender.Groups[index], Defender.Groups[target]) = (Defender.Groups[target], Defender.Groups[index]);
         return NotifyChanged();

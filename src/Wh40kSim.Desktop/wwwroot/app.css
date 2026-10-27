@@ -1,4 +1,56 @@
-/* Le style de l'interface vient de MudBlazor : ici, seulement le bandeau d'erreur de Blazor. */
+/*
+   Le style de l'interface vient de MudBlazor : ici, seulement ce qui s'affiche avant le premier rendu de Blazor (fond
+   et barre de chargement aux couleurs du thème du système, comme la page MAUI) et le bandeau d'erreur de Blazor.
+   Couleurs reprises de Wh40kTheme : parchemin et laiton foncé en clair, Grimdark (presque noir, or terni) en sombre.
+*/
+
+:root {
+    --wh-loading-background: #f2ece0;
+    --wh-loading-track: rgba(140, 106, 28, 0.2);
+    --wh-loading-bar: #8c6a1c;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --wh-loading-background: #0a0a0b;
+        --wh-loading-track: rgba(176, 141, 60, 0.2);
+        --wh-loading-bar: #b08d3c;
+    }
+}
+
+html, body {
+    background: var(--wh-loading-background);
+    margin: 0;
+}
+
+/* Barre indéterminée centrée dans la fenêtre */
+.wh-loading {
+    background: var(--wh-loading-track);
+    height: 4px;
+    left: 50%;
+    overflow: hidden;
+    position: fixed;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(320px, 60vw);
+}
+
+.wh-loading-bar {
+    animation: wh-loading 1.2s ease-in-out infinite;
+    background: var(--wh-loading-bar);
+    height: 100%;
+    width: 40%;
+}
+
+@keyframes wh-loading {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(250%);
+    }
+}
 
 #blazor-error-ui {
     background: lightyellow;

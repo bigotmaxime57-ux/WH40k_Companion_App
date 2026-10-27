@@ -23,9 +23,23 @@ public class AppShellTests() : ComponentTestContext(renderPopoverProvider: false
         var shell = Render<AppShell>();
         shell.WaitForAssertion(() => Assert.True(shell.Instance.IsDarkMode));
 
-        shell.Find("[data-test=toggle-theme]").Click();
+        shell.ClickUntil("[data-test=toggle-theme]", () => !shell.Instance.IsDarkMode);
 
         Assert.False(shell.Instance.IsDarkMode);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Theme_given_by_the_host_applies_from_the_first_render_without_asking_the_browser(bool dark)
+    {
+        // Le navigateur dirait l'inverse : il ne doit pas être consulté
+        JSInterop.Setup<bool>("mudThemeProvider.isDarkMode").SetResult(!dark);
+        var shell = Render<AppShell>(p => p.Add(c => c.SystemDarkMode, dark));
+
+        Assert.Equal(dark, shell.FindAll(".wh-dark").Count > 0);
+        Assert.Equal(dark, shell.Instance.IsDarkMode);
+        Assert.Empty(JSInterop.Invocations["mudThemeProvider.isDarkMode"]);
     }
 
     [Theory]
@@ -38,7 +52,7 @@ public class AppShellTests() : ComponentTestContext(renderPopoverProvider: false
         shell.WaitForAssertion(() => Assert.True(shell.Instance.IsDarkMode));
 
         Assert.Equal(grimdark, shell.FindAll(".wh-grimdark").Count > 0);
-        shell.Find("[data-test=toggle-theme]").Click();
+        shell.ClickUntil("[data-test=toggle-theme]", () => !shell.Instance.IsDarkMode);
         Assert.Empty(shell.FindAll(".wh-grimdark")); // thème clair : jamais
     }
 

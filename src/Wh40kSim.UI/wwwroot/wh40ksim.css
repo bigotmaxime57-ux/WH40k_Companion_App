@@ -1,10 +1,53 @@
 /*
    Styles globaux de Wh40kSim.UI (en plus du thème MudBlazor, Theme/Wh40kTheme.cs).
    L'hôte les charge après MudBlazor : <link rel="stylesheet" href="_content/Wh40kSim.UI/wh40ksim.css" />
-   .wh-shell : toute l'application ; .wh-grimdark : thème sombre de style Grimdark seulement (classe posée par AppShell).
+   .wh-shell : toute l'application ; .wh-dark : thème sombre, quel que soit son style ; .wh-grimdark : thème sombre de
+   style Grimdark seulement (classes posées par AppShell).
 */
 
 /* --- Commun aux deux thèmes ------------------------------------------------------------------------ */
+
+/*
+   Couleur de camp (--wh-accent) : filets, titres et boosts d'une section. Comme sur les cartes de déploiement de
+   Warhammer, rouge pour l'attaquant et vert pour le défenseur, dans tous les thèmes ; or (couleur principale) ailleurs.
+   .wh-dark (posée par AppShell en sombre) éclaircit un peu les deux teintes pour qu'elles restent lisibles sur fond noir.
+   Dans une carte de camp, la couleur principale de MudBlazor devient celle du camp : boutons, étiquettes, cases et
+   champs actifs la reprennent. --wh-gold garde l'or du thème (valeur calculée sur .wh-shell, avant redéfinition).
+*/
+.wh-shell {
+    --wh-accent: var(--mud-palette-primary);
+    --wh-gold: var(--mud-palette-primary);
+}
+
+.wh-shell .wh-attacker {
+    --wh-accent: #8c352c;
+    --wh-accent-rgb: 140, 53, 44;
+}
+
+.wh-shell .wh-defender {
+    --wh-accent: #2b6e5c;
+    --wh-accent-rgb: 43, 110, 92;
+}
+
+.wh-shell.wh-dark .wh-attacker {
+    --wh-accent: #a8463a;
+    --wh-accent-rgb: 168, 70, 58;
+}
+
+.wh-shell.wh-dark .wh-defender {
+    --wh-accent: #3f9a80;
+    --wh-accent-rgb: 63, 154, 128;
+}
+
+.wh-shell .wh-attacker,
+.wh-shell .wh-defender {
+    --mud-palette-primary: var(--wh-accent);
+    --mud-palette-primary-rgb: var(--wh-accent-rgb);
+    --mud-palette-primary-text: #ffffff;
+    --mud-palette-primary-hover: rgba(var(--wh-accent-rgb), .08);
+    --mud-palette-primary-darken: color-mix(in srgb, var(--wh-accent) 85%, black);
+    --mud-palette-primary-lighten: color-mix(in srgb, var(--wh-accent) 85%, white);
+}
 
 .wh-shell .mud-main-content {
     background: radial-gradient(ellipse at top, var(--mud-palette-background-gray) 0%, var(--mud-palette-background) 70%);
@@ -38,7 +81,7 @@
 
 /* Sections (attaquant, défenseur…) : carte soulignée d'un filet or */
 .wh-section {
-    border-top: 3px solid var(--mud-palette-primary);
+    border-top: 3px solid var(--wh-accent);
 }
 
 .wh-section-header {
@@ -49,12 +92,12 @@
 }
 
 .wh-section-header > .mud-icon-root {
-    color: var(--mud-palette-primary);
+    color: var(--wh-accent);
 }
 
 /* Trait décoratif qui prolonge le titre jusqu'aux actions */
 .wh-section-header::after {
-    background: linear-gradient(90deg, var(--mud-palette-primary) 0%, transparent 100%);
+    background: linear-gradient(90deg, var(--wh-accent) 0%, transparent 100%);
     content: "";
     flex: 1;
     height: 1px;
@@ -64,6 +107,50 @@
 
 .wh-section-header > .wh-section-actions {
     order: 2;
+}
+
+/* Bulle d'aide « ? » à côté d'un titre (explications au survol) */
+.wh-help-icon {
+    color: var(--mud-palette-text-secondary);
+    cursor: help;
+    opacity: .7;
+}
+
+.wh-help-icon:hover {
+    color: var(--mud-palette-primary);
+    opacity: 1;
+}
+
+.wh-help-content {
+    line-height: 1.45;
+    max-width: 26rem;
+}
+
+.wh-help-content p {
+    margin: 0 0 .35rem 0;
+}
+
+.wh-help-content p:last-child {
+    margin-bottom: 0;
+}
+
+.wh-subsection-title {
+    align-items: center;
+    display: flex;
+    gap: .4rem;
+}
+
+/* Petits titres des rangées de boosts (Touche, Blessure…) */
+.wh-boost-row-title {
+    color: var(--wh-accent);
+    display: block;
+    letter-spacing: .06em;
+    margin-top: .5rem;
+    text-transform: uppercase;
+}
+
+.wh-muted {
+    color: var(--mud-palette-text-secondary);
 }
 
 /* Colonne de droite (simulation, résultats) : reste visible sous la barre de titre, avec son propre défilement */
@@ -86,17 +173,40 @@
 }
 
 .wh-subcard {
-    border-left: 3px solid var(--mud-palette-primary) !important;
+    border-left: 3px solid var(--wh-accent) !important;
 }
 
-/* Groupe PERSONNAGE : filet rouge, pour le distinguer des gardes du corps */
+/* Bloc « Boosts » : fond et contour teintés de la couleur de camp, pour le distinguer des armes et des groupes */
+.wh-boosts {
+    background-color: color-mix(in srgb, var(--wh-accent) 7%, var(--mud-palette-surface)) !important;
+    border-color: color-mix(in srgb, var(--wh-accent) 45%, transparent) !important;
+    border-left-width: 5px !important;
+}
+
+.wh-boosts .wh-subsection-title .mud-typography {
+    color: var(--wh-accent);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+/* Choix rapide du nombre de simulations égal à la valeur saisie : rempli comme le bouton Lancer */
+.wh-preset-active:not(:disabled) {
+    background-color: var(--mud-palette-primary) !important;
+    color: var(--mud-palette-primary-text) !important;
+}
+
+.wh-preset-active:not(:disabled):hover {
+    background-color: var(--mud-palette-primary-darken) !important;
+}
+
+/* Groupe PERSONNAGE : filet or (le rouge est la couleur de l'attaquant), pour le distinguer des gardes du corps */
 .wh-subcard-character {
-    border-left-color: var(--mud-palette-secondary) !important;
+    border-left-color: var(--wh-gold) !important;
 }
 
 /* Numéro d'ordre d'allocation d'un groupe */
 .wh-group-number {
-    color: var(--mud-palette-primary);
+    color: var(--wh-accent);
     font-family: Bahnschrift, "Segoe UI", sans-serif;
     font-size: 1.4rem;
     font-weight: 600;
@@ -156,6 +266,15 @@
     grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
 }
 
+/* Tableaux prolongés : lignes au-delà de l'unité (pertes virtuelles), sous un trait pointillé */
+.wh-row-beyond td {
+    color: var(--mud-palette-text-secondary);
+}
+
+.wh-row-beyond-first td {
+    border-top: 2px dashed var(--mud-palette-primary) !important;
+}
+
 .wh-tile {
     background: var(--mud-palette-background-gray);
     border: 1px solid var(--mud-palette-lines-default);
@@ -193,6 +312,17 @@
 
 .wh-tile-good .wh-tile-value {
     color: var(--mud-palette-success);
+}
+
+/* Marge sous la moyenne (« Afficher la marge ») : plus petite, dans la couleur de la valeur */
+.wh-tile-margin {
+    align-items: center;
+    color: var(--mud-palette-primary);
+    display: flex;
+    gap: .25rem;
+    font-family: Bahnschrift, "Segoe UI", sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
 }
 
 .wh-tile-detail {
@@ -247,6 +377,6 @@
 }
 
 .wh-shell.wh-grimdark .wh-section-header .mud-typography-h6 {
-    color: var(--mud-palette-primary);
+    color: var(--wh-accent);
     text-shadow: 0 1px 2px rgba(0, 0, 0, .8);
 }

@@ -55,6 +55,12 @@ public sealed class AttackResolver
     /// <summary>Dés à utiliser maintenant : ceux de l'excédent une fois l'unité détruite.</summary>
     private IDiceRoller Dice => TracksExcess && _target.IsDestroyed ? _excessDice! : _dice;
 
+    /// <summary>Boosts de l'attaquant (toutes ses armes).</summary>
+    private AttackerBoosts Attack => _scenario.Attacker.Boosts;
+
+    /// <summary>Boosts du défenseur (attaques qui le visent), cumulés avec ceux de l'attaquant.</summary>
+    private DefenderBoosts Defense => _scenario.Defender.Boosts;
+
     /// <summary>Remet le défenseur à neuf puis résout tous les pools d'attaques, dans l'ordre.</summary>
     /// <param name="dice">Dés de la séquence réelle.</param>
     /// <param name="excessDice">
@@ -138,8 +144,8 @@ public sealed class AttackResolver
 
             for (int model = 0; model < member.ModelCount; model++)
             {
-                // A ne peut pas être inférieur à 1 (02.02.01)
-                attacks += Math.Max(1, member.Weapon.Attacks.Roll(Dice)) + bonusPerModel;
+                // A modifiée, puis jamais inférieure à 1 (02.02.01) ; Blast et Rapid Fire s'ajoutent ensuite
+                attacks += Math.Max(1, member.Weapon.Attacks.Roll(Dice) + Attack.Attacks) + bonusPerModel;
             }
         }
         return attacks;
@@ -160,19 +166,9 @@ public sealed class AttackResolver
         }
 
         var context = _scenario.Context;
-        var defender = _scenario.Defender;
-        bool ranged = weapon.Type == WeaponType.Ranged;
+        int skill = EffectiveSkill(weapon);
 
-        // Couvert (11e) : CT dégradée de 1. Modification de caractéristique, donc non plafonnée à ±1,
-        // mais la CT ne peut être ni 1+ ni 7+ (02.02.01).
-        int skill = weapon.Skill;
-        if (ranged && defender.InCover && !abilities.IgnoresCover)
-        {
-            skill += 1;
-        }
-        skill = Math.Clamp(skill, 2, 6);
-
-        int modifier = context.HitModifier + defender.HitModifier;
+        int modifier = Attack.HitRoll + Defense.HitRoll;
         if (weapon.UsesRemainedStationary && context.RemainedStationary)
         {
             modifier += 1;
@@ -183,7 +179,7 @@ public sealed class AttackResolver
         {
             int roll = Dice.D6();
             var outcome = Evaluate(roll, skill, modifier, abilities.CriticalHitOn);
-            if (ShouldReroll(context.HitReroll, roll, outcome))
+            if (ShouldReroll(Attack.HitReroll, roll, outcome))
             {
                 roll = Dice.D6();
                 outcome = Evaluate(roll, skill, modifier, abilities.CriticalHitOn);
@@ -220,9 +216,9 @@ public sealed class AttackResolver
         normalWounds = 0;
         devastatingWounds = 0;
 
-        int target = WoundTable.RequiredRoll(weapon.Strength, _target.EffectiveToughness());
+        int target = WoundTable.RequiredRoll(EffectiveStrength(weapon), _target.EffectiveToughness());
 
-        int modifier = context.WoundModifier + _scenario.Defender.WoundModifier;
+        int modifier = Attack.WoundRoll + Defense.WoundRoll;
         if (weapon.UsesCharged && context.Charged)
         {
             modifier += 1;
@@ -230,7 +226,7 @@ public sealed class AttackResolver
         modifier = Math.Clamp(modifier, -1, 1);
 
         // Twin-linked = relance des échecs ; on garde la relance la plus large disponible
-        var reroll = (RerollPolicy)Math.Max((int)context.WoundReroll, abilities.TwinLinked ? (int)RerollPolicy.Failed : 0);
+        var reroll = (RerollPolicy)Math.Max((int)Attack.WoundReroll, abilities.TwinLinked ? (int)RerollPolicy.Failed : 0);
 
         for (int i = 0; i < hits; i++)
         {
@@ -274,7 +270,7 @@ public sealed class AttackResolver
             _saveRollCounts[Dice.D6()]++;
         }
 
-        int ap = -Math.Abs(weapon.Ap);
+        int ap = EffectiveAp(weapon);
 
         for (int face = 1; face <= 6; face++)
         {
@@ -319,12 +315,40 @@ public sealed class AttackResolver
         }
     }
 
+    // --- Caractéristiques modifiées (02.02.01) ---------------------------------------------
+    // Modifications de caractéristiques : sans plafond (contrairement aux modificateurs aux jets), mais chaque
+    // caractéristique garde ses bornes. Convention : +1 = mieux pour l'attaquant.
+
+    /// <summary>
+    /// CT / CC après boosts de l'attaquant et du défenseur, et couvert (11e : CT dégradée de 1, armes de tir seulement,
+    /// sauf Ignores Cover) ; ni 1+ ni 7+ (bornée entre 2+ et 6+).
+    /// </summary>
+    private int EffectiveSkill(WeaponProfile weapon)
+    {
+        int improvement = Attack.Skill + Defense.Skill;
+        if (weapon.Type == WeaponType.Ranged && Defense.InCover && !weapon.Abilities.IgnoresCover)
+        {
+            improvement -= 1;
+        }
+        return Math.Clamp(weapon.Skill - improvement, 2, 6);
+    }
+
+    /// <summary>Force après modification ; jamais inférieure à 1.</summary>
+    private int EffectiveStrength(WeaponProfile weapon) => Math.Max(1, weapon.Strength + Attack.Strength);
+
+    /// <summary>
+    /// PA (valeur négative ou nulle, ex. -2) après boosts de l'attaquant et du défenseur ; ne dépasse jamais 0.
+    /// La PA du profil est lue comme négative même si elle est saisie positive.
+    /// </summary>
+    private int EffectiveAp(WeaponProfile weapon) =>
+        Math.Min(0, -Math.Abs(weapon.Ap) - (Attack.Ap + Defense.Ap));
+
     // --- Utilitaires ----------------------------------------------------------------------
 
     private int RollDamage(WeaponProfile weapon)
     {
-        // D ne peut pas être inférieur à 1 (02.02.01)
-        int damage = Math.Max(1, weapon.Damage.Roll(Dice));
+        // D modifié, puis jamais inférieur à 1 (02.02.01) ; Melta s'ajoute ensuite
+        int damage = Math.Max(1, weapon.Damage.Roll(Dice) + Attack.Damage);
         if (weapon.Abilities.Melta > 0 && _scenario.Context.HalfRange)
         {
             damage += weapon.Abilities.Melta;

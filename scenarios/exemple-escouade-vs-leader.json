@@ -35,7 +35,7 @@
   },
   "defender": {
     "name": "Escouade + Leader",
-    "inCover": false,
+    "boosts": { "inCover": false },
     "groups": [
       { "name": "Gardes du corps", "count": 8, "toughness": 4, "wounds": 2, "save": 4 },
       { "name": "Gardes d'élite", "count": 2, "toughness": 4, "wounds": 2, "save": 3 },
@@ -44,8 +44,6 @@
   },
   "context": {
     "halfRange": false,
-    "remainedStationary": true,
-    "hitReroll": "None",
-    "woundReroll": "None"
+    "remainedStationary": true
   }
 }

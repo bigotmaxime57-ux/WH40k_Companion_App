@@ -27,7 +27,7 @@ public class DefenderPanelTests : ComponentTestContext
         var form = ThreeGroups();
         var panel = RenderPanel(form);
 
-        panel.FindAll("[data-test=move-down]")[0].Click();
+        panel.ClickUntil("[data-test=move-down]", () => form.Groups[0].Name == "B");
 
         Assert.Equal(["B", "A", "C"], form.Groups.Select(g => g.Name));
     }
@@ -38,23 +38,53 @@ public class DefenderPanelTests : ComponentTestContext
         var form = ThreeGroups();
         var panel = RenderPanel(form);
 
-        panel.FindAll("[data-test=move-up]")[2].Click();
+        // Le premier bouton « monter » actif est celui de B (A est en tête, C est un PERSONNAGE)
+        panel.ClickUntil("[data-test=move-up]:not([disabled])", () => form.Groups[0].Name == "B");
 
-        Assert.Equal(["A", "C", "B"], form.Groups.Select(g => g.Name));
+        Assert.Equal(["B", "A", "C"], form.Groups.Select(g => g.Name));
     }
 
     [Fact]
-    public void First_group_cannot_move_up_and_last_cannot_move_down()
+    public void Moves_stay_in_the_list_and_never_put_a_character_before_a_bodyguard()
     {
         var panel = RenderPanel(ThreeGroups());
+        var up = panel.FindAll("[data-test=move-up]");
+        var down = panel.FindAll("[data-test=move-down]");
 
-        Assert.True(panel.FindAll("[data-test=move-up]")[0].HasAttribute("disabled"));
-        Assert.False(panel.FindAll("[data-test=move-up]")[1].HasAttribute("disabled"));
-        Assert.True(panel.FindAll("[data-test=move-down]")[2].HasAttribute("disabled"));
+        Assert.True(up[0].HasAttribute("disabled"));    // A est déjà en tête
+        Assert.False(up[1].HasAttribute("disabled"));   // B peut passer devant A
+        Assert.True(up[2].HasAttribute("disabled"));    // C (PERSONNAGE) ne peut pas passer devant B
+        Assert.True(down[1].HasAttribute("disabled"));  // B ne peut pas passer derrière C
+        Assert.True(down[2].HasAttribute("disabled"));  // C est déjà en dernier
     }
 
     [Fact]
-    public void New_group_takes_the_toughness_of_the_previous_one()
+    public void Checking_character_sends_the_group_after_the_bodyguards()
+    {
+        var form = ThreeGroups();
+        var panel = RenderPanel(form);
+
+        panel.FindAll("input[data-test=is-character]")[0].Change(true);
+
+        Assert.Equal(["B", "A", "C"], form.Groups.Select(g => g.Name));
+    }
+
+    [Fact]
+    public void Unchecking_character_puts_the_group_back_before_the_characters()
+    {
+        var form = new DefenderForm(new DefenderUnit
+        {
+            Groups = [new ModelGroup { Name = "A", Count = 5 }, new ModelGroup { Name = "L1", IsCharacter = true }, new ModelGroup { Name = "L2", IsCharacter = true, Wounds = 3 }],
+        });
+        var panel = RenderPanel(form);
+
+        panel.FindAll("input[data-test=is-character]")[2].Change(false);
+
+        Assert.Equal(["A", "L2", "L1"], form.Groups.Select(g => g.Name));
+    }
+
+    [Fact]
+    public void New_group_is_added_before_the_characters_with_the_last_bodyguard_toughness()
     {
         var form = ThreeGroups();
         var panel = RenderPanel(form);
@@ -62,8 +92,9 @@ public class DefenderPanelTests : ComponentTestContext
         panel.Find("[data-test=add-group]").Click();
 
         Assert.Equal(4, form.Groups.Count);
-        Assert.Equal(6, form.Groups[^1].Toughness);
-        Assert.Equal(new ModelGroup().Wounds, form.Groups[^1].Wounds);
+        Assert.Equal("C", form.Groups[^1].Name);
+        Assert.Equal(5, form.Groups[2].Toughness);
+        Assert.Equal(new ModelGroup().Wounds, form.Groups[2].Wounds);
     }
 
     [Fact]
@@ -105,9 +136,10 @@ public class AttackerPanelTests : ComponentTestContext
         var form = new AttackerForm();
         var panel = Render<AttackerPanel>(p => p.Add(c => c.Attacker, form));
 
-        panel.Find("[data-test=add-weapon]").Click();
-        panel.Find("[data-test=add-weapon]").Click();
-        panel.FindAll("[data-test=remove-weapon]")[0].Click();
+        // Rendu asynchrone de MudBlazor (infobulles de la carte) : clics via ClickUntil, voir ComponentTestContext
+        panel.ClickUntil("[data-test=add-weapon]", () => form.Weapons.Count == 1);
+        panel.ClickUntil("[data-test=add-weapon]", () => form.Weapons.Count == 2);
+        panel.ClickUntil("[data-test=remove-weapon]", () => form.Weapons.Count == 1);
 
         Assert.Single(form.Weapons);
     }
@@ -147,6 +179,15 @@ public class ContextPanelTests : ComponentTestContext
     }
 
     [Fact]
+    public void Without_conditions_the_situation_says_so()
+    {
+        var panel = RenderPanel(new Scenario());
+
+        Assert.NotNull(panel.Find("[data-test=context-none]"));
+        Assert.Empty(panel.FindAll(".mud-input-helper-text"));
+    }
+
+    [Fact]
     public void Situation_options_follow_the_weapons()
     {
         var reference = new Scenario
@@ -166,6 +207,52 @@ public class ContextPanelTests : ComponentTestContext
         Assert.Empty(panel.FindAll("[data-test=half-range]"));
         Assert.NotEmpty(panel.FindAll("[data-test=remained-stationary]"));
         Assert.NotEmpty(panel.FindAll("[data-test=charged]"));
+    }
+}
+
+public class BoostTests : ComponentTestContext
+{
+    [Fact]
+    public void Attacker_boosts_start_collapsed_and_count_active_boosts()
+    {
+        var form = new AttackerBoostsForm();
+        var boosts = Render<AttackerBoostsEditor>(p => p.Add(c => c.Boosts, form));
+        Assert.Empty(boosts.FindAll("[data-test=boosts-content]"));
+        Assert.Empty(boosts.FindAll("[data-test=boosts-count]"));
+
+        boosts.Find("[data-test=toggle-boosts]").Click();
+        boosts.Find("input[data-test=skill-modifier]").Change("2");
+
+        Assert.Equal(2, form.Skill);
+        Assert.Equal(0, form.HitRoll);
+        Assert.Contains("1", boosts.Find("[data-test=boosts-count]").TextContent);
+        // Les explications sont derrière la bulle « ? », pas sous les champs
+        Assert.NotEmpty(boosts.FindAll("[data-test=help]"));
+        Assert.Empty(boosts.FindAll(".mud-input-helper-text"));
+    }
+
+    [Fact]
+    public void Defender_boosts_start_expanded_when_some_are_set()
+    {
+        var form = new DefenderBoostsForm(new DefenderBoosts { InCover = true, Damage = -1 });
+
+        var boosts = Render<DefenderBoostsEditor>(p => p.Add(c => c.Boosts, form));
+
+        Assert.NotNull(boosts.Find("[data-test=boosts-content]"));
+        Assert.Contains("2", boosts.Find("[data-test=boosts-count]").TextContent);
+        boosts.Find("input[data-test=defender-damage-modifier]").Change("-2");
+        Assert.Equal(-2, form.Damage);
+    }
+
+    [Fact]
+    public void Attacker_card_shows_its_boosts_on_the_page()
+    {
+        var page = Render<SimulatorPage>();
+
+        Assert.NotNull(page.Find("[data-test=attacker-boosts]"));
+        Assert.NotNull(page.Find("[data-test=defender-boosts]"));
+        // Titre « Armement » entre les boosts et les armes, comme « Groupes d'allocation » côté défenseur
+        Assert.Contains("Armement", page.Find("[data-test=weapons-title]").TextContent);
     }
 }
 
@@ -190,12 +277,20 @@ public class ResultsViewTests : ComponentTestContext
         var result = Run(defenders: 2);
         var view = Render<ResultsView>(p => p.Add(c => c.Result, result));
         int realRows = view.Find("[data-test=distribution]").QuerySelectorAll("tbody tr").Length;
+        Assert.Empty(view.FindAll("[data-test=beyond]"));
+        Assert.Empty(view.FindAll("[data-test=margin-kills]"));
 
         view.Find("input[data-test=extended]").Change(true);
 
         int extendedRows = view.Find("[data-test=distribution]").QuerySelectorAll("tbody tr").Length;
         Assert.True(extendedRows > realRows);
         Assert.Contains("Gardes", view.Find("[data-test=excess-explanation]").TextContent);
+        // La moyenne des tuiles reste celle des pertes réelles ; la marge s'affiche dessous, « +x,xx (Marge) »
+        Assert.Equal(result.Kills.Mean.ToString("F2"), view.Find("[data-test=tile-kills] .wh-tile-value").TextContent);
+        Assert.Equal($"+{result.KillMarginWhenWiped:F2} (Marge)", view.Find("[data-test=tile-kills] [data-test=margin-kills]").TextContent.Trim());
+        Assert.Equal($"+{result.DamageMarginWhenWiped:F2} (Marge)", view.Find("[data-test=tile-damage] [data-test=margin-damage]").TextContent.Trim());
+        // Lignes au-delà de l'unité notées « 2 + n »
+        Assert.StartsWith("2 + 1", view.Find("[data-test=beyond]").TextContent.Trim());
     }
 
     /// <summary>Une attaque Torrent contre une seule figurine à 1 PV sans sauvegarde : P(détruite) = P(blesser).</summary>

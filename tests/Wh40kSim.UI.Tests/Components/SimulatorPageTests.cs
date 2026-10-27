@@ -236,8 +236,12 @@ public class SimulatorPageTests : ComponentTestContext
     public void Iteration_presets_set_the_number_of_simulations()
     {
         var page = Render<SimulatorPage>();
+        // Par défaut 1 000 000 : ce choix est mis en évidence
+        Assert.Contains("wh-preset-active", page.Find("[data-test=preset-1000000]").ClassName);
 
         page.Find("[data-test=preset-10000]").Click();
+        Assert.Contains("wh-preset-active", page.Find("[data-test=preset-10000]").ClassName);
+        Assert.DoesNotContain("wh-preset-active", page.Find("[data-test=preset-1000000]").ClassName);
         page.Find("[data-test=run]").Click();
 
         page.WaitForElement("[data-test=results]");

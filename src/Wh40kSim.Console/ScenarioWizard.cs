@@ -54,7 +54,16 @@ internal static class ScenarioWizard
             });
         }
 
-        return new AttackerUnit { Name = name, Weapons = weapons };
+        // Boosts les plus courants ; les autres (CT, F, PA, D…) se saisissent dans le fichier JSON ou l'interface
+        var boosts = new AttackerBoosts
+        {
+            HitRoll = ReadInt("Modificateur aux jets de touche de l'attaquant", 0, -3, 3),
+            WoundRoll = ReadInt("Modificateur aux jets de blessure de l'attaquant", 0, -3, 3),
+            HitReroll = ReadReroll("Relance des touches"),
+            WoundReroll = ReadReroll("Relance des blessures"),
+        };
+
+        return new AttackerUnit { Name = name, Boosts = boosts, Weapons = weapons };
     }
 
     private static DefenderUnit ReadDefender()
@@ -93,9 +102,7 @@ internal static class ScenarioWizard
         return new DefenderUnit
         {
             Name = name,
-            InCover = inCover,
-            HitModifier = hitModifier,
-            WoundModifier = woundModifier,
+            Boosts = new DefenderBoosts { InCover = inCover, HitRoll = hitModifier, WoundRoll = woundModifier },
             Groups = groups,
         };
     }
@@ -121,10 +128,6 @@ internal static class ScenarioWizard
             HalfRange = halfRange,
             RemainedStationary = stationary,
             Charged = charged,
-            HitModifier = ReadInt("Modificateur aux jets de touche de l'attaquant", 0, -3, 3),
-            WoundModifier = ReadInt("Modificateur aux jets de blessure de l'attaquant", 0, -3, 3),
-            HitReroll = ReadReroll("Relance des touches"),
-            WoundReroll = ReadReroll("Relance des blessures"),
             PrecisionTarget = precisionTarget,
         };
     }

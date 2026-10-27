@@ -66,18 +66,9 @@ public sealed record Scenario
         }
 
         // 05.03 : aucun PERSONNAGE avant un groupe non-PERSONNAGE
-        int firstCharacter = -1;
-        for (int g = 0; g < Defender.Groups.Count; g++)
+        if (AllocationOrder.FindViolation(Defender.Groups.Select(g => g.IsCharacter).ToList()) is var (character, bodyguard))
         {
-            if (Defender.Groups[g].IsCharacter && firstCharacter < 0)
-            {
-                firstCharacter = g;
-            }
-            else if (!Defender.Groups[g].IsCharacter && firstCharacter >= 0)
-            {
-                errors.Add($"Le PERSONNAGE '{Defender.Groups[firstCharacter].Name}' ne peut pas être alloué avant le groupe '{Defender.Groups[g].Name}'.");
-                break;
-            }
+            errors.Add($"Le PERSONNAGE '{Defender.Groups[character].Name}' ne peut pas être alloué avant le groupe '{Defender.Groups[bodyguard].Name}'.");
         }
 
         // 05.03 : les figurines non-PERSONNAGE aux mêmes PV/Sv/InSv forment un seul groupe

@@ -66,20 +66,30 @@ L'application n'est pas empaquetée (pas de Microsoft Store) : le `.exe` est dan
 
 ## Séquence d'attaque implémentée (règles 05 et 02.02.01, 11e édition)
 
+**Boosts** (auras, stratagèmes, aptitudes) : l'attaquant et le défenseur ont chacun les leurs, que le moteur cumule.
+Valeurs du point de vue de l'attaquant (+1 = mieux pour lui). Deux sortes, à ne pas confondre :
+- **modificateurs aux jets** (touche, blessure) : ajoutés au résultat du dé, cumulés entre attaquant et défenseur,
+  **plafonnés à ±1**, appliqués après les relances ;
+- **modifications de caractéristiques** : CT/CC, A, F, PA, D pour l'attaquant ; couvert, CT/CC des attaquants, PA et
+  dégâts des attaques reçues pour le défenseur. Elles changent le profil avant les jets, **sans plafond**, chaque
+  caractéristique gardant ses bornes (CT/CC entre 2+ et 6+, F, A et D au moins 1, PA jamais au-dessus de 0). Les dégâts
+  du défenseur s'appliquent avec la réduction de dégâts des groupes (après Melta, minimum 1, pas sur les mortelles).
+
 0. **Pools** : les armes aux attaques identiques (même type, CT/CC, F, PA, D et règles, hors nom, A, Blast et Rapid Fire)
    forment un seul pool, comme bolters + pistolets bolter dans l'exemple des règles. Les pools sont résolus dans l'ordre de saisie.
-1. **Attaques** : expression de dés par figurine (minimum 1), + Blast (1 par tranche de 5 fig. ciblées), + Rapid Fire à demi-portée.
+1. **Attaques** : expression de dés par figurine, modifiée (minimum 1), + Blast (1 par tranche de 5 fig. ciblées), + Rapid Fire à demi-portée.
 2. **Touche** : 1 naturel = échec, 6 naturel = critique, sinon résultat modifié ≥ CT/CC.
    Modificateurs de jet plafonnés à ±1, appliqués après les relances (Heavy inclus).
-   **Couvert : CT dégradée de 1** (tir uniquement, sauf Ignores Cover), CT bornée entre 2+ et 6+. Torrent = touche auto.
+   CT/CC modifiée par l'attaquant et le défenseur ; **couvert : CT dégradée de 1** de plus (tir uniquement, sauf
+   Ignores Cover) ; résultat borné entre 2+ et 6+. Torrent = touche auto.
    Critique : Sustained Hits X (touches en plus), Lethal Hits (blessure auto).
-3. **Blessure** : table F/E, modificateurs plafonnés à ±1 (Lance incluse), Twin-linked = relance des échecs.
+3. **Blessure** : table F/E (Force modifiée), modificateurs plafonnés à ±1 (Lance incluse), Twin-linked = relance des échecs.
    **Endurance (05.02.01)** recalculée avant chaque pool : la plus haute des gardes du corps encore en jeu,
    sinon la plus haute des figurines restantes.
 4. **Sauvegardes (05.03 / 05.04)** : groupes d'allocation = un par PERSONNAGE, un par combinaison PV/Sv/InSv pour les autres
    (PERSONNAGES toujours en dernier). Tous les dés du pool sont jetés ensemble puis résolus du plus petit au plus grand
-   sur le groupe courant, jusqu'à sa destruction. 1 naturel = dégâts ; résultat ≥ InSv ou résultat + PA ≥ Sv = attaque ratée.
-5. **Dégâts** : expression de dés (minimum 1), + Melta à demi-portée, − réduction de dégâts (min 1), puis FNP point par point.
+   sur le groupe courant, jusqu'à sa destruction. 1 naturel = dégâts ; résultat ≥ InSv ou résultat + PA (modifiée) ≥ Sv = attaque ratée.
+5. **Dégâts** : expression de dés, modifiée (minimum 1), + Melta à demi-portée, − réduction de dégâts (min 1), puis FNP point par point.
    Dégâts excédentaires perdus ; une fois l'unité détruite, les attaques restantes sont perdues.
 6. **Devastating Wounds (24.10)** : une blessure critique met fin à l'attaque et inflige D blessures mortelles,
    après les dégâts normaux du pool, sur une seule figurine (excédent perdu). Feel No Pain s'applique, pas la réduction de dégâts.
@@ -98,6 +108,11 @@ le dernier tué, souvent le leader, unique et plus résistant. L'excédent de d�
 Ces dés sont tirés à part : les résultats réels sont les mêmes que sans ce calcul. La console affiche la section
 « Au-delà de l'unité » dès que l'unité peut être détruite.
 
+La **marge** résume ces distributions : figurines virtuelles tuées et PV retirés en plus, en moyenne sur les
+simulations où l'unité est détruite. Dans l'interface, les tuiles du haut restent les pertes réelles ; « Afficher la
+marge » ajoute la marge sous leur moyenne, « +1,33 (Marge) », et prolonge les tableaux, dont les lignes au-delà de l'unité sont notées
+« 5 + 2 » (les 5 figurines de l'unité, plus 2 virtuelles).
+
 ## Hypothèses restantes
 
 - **Réduction de dégâts** : non appliquée aux blessures mortelles (elles ne sont pas une attaque allouée).
@@ -111,3 +126,11 @@ Voir `scenarios/exemple-escouade-vs-leader.json`. Les expressions de dés s'écr
 la PA `-1`, une sauvegarde `3` pour 3+ (`7` = aucune), `"isCharacter": true` pour un leader,
 `"toughness"` (Endurance) et `"wounds"` (PV) sur chaque groupe de figurines. Les commentaires `//` sont autorisés ;
 une propriété inconnue ou mal placée est refusée au chargement.
+
+Le fichier suit l'interface :
+- `"attacker"` : `"name"`, `"boosts"` (`skill`, `hitRoll`, `hitReroll`, `strength`, `woundRoll`, `woundReroll`,
+  `attacks`, `ap`, `damage`) et `"weapons"` ;
+- `"defender"` : `"name"`, `"boosts"` (`inCover`, `skill`, `hitRoll`, `woundRoll`, `ap`, `damage`) et `"groups"` ;
+- `"context"` : la situation seulement (`halfRange`, `remainedStationary`, `charged`, `precisionTarget`).
+
+Un boost absent vaut 0 (ou `"None"` pour une relance, `false` pour le couvert).

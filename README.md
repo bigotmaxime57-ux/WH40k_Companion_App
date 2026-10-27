@@ -29,11 +29,12 @@ src/Wh40kSim.Simulation      Monte Carlo : simulateur parallèle et déterminist
 src/Wh40kSim.Console         Appli console de debug (saisie interactive ou fichier JSON) : affichage uniquement
 src/Wh40kSim.Desktop         Application desktop Windows (MAUI Blazor Hybrid) : hôte de Wh40kSim.UI
 src/Wh40kSim.UI              Interface Blazor + MudBlazor partagée par les hôtes (aucune règle de jeu, aucun calcul)
-  Components/                AppShell (barre de titre, thème) et page « Simulateur » : attaquant, défenseur, situation,
-                             simulation, résultats
+  Components/                AppShell (barre de titre, menu des thèmes) et page « Simulateur » : attaquant,
+                             défenseur, situation, simulation, résultats
   Forms/                     Modèles de formulaire modifiables, convertis vers / depuis les records du Core
   Resources/                 Textes de l'interface (Strings.resx, français)
-  Services/                  Simulation hors du thread de l'interface, ouverture / enregistrement des scénarios
+  Services/                  Simulation hors du thread de l'interface, ouverture / enregistrement des scénarios,
+                             préférences (thème mémorisé)
 tests/Wh40kSim.Core.Tests    Tests xUnit du Core (règles)
 tests/Wh40kSim.Simulation.Tests  Tests xUnit de la simulation (moyennes analytiques, statistiques, non-régression)
 tests/Wh40kSim.UI.Tests      Tests xUnit de l'interface (formulaires, services, composants avec bUnit)

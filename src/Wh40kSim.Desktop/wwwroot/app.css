@@ -1,25 +1,32 @@
 /*
-   Le style de l'interface vient de MudBlazor : ici, seulement ce qui s'affiche avant le premier rendu de Blazor (fond
-   et barre de chargement aux couleurs du thème du système, comme la page MAUI) et le bandeau d'erreur de Blazor.
-   Couleurs reprises de Wh40kTheme : parchemin et laiton foncé en clair, Grimdark (presque noir, or terni) en sombre.
+   Le style de l'interface vient de MudBlazor : ici, seulement ce qui s'affiche avant le premier rendu de Blazor (barre
+   de chargement aux couleurs du thème) et le bandeau d'erreur de Blazor. Fond transparent : celui de la page MAUI, déjà
+   aux couleurs du thème, reste visible. Thème posé par MainPage (attribut data-theme) ; à défaut, or de Grimdark.
+   Couleurs reprises de Wh40kTheme.
 */
 
 :root {
-    --wh-loading-background: #f2ece0;
+    --wh-loading-track: rgba(176, 141, 60, 0.2);
+    --wh-loading-bar: #b08d3c;
+}
+
+:root[data-theme="parchment"] {
     --wh-loading-track: rgba(140, 106, 28, 0.2);
     --wh-loading-bar: #8c6a1c;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --wh-loading-background: #0a0a0b;
-        --wh-loading-track: rgba(176, 141, 60, 0.2);
-        --wh-loading-bar: #b08d3c;
-    }
+:root[data-theme="steel"] {
+    --wh-loading-track: rgba(201, 160, 60, 0.2);
+    --wh-loading-bar: #c9a03c;
+}
+
+:root[data-theme="neon"] {
+    --wh-loading-track: rgba(143, 123, 255, 0.2);
+    --wh-loading-bar: linear-gradient(90deg, #c04dff 0%, #29b6ff 100%);
 }
 
 html, body {
-    background: var(--wh-loading-background);
+    background: transparent;
     margin: 0;
 }
 

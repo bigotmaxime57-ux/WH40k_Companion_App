@@ -16,8 +16,8 @@
   <data name="App_Title" xml:space="preserve">
     <value>Wh40kSim – Simulateur de dégâts</value>
   </data>
-  <data name="App_ToggleTheme" xml:space="preserve">
-    <value>Basculer entre thème clair et sombre</value>
+  <data name="App_Theme" xml:space="preserve">
+    <value>Thème</value>
   </data>
   <data name="Attacker_AddWeapon" xml:space="preserve">
     <value>Ajouter un profil d'arme</value>
@@ -432,6 +432,18 @@
   </data>
   <data name="Simulation_Title" xml:space="preserve">
     <value>Simulation</value>
+  </data>
+  <data name="Theme_Grimdark" xml:space="preserve">
+    <value>Grimdark</value>
+  </data>
+  <data name="Theme_Neon" xml:space="preserve">
+    <value>Néon</value>
+  </data>
+  <data name="Theme_Parchment" xml:space="preserve">
+    <value>Parchemin (clair)</value>
+  </data>
+  <data name="Theme_Steel" xml:space="preserve">
+    <value>Acier</value>
   </data>
   <data name="Toolbar_New" xml:space="preserve">
     <value>Nouveau</value>

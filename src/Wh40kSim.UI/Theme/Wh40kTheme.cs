@@ -1,10 +1,14 @@
 using MudBlazor;
+using MudBlazor.Utilities;
 
 namespace Wh40kSim.UI.Theme;
 
-/// <summary>Style du thème sombre (le thème clair, parchemin, est commun).</summary>
-public enum DarkStyle
+/// <summary>Thème choisi par l'utilisateur (menu de la barre de titre, mémorisé par l'hôte) : un clair, trois sombres.</summary>
+public enum ThemeChoice
 {
+    /// <summary>Clair, couleur parchemin.</summary>
+    Parchment,
+
     /// <summary>Presque noir, or terni, os, rouge sang ; matière et filets ajoutés par wh40ksim.css (classe wh-grimdark).</summary>
     Grimdark,
 
@@ -16,9 +20,9 @@ public enum DarkStyle
 }
 
 /// <summary>
-/// Thèmes de l'application, à l'identité Warhammer 40k : deux styles sombres (<see cref="DarkStyle"/>) et un clair
-/// couleur parchemin. Titres en Bahnschrift (police condensée fournie avec Windows 10 et 11), texte en Segoe UI ;
-/// les polices suivantes servent de repli ailleurs (hôte web).
+/// Thèmes de l'application, à l'identité Warhammer 40k (<see cref="ThemeChoice"/>) : trois styles sombres et un clair
+/// couleur parchemin, commun à tous (palette claire de chaque <see cref="MudTheme"/>). Titres en Bahnschrift (police
+/// condensée fournie avec Windows 10 et 11), texte en Segoe UI ; les polices suivantes servent de repli ailleurs (hôte web).
 /// </summary>
 public static class Wh40kTheme
 {
@@ -31,12 +35,25 @@ public static class Wh40kTheme
 
     public static MudTheme Neon { get; } = Create(NeonPalette(), borderRadius: "10px");
 
-    public static MudTheme For(DarkStyle style) => style switch
+    /// <summary>Thème MudBlazor d'un choix (Parchemin : la palette claire, commune, de Grimdark).</summary>
+    public static MudTheme For(ThemeChoice choice) => choice switch
     {
-        DarkStyle.Steel => Steel,
-        DarkStyle.Neon => Neon,
+        ThemeChoice.Steel => Steel,
+        ThemeChoice.Neon => Neon,
         _ => Grimdark,
     };
+
+    /// <summary>Clé du nom affiché dans le menu des thèmes (Resources/Strings.resx).</summary>
+    public static string NameKey(ThemeChoice choice) => $"Theme_{choice}";
+
+    public static bool IsDark(ThemeChoice choice) => choice != ThemeChoice.Parchment;
+
+    /// <summary>Couleur de fond d'un thème, pour l'hôte (fond de la fenêtre avant le premier rendu).</summary>
+    public static MudColor Background(ThemeChoice choice) =>
+        IsDark(choice) ? For(choice).PaletteDark.Background : For(choice).PaletteLight.Background;
+
+    /// <summary>Thème sans choix mémorisé (premier lancement) : celui qui correspond au mode clair / sombre du système.</summary>
+    public static ThemeChoice Default(bool systemDarkMode) => systemDarkMode ? ThemeChoice.Grimdark : ThemeChoice.Parchment;
 
     private static MudTheme Create(PaletteDark dark, string borderRadius) => new()
     {

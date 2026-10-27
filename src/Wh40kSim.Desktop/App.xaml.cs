@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Localization;
 using Wh40kSim.UI.Resources;
+using Wh40kSim.UI.Theme;
 
 namespace Wh40kSim.Desktop;
 
@@ -12,11 +13,13 @@ public partial class App : Application
     private const double MinimumHeight = 600;
 
     private readonly string _title;
+    private readonly DesktopPreferenceService _preferences;
 
-    public App(IStringLocalizer<Strings> strings)
+    public App(IStringLocalizer<Strings> strings, DesktopPreferenceService preferences)
     {
         InitializeComponent();
         _title = strings["App_Title"];
+        _preferences = preferences;
     }
 
     protected override Window CreateWindow(IActivationState? activationState)
@@ -28,7 +31,10 @@ public partial class App : Application
         double width = Math.Min(PreferredWidth, screenWidth);
         double height = Math.Min(PreferredHeight, screenHeight);
 
-        return new Window(new MainPage())
+        // Thème connu avant le premier affichage : choix mémorisé, sinon celui qui correspond au mode de Windows
+        var theme = _preferences.GetTheme() ?? Wh40kTheme.Default(RequestedTheme == AppTheme.Dark);
+
+        return new Window(new MainPage(theme))
         {
             Title = _title,
             Width = width,

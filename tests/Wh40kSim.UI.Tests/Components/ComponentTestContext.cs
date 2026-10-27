@@ -6,13 +6,14 @@ using MudBlazor;
 using Wh40kSim.Core.Model;
 using Wh40kSim.Simulation;
 using Wh40kSim.UI.Services;
+using Wh40kSim.UI.Theme;
 
 namespace Wh40kSim.UI.Tests.Components;
 
 /// <summary>
-/// Contexte bUnit commun : services de l'interface (MudBlazor, textes), culture de l'appli, faux services de simulation
-/// et de fichiers. Le fournisseur de popovers est rendu d'abord, comme dans la mise en page d'un hôte : les listes
-/// déroulantes MudBlazor en ont besoin (sauf pour AppShell, qui contient déjà le sien : un seul est permis).
+/// Contexte bUnit commun : services de l'interface (MudBlazor, textes), culture de l'appli, faux services de simulation,
+/// de fichiers et de préférences. Le fournisseur de popovers est rendu d'abord, comme dans la mise en page d'un hôte :
+/// les listes déroulantes MudBlazor en ont besoin (sauf pour AppShell, qui contient déjà le sien : un seul est permis).
 /// <para>Certains services de MudBlazor ne se libèrent qu'en asynchrone : <see cref="IAsyncLifetime"/> fait libérer le
 /// contexte par xUnit avec <see cref="BunitContext.DisposeAsync"/> (xUnit 2 n'appelle sinon que Dispose).</para>
 /// </summary>
@@ -24,6 +25,7 @@ public abstract class ComponentTestContext : BunitContext, IAsyncLifetime
         Services.AddWh40kSimUI();
         Services.AddSingleton<ISimulationService>(Simulations);
         Services.AddSingleton<IScenarioFileService>(Files);
+        Services.AddSingleton<IPreferenceService>(Preferences);
         // Les appels JavaScript de MudBlazor (mesures, focus…) reçoivent une réponse par défaut
         JSInterop.Mode = JSRuntimeMode.Loose;
         if (renderPopoverProvider)
@@ -39,6 +41,8 @@ public abstract class ComponentTestContext : BunitContext, IAsyncLifetime
     protected FakeSimulationService Simulations { get; } = new();
 
     protected FakeScenarioFileService Files { get; } = new();
+
+    protected FakePreferenceService Preferences { get; } = new();
 
     Task IAsyncLifetime.InitializeAsync() => Task.CompletedTask;
 
@@ -120,4 +124,18 @@ public sealed class FakeScenarioFileService : IScenarioFileService
     }
 
     public static JsonException InvalidJson() => new("Propriété inconnue 'toughness'.");
+}
+
+/// <summary>Préférences en mémoire : thème mémorisé lisible et modifiable par les tests.</summary>
+public sealed class FakePreferenceService : IPreferenceService
+{
+    public ThemeChoice? Theme { get; set; }
+
+    public Task<ThemeChoice?> GetThemeAsync() => Task.FromResult(Theme);
+
+    public Task SetThemeAsync(ThemeChoice theme)
+    {
+        Theme = theme;
+        return Task.CompletedTask;
+    }
 }

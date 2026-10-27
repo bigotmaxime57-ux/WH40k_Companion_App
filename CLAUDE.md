@@ -294,6 +294,19 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
      de l'unité notées « 5 + 2 » sous un trait. La console affiche aussi la marge. Explication de la marge dans une bulle « ? »
      à côté de la valeur, comme ailleurs.
    - Fin d'étape : tag `v0.2a.1`.
+9. **Choix du thème** (ajoutée après `v0.2a.1`, ticket #9). Quatre thèmes : Parchemin (clair), Grimdark, Acier et
+   **Néon** (nuit indigo, violet pour l'attaquant, bleu pour le défenseur, halos et dégradés ; essai de la branche
+   `essai/theme-neon`, validé par l'utilisateur). Décisions de l'utilisateur :
+   - **Menu de 4 thèmes** (icône palette dans la barre de titre), qui remplace la bascule clair / sombre.
+   - **Premier lancement** : Parchemin si le système est clair, Grimdark s'il est sombre ; ensuite, le dernier thème
+     choisi, quel que soit le système (pas d'option « automatique »).
+   - **Mémorisation par l'hôte** : `IPreferenceService` (Wh40kSim.UI), implémenté par `DesktopPreferenceService`
+     (préférences MAUI) ; en web (2b), stockage du navigateur. L'hôte desktop lit le thème avant le premier affichage
+     et le passe à `AppShell` (`InitialTheme`) : pas de flash, fond de la fenêtre et barre de chargement aux couleurs
+     du thème.
+   - `ThemeChoice` (Parchment, Grimdark, Steel, Neon) remplace `DarkStyle` ; `Wh40kTheme.For`, `IsDark`, `Default`,
+     `Background`, `NameKey`.
+   - Fin d'étape : tag `v0.2a.2`.
 
 ## Décisions techniques
 
@@ -348,13 +361,14 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 - **Mise en page** : les points de rupture de MudGrid (`sm`, `md`, `lg`) suivent la largeur de la *fenêtre*, pas du
   panneau ; dans un panneau en demi-largeur, n'utiliser que `xs` / `sm`.
 - **Hôte desktop (Wh40kSim.Desktop)** : réduit au minimum. Toute l'interface est `AppShell` (Wh40kSim.UI) :
-  fournisseurs MudBlazor, barre de titre, thème qui suit le système au démarrage (`GetSystemDarkModeAsync`, préférence
-  lue par la WebView) et bascule, puis `SimulatorPage` ; réutilisable tel quel par l'hôte web (2b). L'hôte fournit
-  `MauiProgram` (services), la fenêtre (`App` : titre lu dans `Strings.resx`, 1400 × 900 centrée, minimum 900 × 600),
-  `DesktopScenarioFileService` et `wwwroot/index.html` (CSS / JS de MudBlazor). Pas de `Package.appxmanifest`
-  (application non empaquetée). Démarrage sans flash : l'hôte passe le thème du système à
-  `AppShell` (`SystemDarkMode`, sinon lu par le navigateur après le premier rendu) ; fond de la page MAUI et de
-  `index.html` aux couleurs du thème, barre de chargement dans `index.html`, WebView2 transparente jusqu'au premier rendu.
+  fournisseurs MudBlazor, barre de titre avec le menu des thèmes, puis `SimulatorPage` ; réutilisable tel quel par
+  l'hôte web (2b). L'hôte fournit `MauiProgram` (services), la fenêtre (`App` : titre lu dans `Strings.resx`,
+  1400 × 900 centrée, minimum 900 × 600, thème au démarrage), `DesktopScenarioFileService`,
+  `DesktopPreferenceService` et `wwwroot/index.html` (CSS / JS de MudBlazor). Pas de `Package.appxmanifest`
+  (application non empaquetée). Démarrage sans flash : l'hôte passe le thème (mémorisé, sinon selon Windows) à
+  `AppShell` (`InitialTheme` ; sans lui, préférence puis mode du navigateur, après le premier rendu) ; fond de la page
+  MAUI aux couleurs du thème, `index.html` transparente avec une barre de chargement colorée selon l'attribut
+  `data-theme` (posé par `MainPage`), WebView2 transparente jusqu'au premier rendu.
 - **Vérification visuelle** : pas de test automatique du rendu. Captures d'écran de la fenêtre par un script PowerShell
   (`CopyFromScreen`, clic et molette via `user32`) dans le scratchpad de Claude, lues comme des images.
 
@@ -407,12 +421,12 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 - Phase 2a, étape 8 (modifications de caractéristiques) : fusionnée dans `main`, **tag `v0.2a.1`**.
   275 tests verts (145 Core, 35 Simulation, 95 UI) ;
   `NonRegressionTests` inchangés (sans modification, résultats identiques au bit près).
+- Phase 2a, étape 9 (choix du thème) : terminée sur `phase2a/etape9-choix-theme`, en attente de validation avant fusion
+  et du tag `v0.2a.2`. 280 tests verts (145 Core, 35 Simulation, 100 UI). Branche `essai/theme-neon` reprise dans
+  l'étape, à supprimer après la fusion.
 - Prochaine ensuite : phase 2b (API + client web).
 
 Points notés pour la suite :
-- Thème **Néon** (violet pour l'attaquant, bleu pour le défenseur, halos et dégradés) : essai validé par l'utilisateur,
-  gardé de côté sur la branche `essai/theme-neon` (poussée, non fusionnée ; Néon y est le style par défaut). À reprendre
-  avec le sélecteur de thème (ticket #9).
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis
   `dotnet restore`).
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

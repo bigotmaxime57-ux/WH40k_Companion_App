@@ -24,6 +24,9 @@ public static class MauiProgram
         builder.Services.AddSingleton(FilePicker.Default);
         builder.Services.AddSingleton(FileSaver.Default);
         builder.Services.AddSingleton<IScenarioFileService, DesktopScenarioFileService>();
+        builder.Services.AddSingleton(Preferences.Default);
+        builder.Services.AddSingleton<DesktopPreferenceService>();
+        builder.Services.AddSingleton<IPreferenceService>(services => services.GetRequiredService<DesktopPreferenceService>());
 
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();

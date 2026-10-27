@@ -437,14 +437,19 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
   panneau ; dans un panneau en demi-largeur, n'utiliser que `xs` / `sm`.
 - **Hôte desktop (Wh40kSim.Desktop)** : réduit au minimum. Toute l'interface est `AppShell` (Wh40kSim.UI) :
   fournisseurs MudBlazor, barre de titre (retour à l'accueil, nom de l'écran, menu des thèmes), puis le routeur Blazor
-  vers les écrans (`HomePage` `/`, `SimulatorPage` `/quick-sim` ; adresses dans `AppRoutes`) ; réutilisable tel quel par
+  vers les écrans (`HomePage` `/`, `SimulatorPage` `/quick-sim` ; adresses dans `AppRoutes`). Ouverture d'un écran
+  depuis l'accueil par `ScreenNavigator` : barre de chargement dessinée avant la construction de l'écran (première
+  construction lente : compilation à la volée), retirée ensuite. Pas de `RegisterLocationChangingHandler` asynchrone :
+  bUnit ne termine pas la navigation dans ce cas. Réutilisable tel quel par
   l'hôte web (phase 7). L'hôte fournit `MauiProgram` (services), la fenêtre (`App` : titre lu dans `Strings.resx`,
   1400 × 900 centrée, minimum 900 × 600, thème au démarrage), `DesktopScenarioFileService`,
   `DesktopPreferenceService` et `wwwroot/index.html` (CSS / JS de MudBlazor). Pas de `Package.appxmanifest`
   (application non empaquetée). Démarrage sans flash : l'hôte passe le thème (mémorisé, sinon selon Windows) à
   `AppShell` (`InitialTheme` ; sans lui, préférence puis mode du navigateur, après le premier rendu) ; fond de la page
   MAUI aux couleurs du thème, `index.html` transparente avec une barre de chargement colorée selon l'attribut
-  `data-theme` (posé par `MainPage`), WebView2 transparente jusqu'au premier rendu.
+  `data-theme`, posé par un script de `index.html` d'après l'adresse de départ (`MainPage` : `StartPath = "/?theme=…"` ;
+  un script injecté « à la création du document » arrivait parfois trop tard), WebView2 transparente jusqu'au premier
+  rendu.
 - **Vérification visuelle** : pas de test automatique du rendu. Captures d'écran de la fenêtre par un script PowerShell
   (`CopyFromScreen`, clic et molette via `user32`) dans le scratchpad de Claude, lues comme des images.
 
@@ -511,6 +516,9 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
   107 UI ; UI stables sur 8 exécutions). Skill `/valider-etape` ajouté dans la même branche.
 - Phase 3, étape 3 (JSON partiels) : fusionnée dans `main`. 325 tests verts (166 Core, 41 Simulation, 118 UI ;
   UI stables sur 6 exécutions).
+- Barre de chargement à l'ouverture d'un écran (gel au premier clic sur Quick sim, signalé par l'utilisateur), avec
+  fond uni du thème, et barre du démarrage enfin aux couleurs du thème mémorisé : fusionnées dans `main`. 327 tests
+  verts (166 Core, 41 Simulation, 120 UI ; UI stables sur 6 exécutions).
 - Prochaine ensuite : phase 3, étape 4 (points, #2 version légère), à préciser et valider avant de coder.
 
 Points notés pour la suite :

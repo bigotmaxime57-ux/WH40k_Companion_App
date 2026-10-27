@@ -1,7 +1,8 @@
 /*
    Le style de l'interface vient de MudBlazor : ici, seulement ce qui s'affiche avant le premier rendu de Blazor (barre
    de chargement aux couleurs du thème) et le bandeau d'erreur de Blazor. Fond transparent : celui de la page MAUI, déjà
-   aux couleurs du thème, reste visible. Thème posé par MainPage (attribut data-theme) ; à défaut, or de Grimdark.
+   aux couleurs du thème, reste visible. Thème passé par MainPage dans l'adresse de départ et posé par index.html
+   (attribut data-theme) ; à défaut, or de Grimdark.
    Couleurs reprises de Wh40kTheme.
 */
 

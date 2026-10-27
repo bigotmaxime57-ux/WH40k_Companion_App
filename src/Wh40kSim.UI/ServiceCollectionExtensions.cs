@@ -6,8 +6,8 @@ namespace Wh40kSim.UI;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Services communs à tous les hôtes : MudBlazor, textes de l'interface (<c>IStringLocalizer</c>) et scénario
-    /// courant (<see cref="Services.ScenarioSession"/>).
+    /// Services communs à tous les hôtes : MudBlazor, textes de l'interface (<c>IStringLocalizer</c>), scénario
+    /// courant (<see cref="Services.ScenarioSession"/>) et ouverture des écrans (<see cref="Services.ScreenNavigator"/>).
     /// L'hôte enregistre en plus son <see cref="Services.ISimulationService"/>, son
     /// <see cref="Services.IScenarioFileService"/> et son <see cref="Services.IPreferenceService"/>, et appelle
     /// <see cref="UiCulture.Apply"/> au démarrage.
@@ -17,6 +17,7 @@ public static class ServiceCollectionExtensions
         services.AddMudServices();
         services.AddLocalization();
         services.AddScoped<Services.ScenarioSession>();
+        services.AddScoped<Services.ScreenNavigator>();
         return services;
     }
 }

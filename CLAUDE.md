@@ -422,9 +422,8 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 - Phase 2a, étape 8 (modifications de caractéristiques) : fusionnée dans `main`, **tag `v0.2a.1`**.
   275 tests verts (145 Core, 35 Simulation, 95 UI) ;
   `NonRegressionTests` inchangés (sans modification, résultats identiques au bit près).
-- Phase 2a, étape 9 (choix du thème) : terminée sur `phase2a/etape9-choix-theme`, en attente de validation avant fusion
-  et du tag `v0.2a.2`. 280 tests verts (145 Core, 35 Simulation, 100 UI). Branche `essai/theme-neon` reprise dans
-  l'étape, à supprimer après la fusion.
+- Phase 2a, étape 9 (choix du thème) : fusionnée dans `main`, **tag `v0.2a.2`**. 280 tests verts (145 Core,
+  35 Simulation, 100 UI). Branche `essai/theme-neon` reprise dans l'étape, puis supprimée.
 - Prochaine ensuite : phase 2b (API + client web).
 
 Points notés pour la suite :

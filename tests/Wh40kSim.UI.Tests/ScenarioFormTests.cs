@@ -166,10 +166,22 @@ public class ScenarioFormTests
         string[] files = Directory.GetFiles(Path.Combine(FindRepositoryRoot(), "scenarios"), "*.json");
         Assert.NotEmpty(files);
 
+        // Scénarios complets et fichiers partiels (attaquant seul, défenseur seul) : chaque partie fait l'aller-retour
         foreach (string file in files)
         {
-            var scenario = ScenarioJson.Load(file);
-            AssertSameScenario(scenario, RoundTrip(scenario));
+            var content = ScenarioJson.ReadFile(File.ReadAllText(file));
+            if (content.Attacker is not null)
+            {
+                Assert.Equal(ScenarioJson.Serialize(content.Attacker), ScenarioJson.Serialize(new AttackerForm(content.Attacker).ToAttackerUnit()));
+            }
+            if (content.Defender is not null)
+            {
+                Assert.Equal(ScenarioJson.Serialize(content.Defender), ScenarioJson.Serialize(new DefenderForm(content.Defender).ToDefenderUnit()));
+            }
+            if (content.Kind == ScenarioFileKind.Scenario)
+            {
+                AssertSameScenario(content.ToScenario(), RoundTrip(content.ToScenario()));
+            }
         }
     }
 

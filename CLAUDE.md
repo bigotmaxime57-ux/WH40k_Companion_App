@@ -354,7 +354,7 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   `DesktopScenarioFileService` et `wwwroot/index.html` (CSS / JS de MudBlazor). Pas de `Package.appxmanifest`
   (application non empaquetée). Démarrage sans flash : l'hôte passe le thème du système à
   `AppShell` (`SystemDarkMode`, sinon lu par le navigateur après le premier rendu) ; fond de la page MAUI et de
-  `index.html` aux couleurs du thème, WebView2 transparente jusqu'au premier rendu.
+  `index.html` aux couleurs du thème, barre de chargement dans `index.html`, WebView2 transparente jusqu'au premier rendu.
 - **Vérification visuelle** : pas de test automatique du rendu. Captures d'écran de la fenêtre par un script PowerShell
   (`CopyFromScreen`, clic et molette via `user32`) dans le scratchpad de Claude, lues comme des images.
 

@@ -364,7 +364,17 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
    Marge exclue (on ne détruit pas plus que la valeur de l'unité). Ticket #2 commenté, pas fermé.
 5. **Dégâts bruts (#6).** Dégâts de chaque attaque non sauvegardée comptés en entier (après réduction de dégâts et FNP),
    sans plafond par figurine ni arrêt à la destruction de l'unité ; distribution et gaspillage (bruts - PV retirés)
-   dans Simulation. Fait tôt pour figurer dans le Full sim.
+   dans Simulation. Fait tôt pour figurer dans le Full sim. Précisé et validé le 2026-10-27 :
+   - Core : `DefenderState.RawDamage` cumule les dégâts perdus par chaque attaque avant plafonnement aux PV de la
+     figurine (`lost` dans `ApplyDamage` : après boost de dégâts du défenseur, réduction et FNP), y compris contre les
+     figurines virtuelles de l'excédent (pas d'arrêt à la destruction) et pour les mortelles de Devastating Wounds.
+     Aucun dé consommé : non-régression au bit près.
+   - Simulation : distribution des dégâts bruts ; gaspillage = bruts - (PV retirés + PV de l'excédent). Décision de
+     l'utilisateur : le gaspillage ne compte que la perte **par figurine** ; ce qui dépasse la destruction de l'unité
+     reste mesuré à part par la marge (pas de double compte).
+   - Console : section « Dégâts bruts » (moyenne, gaspillage et sa part). Pas d'affichage dans l'interface (Full sim).
+   - Tests : dés imposés (D3 contre 1 PV, réduction, FNP, Devastating Wounds), bruts ≥ PV retirés, égalité avec des
+     armes D1, valeur exacte ; ticket #6 fermé par le commit (`Closes #6`).
 6. **Statistiques détaillées, côté Simulation** (tout ce que le Full sim affichera, calculé et testé, affiché par la
    console) : distribution des pertes par groupe (% de kill par groupe, P(tuer le PERSONNAGE)) ; PV retirés et
    figurines tuées par profil d'arme ; part des pertes de PERSONNAGE dues aux attaques Precision ; analyses en points
@@ -525,8 +535,10 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
   fond uni du thème, et barre du démarrage enfin aux couleurs du thème mémorisé : fusionnées dans `main`. 327 tests
   verts (166 Core, 41 Simulation, 120 UI ; UI stables sur 6 exécutions).
 - Phase 3, étape 4 (points, #2 version légère) : fusionnée dans `main` (ticket #2 commenté, laissé ouvert).
-  Prochaine étape : 5 (dégâts bruts, #6). 340 tests verts (172 Core, 48 Simulation, 120 UI) ; `NonRegressionTests` inchangés. Champs de points retirés du
+  340 tests verts (172 Core, 48 Simulation, 120 UI) ; `NonRegressionTests` inchangés. Champs de points retirés du
   Quick sim à la demande de l'utilisateur (saisie au Full sim).
+- Phase 3, étape 5 (dégâts bruts, #6) : précisée et validée (voir « Phase 3 : étapes »), **à coder** sur la branche
+  `phase3/etape5-degats-bruts`.
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

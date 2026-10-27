@@ -385,14 +385,14 @@
   <data name="Results_Beyond" xml:space="preserve">
     <value>{0} + {1}</value>
   </data>
-  <data name="Results_MarginDamage" xml:space="preserve">
-    <value>Marge : PV retirés</value>
+  <data name="Results_MarginDamageHelp" xml:space="preserve">
+    <value>PV retirés en plus, en moyenne, quand l'unité est détruite, à des figurines virtuelles : {0}.</value>
   </data>
-  <data name="Results_MarginDetail" xml:space="preserve">
-    <value>en plus, en moyenne, quand l'unité est détruite</value>
+  <data name="Results_MarginKillsHelp" xml:space="preserve">
+    <value>Figurines virtuelles tuées en plus, en moyenne, quand l'unité est détruite : {0}.</value>
   </data>
-  <data name="Results_MarginKills" xml:space="preserve">
-    <value>Marge : figurines tuées</value>
+  <data name="Results_MarginValue" xml:space="preserve">
+    <value>{0} (Marge)</value>
   </data>
   <data name="Results_Header" xml:space="preserve">
     <value>{0} simulations en {1} s (graine {2})</value>

@@ -277,18 +277,18 @@ public class ResultsViewTests : ComponentTestContext
         var result = Run(defenders: 2);
         var view = Render<ResultsView>(p => p.Add(c => c.Result, result));
         int realRows = view.Find("[data-test=distribution]").QuerySelectorAll("tbody tr").Length;
-        string kills = view.Find("[data-test=tile-kills]").TextContent;
         Assert.Empty(view.FindAll("[data-test=beyond]"));
+        Assert.Empty(view.FindAll("[data-test=margin-kills]"));
 
         view.Find("input[data-test=extended]").Change(true);
 
         int extendedRows = view.Find("[data-test=distribution]").QuerySelectorAll("tbody tr").Length;
         Assert.True(extendedRows > realRows);
         Assert.Contains("Gardes", view.Find("[data-test=excess-explanation]").TextContent);
-        // Les tuiles restent les pertes réelles ; la marge a ses propres tuiles
-        Assert.Equal(kills, view.Find("[data-test=tile-kills]").TextContent);
-        Assert.Contains(result.KillMarginWhenWiped.ToString("F2"), view.Find("[data-test=margin-kills]").TextContent);
-        Assert.Contains(result.DamageMarginWhenWiped.ToString("F2"), view.Find("[data-test=margin-damage]").TextContent);
+        // La moyenne des tuiles reste celle des pertes réelles ; la marge s'affiche dessous, « +x,xx (Marge) »
+        Assert.Equal(result.Kills.Mean.ToString("F2"), view.Find("[data-test=tile-kills] .wh-tile-value").TextContent);
+        Assert.Equal($"+{result.KillMarginWhenWiped:F2} (Marge)", view.Find("[data-test=tile-kills] [data-test=margin-kills]").TextContent.Trim());
+        Assert.Equal($"+{result.DamageMarginWhenWiped:F2} (Marge)", view.Find("[data-test=tile-damage] [data-test=margin-damage]").TextContent.Trim());
         // Lignes au-delà de l'unité notées « 2 + n »
         Assert.StartsWith("2 + 1", view.Find("[data-test=beyond]").TextContent.Trim());
     }

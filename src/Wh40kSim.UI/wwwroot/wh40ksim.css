@@ -314,6 +314,14 @@
     color: var(--mud-palette-success);
 }
 
+/* Marge sous la moyenne (« Afficher la marge ») : plus petite, dans la couleur de la valeur */
+.wh-tile-margin {
+    color: var(--mud-palette-primary);
+    font-family: Bahnschrift, "Segoe UI", sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
 .wh-tile-detail {
     color: var(--mud-palette-text-secondary);
     font-size: .8rem;

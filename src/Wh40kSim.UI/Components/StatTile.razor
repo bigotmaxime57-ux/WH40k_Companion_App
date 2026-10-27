@@ -1,8 +1,12 @@
-@* Tuile de synthèse : libellé, grande valeur, détail optionnel, et une tonalité (neutre, bonne, mauvaise). *@
+@*
+    Tuile de synthèse : libellé, grande valeur, contenu optionnel sous la valeur (la marge), détail optionnel, et une
+    tonalité (neutre, bonne, mauvaise).
+*@
 
 <div class="@($"wh-tile wh-tile-{Tone.ToString().ToLowerInvariant()}")" @attributes="Attributes">
     <div class="wh-tile-label">@Label</div>
     <div class="wh-tile-value">@Value</div>
+    @ChildContent
     @if (Detail is not null)
     {
         <div class="wh-tile-detail">@Detail</div>
@@ -29,6 +33,9 @@
 
     [Parameter]
     public TileTone Tone { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
 
     /// <summary>Attributs supplémentaires (data-test…) posés sur la tuile.</summary>
     [Parameter(CaptureUnmatchedValues = true)]

@@ -10,13 +10,23 @@
         @L["Results_Header", Result.Iterations.ToString("N0"), Result.Elapsed.TotalSeconds.ToString("F2"), Result.Seed]
     </MudText>
 
+    @* La marge s'affiche sous la moyenne sans la remplacer : les tuiles restent les pertes réelles, plafonnées à l'unité *@
     <div class="wh-tiles my-3">
-        <StatTile Label="@L["Results_Kills"]" Value="@Result.Kills.Mean.ToString("F2")" Detail="@Detail(Result.Kills)" data-test="tile-kills" />
-        <StatTile Label="@L["Results_Damage"]" Value="@Result.Damage.Mean.ToString("F2")" Detail="@Detail(Result.Damage)" data-test="tile-damage" />
+        <StatTile Label="@L["Results_Kills"]" Value="@Result.Kills.Mean.ToString("F2")" Detail="@Detail(Result.Kills)" data-test="tile-kills">
+            @if (_extended)
+            {
+                @MarginLine(Result.KillMarginWhenWiped, L["Results_MarginKillsHelp", ExcessModel], "margin-kills")
+            }
+        </StatTile>
+        <StatTile Label="@L["Results_Damage"]" Value="@Result.Damage.Mean.ToString("F2")" Detail="@Detail(Result.Damage)" data-test="tile-damage">
+            @if (_extended)
+            {
+                @MarginLine(Result.DamageMarginWhenWiped, L["Results_MarginDamageHelp", ExcessModel], "margin-damage")
+            }
+        </StatTile>
         <StatTile Label="@L["Results_Wipe"]" Value="@Result.ProbabilityWipe.ToString("P1")" Tone="WipeTone" data-test="wipe" />
     </div>
 
-    @* La marge s'ajoute aux pertes réelles sans les remplacer : les tuiles du haut restent plafonnées à l'unité *@
     @if (Result.ProbabilityWipe > 0)
     {
         <div class="wh-subsection-title">
@@ -25,14 +35,8 @@
         </div>
         @if (_extended)
         {
-            <div class="wh-tiles mt-2">
-                <StatTile Label="@L["Results_MarginKills"]" Value="@Margin(Result.KillMarginWhenWiped)"
-                          Detail="@L["Results_MarginDetail"]" data-test="margin-kills" />
-                <StatTile Label="@L["Results_MarginDamage"]" Value="@Margin(Result.DamageMarginWhenWiped)"
-                          Detail="@L["Results_MarginDetail"]" data-test="margin-damage" />
-            </div>
             <MudText Typo="Typo.caption" Class="wh-muted d-block mt-1 mb-2" data-test="excess-explanation">
-                @L["Results_ExtendedHelp", (Result.ExcessProfile with { Count = 1 }).Describe()]
+                @L["Results_ExtendedHelp", ExcessModel]
             </MudText>
         }
     }
@@ -73,7 +77,19 @@
     [Parameter, EditorRequired]
     public SimulationResult Result { get; set; } = null!;
 
-    private static string Margin(double value) => "+" + value.ToString("F2");
+    /// <summary>Profil des figurines virtuelles de la marge (premier garde du corps), décrit pour une figurine.</summary>
+    private string ExcessModel => (Result.ExcessProfile with { Count = 1 }).Describe();
+
+    /// <summary>
+    /// Marge sous la moyenne d'une tuile, « +1,33 (Marge) », expliquée en infobulle. Un tiret si l'unité n'est jamais
+    /// détruite : la marge n'est alors pas définie (l'interrupteur est d'ailleurs masqué).
+    /// </summary>
+    private RenderFragment MarginLine(double value, string help, string test) =>
+        @<MudTooltip Delay="1000" Arrow="true" Placement="Placement.Bottom" Text="@help">
+            <div class="wh-tile-margin" data-test="@test">
+                @L["Results_MarginValue", Result.ProbabilityWipe > 0 ? "+" + value.ToString("F2") : "—"]
+            </div>
+        </MudTooltip>;
 
     /// <summary>Distributions des tableaux : réelles, ou prolongées au-delà de la destruction de l'unité (marge).</summary>
     private DiscreteDistribution Kills => _extended ? Result.ExtendedKills : Result.Kills;

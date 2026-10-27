@@ -27,6 +27,15 @@
     padding-bottom: .3rem;
 }
 
+/* Libellés au-dessus d'un champ rempli : 85 % de la taille du contenu au lieu de 75 % (MudBlazor), plus lisibles avec
+   Segoe UI ; largeur maximale ajustée en conséquence (100 / 0,85). Mêmes cas que la règle de MudBlazor. */
+.wh-shell .mud-shrink ~ label.mud-input-label.mud-input-label-inputcontrol,
+.wh-shell .mud-input:focus-within ~ label.mud-input-label.mud-input-label-inputcontrol,
+.wh-shell .mud-input:has(:-webkit-autofill) ~ label.mud-input-label.mud-input-label-inputcontrol {
+    max-width: 117.6%;
+    transform: translate(0, 1px) scale(.85);
+}
+
 /* Sections (attaquant, défenseur…) : carte soulignée d'un filet or */
 .wh-section {
     border-top: 3px solid var(--mud-palette-primary);

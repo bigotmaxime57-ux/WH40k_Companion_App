@@ -10,26 +10,43 @@
 /*
    Couleur de camp (--wh-accent) : filets, titres et boosts d'une section. Comme sur les cartes de déploiement de
    Warhammer, rouge pour l'attaquant et vert pour le défenseur, dans tous les thèmes ; or (couleur principale) ailleurs.
-   .wh-dark (posée par AppShell en sombre) éclaircit les deux teintes pour qu'elles restent lisibles sur fond noir.
+   .wh-dark (posée par AppShell en sombre) éclaircit un peu les deux teintes pour qu'elles restent lisibles sur fond noir.
+   Dans une carte de camp, la couleur principale de MudBlazor devient celle du camp : boutons, étiquettes, cases et
+   champs actifs la reprennent. --wh-gold garde l'or du thème (valeur calculée sur .wh-shell, avant redéfinition).
 */
 .wh-shell {
     --wh-accent: var(--mud-palette-primary);
+    --wh-gold: var(--mud-palette-primary);
 }
 
 .wh-shell .wh-attacker {
-    --wh-accent: #a8321f;
+    --wh-accent: #8c352c;
+    --wh-accent-rgb: 140, 53, 44;
 }
 
 .wh-shell .wh-defender {
     --wh-accent: #2b6e5c;
+    --wh-accent-rgb: 43, 110, 92;
 }
 
 .wh-shell.wh-dark .wh-attacker {
-    --wh-accent: #c9472f;
+    --wh-accent: #a8463a;
+    --wh-accent-rgb: 168, 70, 58;
 }
 
 .wh-shell.wh-dark .wh-defender {
     --wh-accent: #3f9a80;
+    --wh-accent-rgb: 63, 154, 128;
+}
+
+.wh-shell .wh-attacker,
+.wh-shell .wh-defender {
+    --mud-palette-primary: var(--wh-accent);
+    --mud-palette-primary-rgb: var(--wh-accent-rgb);
+    --mud-palette-primary-text: #ffffff;
+    --mud-palette-primary-hover: rgba(var(--wh-accent-rgb), .08);
+    --mud-palette-primary-darken: color-mix(in srgb, var(--wh-accent) 85%, black);
+    --mud-palette-primary-lighten: color-mix(in srgb, var(--wh-accent) 85%, white);
 }
 
 .wh-shell .mud-main-content {
@@ -174,7 +191,7 @@
 
 /* Groupe PERSONNAGE : filet or (le rouge est la couleur de l'attaquant), pour le distinguer des gardes du corps */
 .wh-subcard-character {
-    border-left-color: var(--mud-palette-primary) !important;
+    border-left-color: var(--wh-gold) !important;
 }
 
 /* Numéro d'ordre d'allocation d'un groupe */

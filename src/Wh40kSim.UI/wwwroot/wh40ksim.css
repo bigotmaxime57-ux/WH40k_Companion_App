@@ -21,9 +21,10 @@
 }
 
 /* Libellés des champs : MudBlazor les limite à une ligne de 1.15rem et masque le dépassement ; avec Segoe UI, le bas
-   des lettres à jambage (p, g) était coupé. Un peu de marge en bas agrandit la zone visible sans déplacer le texte. */
-.wh-shell .mud-input-label-inputcontrol {
-    padding-bottom: .25rem;
+   des lettres à jambage (p, g) était coupé. Un peu de marge en bas agrandit la zone visible sans déplacer le texte.
+   Sélecteur aussi précis que celui de MudBlazor (qui impose padding: 0), préfixé pour l'emporter. */
+.wh-shell .mud-input-control > .mud-input-control-input-container > .mud-input-label-inputcontrol {
+    padding-bottom: .3rem;
 }
 
 /* Sections (attaquant, défenseur…) : carte soulignée d'un filet or */
@@ -77,6 +78,21 @@
 
 .wh-subcard {
     border-left: 3px solid var(--mud-palette-primary) !important;
+}
+
+/* Groupe PERSONNAGE : filet rouge, pour le distinguer des gardes du corps */
+.wh-subcard-character {
+    border-left-color: var(--mud-palette-secondary) !important;
+}
+
+/* Numéro d'ordre d'allocation d'un groupe */
+.wh-group-number {
+    color: var(--mud-palette-primary);
+    font-family: Bahnschrift, "Segoe UI", sans-serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    min-width: 1.6rem;
+    text-align: center;
 }
 
 /* Étiquettes de mots-clés sur la carte d'une arme */

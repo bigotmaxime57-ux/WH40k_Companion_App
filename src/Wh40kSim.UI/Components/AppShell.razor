@@ -1,0 +1,42 @@
+@*
+    Coquille de l'application, commune aux hôtes : fournisseurs MudBlazor, barre de titre avec bascule clair / sombre,
+    et la page « Simulateur ». Le thème suit celui du système au démarrage (préférence lue par le navigateur ou la WebView).
+*@
+
+<MudThemeProvider @ref="_themeProvider" @bind-IsDarkMode="_isDarkMode" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar Elevation="1" Dense="true">
+        <MudText Typo="Typo.h6">@L["App_Title"]</MudText>
+        <MudSpacer />
+        <MudTooltip Text="@L["App_ToggleTheme"]">
+            <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)" Color="Color.Inherit"
+                           OnClick="ToggleTheme" data-test="toggle-theme" />
+        </MudTooltip>
+    </MudAppBar>
+    <MudMainContent>
+        <SimulatorPage />
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private MudThemeProvider _themeProvider = null!;
+    private bool _isDarkMode;
+
+    /// <summary>Thème sombre actif (bascule par le bouton de la barre de titre).</summary>
+    public bool IsDarkMode => _isDarkMode;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _isDarkMode = await _themeProvider.GetSystemDarkModeAsync();
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleTheme() => _isDarkMode = !_isDarkMode;
+}

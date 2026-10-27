@@ -1,24 +1,28 @@
-@* Un groupe d'allocation : figurines aux mêmes caractéristiques, ou un PERSONNAGE. *@
+@*
+    Un groupe d'allocation : figurines aux mêmes caractéristiques, ou un PERSONNAGE.
+    Colonnes xs / sm seulement : les points de rupture de MudGrid suivent la largeur de la fenêtre, pas celle du panneau
+    (qui n'en occupe que la moitié sur un grand écran).
+*@
 
 <MudGrid Spacing="2">
-    <MudItem xs="12" sm="6" md="4">
+    <MudItem xs="12" sm="5">
         <MudTextField T="string" Label="@L["Group_Name"]" @bind-Value="Group.Name" @bind-Value:after="NotifyChanged" data-test="group-name" />
     </MudItem>
-    <MudItem xs="6" sm="3" md="2">
+    <MudItem xs="6" sm="3">
         <MudNumericField T="int" Label="@L["Group_Count"]" Min="1" @bind-Value="Group.Count" @bind-Value:after="NotifyChanged" />
     </MudItem>
-    <MudItem xs="6" sm="3" md="2">
+    <MudItem xs="6" sm="4">
         <MudCheckBox T="bool" Label="@L["Group_IsCharacter"]" @bind-Value="Group.IsCharacter" @bind-Value:after="NotifyChanged"
                      data-test="is-character" />
     </MudItem>
-    <MudItem xs="4" sm="3" md="2">
+    <MudItem xs="6" sm="3">
         <MudNumericField T="int" Label="@L["Group_Toughness"]" Min="1" @bind-Value="Group.Toughness" @bind-Value:after="NotifyChanged"
                          data-test="toughness" />
     </MudItem>
-    <MudItem xs="4" sm="3" md="2">
+    <MudItem xs="6" sm="3">
         <MudNumericField T="int" Label="@L["Group_Wounds"]" Min="1" @bind-Value="Group.Wounds" @bind-Value:after="NotifyChanged" />
     </MudItem>
-    <MudItem xs="4" sm="3" md="3">
+    <MudItem xs="6" sm="3">
         <MudSelect T="int" Label="@L["Group_Save"]" @bind-Value="Group.Save" @bind-Value:after="NotifyChanged">
             @foreach (int value in TwoToSix)
             {
@@ -27,7 +31,7 @@
             <MudSelectItem T="int" Value="7">@L["Group_None"]</MudSelectItem>
         </MudSelect>
     </MudItem>
-    <MudItem xs="4" sm="3" md="3">
+    <MudItem xs="6" sm="3">
         <MudSelect T="int" Label="@L["Group_InvulnerableSave"]" @bind-Value="InvulnerableChoice" @bind-Value:after="NotifyChanged">
             <MudSelectItem T="int" Value="None">@L["Group_None"]</MudSelectItem>
             @foreach (int value in TwoToSix)
@@ -36,7 +40,7 @@
             }
         </MudSelect>
     </MudItem>
-    <MudItem xs="4" sm="3" md="3">
+    <MudItem xs="6" sm="3">
         <MudSelect T="int" Label="@L["Group_FeelNoPain"]" @bind-Value="FeelNoPainChoice" @bind-Value:after="NotifyChanged">
             <MudSelectItem T="int" Value="None">@L["Group_None"]</MudSelectItem>
             @foreach (int value in TwoToSix)
@@ -45,7 +49,7 @@
             }
         </MudSelect>
     </MudItem>
-    <MudItem xs="4" sm="3" md="3">
+    <MudItem xs="6" sm="3">
         <MudNumericField T="int" Label="@L["Group_DamageReduction"]" Min="0" @bind-Value="Group.DamageReduction" @bind-Value:after="NotifyChanged" />
     </MudItem>
 </MudGrid>

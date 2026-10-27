@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <!--
+    Application desktop Windows : MAUI Blazor Hybrid, qui affiche l'interface de Wh40kSim.UI dans un BlazorWebView.
+    Windows uniquement, non empaquetée. Prérequis : charge de travail MAUI (dotnet workload install maui-windows).
+  -->
+  <PropertyGroup>
+    <!-- Au singulier : remplace le net10.0 de Directory.Build.props -->
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Wh40kSim.Desktop</RootNamespace>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+    <WindowsPackageType>None</WindowsPackageType>
+    <!-- Les CSS sont gérées par Blazor, pas par MAUI -->
+    <EnableDefaultCssItems>false</EnableDefaultCssItems>
+    <MauiXamlInflator>SourceGen</MauiXamlInflator>
+
+    <ApplicationTitle>Wh40kSim</ApplicationTitle>
+    <ApplicationId>com.wh40ksim.desktop</ApplicationId>
+    <ApplicationDisplayVersion>0.2</ApplicationDisplayVersion>
+    <ApplicationVersion>1</ApplicationVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Versions fixées (et non $(MauiVersion), qui dépend de la charge de travail installée sur chaque machine) -->
+    <PackageReference Include="CommunityToolkit.Maui" Version="15.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="10.0.120" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.14" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.120" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Wh40kSim.UI\Wh40kSim.UI.csproj" />
+  </ItemGroup>
+
+</Project>

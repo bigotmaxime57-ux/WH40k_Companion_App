@@ -79,27 +79,27 @@
 
     <MudGrid Spacing="2" Class="mt-1">
         <MudItem xs="12" sm="4">
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                 <MudCheckBox T="bool" Label="@L["Ability_SustainedHits"]" @bind-Value="Abilities.HasSustainedHits" @bind-Value:after="NotifyChanged"
                              data-test="sustained-hits" />
                 <MudTextField T="string" Immediate="true" Disabled="@(!Abilities.HasSustainedHits)" @bind-Value="Abilities.SustainedHits"
                               @bind-Value:after="NotifyChanged" Error="@(Abilities.HasSustainedHits && !IsDice(Abilities.SustainedHits))"
-                              ErrorText="@L["Dice_Invalid"]" Style="max-width: 6rem" data-test="sustained-hits-value" />
+                              ErrorText="@L["Dice_Invalid"]" Style="max-width: 5rem" data-test="sustained-hits-value" />
             </MudStack>
         </MudItem>
         <MudItem xs="12" sm="4">
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                 <MudCheckBox T="bool" Label="@L["Ability_RapidFire"]" @bind-Value="Abilities.HasRapidFire" @bind-Value:after="NotifyChanged"
                              data-test="rapid-fire" />
                 <MudNumericField T="int" Min="1" Disabled="@(!Abilities.HasRapidFire)" @bind-Value="Abilities.RapidFire"
-                                 @bind-Value:after="NotifyChanged" Style="max-width: 6rem" />
+                                 @bind-Value:after="NotifyChanged" Style="max-width: 5rem" />
             </MudStack>
         </MudItem>
         <MudItem xs="12" sm="4">
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="0">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                 <MudCheckBox T="bool" Label="@L["Ability_Melta"]" @bind-Value="Abilities.HasMelta" @bind-Value:after="NotifyChanged" />
                 <MudNumericField T="int" Min="1" Disabled="@(!Abilities.HasMelta)" @bind-Value="Abilities.Melta"
-                                 @bind-Value:after="NotifyChanged" Style="max-width: 6rem" />
+                                 @bind-Value:after="NotifyChanged" Style="max-width: 5rem" />
             </MudStack>
         </MudItem>
         <MudItem xs="6" sm="4">

@@ -516,9 +516,9 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
   107 UI ; UI stables sur 8 exécutions). Skill `/valider-etape` ajouté dans la même branche.
 - Phase 3, étape 3 (JSON partiels) : fusionnée dans `main`. 325 tests verts (166 Core, 41 Simulation, 118 UI ;
   UI stables sur 6 exécutions).
-- Barre de chargement à l'ouverture d'un écran (gel au premier clic sur Quick sim, signalé par l'utilisateur) :
-  branche `phase3/barre-chargement-ecrans`, en attente de validation. 327 tests verts (166 Core, 41 Simulation,
-  120 UI ; UI stables sur 6 exécutions).
+- Barre de chargement à l'ouverture d'un écran (gel au premier clic sur Quick sim, signalé par l'utilisateur), avec
+  fond uni du thème, et barre du démarrage enfin aux couleurs du thème mémorisé : fusionnées dans `main`. 327 tests
+  verts (166 Core, 41 Simulation, 120 UI ; UI stables sur 6 exécutions).
 - Prochaine ensuite : phase 3, étape 4 (points, #2 version légère), à préciser et valider avant de coder.
 
 Points notés pour la suite :

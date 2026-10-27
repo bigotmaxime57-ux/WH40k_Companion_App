@@ -10,8 +10,10 @@ using Wh40kSim.UI.Services;
 namespace Wh40kSim.UI.Components;
 
 /// <summary>
-/// État de la page : le formulaire édité, sa validation (par le Core), les modifications non enregistrées, la simulation
-/// en cours et son résultat. Le scénario est reconstruit et revalidé après chaque modification signalée par un panneau.
+/// Écran « Quick sim ». Le scénario courant (formulaire, fichier, modifications non enregistrées, dernier résultat,
+/// réglages) est tenu par <see cref="ScenarioSession"/> et survit au changement d'écran ; la page garde ce qui s'en
+/// déduit (validation par le Core) et la simulation en cours. Le scénario est reconstruit et revalidé après chaque
+/// modification signalée par un panneau.
 /// </summary>
 public partial class SimulatorPage : IAsyncDisposable
 {
@@ -22,16 +24,10 @@ public partial class SimulatorPage : IAsyncDisposable
     private Scenario _reference = new();  // dernier scénario lisible : décide des options de situation à afficher
     private IReadOnlyList<string> _errors = [];
     private bool _hasDiceErrors;
-    private string? _fileName;
-    private bool _isDirty;                // modifications non enregistrées
     private WeaponForm? _keywordWeapon;   // arme dont les mots-clés sont ouverts dans le panneau latéral
 
-    private int _iterations = 1_000_000;
-    private int? _seed;
-    private bool _running;
     private double _progress;
     private CancellationTokenSource? _cancellation;
-    private SimulationResult? _result;
 
     private string? _message;
     private Severity _messageSeverity;
@@ -52,19 +48,24 @@ public partial class SimulatorPage : IAsyncDisposable
     [Inject]
     private IJSRuntime JS { get; set; } = null!;
 
+    [Inject]
+    private ScenarioSession Session { get; set; } = null!;
+
     /// <summary>Formulaire en cours d'édition.</summary>
-    public ScenarioForm Form { get; private set; } = NewForm();
+    public ScenarioForm Form => Session.Form;
 
     /// <summary>Le formulaire a été modifié depuis le dernier « Nouveau », « Ouvrir » ou « Enregistrer ».</summary>
-    public bool IsDirty => _isDirty;
+    public bool IsDirty => Session.IsDirty;
 
-    private bool CanRun => !_running && _scenario is not null && _errors.Count == 0;
+    private bool Running => Session.IsRunning;
+
+    private bool CanRun => !Running && _scenario is not null && _errors.Count == 0;
 
     /// <summary>On peut enregistrer un scénario incohérent (à corriger plus tard), pas une saisie de dés illisible.</summary>
-    private bool CanSave => !_running && _scenario is not null;
+    private bool CanSave => !Running && _scenario is not null;
 
     /// <summary>Nom du fichier (ou « Nouveau scénario »), suivi de « * » s'il y a des modifications non enregistrées.</summary>
-    private string FileLabel => (_fileName ?? L["Toolbar_Untitled"]) + (_isDirty ? " *" : "");
+    private string FileLabel => (Session.FileName ?? L["Toolbar_Untitled"]) + (Session.IsDirty ? " *" : "");
 
     protected override void OnInitialized() => Refresh();
 
@@ -120,18 +121,9 @@ public partial class SimulatorPage : IAsyncDisposable
         StateHasChanged();
     });
 
-    /// <summary>Nouveau scénario : valeurs par défaut du Core, avec une arme et un groupe pour commencer.</summary>
-    private static ScenarioForm NewForm()
-    {
-        var form = new ScenarioForm();
-        form.Attacker.Weapons.Add(new WeaponForm());
-        form.Defender.Groups.Add(new ModelGroupForm());
-        return form;
-    }
-
     private void OnFormChanged()
     {
-        _isDirty = true;
+        Session.IsDirty = true;
         Refresh();
     }
 
@@ -160,11 +152,11 @@ public partial class SimulatorPage : IAsyncDisposable
 
     private void Load(ScenarioForm form, string? fileName)
     {
-        Form = form;
-        _fileName = fileName;
-        _isDirty = false;
+        Session.Form = form;
+        Session.FileName = fileName;
+        Session.IsDirty = false;
+        Session.Result = null;
         _keywordWeapon = null;
-        _result = null;
         _message = null;
         Refresh();
     }
@@ -172,7 +164,7 @@ public partial class SimulatorPage : IAsyncDisposable
     /// <summary>Demande confirmation avant d'abandonner des modifications non enregistrées.</summary>
     private async Task<bool> ConfirmDiscardAsync()
     {
-        if (!_isDirty)
+        if (!Session.IsDirty)
         {
             return true;
         }
@@ -183,16 +175,16 @@ public partial class SimulatorPage : IAsyncDisposable
 
     private async Task NewScenarioAsync()
     {
-        if (_running || !await ConfirmDiscardAsync())
+        if (Running || !await ConfirmDiscardAsync())
         {
             return;
         }
-        Load(NewForm(), null);
+        Load(ScenarioSession.NewForm(), null);
     }
 
     private async Task OpenAsync()
     {
-        if (_running || !await ConfirmDiscardAsync())
+        if (Running || !await ConfirmDiscardAsync())
         {
             return;
         }
@@ -220,11 +212,11 @@ public partial class SimulatorPage : IAsyncDisposable
 
         try
         {
-            string? written = await FileService.SaveAsync(_scenario!, _fileName ?? DefaultFileName);
+            string? written = await FileService.SaveAsync(_scenario!, Session.FileName ?? DefaultFileName);
             if (written is not null)
             {
-                _fileName = written;
-                _isDirty = false;
+                Session.FileName = written;
+                Session.IsDirty = false;
                 ShowMessage(L["File_Saved", written], Severity.Success);
             }
         }
@@ -241,7 +233,7 @@ public partial class SimulatorPage : IAsyncDisposable
             return;
         }
 
-        _running = true;
+        Session.IsRunning = true;
         _progress = 0;
         _message = null;
         _cancellation = new CancellationTokenSource();
@@ -254,7 +246,7 @@ public partial class SimulatorPage : IAsyncDisposable
 
         try
         {
-            _result = await SimulationService.RunAsync(_scenario!, _iterations, _seed, progress, _cancellation.Token);
+            Session.Result = await SimulationService.RunAsync(_scenario!, Session.Iterations, Session.Seed, progress, _cancellation.Token);
         }
         catch (OperationCanceledException)
         {
@@ -262,7 +254,7 @@ public partial class SimulatorPage : IAsyncDisposable
         }
         finally
         {
-            _running = false;
+            Session.IsRunning = false;
             _cancellation.Dispose();
             _cancellation = null;
         }

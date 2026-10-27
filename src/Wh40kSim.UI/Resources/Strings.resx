@@ -223,6 +223,12 @@
   <data name="Help_Wipe" xml:space="preserve">
     <value>Unité détruite : en rouge sous {0}, couleur du thème jusqu'à {1}, en vert au-delà.</value>
   </data>
+  <data name="Home_QuickSimDescription" xml:space="preserve">
+    <value>Une unité attaquante contre une unité en défense : l'essentiel de l'interaction sur une seule page.</value>
+  </data>
+  <data name="Home_Title" xml:space="preserve">
+    <value>Que voulez-vous faire ?</value>
+  </data>
   <data name="Keyword_Blast" xml:space="preserve">
     <value>Blast</value>
   </data>
@@ -337,6 +343,9 @@
   <data name="Keywords_Title" xml:space="preserve">
     <value>Mots-clés</value>
   </data>
+  <data name="Mode_QuickSim" xml:space="preserve">
+    <value>Quick sim</value>
+  </data>
   <data name="Modifier_Ap" xml:space="preserve">
     <value>PA</value>
   </data>
@@ -360,6 +369,9 @@
   </data>
   <data name="Modifier_Strength" xml:space="preserve">
     <value>Force (F)</value>
+  </data>
+  <data name="Nav_Home" xml:space="preserve">
+    <value>Accueil</value>
   </data>
   <data name="Reroll_Failed" xml:space="preserve">
     <value>Les échecs</value>

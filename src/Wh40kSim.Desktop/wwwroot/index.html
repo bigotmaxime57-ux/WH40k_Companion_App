@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="_content/Wh40kSim.UI/wh40ksim.css" />
     <link rel="stylesheet" href="app.css" />
     <link rel="icon" href="data:," />
+    <script>
+        // Thème au démarrage, passé par l'hôte dans l'adresse (?theme=…) : couleurs de la barre de chargement (app.css)
+        document.documentElement.dataset.theme = new URLSearchParams(location.search).get('theme') || '';
+    </script>
 </head>
 
 <body>

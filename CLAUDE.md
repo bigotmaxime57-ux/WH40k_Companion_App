@@ -447,7 +447,9 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
   (application non empaquetée). Démarrage sans flash : l'hôte passe le thème (mémorisé, sinon selon Windows) à
   `AppShell` (`InitialTheme` ; sans lui, préférence puis mode du navigateur, après le premier rendu) ; fond de la page
   MAUI aux couleurs du thème, `index.html` transparente avec une barre de chargement colorée selon l'attribut
-  `data-theme` (posé par `MainPage`), WebView2 transparente jusqu'au premier rendu.
+  `data-theme`, posé par un script de `index.html` d'après l'adresse de départ (`MainPage` : `StartPath = "/?theme=…"` ;
+  un script injecté « à la création du document » arrivait parfois trop tard), WebView2 transparente jusqu'au premier
+  rendu.
 - **Vérification visuelle** : pas de test automatique du rendu. Captures d'écran de la fenêtre par un script PowerShell
   (`CopyFromScreen`, clic et molette via `user32`) dans le scratchpad de Claude, lues comme des images.
 

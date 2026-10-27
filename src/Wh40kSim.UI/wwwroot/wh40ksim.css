@@ -73,18 +73,25 @@
     margin: 0 .6rem;
 }
 
-/* Barre de chargement à l'ouverture d'un écran (AppShell) : même dessin que celle du démarrage de l'hôte desktop
-   (wwwroot/app.css de Wh40kSim.Desktop), centrée dans la fenêtre, aux couleurs du thème */
+/* Chargement à l'ouverture d'un écran (AppShell) : comme au démarrage de l'hôte desktop (wwwroot/app.css de
+   Wh40kSim.Desktop), fond uni du thème qui cache l'écran précédent, barre centrée aux couleurs du thème. La barre de
+   titre (z-index plus élevé) reste visible au-dessus. */
+.wh-screen-loading-overlay {
+    background: var(--mud-palette-background);
+    inset: 0;
+    position: fixed;
+    z-index: calc(var(--mud-zindex-appbar) - 1);
+}
+
 .wh-screen-loading {
     background: rgba(var(--mud-palette-primary-rgb), .2);
     height: 4px;
     left: 50%;
     overflow: hidden;
-    position: fixed;
+    position: absolute;
     top: 50%;
     transform: translate(-50%, -50%);
     width: min(320px, 60vw);
-    z-index: 1500;
 }
 
 .wh-screen-loading-bar {

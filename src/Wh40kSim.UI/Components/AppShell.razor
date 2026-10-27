@@ -47,7 +47,9 @@
     </MudAppBar>
     @if (Screens.IsLoading)
     {
-        <div class="wh-screen-loading" data-test="screen-loading"><div class="wh-screen-loading-bar"></div></div>
+        <div class="wh-screen-loading-overlay" data-test="screen-loading">
+            <div class="wh-screen-loading"><div class="wh-screen-loading-bar"></div></div>
+        </div>
     }
     <MudMainContent>
         <Router AppAssembly="typeof(AppShell).Assembly">

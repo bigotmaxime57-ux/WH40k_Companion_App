@@ -1,7 +1,20 @@
 # Wh40kSim : simulateur de dégâts Warhammer 40.000 (11e édition)
 
-Phase 1 de la roadmap : un moteur Monte Carlo qui simule un grand nombre de fois
-une séquence d'attaque (profils d'armes contre une unité cible) et en sort des statistiques.
+Un moteur Monte Carlo qui simule un grand nombre de fois une séquence d'attaque (profils d'armes contre une unité
+cible) et en sort des statistiques, avec une application desktop Windows pour saisir les scénarios et lire les
+résultats, et une console de debug.
+
+## Roadmap
+
+1. Moteur de simulation (11e édition) et console : **terminé**.
+2. Interface graphique : **2a** application desktop Windows (MAUI Blazor Hybrid + MudBlazor) : **terminée** (`v0.2a`) ;
+   **2b** API serveur + client web.
+3. Traduction : anglais, choix de la langue, messages du Core.
+4. Graphiques et comparaison : distributions, probabilités cumulées P(≥ k), comparaison de profils côte à côte.
+5. Mots-clés du défenseur (vrai Anti-X…), règles d'armée et détachements, stockage des règles.
+6. Gestion et sauvegarde des unités : bibliothèque, choix du loadout et des leaders.
+
+Détail des étapes et décisions : `CLAUDE.md`. Idées non planifiées : tickets GitHub du dépôt.
 
 ## Structure
 
@@ -14,8 +27,10 @@ src/Wh40kSim.Core            Règles du jeu, bibliothèque pure : modèles + ré
 src/Wh40kSim.Simulation      Monte Carlo : simulateur parallèle et déterministe, résultats agrégés en histogrammes
   Statistics/                Distributions : moyenne, écart-type, centiles, P(= k), P(≥ k), lignes de tableau
 src/Wh40kSim.Console         Appli console de debug (saisie interactive ou fichier JSON) : affichage uniquement
+src/Wh40kSim.Desktop         Application desktop Windows (MAUI Blazor Hybrid) : hôte de Wh40kSim.UI
 src/Wh40kSim.UI              Interface Blazor + MudBlazor partagée par les hôtes (aucune règle de jeu, aucun calcul)
-  Components/                Page « Simulateur » : attaquant, défenseur, situation, simulation, résultats
+  Components/                AppShell (barre de titre, thème) et page « Simulateur » : attaquant, défenseur, situation,
+                             simulation, résultats
   Forms/                     Modèles de formulaire modifiables, convertis vers / depuis les records du Core
   Resources/                 Textes de l'interface (Strings.resx, français)
   Services/                  Simulation hors du thread de l'interface, ouverture / enregistrement des scénarios
@@ -27,14 +42,27 @@ scenarios/                   Scénarios d'exemple et scénarios enregistrés dep
 
 ## Prérequis et commandes
 
-SDK .NET 10 (Rider le propose s'il manque).
+**Windows uniquement** (l'application desktop cible Windows 10 1809 ou plus récent).
+
+- SDK .NET 10 (Rider le propose s'il manque).
+- Charge de travail MAUI, nécessaire pour compiler la solution :
+  `dotnet workload install maui-windows` (dans un terminal administrateur si .NET est installé dans
+  `C:\Program Files\dotnet`). Elle s'installe pour chaque installation de .NET : si `dotnet --list-sdks` et Rider
+  n'utilisent pas la même, l'installer dans les deux.
+- Runtime WebView2 (fourni avec Windows 11 et Microsoft Edge, sinon : https://developer.microsoft.com/microsoft-edge/webview2/).
 
 ```bash
 dotnet build
 dotnet test
-dotnet run --project src/Wh40kSim.Console                                            # saisie interactive
+dotnet run --project src/Wh40kSim.Desktop                                            # application desktop
+dotnet run --project src/Wh40kSim.Console                                            # console : saisie interactive
 dotnet run --project src/Wh40kSim.Console -- scenarios/exemple-escouade-vs-leader.json -n 1000000 --seed 42
 ```
+
+**Depuis Rider** : choisir la configuration d'exécution `Wh40kSim.Desktop` (profil « Windows Machine ») puis Run.
+L'application n'est pas empaquetée (pas de Microsoft Store) : le `.exe` est dans
+`src/Wh40kSim.Desktop/bin/<Configuration>/net10.0-windows10.0.19041.0/win-x64/`. Le lancer directement demande que
+.NET soit trouvable par Windows (installé dans `C:\Program Files\dotnet`, sinon variable `DOTNET_ROOT`).
 
 ## Séquence d'attaque implémentée (règles 05 et 02.02.01, 11e édition)
 
@@ -75,7 +103,7 @@ Ces dés sont tirés à part : les résultats réels sont les mêmes que sans ce
 - **Réduction de dégâts** : non appliquée aux blessures mortelles (elles ne sont pas une attaque allouée).
 - **Precision** : le PERSONNAGE visé est supposé visible.
 - **Ordre des pools** : celui de la saisie ; l'attaquant pourrait choisir un ordre plus favorable.
-- **Anti-X** : en attendant les mots-clés du défenseur (phase 3), « Anti-Infantry 4+ » suppose que la cible est concernée.
+- **Anti-X** : en attendant les mots-clés du défenseur (phase 5), « Anti-Infantry 4+ » suppose que la cible est concernée.
 
 ## Format JSON d'un scénario
 

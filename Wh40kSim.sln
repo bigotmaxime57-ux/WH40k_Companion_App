@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wh40kSim.Simulation", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wh40kSim.Simulation.Tests", "tests\Wh40kSim.Simulation.Tests\Wh40kSim.Simulation.Tests.csproj", "{597401F7-B61C-4553-B754-97061FF7EBA6}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wh40kSim.Desktop", "src\Wh40kSim.Desktop\Wh40kSim.Desktop.csproj", "{B61CE407-80C4-42C1-9D4A-E0A5DA3C3160}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,5 +53,9 @@ Global
 		{597401F7-B61C-4553-B754-97061FF7EBA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{597401F7-B61C-4553-B754-97061FF7EBA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{597401F7-B61C-4553-B754-97061FF7EBA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B61CE407-80C4-42C1-9D4A-E0A5DA3C3160}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B61CE407-80C4-42C1-9D4A-E0A5DA3C3160}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B61CE407-80C4-42C1-9D4A-E0A5DA3C3160}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B61CE407-80C4-42C1-9D4A-E0A5DA3C3160}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

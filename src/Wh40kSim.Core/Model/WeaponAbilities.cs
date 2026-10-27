@@ -6,8 +6,8 @@ using Wh40kSim.Core.Dice;
 namespace Wh40kSim.Core.Model;
 
 /// <summary>
-/// Mots-clés d'arme gérés par le moteur en phase 1.
-/// Les règles qui dépendent des mots-clés du défenseur (Anti-X, Precision…) viendront en phase 3 ;
+/// Mots-clés d'arme gérés par le moteur.
+/// Les règles qui dépendent des mots-clés du défenseur (vrai Anti-X…) viendront en phase 5 ;
 /// en attendant, Anti-X peut s'approximer avec <see cref="CriticalWoundOn"/>.
 /// </summary>
 public sealed record WeaponAbilities
@@ -123,7 +123,7 @@ public sealed record WeaponAbilities
                 "precision" => result with { Precision = true },
                 "crit hit" or "critical hit" or "crit touche" => result with { CriticalHitOn = RequireInt(value, raw, 2, 6) },
                 "crit wound" or "critical wound" or "anti" or "crit blessure" => result with { CriticalWoundOn = RequireInt(value, raw, 2, 6) },
-                // "Anti-Infantry 4+" : en attendant les mots-clés du défenseur (phase 3), on suppose que la cible est concernée
+                // "Anti-Infantry 4+" : en attendant les mots-clés du défenseur (phase 5), on suppose que la cible est concernée
                 _ when name.StartsWith("anti ", StringComparison.Ordinal) => result with { CriticalWoundOn = RequireInt(value, raw, 2, 6) },
                 _ => throw new FormatException($"Mot-clé d'arme non reconnu : '{raw}'."),
             };

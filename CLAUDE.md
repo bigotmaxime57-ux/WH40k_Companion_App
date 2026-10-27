@@ -245,8 +245,11 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   souvent le leader, unique et plus résistant). Flux de dés séparé pour ne pas modifier les résultats réels.
 - **Web (phase 2b)** : Blazor Web App, serveur `Wh40kSim.Web` (API + client) et client WebAssembly
   `Wh40kSim.Web.Client` ; le calcul se fait sur le serveur.
-- **Versions** (vérifiées le 2026-10-26) : MudBlazor 9.11.0, Microsoft.AspNetCore.Components.Web 10.0.14,
-  CommunityToolkit.Maui 15.0.1, bUnit 2.13.3, MAUI 10.0.1xx. Tests xUnit : mêmes versions que `Wh40kSim.Core.Tests`.
+- **Versions** (vérifiées le 2026-10-27) : MudBlazor 9.11.0, Microsoft.AspNetCore.Components.Web 10.0.14,
+  Microsoft.Extensions.Localization 10.0.14, CommunityToolkit.Maui 15.0.1, bUnit 2.13.3, Microsoft.Maui.Controls et
+  Microsoft.AspNetCore.Components.WebView.Maui 10.0.120 (charge de travail MAUI 10.0.110), Microsoft.Extensions.Logging.Debug
+  10.0.14. Paquets MAUI à version fixe, pas `$(MauiVersion)` (qui suit la charge de travail installée sur chaque machine).
+  Tests xUnit : mêmes versions que `Wh40kSim.Core.Tests`.
 - **Formulaires (Wh40kSim.UI/Forms)** : classes modifiables avec un constructeur depuis le record du Core, un
   constructeur vide (= valeurs par défaut du Core, rien n'est recopié dans l'UI) et une méthode `ToXxx()`.
   `WeaponForm` regroupe `WeaponGroup` + `WeaponProfile`. Expressions de dés en texte, lues par le Core.
@@ -269,11 +272,24 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 - **Tests bUnit** : `ComponentTestContext` (services, culture, faux services, `MudPopoverProvider` rendu d'abord,
   JS en mode `Loose`, `IAsyncLifetime` car des services MudBlazor ne se libèrent qu'en asynchrone). Repérage par
   attributs `data-test` : MudBlazor les pose sur l'`<input>` lui-même (sélecteur `input[data-test=…]`).
+- **Mise en page** : les points de rupture de MudGrid (`sm`, `md`, `lg`) suivent la largeur de la *fenêtre*, pas du
+  panneau ; dans un panneau en demi-largeur, n'utiliser que `xs` / `sm`.
+- **Hôte desktop (Wh40kSim.Desktop)** : réduit au minimum. Toute l'interface est `AppShell` (Wh40kSim.UI) :
+  fournisseurs MudBlazor, barre de titre, thème qui suit le système au démarrage (`GetSystemDarkModeAsync`, préférence
+  lue par la WebView) et bascule, puis `SimulatorPage` ; réutilisable tel quel par l'hôte web (2b). L'hôte fournit
+  `MauiProgram` (services), la fenêtre (`App` : titre lu dans `Strings.resx`, 1400 × 900 centrée, minimum 900 × 600),
+  `DesktopScenarioFileService` et `wwwroot/index.html` (CSS / JS de MudBlazor). Pas de `Package.appxmanifest`
+  (application non empaquetée).
+- **Vérification visuelle** : pas de test automatique du rendu. Captures d'écran de la fenêtre par un script PowerShell
+  (`CopyFromScreen`, clic et molette via `user32`) dans le scratchpad de Claude, lues comme des images.
 
 ## Environnement de développement
 
 - SDK .NET 10 ; IDE Rider ; historique suivi dans SourceTree. Desktop développé et testé sous Windows uniquement.
-- Charge de travail MAUI : `dotnet workload install maui-windows` (à faire sur chaque machine).
+- Charge de travail MAUI : `dotnet workload install maui-windows`, à faire sur chaque machine **et pour chaque
+  installation de .NET** (les charges de travail ne sont pas partagées entre `C:\Program Files\dotnet`, qui demande un
+  terminal administrateur, et un .NET installé dans le dossier utilisateur, comme celui de Rider). Sans elle, le build
+  de la solution échoue (projet Wh40kSim.Desktop).
 - Si .NET est installé dans le dossier utilisateur plutôt que dans `C:\Program Files\dotnet`, lancer un `.exe`
   directement échoue (0x80008083, runtime introuvable) sans la variable `DOTNET_ROOT` ; `dotnet run` et Rider fonctionnent.
 - Si les chemins longs Windows sont désactivés (`LongPathsEnabled = 0`), le build MAUI échoue au-delà de 260
@@ -304,10 +320,14 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   identiques au bit près) ; pas de surcoût mesurable (5 M simulations, unité détruite à 89 %), donc pas d'option.
 - Phase 2a, étape 5 (composants) : fusionnée dans `main`.
   211 tests verts (114 Core, 33 Simulation, 64 UI dont bUnit). Pas encore vue à l'écran : aucun hôte avant l'étape 6.
-- **Prochaine : étape 6 (Wh40kSim.Desktop)**, en attente du feu vert.
+- Phase 2a, étape 6 (Wh40kSim.Desktop) : terminée sur `phase2a/etape6-desktop`, en attente de validation avant
+  fusion et du tag `v0.2a`. 213 tests verts (114 Core, 33 Simulation, 66 UI). Application lancée et vérifiée à l'écran
+  (captures) : fenêtre, thème, saisie, simulation et résultats ; deux défauts de mise en page corrigés (groupe
+  d'allocation, valeurs de Sustained Hits / Rapid Fire / Melta). Numérotation des phases alignée dans le README et le
+  code.
+- **Prochaine : phase 2b (API + client web)**, à détailler avant de commencer.
 
-Points notés pour les étapes suivantes :
-- **Ancienne numérotation** dans le code : `WeaponAbilities.cs` (« phase 3 » pour les mots-clés, et un commentaire
-  qui cite Precision comme non géré alors qu'il l'est) : à corriger quand ce fichier est touché, au plus tard à
-  l'étape 6.
-- Étape 6 : première vue réelle de la page ; prévoir des retouches de mise en page (non vérifiable avec bUnit).
+Points notés pour la suite :
+- Charge de travail MAUI : installée dans le .NET du dossier utilisateur de la deuxième machine seulement ; à
+  installer aussi dans `C:\Program Files\dotnet` (terminal administrateur) et sur l'autre machine.
+- Ouvrir un scénario quand le formulaire a été modifié remplace la saisie sans confirmation (pas demandé en 2a).

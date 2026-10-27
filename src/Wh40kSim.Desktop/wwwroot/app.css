@@ -1,4 +1,17 @@
-/* Le style de l'interface vient de MudBlazor : ici, seulement le bandeau d'erreur de Blazor. */
+/*
+   Le style de l'interface vient de MudBlazor : ici, seulement le fond affiché avant le premier rendu de Blazor (aux
+   couleurs du thème du système, comme la page MAUI) et le bandeau d'erreur de Blazor.
+*/
+
+html, body {
+    background: #f2ece0;
+}
+
+@media (prefers-color-scheme: dark) {
+    html, body {
+        background: #0a0a0b;
+    }
+}
 
 #blazor-error-ui {
     background: lightyellow;

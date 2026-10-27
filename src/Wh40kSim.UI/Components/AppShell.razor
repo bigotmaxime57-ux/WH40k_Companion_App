@@ -1,7 +1,7 @@
 @*
     Coquille de l'application, commune aux hôtes : fournisseurs MudBlazor, barre de titre avec bascule clair / sombre,
-    et la page « Simulateur ». Thèmes Wh40kTheme ; le mode sombre suit celui du système au démarrage (préférence lue par
-    le navigateur ou la WebView). Styles complémentaires : wwwroot/wh40ksim.css, chargé par l'hôte.
+    et la page « Simulateur ». Thèmes Wh40kTheme ; le mode sombre suit celui du système au démarrage (fourni par l'hôte,
+    ou à défaut lu par le navigateur). Styles complémentaires : wwwroot/wh40ksim.css, chargé par l'hôte.
 *@
 
 <MudThemeProvider @ref="_themeProvider" Theme="Wh40kTheme.For(DarkStyle)" @bind-IsDarkMode="_isDarkMode" />
@@ -32,15 +32,24 @@
     [Parameter]
     public DarkStyle DarkStyle { get; set; } = DarkStyle.Grimdark;
 
+    /// <summary>
+    /// Mode sombre du système, fourni par l'hôte s'il le connaît : le premier rendu a alors déjà le bon thème. Sinon,
+    /// il est demandé au navigateur après le premier rendu (le thème clair s'affiche un instant).
+    /// </summary>
+    [Parameter]
+    public bool? SystemDarkMode { get; set; }
+
     /// <summary>Thème sombre actif (bascule par le bouton de la barre de titre).</summary>
     public bool IsDarkMode => _isDarkMode;
 
     private string ShellClass => !_isDarkMode ? "wh-shell"
         : DarkStyle == DarkStyle.Grimdark ? "wh-shell wh-dark wh-grimdark" : "wh-shell wh-dark";
 
+    protected override void OnInitialized() => _isDarkMode = SystemDarkMode ?? false;
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (firstRender && SystemDarkMode is null)
         {
             _isDarkMode = await _themeProvider.GetSystemDarkModeAsync();
             StateHasChanged();

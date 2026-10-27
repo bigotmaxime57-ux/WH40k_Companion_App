@@ -291,7 +291,8 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
      « +1,33 (Marge) », expliqué en infobulle, tiret si l'unité n'est jamais détruite (figurines et PV en plus, en
      moyenne quand l'unité est détruite : `SimulationResult.KillMarginWhenWiped` /
      `DamageMarginWhenWiped`, via `DiscreteDistribution.MeanExcessAbove`) et prolonge les tableaux, lignes au-delà
-     de l'unité notées « 5 + 2 » sous un trait. La console affiche aussi la marge.
+     de l'unité notées « 5 + 2 » sous un trait. La console affiche aussi la marge. Explication de la marge dans une bulle « ? »
+     à côté de la valeur, comme ailleurs.
    - Fin d'étape : tag `v0.2a.1`.
 
 ## Décisions techniques
@@ -351,7 +352,9 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   lue par la WebView) et bascule, puis `SimulatorPage` ; réutilisable tel quel par l'hôte web (2b). L'hôte fournit
   `MauiProgram` (services), la fenêtre (`App` : titre lu dans `Strings.resx`, 1400 × 900 centrée, minimum 900 × 600),
   `DesktopScenarioFileService` et `wwwroot/index.html` (CSS / JS de MudBlazor). Pas de `Package.appxmanifest`
-  (application non empaquetée).
+  (application non empaquetée). Démarrage sans flash : l'hôte passe le thème du système à
+  `AppShell` (`SystemDarkMode`, sinon lu par le navigateur après le premier rendu) ; fond de la page MAUI et de
+  `index.html` aux couleurs du thème, WebView2 transparente jusqu'au premier rendu.
 - **Vérification visuelle** : pas de test automatique du rendu. Captures d'écran de la fenêtre par un script PowerShell
   (`CopyFromScreen`, clic et molette via `user32`) dans le scratchpad de Claude, lues comme des images.
 

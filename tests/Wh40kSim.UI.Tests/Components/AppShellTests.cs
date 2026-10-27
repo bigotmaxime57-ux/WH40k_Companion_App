@@ -29,6 +29,20 @@ public class AppShellTests() : ComponentTestContext(renderPopoverProvider: false
     }
 
     [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Theme_given_by_the_host_applies_from_the_first_render_without_asking_the_browser(bool dark)
+    {
+        // Le navigateur dirait l'inverse : il ne doit pas être consulté
+        JSInterop.Setup<bool>("mudThemeProvider.isDarkMode").SetResult(!dark);
+        var shell = Render<AppShell>(p => p.Add(c => c.SystemDarkMode, dark));
+
+        Assert.Equal(dark, shell.FindAll(".wh-dark").Count > 0);
+        Assert.Equal(dark, shell.Instance.IsDarkMode);
+        Assert.Empty(JSInterop.Invocations["mudThemeProvider.isDarkMode"]);
+    }
+
+    [Theory]
     [InlineData(DarkStyle.Grimdark, true)]
     [InlineData(DarkStyle.Steel, false)]
     public void Grimdark_effects_apply_only_to_the_grimdark_dark_theme(DarkStyle style, bool grimdark)

@@ -316,7 +316,10 @@
 
 /* Marge sous la moyenne (« Afficher la marge ») : plus petite, dans la couleur de la valeur */
 .wh-tile-margin {
+    align-items: center;
     color: var(--mud-palette-primary);
+    display: flex;
+    gap: .25rem;
     font-family: Bahnschrift, "Segoe UI", sans-serif;
     font-size: 1rem;
     font-weight: 600;

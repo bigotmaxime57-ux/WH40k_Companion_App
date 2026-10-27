@@ -81,15 +81,14 @@
     private string ExcessModel => (Result.ExcessProfile with { Count = 1 }).Describe();
 
     /// <summary>
-    /// Marge sous la moyenne d'une tuile, « +1,33 (Marge) », expliquée en infobulle. Un tiret si l'unité n'est jamais
-    /// détruite : la marge n'est alors pas définie (l'interrupteur est d'ailleurs masqué).
+    /// Marge sous la moyenne d'une tuile, « +1,33 (Marge) », expliquée par une bulle « ? ». Un tiret si l'unité n'est
+    /// jamais détruite : la marge n'est alors pas définie (l'interrupteur est d'ailleurs masqué).
     /// </summary>
     private RenderFragment MarginLine(double value, string help, string test) =>
-        @<MudTooltip Delay="1000" Arrow="true" Placement="Placement.Bottom" Text="@help">
-            <div class="wh-tile-margin" data-test="@test">
-                @L["Results_MarginValue", Result.ProbabilityWipe > 0 ? "+" + value.ToString("F2") : "—"]
-            </div>
-        </MudTooltip>;
+        @<div class="wh-tile-margin">
+            <span data-test="@test">@L["Results_MarginValue", Result.ProbabilityWipe > 0 ? "+" + value.ToString("F2") : "—"]</span>
+            <HelpBubble Lines="@([help])" />
+        </div>;
 
     /// <summary>Distributions des tableaux : réelles, ou prolongées au-delà de la destruction de l'unité (marge).</summary>
     private DiscreteDistribution Kills => _extended ? Result.ExtendedKills : Result.Kills;

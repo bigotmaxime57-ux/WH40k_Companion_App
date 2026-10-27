@@ -1,0 +1,129 @@
+@*
+    Explorateur / sélecteur de mots-clés, générique : il reçoit un catalogue (KeywordDefinition) et la cible à modifier,
+    qu'il change en direct. Recherche (Entrée active le premier résultat), filtre par catégorie, valeur modifiable sur
+    place. Réutilisable en phase 5 avec d'autres catalogues (et une portée).
+*@
+@using Wh40kSim.UI.Keywords
+@typeparam TTarget
+
+<MudTextField T="string" @bind-Value="_search" Immediate="true" Placeholder="@L["Keywords_Search"]" AutoFocus="true"
+              Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Clearable="true"
+              OnKeyDown="OnSearchKeyDown" data-test="keyword-search" />
+
+<div class="wh-keyword-categories my-3">
+    <MudChip T="string" Size="Size.Small" Variant="@CategoryVariant(null)" Color="Color.Primary" OnClick="() => _category = null"
+             data-test="keyword-category-all">@L["Keywords_AllCategories"]</MudChip>
+    @foreach (string category in Categories)
+    {
+        <MudChip T="string" Size="Size.Small" Variant="@CategoryVariant(category)" Color="Color.Primary" OnClick="() => _category = category"
+                 data-test="@($"keyword-category-{category}")">@L[$"KeywordCategory_{category}"]</MudChip>
+    }
+</div>
+
+@foreach (var group in Visible.GroupBy(d => d.Category))
+{
+    <MudText Typo="Typo.subtitle2" Class="mt-2">@L[group.First().CategoryKey]</MudText>
+    @foreach (var keyword in group)
+    {
+        bool active = keyword.IsActive(Target);
+        <div class="wh-keyword-row @(active ? "wh-keyword-active" : "")" data-test="keyword-row">
+            <MudCheckBox T="bool" Value="active" ValueChanged="value => SetActive(keyword, value)" Color="Color.Primary"
+                         data-test="@($"keyword-{keyword.Id}")" />
+            <div class="wh-keyword-text">
+                <MudText Typo="Typo.body1"><b>@L[keyword.NameKey]</b></MudText>
+                <MudText Typo="Typo.caption">@L[keyword.HelpKey]</MudText>
+            </div>
+            @if (active && keyword.ValueKind != KeywordValueKind.None)
+            {
+                <div class="wh-keyword-value">
+                    @switch (keyword.ValueKind)
+                    {
+                        case KeywordValueKind.Number:
+                            <MudNumericField T="int" Min="keyword.Min" Max="keyword.Max" Value="keyword.GetNumber!(Target)"
+                                             ValueChanged="value => SetNumber(keyword, value)" data-test="@($"keyword-value-{keyword.Id}")" />
+                            break;
+                        case KeywordValueKind.Threshold:
+                            <MudSelect T="int" Value="keyword.GetNumber!(Target)" ValueChanged="value => SetNumber(keyword, value)"
+                                       data-test="@($"keyword-value-{keyword.Id}")">
+                                @for (int value = keyword.Min; value <= keyword.Max; value++)
+                                {
+                                    int threshold = value;
+                                    <MudSelectItem T="int" Value="threshold">@($"{threshold}+")</MudSelectItem>
+                                }
+                            </MudSelect>
+                            break;
+                        case KeywordValueKind.Dice:
+                            <MudTextField T="string" Immediate="true" Value="keyword.GetText!(Target)" ValueChanged="value => SetText(keyword, value)"
+                                          Error="@(!DiceExpression.TryParse(keyword.GetText!(Target), out _))" ErrorText="@L["Dice_Invalid"]"
+                                          data-test="@($"keyword-value-{keyword.Id}")" />
+                            break;
+                    }
+                </div>
+            }
+        </div>
+    }
+}
+
+@if (!Visible.Any())
+{
+    <MudText Typo="Typo.body2" Class="mt-3" data-test="keyword-none">@L["Keywords_NoResult"]</MudText>
+}
+
+@code {
+    private string? _search;
+    private string? _category;
+
+    [Parameter, EditorRequired]
+    public TTarget Target { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<KeywordDefinition<TTarget>> Definitions { get; set; } = [];
+
+    /// <summary>Appelé après chaque modification de la cible.</summary>
+    [Parameter]
+    public EventCallback Changed { get; set; }
+
+    private IEnumerable<string> Categories => Definitions.Select(d => d.Category).Distinct();
+
+    /// <summary>Mots-clés de la catégorie choisie dont le nom ou le rappel de règle contient le texte cherché.</summary>
+    private IEnumerable<KeywordDefinition<TTarget>> Visible => Definitions.Where(d =>
+        (_category is null || d.Category == _category)
+        && (string.IsNullOrWhiteSpace(_search)
+            || L[d.NameKey].Value.Contains(_search.Trim(), StringComparison.CurrentCultureIgnoreCase)
+            || L[d.HelpKey].Value.Contains(_search.Trim(), StringComparison.CurrentCultureIgnoreCase)));
+
+    private Variant CategoryVariant(string? category) => _category == category ? Variant.Filled : Variant.Outlined;
+
+    /// <summary>Entrée dans la recherche : active le premier mot-clé trouvé qui ne l'est pas encore.</summary>
+    private async Task OnSearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key != "Enter")
+        {
+            return;
+        }
+        var first = Visible.FirstOrDefault(d => !d.IsActive(Target));
+        if (first is not null)
+        {
+            await SetActive(first, true);
+            _search = null;
+        }
+    }
+
+    private Task SetActive(KeywordDefinition<TTarget> keyword, bool active)
+    {
+        keyword.SetActive(Target, active);
+        return Changed.InvokeAsync();
+    }
+
+    private Task SetNumber(KeywordDefinition<TTarget> keyword, int value)
+    {
+        keyword.SetNumber!(Target, value);
+        return Changed.InvokeAsync();
+    }
+
+    private Task SetText(KeywordDefinition<TTarget> keyword, string? value)
+    {
+        keyword.SetText!(Target, value ?? "");
+        return Changed.InvokeAsync();
+    }
+}

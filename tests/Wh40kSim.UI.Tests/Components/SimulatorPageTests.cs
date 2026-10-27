@@ -69,7 +69,8 @@ public class SimulatorPageTests : ComponentTestContext
         var page = Render<SimulatorPage>();
         Assert.Empty(page.FindAll("[data-test=half-range]"));
 
-        page.Find("input[data-test=rapid-fire]").Change(true);
+        page.Find("[data-test=edit-keywords]").Click();
+        page.Find("input[data-test=keyword-RapidFire]").Change(true);
 
         Assert.NotEmpty(page.FindAll("[data-test=half-range]"));
         Assert.Empty(page.FindAll("[data-test=charged]"));
@@ -180,6 +181,87 @@ public class SimulatorPageTests : ComponentTestContext
 
         Assert.Equal(new AttackerUnit().Name, page.Instance.Form.Attacker.Name);
         Assert.Empty(page.FindAll("[data-test=results]"));
-        Assert.Empty(page.FindAll("[data-test=file-name]"));
+        Assert.Equal("Nouveau scénario", page.Find("[data-test=file-name]").TextContent);
+    }
+
+    [Fact]
+    public void Modifications_are_marked_with_a_star_until_saved()
+    {
+        var page = Render<SimulatorPage>();
+        Assert.False(page.Instance.IsDirty);
+
+        page.Find("input[data-test=attacks]").Input("2");
+
+        Assert.True(page.Instance.IsDirty);
+        Assert.Equal("Nouveau scénario *", page.Find("[data-test=file-name]").TextContent);
+        page.Find("[data-test=save]").Click();
+        Assert.Equal("scenario.json", page.Find("[data-test=file-name]").TextContent);
+    }
+
+    [Fact]
+    public void Losing_modifications_asks_for_confirmation()
+    {
+        var page = Render<SimulatorPage>();
+        page.Find("input[data-test=attacks]").Input("2");
+
+        // « Nouveau » puis « Annuler » : la saisie est gardée
+        page.Find("[data-test=new]").Click();
+        DialogButton("Annuler").Click();
+        Assert.Equal("2", page.Instance.Form.Attacker.Weapons[0].Attacks);
+
+        // « Nouveau » puis « Abandonner » : formulaire vierge
+        page.Find("[data-test=new]").Click();
+        DialogButton("Abandonner").Click();
+        page.WaitForAssertion(() => Assert.Equal("1", page.Instance.Form.Attacker.Weapons[0].Attacks));
+        Assert.False(page.Instance.IsDirty);
+    }
+
+    [Fact]
+    public void Shortcuts_run_save_and_open()
+    {
+        Files.ToOpen = new OpenedScenario("ouvert.json", Opened());
+        var page = Render<SimulatorPage>();
+
+        page.InvokeAsync(() => page.Instance.OnShortcut("enter"));
+        page.WaitForElement("[data-test=results]");
+        page.InvokeAsync(() => page.Instance.OnShortcut("s"));
+        page.InvokeAsync(() => page.Instance.OnShortcut("o"));
+
+        Assert.Equal(1, Simulations.Calls);
+        Assert.Single(Files.Saved);
+        Assert.Equal("Escouade ouverte", page.Instance.Form.Attacker.Name);
+    }
+
+    [Fact]
+    public void Iteration_presets_set_the_number_of_simulations()
+    {
+        var page = Render<SimulatorPage>();
+
+        page.Find("[data-test=preset-10000]").Click();
+        page.Find("[data-test=run]").Click();
+
+        page.WaitForElement("[data-test=results]");
+        Assert.Equal(10_000, Simulations.LastIterations);
+    }
+
+    [Fact]
+    public void Results_start_with_summary_tiles()
+    {
+        var page = Render<SimulatorPage>();
+
+        page.Find("[data-test=run]").Click();
+
+        page.WaitForElement("[data-test=results]");
+        Assert.NotNull(page.Find("[data-test=tile-kills]"));
+        Assert.NotNull(page.Find("[data-test=tile-damage]"));
+        Assert.Contains("%", page.Find("[data-test=wipe]").TextContent);
+        Assert.NotEmpty(page.FindAll("[data-test=bar]"));
+    }
+
+    private AngleSharp.Dom.IElement DialogButton(string text)
+    {
+        AngleSharp.Dom.IElement? button = null;
+        Dialogs!.WaitForAssertion(() => button = Assert.Single(Dialogs!.FindAll("button"), b => b.TextContent.Contains(text)));
+        return button!;
     }
 }

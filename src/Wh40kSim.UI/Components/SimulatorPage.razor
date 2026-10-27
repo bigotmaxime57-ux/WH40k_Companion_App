@@ -1,17 +1,25 @@
-@* Page « Simulateur » : saisie du scénario, simulation et résultats. L'hôte la place dans sa mise en page. *@
+@*
+    Page « Simulateur » : saisie du scénario à gauche ; erreurs, simulation et résultats à droite (colonne qui reste
+    visible au défilement) ; sélecteur de mots-clés dans un panneau latéral. L'hôte la place dans sa mise en page.
+    Raccourcis : Ctrl+Entrée lancer, Ctrl+S enregistrer, Ctrl+O ouvrir.
+*@
+@using Wh40kSim.UI.Keywords
 
 <MudStack Spacing="3" Class="pa-4">
     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.NoteAdd" Disabled="_running" OnClick="NewScenario"
-                   data-test="new">@L["Toolbar_New"]</MudButton>
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.FolderOpen" Disabled="_running" OnClick="OpenAsync"
-                   data-test="open">@L["Toolbar_Open"]</MudButton>
-        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Save" Disabled="@(!CanSave)" OnClick="SaveAsync"
-                   data-test="save">@L["Toolbar_Save"]</MudButton>
-        @if (_fileName is not null)
-        {
-            <MudText Typo="Typo.body2" data-test="file-name">@_fileName</MudText>
-        }
+        <MudTooltip Text="@L["Toolbar_NewHelp"]">
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.NoteAdd" Disabled="_running" OnClick="NewScenarioAsync"
+                       data-test="new">@L["Toolbar_New"]</MudButton>
+        </MudTooltip>
+        <MudTooltip Text="@L["Toolbar_OpenHelp"]">
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.FolderOpen" Disabled="_running" OnClick="OpenAsync"
+                       data-test="open">@L["Toolbar_Open"]</MudButton>
+        </MudTooltip>
+        <MudTooltip Text="@L["Toolbar_SaveHelp"]">
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Save" Disabled="@(!CanSave)" OnClick="SaveAsync"
+                       data-test="save">@L["Toolbar_Save"]</MudButton>
+        </MudTooltip>
+        <MudText Typo="Typo.body2" data-test="file-name">@FileLabel</MudText>
     </MudStack>
 
     @if (_message is not null)
@@ -20,27 +28,39 @@
     }
 
     <MudGrid Spacing="3">
-        <MudItem xs="12" lg="6">
-            <AttackerPanel Attacker="Form.Attacker" Changed="Refresh" />
-        </MudItem>
-        <MudItem xs="12" lg="6">
-            <DefenderPanel Defender="Form.Defender" Changed="Refresh" />
-        </MudItem>
-        <MudItem xs="12" lg="6">
-            <ContextPanel Context="Form.Context" Reference="_reference" Changed="Refresh" />
-        </MudItem>
-        <MudItem xs="12" lg="6">
+        <MudItem xs="12" lg="7">
             <MudStack Spacing="3">
-                <ScenarioErrors Errors="_errors" HasDiceErrors="_hasDiceErrors" />
-                <SimulationPanel @bind-Iterations="_iterations" @bind-Seed="_seed" CanRun="CanRun" Running="_running" Progress="_progress"
-                                 OnRun="RunAsync" OnCancel="Cancel" />
+                <AttackerPanel Attacker="Form.Attacker" Changed="OnFormChanged" EditKeywords="EditKeywords" />
+                <DefenderPanel Defender="Form.Defender" Changed="OnFormChanged" />
+                <ContextPanel Context="Form.Context" Reference="_reference" Changed="OnFormChanged" />
             </MudStack>
         </MudItem>
-        @if (_result is not null)
-        {
-            <MudItem xs="12">
-                <ResultsView Result="_result" />
-            </MudItem>
-        }
+        <MudItem xs="12" lg="5">
+            <div class="wh-sticky-column">
+                <MudStack Spacing="3">
+                    <ScenarioErrors Errors="_errors" HasDiceErrors="_hasDiceErrors" />
+                    <SimulationPanel @bind-Iterations="_iterations" @bind-Seed="_seed" CanRun="CanRun" Running="_running" Progress="_progress"
+                                     OnRun="RunAsync" OnCancel="Cancel" />
+                    @if (_result is not null)
+                    {
+                        <ResultsView Result="_result" />
+                    }
+                </MudStack>
+            </div>
+        </MudItem>
     </MudGrid>
 </MudStack>
+
+<MudDrawer Open="_keywordWeapon is not null" OpenChanged="OnKeywordPanelOpenChanged" Anchor="Anchor.End" Variant="DrawerVariant.Temporary"
+           Overlay="false" ClipMode="DrawerClipMode.Always" Width="440px" Elevation="6" Class="wh-keyword-panel" data-test="keyword-panel">
+    @if (_keywordWeapon is not null)
+    {
+        <div class="pa-4">
+            <SectionHeader Icon="@Icons.Material.Filled.Sell" Title="@L["Keywords_Title"]">
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" OnClick="CloseKeywords" data-test="close-keywords" />
+            </SectionHeader>
+            <MudText Typo="Typo.body2" Class="mb-3">@L["Keywords_ForWeapon", _keywordWeapon.Name]</MudText>
+            <KeywordPicker TTarget="WeaponAbilitiesForm" Target="_keywordWeapon.Abilities" Definitions="WeaponKeywords.All" Changed="OnFormChanged" />
+        </div>
+    }
+</MudDrawer>

@@ -218,7 +218,9 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
    - Projet MAUI Blazor Hybrid qui affiche les composants de Wh40kSim.UI dans un `BlazorWebView`. Ce que Wh40kSim.UI
      attend de l'hôte (étape 5) : `services.AddWh40kSimUI()`, `UiCulture.Apply()` au démarrage, les fournisseurs
      MudBlazor dans la mise en page (`MudThemeProvider`, `MudPopoverProvider`, `MudDialogProvider`,
-     `MudSnackbarProvider`), les CSS / JS de MudBlazor, puis `<SimulatorPage />` (composant non routé).
+     `MudSnackbarProvider`), les CSS / JS de MudBlazor, puis `<SimulatorPage />` (composant non routé). Depuis
+     l'étape 7 : `AppShell` fournit déjà tout cela ; l'hôte charge en plus `_content/Wh40kSim.UI/wh40ksim.css`
+     (le module `wh40ksim.js` des raccourcis est importé par la page elle-même).
    - Cible Windows uniquement : `net10.0-windows10.0.19041.0`, `WindowsPackageType=None` (non empaqueté).
      macOS écarté (compilation impossible sous Windows, non testable). `Directory.Build.props` impose
      `TargetFramework=net10.0` : le projet redéfinit `TargetFramework` (au singulier).
@@ -233,18 +235,22 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
    - Fin de phase 2a : tag `v0.2a`.
 7. **Finitions de l'interface** (ajoutée après `v0.2a` : interface jugée « encore un peu austère »). Tout dans
    Wh40kSim.UI, aucune règle ni calcul ajouté côté interface.
-   - Style : thème à identité Warhammer 40k (sombre « grimdark » : acier, laiton / or, rouge sombre ; pendant clair
-     cohérent), en-têtes de section avec icônes, cartes en relief. **Prototype du thème d'abord, validé sur captures
-     avant le reste.**
+   - Style : thème à identité Warhammer 40k, en-têtes de section avec icônes, cartes en relief. Prototype validé sur
+     captures. **Deux styles sombres gardés** : Grimdark (presque noir, or terni, rouge sang, matière ; par défaut) et
+     Acier (acier et laiton, le premier prototype), plus le clair parchemin. Choix par l'utilisateur : ticket #9.
    - Résultats : tuiles de synthèse en tête (figurines tuées, PV retirés, unité détruite) ; barre proportionnelle dans
      la colonne P(= k) des tableaux (pas encore les graphiques de la phase 4).
    - Mise en page en deux colonnes : saisie à gauche, simulation et résultats à droite, toujours visibles.
    - Profils d'armes et groupes du défenseur repliables, avec un résumé en en-tête (`Describe()` du Core).
-   - Mots-clés en puces cliquables ; le champ des mots-clés à valeur n'apparaît que s'ils sont actifs.
+   - **Sélecteur de mots-clés** (idée de l'utilisateur, remplace les puces) : sur la carte d'une arme, les mots-clés
+     actifs en étiquettes (rappel de règle au survol, croix pour retirer) et un bouton « Mots-clés » qui ouvre un
+     **panneau latéral** : recherche (Entrée ajoute), filtre par catégorie, valeur modifiable sur place. Composant
+     générique `KeywordPicker<TTarget>` + catalogue `KeywordDefinition` (dans l'UI : accès aux champs du formulaire
+     seulement), réutilisable en phase 5 avec une portée (arme, unité…).
    - Raccourcis clavier : Ctrl+Entrée lancer, Ctrl+S enregistrer, Ctrl+O ouvrir.
    - Confirmation avant de perdre une saisie modifiée (Nouveau / Ouvrir) ; « * » après le nom du fichier si modifié.
-   - Nombre de simulations en choix rapides (10 000 / 100 000 / 1 000 000 / 10 000 000) ; infobulle sur chaque
-     mot-clé (rappel de la règle en une phrase).
+   - Nombre de simulations en choix rapides (10 000 / 100 000 / 1 000 000 / 10 000 000) ; rappel de règle en une
+     phrase pour chaque mot-clé (sélecteur et infobulles des étiquettes).
    - Fin d'étape : tag `v0.2a.1`.
 
 ## Décisions techniques
@@ -343,7 +349,9 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   d'allocation, valeurs de Sustained Hits / Rapid Fire / Melta). Numérotation des phases alignée dans le README et le
   code.
 - **En cours : phase 2a, étape 7 (finitions de l'interface)** sur `phase2a/etape7-finitions-ui`. Toutes les
-  propositions retenues, identité Warhammer pour le thème. Prochaine ensuite : phase 2b (API + client web).
+  propositions retenues, identité Warhammer pour le thème, sélecteur de mots-clés en panneau latéral. Tout est codé
+  et testé (231 tests verts : 114 Core, 33 Simulation, 84 UI) ; reste la vérification à l'écran avec l'utilisateur.
+  Prochaine ensuite : phase 2b (API + client web).
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

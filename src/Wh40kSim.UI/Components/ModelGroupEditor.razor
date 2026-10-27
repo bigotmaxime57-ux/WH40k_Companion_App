@@ -1,9 +1,20 @@
 @*
     Un groupe d'allocation : figurines aux mêmes caractéristiques, ou un PERSONNAGE.
     Colonnes xs / sm seulement : les points de rupture de MudGrid suivent la largeur de la fenêtre, pas celle du panneau
-    (qui n'en occupe que la moitié sur un grand écran).
+    (qui n'en occupe que la moitié sur un grand écran). Repliable : une fois replié, une ligne de résumé (Describe du Core).
 *@
 
+<div class="d-flex align-center">
+    <MudIconButton Icon="@(_expanded ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)" Size="Size.Small"
+                   OnClick="() => _expanded = !_expanded" data-test="toggle-group" />
+    @if (!_expanded)
+    {
+        <MudText Typo="Typo.body1" Class="wh-summary" data-test="group-summary">@Group.ToModelGroup().Describe()</MudText>
+    }
+</div>
+
+@if (_expanded)
+{
 <MudGrid Spacing="2">
     <MudItem xs="12" sm="5">
         <MudTextField T="string" Label="@L["Group_Name"]" @bind-Value="Group.Name" @bind-Value:after="NotifyChanged" data-test="group-name" />
@@ -53,9 +64,12 @@
         <MudNumericField T="int" Label="@L["Group_DamageReduction"]" Min="0" @bind-Value="Group.DamageReduction" @bind-Value:after="NotifyChanged" />
     </MudItem>
 </MudGrid>
+}
 
 @code {
     private static readonly int[] TwoToSix = [2, 3, 4, 5, 6];
+
+    private bool _expanded = true;
 
     /// <summary>Valeur des listes déroulantes pour « aucune » (le formulaire utilise null).</summary>
     private const int None = 0;

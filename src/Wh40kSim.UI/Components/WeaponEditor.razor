@@ -1,8 +1,21 @@
-@* Un profil d'arme et le nombre de figurines qui l'utilisent. Les expressions de dés sont lues par le Core. *@
+@*
+    Un profil d'arme et le nombre de figurines qui l'utilisent. Repliable : une fois replié, une ligne de résumé (Describe
+    du Core). Les mots-clés actifs sont des étiquettes ; le bouton « Mots-clés » ouvre le sélecteur (panneau latéral).
+*@
+@using Wh40kSim.UI.Keywords
 
-<MudPaper Outlined="true" Class="pa-3 my-3" data-test="weapon">
-    <MudStack Row="true" AlignItems="AlignItems.Center">
-        <MudTextField T="string" Label="@L["Weapon_Name"]" @bind-Value="Weapon.Name" @bind-Value:after="NotifyChanged" />
+<MudPaper Outlined="true" Class="pa-3 my-3 wh-subcard" data-test="weapon">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+        <MudIconButton Icon="@(_expanded ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)" Size="Size.Small"
+                       OnClick="() => _expanded = !_expanded" data-test="toggle-weapon" />
+        @if (_expanded)
+        {
+            <MudTextField T="string" Label="@L["Weapon_Name"]" @bind-Value="Weapon.Name" @bind-Value:after="NotifyChanged" />
+        }
+        else
+        {
+            <MudText Typo="Typo.body1" Class="wh-summary" data-test="weapon-summary">@Summary</MudText>
+        }
         <MudTooltip Text="@L["Weapon_Duplicate"]">
             <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" OnClick="OnDuplicate" data-test="duplicate-weapon" />
         </MudTooltip>
@@ -11,118 +24,62 @@
         </MudTooltip>
     </MudStack>
 
-    <MudGrid Spacing="2">
-        <MudItem xs="6" sm="4" md="3">
-            <MudSelect T="WeaponType" Label="@L["Weapon_Type"]" @bind-Value="Weapon.Type" @bind-Value:after="NotifyChanged">
-                <MudSelectItem T="WeaponType" Value="WeaponType.Ranged">@L["Weapon_Ranged"]</MudSelectItem>
-                <MudSelectItem T="WeaponType" Value="WeaponType.Melee">@L["Weapon_Melee"]</MudSelectItem>
-            </MudSelect>
-        </MudItem>
-        <MudItem xs="6" sm="4" md="3">
-            <MudNumericField T="int" Label="@L["Weapon_ModelCount"]" Min="1" @bind-Value="Weapon.ModelCount" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6" sm="4" md="2">
-            <MudTextField T="string" Label="@L["Weapon_Attacks"]" Immediate="true" @bind-Value="Weapon.Attacks" @bind-Value:after="NotifyChanged"
-                          Error="@(!IsDice(Weapon.Attacks))" ErrorText="@L["Dice_Invalid"]" data-test="attacks" />
-        </MudItem>
-        <MudItem xs="6" sm="4" md="2">
-            <MudSelect T="int" Label="@(Weapon.Type == WeaponType.Ranged ? L["Weapon_BallisticSkill"] : L["Weapon_WeaponSkill"])"
-                       Disabled="Weapon.Abilities.Torrent" @bind-Value="Weapon.Skill" @bind-Value:after="NotifyChanged">
-                @foreach (int value in TwoToSix)
-                {
-                    <MudSelectItem T="int" Value="value">@($"{value}+")</MudSelectItem>
-                }
-            </MudSelect>
-        </MudItem>
-        <MudItem xs="6" sm="4" md="2">
-            <MudNumericField T="int" Label="@L["Weapon_Strength"]" Min="1" @bind-Value="Weapon.Strength" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6" sm="4" md="3">
-            <MudNumericField T="int" Label="@L["Weapon_Ap"]" Min="-6" Max="0" @bind-Value="Weapon.Ap" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6" sm="4" md="3">
-            <MudTextField T="string" Label="@L["Weapon_Damage"]" Immediate="true" @bind-Value="Weapon.Damage" @bind-Value:after="NotifyChanged"
-                          Error="@(!IsDice(Weapon.Damage))" ErrorText="@L["Dice_Invalid"]" data-test="damage" />
-        </MudItem>
-    </MudGrid>
+    @if (_expanded)
+    {
+        <MudGrid Spacing="2">
+            <MudItem xs="6" sm="4" md="3">
+                <MudSelect T="WeaponType" Label="@L["Weapon_Type"]" @bind-Value="Weapon.Type" @bind-Value:after="NotifyChanged">
+                    <MudSelectItem T="WeaponType" Value="WeaponType.Ranged">@L["Weapon_Ranged"]</MudSelectItem>
+                    <MudSelectItem T="WeaponType" Value="WeaponType.Melee">@L["Weapon_Melee"]</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="6" sm="4" md="3">
+                <MudNumericField T="int" Label="@L["Weapon_ModelCount"]" Min="1" @bind-Value="Weapon.ModelCount" @bind-Value:after="NotifyChanged" />
+            </MudItem>
+            <MudItem xs="6" sm="4" md="2">
+                <MudTextField T="string" Label="@L["Weapon_Attacks"]" Immediate="true" @bind-Value="Weapon.Attacks" @bind-Value:after="NotifyChanged"
+                              Error="@(!IsDice(Weapon.Attacks))" ErrorText="@L["Dice_Invalid"]" data-test="attacks" />
+            </MudItem>
+            <MudItem xs="6" sm="4" md="2">
+                <MudSelect T="int" Label="@(Weapon.Type == WeaponType.Ranged ? L["Weapon_BallisticSkill"] : L["Weapon_WeaponSkill"])"
+                           Disabled="Weapon.Abilities.Torrent" @bind-Value="Weapon.Skill" @bind-Value:after="NotifyChanged">
+                    @foreach (int value in TwoToSix)
+                    {
+                        <MudSelectItem T="int" Value="value">@($"{value}+")</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+            <MudItem xs="6" sm="4" md="2">
+                <MudNumericField T="int" Label="@L["Weapon_Strength"]" Min="1" @bind-Value="Weapon.Strength" @bind-Value:after="NotifyChanged" />
+            </MudItem>
+            <MudItem xs="6" sm="4" md="3">
+                <MudNumericField T="int" Label="@L["Weapon_Ap"]" Min="-6" Max="0" @bind-Value="Weapon.Ap" @bind-Value:after="NotifyChanged" />
+            </MudItem>
+            <MudItem xs="6" sm="4" md="3">
+                <MudTextField T="string" Label="@L["Weapon_Damage"]" Immediate="true" @bind-Value="Weapon.Damage" @bind-Value:after="NotifyChanged"
+                              Error="@(!IsDice(Weapon.Damage))" ErrorText="@L["Dice_Invalid"]" data-test="damage" />
+            </MudItem>
+        </MudGrid>
 
-    <MudText Typo="Typo.subtitle2" Class="mt-3">@L["Weapon_Abilities"]</MudText>
-    <MudGrid Spacing="0">
-        <MudItem xs="6" sm="4">
-            <MudCheckBox T="bool" Label="@L["Ability_Torrent"]" @bind-Value="Abilities.Torrent" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6" sm="4">
-            <MudCheckBox T="bool" Label="@L["Ability_LethalHits"]" @bind-Value="Abilities.LethalHits" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6" sm="4">
-            <MudCheckBox T="bool" Label="@L["Ability_DevastatingWounds"]" @bind-Value="Abilities.DevastatingWounds" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6" sm="4">
-            <MudCheckBox T="bool" Label="@L["Ability_TwinLinked"]" @bind-Value="Abilities.TwinLinked" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6" sm="4">
-            <MudCheckBox T="bool" Label="@L["Ability_Blast"]" @bind-Value="Abilities.Blast" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6" sm="4">
-            <MudCheckBox T="bool" Label="@L["Ability_Heavy"]" @bind-Value="Abilities.Heavy" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6" sm="4">
-            <MudCheckBox T="bool" Label="@L["Ability_Lance"]" @bind-Value="Abilities.Lance" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6" sm="4">
-            <MudCheckBox T="bool" Label="@L["Ability_IgnoresCover"]" @bind-Value="Abilities.IgnoresCover" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6" sm="4">
-            <MudCheckBox T="bool" Label="@L["Ability_Precision"]" @bind-Value="Abilities.Precision" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-    </MudGrid>
-
-    <MudGrid Spacing="2" Class="mt-1">
-        <MudItem xs="12" sm="4">
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                <MudCheckBox T="bool" Label="@L["Ability_SustainedHits"]" @bind-Value="Abilities.HasSustainedHits" @bind-Value:after="NotifyChanged"
-                             data-test="sustained-hits" />
-                <MudTextField T="string" Immediate="true" Disabled="@(!Abilities.HasSustainedHits)" @bind-Value="Abilities.SustainedHits"
-                              @bind-Value:after="NotifyChanged" Error="@(Abilities.HasSustainedHits && !IsDice(Abilities.SustainedHits))"
-                              ErrorText="@L["Dice_Invalid"]" Style="max-width: 5rem" data-test="sustained-hits-value" />
-            </MudStack>
-        </MudItem>
-        <MudItem xs="12" sm="4">
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                <MudCheckBox T="bool" Label="@L["Ability_RapidFire"]" @bind-Value="Abilities.HasRapidFire" @bind-Value:after="NotifyChanged"
-                             data-test="rapid-fire" />
-                <MudNumericField T="int" Min="1" Disabled="@(!Abilities.HasRapidFire)" @bind-Value="Abilities.RapidFire"
-                                 @bind-Value:after="NotifyChanged" Style="max-width: 5rem" />
-            </MudStack>
-        </MudItem>
-        <MudItem xs="12" sm="4">
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                <MudCheckBox T="bool" Label="@L["Ability_Melta"]" @bind-Value="Abilities.HasMelta" @bind-Value:after="NotifyChanged" />
-                <MudNumericField T="int" Min="1" Disabled="@(!Abilities.HasMelta)" @bind-Value="Abilities.Melta"
-                                 @bind-Value:after="NotifyChanged" Style="max-width: 5rem" />
-            </MudStack>
-        </MudItem>
-        <MudItem xs="6" sm="4">
-            <MudSelect T="int" Label="@L["Ability_CriticalHitOn"]" @bind-Value="Abilities.CriticalHitOn" @bind-Value:after="NotifyChanged">
-                @foreach (int value in TwoToSix)
-                {
-                    <MudSelectItem T="int" Value="value">@($"{value}+")</MudSelectItem>
-                }
-            </MudSelect>
-        </MudItem>
-        <MudItem xs="6" sm="4">
-            <MudSelect T="int" Label="@L["Ability_CriticalWoundOn"]" @bind-Value="Abilities.CriticalWoundOn" @bind-Value:after="NotifyChanged">
-                @foreach (int value in TwoToSix)
-                {
-                    <MudSelectItem T="int" Value="value">@($"{value}+")</MudSelectItem>
-                }
-            </MudSelect>
-        </MudItem>
-    </MudGrid>
+        <div class="wh-keywords mt-3" data-test="weapon-keywords">
+            <MudText Typo="Typo.subtitle2">@L["Weapon_Abilities"]</MudText>
+            @foreach (var keyword in WeaponKeywords.All.Where(k => k.IsActive(Weapon.Abilities)))
+            {
+                <MudTooltip Text="@L[keyword.HelpKey]">
+                    <MudChip T="string" Size="Size.Small" Color="@(IsValueInvalid(keyword) ? Color.Error : Color.Primary)" Variant="Variant.Outlined"
+                             OnClick="OnEditKeywords" OnClose="() => Remove(keyword)" data-test="keyword-chip">@ChipLabel(keyword)</MudChip>
+                </MudTooltip>
+            }
+            <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="OnEditKeywords" data-test="edit-keywords">@L["Weapon_EditKeywords"]</MudButton>
+        </div>
+    }
 </MudPaper>
 
 @code {
     private static readonly int[] TwoToSix = [2, 3, 4, 5, 6];
+
+    private bool _expanded = true;
 
     [Parameter, EditorRequired]
     public WeaponForm Weapon { get; set; } = null!;
@@ -136,9 +93,40 @@
     [Parameter]
     public EventCallback OnRemove { get; set; }
 
-    private WeaponAbilitiesForm Abilities => Weapon.Abilities;
+    /// <summary>Ouvre le sélecteur de mots-clés pour cette arme.</summary>
+    [Parameter]
+    public EventCallback OnEditKeywords { get; set; }
+
+    /// <summary>Résumé de l'arme par le Core ; seulement le nom tant qu'une expression de dés est invalide.</summary>
+    private string Summary
+    {
+        get
+        {
+            try
+            {
+                var group = Weapon.ToWeaponGroup();
+                return $"{group.ModelCount} × {group.Weapon.Describe()}";
+            }
+            catch (FormatException)
+            {
+                return L["Weapon_SummaryInvalid", Weapon.Name];
+            }
+        }
+    }
 
     private static bool IsDice(string? text) => DiceExpression.TryParse(text, out _);
+
+    private string ChipLabel(KeywordDefinition<WeaponAbilitiesForm> keyword) =>
+        keyword.ValueText(Weapon.Abilities) is string value ? $"{L[keyword.NameKey]} {value}" : L[keyword.NameKey];
+
+    private bool IsValueInvalid(KeywordDefinition<WeaponAbilitiesForm> keyword) =>
+        keyword.ValueKind == KeywordValueKind.Dice && !IsDice(keyword.GetText!(Weapon.Abilities));
+
+    private Task Remove(KeywordDefinition<WeaponAbilitiesForm> keyword)
+    {
+        keyword.SetActive(Weapon.Abilities, false);
+        return NotifyChanged();
+    }
 
     private Task NotifyChanged() => Changed.InvokeAsync();
 }

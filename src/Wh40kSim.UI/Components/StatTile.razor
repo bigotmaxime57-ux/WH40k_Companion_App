@@ -1,0 +1,28 @@
+@* Tuile de synthèse : libellé, grande valeur, détail optionnel. Highlight = valeur mise en avant (couleur secondaire). *@
+
+<div class="wh-tile @(Highlight ? "wh-tile-highlight" : "")" @attributes="Attributes">
+    <div class="wh-tile-label">@Label</div>
+    <div class="wh-tile-value">@Value</div>
+    @if (Detail is not null)
+    {
+        <div class="wh-tile-detail">@Detail</div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public string Value { get; set; } = "";
+
+    [Parameter]
+    public string? Detail { get; set; }
+
+    [Parameter]
+    public bool Highlight { get; set; }
+
+    /// <summary>Attributs supplémentaires (data-test…) posés sur la tuile.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? Attributes { get; set; }
+}

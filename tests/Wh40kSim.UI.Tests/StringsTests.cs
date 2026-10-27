@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using Wh40kSim.UI.Keywords;
 
 namespace Wh40kSim.UI.Tests;
 
@@ -12,11 +13,19 @@ public class StringsTests
 {
     private static readonly string UiProject = Path.Combine(RepositoryRoot(), "src", "Wh40kSim.UI");
 
-    private static HashSet<string> UsedKeys() =>
-        Directory.EnumerateFiles(UiProject, "*.*", SearchOption.AllDirectories)
+    /// <summary>Clés écrites telles quelles dans le code (L["…"]), plus celles construites à partir du catalogue de mots-clés.</summary>
+    private static HashSet<string> UsedKeys()
+    {
+        var keys = Directory.EnumerateFiles(UiProject, "*.*", SearchOption.AllDirectories)
             .Where(f => (f.EndsWith(".razor") || f.EndsWith(".cs")) && !f.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}"))
             .SelectMany(f => Regex.Matches(File.ReadAllText(f), @"\bL\[""(?<key>[A-Za-z_]+)""").Select(m => m.Groups["key"].Value))
             .ToHashSet();
+        foreach (var keyword in WeaponKeywords.All)
+        {
+            keys.UnionWith([keyword.NameKey, keyword.HelpKey, keyword.CategoryKey]);
+        }
+        return keys;
+    }
 
     private static HashSet<string> ResourceKeys() =>
         XDocument.Load(Path.Combine(UiProject, "Resources", "Strings.resx"))

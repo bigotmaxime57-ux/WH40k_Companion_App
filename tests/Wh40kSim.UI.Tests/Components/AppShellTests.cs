@@ -1,5 +1,6 @@
 using Bunit;
 using Wh40kSim.UI.Components;
+using Wh40kSim.UI.Theme;
 
 namespace Wh40kSim.UI.Tests.Components;
 
@@ -25,5 +26,28 @@ public class AppShellTests() : ComponentTestContext(renderPopoverProvider: false
         shell.Find("[data-test=toggle-theme]").Click();
 
         Assert.False(shell.Instance.IsDarkMode);
+    }
+
+    [Theory]
+    [InlineData(DarkStyle.Grimdark, true)]
+    [InlineData(DarkStyle.Steel, false)]
+    public void Grimdark_effects_apply_only_to_the_grimdark_dark_theme(DarkStyle style, bool grimdark)
+    {
+        JSInterop.Setup<bool>("mudThemeProvider.isDarkMode").SetResult(true);
+        var shell = Render<AppShell>(p => p.Add(c => c.DarkStyle, style));
+        shell.WaitForAssertion(() => Assert.True(shell.Instance.IsDarkMode));
+
+        Assert.Equal(grimdark, shell.FindAll(".wh-grimdark").Count > 0);
+        shell.Find("[data-test=toggle-theme]").Click();
+        Assert.Empty(shell.FindAll(".wh-grimdark")); // thème clair : jamais
+    }
+
+    [Fact]
+    public void Each_dark_style_has_its_own_theme_and_the_light_palette_is_shared()
+    {
+        Assert.NotSame(Wh40kTheme.Grimdark, Wh40kTheme.Steel);
+        Assert.Same(Wh40kTheme.Steel, Wh40kTheme.For(DarkStyle.Steel));
+        Assert.Equal(Wh40kTheme.Grimdark.PaletteLight.Background, Wh40kTheme.Steel.PaletteLight.Background);
+        Assert.NotEqual(Wh40kTheme.Grimdark.PaletteDark.Background, Wh40kTheme.Steel.PaletteDark.Background);
     }
 }

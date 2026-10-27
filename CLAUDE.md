@@ -302,7 +302,7 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 - Phase 2a, étape 4 (excédent de dégâts) : fusionnée dans `main`.
   169 tests verts (103 Core, 33 Simulation, 33 UI) ; `NonRegressionTests` inchangés (résultats réels
   identiques au bit près) ; pas de surcoût mesurable (5 M simulations, unité détruite à 89 %), donc pas d'option.
-- Phase 2a, étape 5 (composants) : terminée sur `phase2a/etape5-composants`, en attente de validation avant fusion.
+- Phase 2a, étape 5 (composants) : fusionnée dans `main`.
   211 tests verts (114 Core, 33 Simulation, 64 UI dont bUnit). Pas encore vue à l'écran : aucun hôte avant l'étape 6.
 - **Prochaine : étape 6 (Wh40kSim.Desktop)**, en attente du feu vert.
 

@@ -34,6 +34,9 @@ Voir aussi `README.md` (structure de la solution, règles de jeu implémentées,
 
 - Une branche par étape, créée depuis `main` à jour (ex. `phase2a/etape3-composants`).
 - Un ou quelques commits cohérents par étape, messages en français, terminés par la ligne `Co-Authored-By` de Claude.
+- **Validation d'une étape** (autorisation permanente du 2026-10-27) : quand l'utilisateur valide une étape, Claude
+  enchaîne sans redemander fusion dans `main`, build et tests, push, suppression de la branche et fermeture des tickets
+  traités : skill `/valider-etape` (`.claude/skills/valider-etape/SKILL.md`). Les tags restent soumis à accord.
 - Présenter l'étape, puis fusionner dans `main` **uniquement après accord** de l'utilisateur, **toujours avec
   `git merge --no-ff`** (l'historique est suivi dans SourceTree, les branches doivent rester visibles ;
   `git config merge.ff false` est aussi réglé dans la config locale du dépôt, sur chaque machine).

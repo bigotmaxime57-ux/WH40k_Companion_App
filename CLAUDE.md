@@ -509,8 +509,9 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
   l'ancien surestimait les PV retirés d'environ 0,1 % sur le scénario riche (≈ 16 écarts-types). ~28 % plus rapide.
 - Phase 3, étape 2 (accueil et navigation) : fusionnée dans `main`. 302 tests verts (154 Core, 41 Simulation,
   107 UI ; UI stables sur 8 exécutions). Skill `/valider-etape` ajouté dans la même branche.
-- Phase 3, étape 3 (JSON partiels) : branche `phase3/etape3-json-partiels`, en attente de validation. 325 tests verts
-  (166 Core, 41 Simulation, 118 UI ; UI stables sur 6 exécutions).
+- Phase 3, étape 3 (JSON partiels) : fusionnée dans `main`. 325 tests verts (166 Core, 41 Simulation, 118 UI ;
+  UI stables sur 6 exécutions).
+- Prochaine ensuite : phase 3, étape 4 (points, #2 version légère), à préciser et valider avant de coder.
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

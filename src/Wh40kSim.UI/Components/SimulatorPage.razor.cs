@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using MudBlazor;
 using Wh40kSim.Core.Model;
+using Wh40kSim.Core.Serialization;
 using Wh40kSim.Simulation;
 using Wh40kSim.UI.Forms;
 using Wh40kSim.UI.Services;
@@ -63,6 +64,9 @@ public partial class SimulatorPage : IAsyncDisposable
 
     /// <summary>On peut enregistrer un scénario incohérent (à corriger plus tard), pas une saisie de dés illisible.</summary>
     private bool CanSave => !Running && _scenario is not null;
+
+    /// <summary>Les dés ne se saisissent que dans les armes : une erreur de dés rend l'attaquant (seul) illisible.</summary>
+    private bool CanSaveAttacker => !Running && !_hasDiceErrors;
 
     /// <summary>Nom du fichier (ou « Nouveau scénario »), suivi de « * » s'il y a des modifications non enregistrées.</summary>
     private string FileLabel => (Session.FileName ?? L["Toolbar_Untitled"]) + (Session.IsDirty ? " *" : "");
@@ -182,25 +186,93 @@ public partial class SimulatorPage : IAsyncDisposable
         Load(ScenarioSession.NewForm(), null);
     }
 
+    /// <summary>
+    /// Bouton « Ouvrir » de la barre : un scénario complet remplace tout ; un fichier attaquant (ou défenseur) ne
+    /// remplace que cette partie, comme le bouton de la carte correspondante.
+    /// </summary>
     private async Task OpenAsync()
     {
-        if (Running || !await ConfirmDiscardAsync())
+        if (Running || !await ConfirmDiscardAsync() || await PickFileAsync() is not var (fileName, file))
         {
             return;
         }
 
+        switch (file.Kind)
+        {
+            case ScenarioFileKind.Scenario:
+                Load(new ScenarioForm(file.ToScenario()), fileName);
+                break;
+            case ScenarioFileKind.Attacker:
+                LoadAttacker(file.Attacker!, fileName);
+                break;
+            default:
+                LoadDefender(file.Defender!, fileName);
+                break;
+        }
+    }
+
+    /// <summary>Remplace l'attaquant par celui d'un fichier attaquant ou d'un scénario complet.</summary>
+    private async Task OpenAttackerAsync()
+    {
+        if (Running || !await ConfirmDiscardAsync() || await PickFileAsync() is not var (fileName, file))
+        {
+            return;
+        }
+
+        if (file.Attacker is null)
+        {
+            ShowMessage(L["File_NoAttacker", fileName], Severity.Warning);
+            return;
+        }
+        LoadAttacker(file.Attacker, fileName);
+    }
+
+    /// <summary>Remplace le défenseur par celui d'un fichier défenseur ou d'un scénario complet.</summary>
+    private async Task OpenDefenderAsync()
+    {
+        if (Running || !await ConfirmDiscardAsync() || await PickFileAsync() is not var (fileName, file))
+        {
+            return;
+        }
+
+        if (file.Defender is null)
+        {
+            ShowMessage(L["File_NoDefender", fileName], Severity.Warning);
+            return;
+        }
+        LoadDefender(file.Defender, fileName);
+    }
+
+    /// <summary>Demande un fichier et le lit (scénario complet ou partiel) ; null si annulé ou illisible (message affiché).</summary>
+    private async Task<(string FileName, ScenarioFile File)?> PickFileAsync()
+    {
         try
         {
             var opened = await FileService.OpenAsync();
-            if (opened is not null)
-            {
-                Load(new ScenarioForm(opened.Scenario), opened.FileName);
-            }
+            return opened is null ? null : (opened.FileName, ScenarioJson.ReadFile(opened.Content));
         }
         catch (Exception ex) when (ex is JsonException or IOException)
         {
             ShowMessage(L["File_OpenError", ex.Message], Severity.Error);
+            return null;
         }
+    }
+
+    /// <summary>Une partie chargée modifie le scénario courant, qui garde son nom de fichier.</summary>
+    private void LoadAttacker(AttackerUnit attacker, string fileName)
+    {
+        Form.Attacker = new AttackerForm(attacker);
+        Session.IsDirty = true;
+        ShowMessage(L["File_AttackerLoaded", fileName], Severity.Success);
+        Refresh();
+    }
+
+    private void LoadDefender(DefenderUnit defender, string fileName)
+    {
+        Form.Defender = new DefenderForm(defender);
+        Session.IsDirty = true;
+        ShowMessage(L["File_DefenderLoaded", fileName], Severity.Success);
+        Refresh();
     }
 
     private async Task SaveAsync()
@@ -210,20 +282,59 @@ public partial class SimulatorPage : IAsyncDisposable
             return;
         }
 
+        string? written = await WriteAsync(ScenarioJson.Serialize(_scenario!), Session.FileName ?? DefaultFileName, name => L["File_Saved", name]);
+        if (written is not null)
+        {
+            Session.FileName = written;
+            Session.IsDirty = false;
+        }
+    }
+
+    /// <summary>Enregistre l'attaquant seul (boosts compris) ; le scénario courant n'est pas considéré comme enregistré.</summary>
+    private async Task SaveAttackerAsync()
+    {
+        if (CanSaveAttacker)
+        {
+            var attacker = Form.Attacker.ToAttackerUnit();
+            await WriteAsync(ScenarioJson.Serialize(attacker), SuggestedFileName(attacker.Name, L["File_DefaultAttacker"]),
+                name => L["File_AttackerSaved", name]);
+        }
+    }
+
+    private async Task SaveDefenderAsync()
+    {
+        if (!Running)
+        {
+            var defender = Form.Defender.ToDefenderUnit();
+            await WriteAsync(ScenarioJson.Serialize(defender), SuggestedFileName(defender.Name, L["File_DefaultDefender"]),
+                name => L["File_DefenderSaved", name]);
+        }
+    }
+
+    /// <summary>Écrit un fichier et affiche <paramref name="savedMessage"/> (nom écrit) ; renvoie le nom écrit, ou null.</summary>
+    private async Task<string?> WriteAsync(string content, string suggestedFileName, Func<string, string> savedMessage)
+    {
         try
         {
-            string? written = await FileService.SaveAsync(_scenario!, Session.FileName ?? DefaultFileName);
+            string? written = await FileService.SaveAsync(content, suggestedFileName);
             if (written is not null)
             {
-                Session.FileName = written;
-                Session.IsDirty = false;
-                ShowMessage(L["File_Saved", written], Severity.Success);
+                ShowMessage(savedMessage(written), Severity.Success);
             }
+            return written;
         }
         catch (IOException ex)
         {
             ShowMessage(L["File_SaveError", ex.Message], Severity.Error);
+            return null;
         }
+    }
+
+    /// <summary>Nom proposé pour une partie : le nom de l'unité sans les caractères interdits, à défaut un nom générique.</summary>
+    private static string SuggestedFileName(string unitName, string fallback)
+    {
+        string name = string.Concat(unitName.Split(Path.GetInvalidFileNameChars())).Trim();
+        return (name.Length > 0 ? name : fallback) + ".json";
     }
 
     private async Task RunAsync()

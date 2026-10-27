@@ -114,7 +114,7 @@ public class ScenarioJsonTests
     {
         string json = $$"""{ "attacker": { "weapons": [{ "weapon": { "attacks": {{value}} } }] } }""";
 
-        var attacks = ScenarioJson.Deserialize(json).Attacker.Weapons[0].Weapon.Attacks;
+        var attacks = ScenarioJson.ReadFile(json).Attacker!.Weapons[0].Weapon.Attacks;
 
         Assert.Equal(new DiceExpression(count, sides, modifier), attacks);
     }
@@ -152,10 +152,10 @@ public class ScenarioJsonTests
             }
             """;
 
-        var scenario = ScenarioJson.Deserialize(json);
+        var attacker = ScenarioJson.ReadFile(json).Attacker!;
 
-        Assert.Equal(WeaponType.Melee, scenario.Attacker.Weapons[0].Weapon.Type);
-        Assert.Equal(RerollPolicy.Failed, scenario.Attacker.Boosts.HitReroll);
+        Assert.Equal(WeaponType.Melee, attacker.Weapons[0].Weapon.Type);
+        Assert.Equal(RerollPolicy.Failed, attacker.Boosts.HitReroll);
     }
 
     [Fact]
@@ -178,7 +178,7 @@ public class ScenarioJsonTests
     {
         const string json = """{ "Defender": { "NAME": "Cible", "Groups": [{ "Count": 3, "TOUGHNESS": 6 }] } }""";
 
-        var defender = ScenarioJson.Deserialize(json).Defender;
+        var defender = ScenarioJson.ReadFile(json).Defender!;
 
         Assert.Equal("Cible", defender.Name);
         Assert.Equal(3, defender.Groups[0].Count);
@@ -207,7 +207,7 @@ public class ScenarioJsonTests
             }
             """;
 
-        var defender = ScenarioJson.Deserialize(json).Defender;
+        var defender = ScenarioJson.ReadFile(json).Defender!;
 
         Assert.Equal("Cible", defender.Name);
         Assert.Equal(2, defender.Groups[0].Count);
@@ -264,6 +264,89 @@ public class ScenarioJsonTests
     public void Malformed_json_is_rejected(string json)
     {
         Assert.Throws<JsonException>(() => ScenarioJson.Deserialize(json));
+    }
+
+    // --- Fichiers partiels (attaquant seul, défenseur seul) ---
+
+    [Fact]
+    public void Attacker_file_contains_only_the_attacker_with_its_boosts()
+    {
+        var scenario = FullScenario();
+
+        string json = ScenarioJson.Serialize(scenario.Attacker);
+        var file = ScenarioJson.ReadFile(json);
+
+        Assert.Equal(["attacker"], Node(json).AsObject().Select(p => p.Key));
+        Assert.Equal(ScenarioFileKind.Attacker, file.Kind);
+        Assert.Equal(scenario.Attacker.Boosts, file.Attacker!.Boosts);
+        Assert.Equal(scenario.Attacker.Weapons, file.Attacker.Weapons);
+        Assert.Null(file.Defender);
+    }
+
+    [Fact]
+    public void Defender_file_contains_only_the_defender_with_its_boosts()
+    {
+        var scenario = FullScenario();
+
+        string json = ScenarioJson.Serialize(scenario.Defender);
+        var file = ScenarioJson.ReadFile(json);
+
+        Assert.Equal(["defender"], Node(json).AsObject().Select(p => p.Key));
+        Assert.Equal(ScenarioFileKind.Defender, file.Kind);
+        Assert.Equal(scenario.Defender.Boosts, file.Defender!.Boosts);
+        Assert.Equal(scenario.Defender.Groups, file.Defender.Groups);
+        Assert.Null(file.Attacker);
+    }
+
+    [Fact]
+    public void A_full_scenario_file_gives_both_parts_and_its_situation()
+    {
+        var file = ScenarioJson.ReadFile(ScenarioJson.Serialize(FullScenario()));
+
+        Assert.Equal(ScenarioFileKind.Scenario, file.Kind);
+        Assert.Equal(FullScenario().Attacker.Name, file.Attacker!.Name);
+        Assert.Equal(FullScenario().Defender.Name, file.Defender!.Name);
+        Assert.Equal(FullScenario().Context, file.Context);
+    }
+
+    [Fact]
+    public void A_scenario_without_situation_gets_the_default_one()
+    {
+        var scenario = ScenarioJson.Deserialize("""{ "attacker": {}, "defender": {} }""");
+
+        Assert.Equal(new AttackContext(), scenario.Context);
+    }
+
+    [Theory]
+    [InlineData("""{ "attacker": {} }""", "qu'un attaquant")]
+    [InlineData("""{ "defender": {} }""", "qu'un défenseur")]
+    public void A_partial_file_is_not_a_scenario(string json, string expected)
+    {
+        var error = Assert.Throws<JsonException>(() => ScenarioJson.Deserialize(json));
+
+        Assert.Contains(expected, error.Message);
+    }
+
+    [Theory]
+    [InlineData("{}", "ni attaquant ni défenseur")]
+    [InlineData("""{ "attacker": null, "defender": null }""", "ni attaquant ni défenseur")]
+    [InlineData("""{ "context": { "halfRange": true } }""", "ni attaquant ni défenseur")]
+    [InlineData("""{ "attacker": {}, "context": {} }""", "situation")]
+    [InlineData("""{ "defender": {}, "context": {} }""", "situation")]
+    public void A_file_without_a_usable_part_is_rejected(string json, string expected)
+    {
+        var error = Assert.Throws<JsonException>(() => ScenarioJson.ReadFile(json));
+
+        Assert.Contains(expected, error.Message);
+    }
+
+    [Fact]
+    public void The_example_scenario_is_still_a_full_scenario()
+    {
+        // Seul le fichier versionné : scenarios/ contient aussi les fichiers personnels de l'utilisateur, partiels compris
+        string path = Path.Combine(Build.RepositoryRoot(), "scenarios", "exemple-escouade-vs-leader.json");
+
+        Assert.Equal(ScenarioFileKind.Scenario, ScenarioJson.ReadFile(File.ReadAllText(path)).Kind);
     }
 
     [Fact]

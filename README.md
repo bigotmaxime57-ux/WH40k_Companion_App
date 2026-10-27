@@ -136,3 +136,10 @@ Le fichier suit l'interface :
 - `"context"` : la situation seulement (`halfRange`, `remainedStationary`, `charged`, `precisionTarget`).
 
 Un boost absent vaut 0 (ou `"None"` pour une relance, `false` pour le couvert).
+
+Un scénario complet contient `"attacker"` et `"defender"` (`"context"` facultatif). Un fichier peut aussi ne contenir
+qu'une partie, pour la réutiliser dans d'autres scénarios : `{ "attacker": { … } }` (fichier attaquant) ou
+`{ "defender": { … } }` (fichier défenseur), boosts compris. Dans le Quick sim, les boutons des cartes Attaquant et
+Défenseur ouvrent et enregistrent une partie ; l'attaquant ou le défenseur d'un scénario complet peut aussi être repris.
+Sont refusés : un fichier sans attaquant ni défenseur, une situation (`"context"`) hors d'un scénario complet. La
+console n'accepte que les scénarios complets.

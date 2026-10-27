@@ -37,4 +37,14 @@ internal static class Build
     {
         Groups = [new ModelGroup { Name = "Horde", Count = models, Toughness = toughness, Wounds = 1, Save = save }],
     };
+
+    public static string RepositoryRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Wh40kSim.sln")))
+        {
+            directory = directory.Parent;
+        }
+        return directory?.FullName ?? throw new DirectoryNotFoundException("Racine de la solution introuvable.");
+    }
 }

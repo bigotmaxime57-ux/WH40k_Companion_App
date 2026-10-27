@@ -1,15 +1,14 @@
 using System.Text;
 using CommunityToolkit.Maui.Storage;
-using Wh40kSim.Core.Model;
-using Wh40kSim.Core.Serialization;
 using Wh40kSim.UI.Services;
 
 namespace Wh40kSim.Desktop;
 
 /// <summary>
-/// Ouverture et enregistrement des scénarios avec les boîtes de dialogue de Windows : <see cref="IFilePicker"/> (MAUI)
-/// pour ouvrir, qui ne permet pas de choisir le dossier de départ, et <see cref="IFileSaver"/> (CommunityToolkit.Maui)
-/// pour enregistrer, qui part du dernier dossier utilisé, à défaut du dossier scenarios/ du dépôt s'il est trouvé.
+/// Ouverture et enregistrement des fichiers JSON (scénarios, attaquants, défenseurs) avec les boîtes de dialogue de
+/// Windows : <see cref="IFilePicker"/> (MAUI) pour ouvrir, qui ne permet pas de choisir le dossier de départ, et
+/// <see cref="IFileSaver"/> (CommunityToolkit.Maui) pour enregistrer, qui part du dernier dossier utilisé, à défaut du
+/// dossier scenarios/ du dépôt s'il est trouvé. Le contenu est lu et écrit tel quel : l'interface l'interprète.
 /// </summary>
 public sealed class DesktopScenarioFileService(IFilePicker filePicker, IFileSaver fileSaver) : IScenarioFileService
 {
@@ -20,7 +19,7 @@ public sealed class DesktopScenarioFileService(IFilePicker filePicker, IFileSave
 
     private string? _lastDirectory = FindScenariosDirectory();
 
-    public async Task<OpenedScenario?> OpenAsync(CancellationToken cancellationToken = default)
+    public async Task<OpenedFile?> OpenAsync(CancellationToken cancellationToken = default)
     {
         var file = await filePicker.PickAsync(new PickOptions { FileTypes = JsonFiles });
         if (file is null)
@@ -28,27 +27,25 @@ public sealed class DesktopScenarioFileService(IFilePicker filePicker, IFileSave
             return null;
         }
 
-        string json;
+        string content;
         try
         {
             await using var stream = await file.OpenReadAsync();
             using var reader = new StreamReader(stream, Encoding.UTF8);
-            json = await reader.ReadToEndAsync(cancellationToken);
+            content = await reader.ReadToEndAsync(cancellationToken);
         }
         catch (UnauthorizedAccessException ex)
         {
             throw new IOException(ex.Message, ex);
         }
 
-        // Une JsonException (fichier invalide, ancien format) remonte telle quelle : la page l'affiche
-        var scenario = ScenarioJson.Deserialize(json);
         _lastDirectory = Path.GetDirectoryName(file.FullPath);
-        return new OpenedScenario(file.FileName, scenario);
+        return new OpenedFile(file.FileName, content);
     }
 
-    public async Task<string?> SaveAsync(Scenario scenario, string suggestedFileName, CancellationToken cancellationToken = default)
+    public async Task<string?> SaveAsync(string content, string suggestedFileName, CancellationToken cancellationToken = default)
     {
-        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(ScenarioJson.Serialize(scenario)));
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes(content));
         var result = await fileSaver.SaveAsync(_lastDirectory ?? "", suggestedFileName, stream, cancellationToken);
 
         if (result.IsCancelled)

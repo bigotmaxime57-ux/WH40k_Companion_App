@@ -5,15 +5,50 @@ using Wh40kSim.Core.Model;
 
 namespace Wh40kSim.Core.Serialization;
 
-/// <summary>Lecture / écriture des scénarios au format JSON (réutilisable plus tard par l'API et l'UI).</summary>
+/// <summary>
+/// Lecture / écriture au format JSON : scénarios complets, et fichiers partiels (attaquant seul, défenseur seul, voir
+/// <see cref="ScenarioFile"/>). Lecture stricte : propriété inconnue, section manquante ou mal placée refusées.
+/// </summary>
 public static class ScenarioJson
 {
     public static JsonSerializerOptions Options { get; } = CreateOptions();
 
-    public static Scenario Deserialize(string json) =>
-        JsonSerializer.Deserialize<Scenario>(json, Options) ?? throw new JsonException("Le fichier de scénario est vide.");
+    /// <summary>Lit un fichier qui peut ne contenir qu'une partie (attaquant seul, défenseur seul) ou un scénario complet.</summary>
+    /// <exception cref="JsonException">JSON invalide, sans attaquant ni défenseur, ou situation sans scénario complet.</exception>
+    public static ScenarioFile ReadFile(string json)
+    {
+        var file = JsonSerializer.Deserialize<ScenarioFile>(json, Options) ?? throw new JsonException("Le fichier de scénario est vide.");
+        if (file.Attacker is null && file.Defender is null)
+        {
+            throw new JsonException("Le fichier ne contient ni attaquant ni défenseur.");
+        }
+        if (file.Context is not null && file.Kind != ScenarioFileKind.Scenario)
+        {
+            throw new JsonException("La situation (context) n'a de sens que dans un scénario complet, avec un attaquant et un défenseur.");
+        }
+        return file;
+    }
+
+    /// <summary>Lit un scénario complet : attaquant et défenseur obligatoires, situation facultative.</summary>
+    /// <exception cref="JsonException">JSON invalide ou fichier partiel.</exception>
+    public static Scenario Deserialize(string json)
+    {
+        var file = ReadFile(json);
+        return file.Kind switch
+        {
+            ScenarioFileKind.Scenario => file.ToScenario(),
+            ScenarioFileKind.Attacker => throw new JsonException("Le fichier ne contient qu'un attaquant : un scénario complet demande aussi un défenseur."),
+            _ => throw new JsonException("Le fichier ne contient qu'un défenseur : un scénario complet demande aussi un attaquant."),
+        };
+    }
 
     public static string Serialize(Scenario scenario) => JsonSerializer.Serialize(scenario, Options);
+
+    /// <summary>Fichier attaquant : <c>{ "attacker": … }</c>, boosts compris.</summary>
+    public static string Serialize(AttackerUnit attacker) => JsonSerializer.Serialize(new ScenarioFile { Attacker = attacker }, Options);
+
+    /// <summary>Fichier défenseur : <c>{ "defender": … }</c>, boosts compris.</summary>
+    public static string Serialize(DefenderUnit defender) => JsonSerializer.Serialize(new ScenarioFile { Defender = defender }, Options);
 
     public static Scenario Load(string path) => Deserialize(File.ReadAllText(path));
 

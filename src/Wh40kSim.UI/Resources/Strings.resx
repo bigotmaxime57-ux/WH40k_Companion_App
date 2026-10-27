@@ -28,6 +28,12 @@
   <data name="Attacker_Name" xml:space="preserve">
     <value>Nom de l'attaquant</value>
   </data>
+  <data name="Attacker_OpenHelp" xml:space="preserve">
+    <value>Ouvrir un attaquant : celui d'un fichier attaquant ou d'un scénario complet remplace l'attaquant actuel</value>
+  </data>
+  <data name="Attacker_SaveHelp" xml:space="preserve">
+    <value>Enregistrer l'attaquant seul (boosts compris), pour le réutiliser dans d'autres scénarios</value>
+  </data>
   <data name="Attacker_Title" xml:space="preserve">
     <value>Attaquant</value>
   </data>
@@ -124,8 +130,14 @@
   <data name="Defender_Name" xml:space="preserve">
     <value>Nom du défenseur</value>
   </data>
+  <data name="Defender_OpenHelp" xml:space="preserve">
+    <value>Ouvrir un défenseur : celui d'un fichier défenseur ou d'un scénario complet remplace le défenseur actuel</value>
+  </data>
   <data name="Defender_RemoveGroup" xml:space="preserve">
     <value>Supprimer le groupe</value>
+  </data>
+  <data name="Defender_SaveHelp" xml:space="preserve">
+    <value>Enregistrer le défenseur seul (boosts compris), pour le réutiliser dans d'autres scénarios</value>
   </data>
   <data name="Defender_Title" xml:space="preserve">
     <value>Défenseur</value>
@@ -142,14 +154,38 @@
   <data name="Errors_Title" xml:space="preserve">
     <value>Le scénario ne peut pas être simulé :</value>
   </data>
+  <data name="File_AttackerLoaded" xml:space="preserve">
+    <value>Attaquant chargé depuis {0}.</value>
+  </data>
+  <data name="File_AttackerSaved" xml:space="preserve">
+    <value>Attaquant enregistré : {0}</value>
+  </data>
+  <data name="File_DefaultAttacker" xml:space="preserve">
+    <value>attaquant</value>
+  </data>
+  <data name="File_DefaultDefender" xml:space="preserve">
+    <value>defenseur</value>
+  </data>
+  <data name="File_DefenderLoaded" xml:space="preserve">
+    <value>Défenseur chargé depuis {0}.</value>
+  </data>
+  <data name="File_DefenderSaved" xml:space="preserve">
+    <value>Défenseur enregistré : {0}</value>
+  </data>
+  <data name="File_NoAttacker" xml:space="preserve">
+    <value>{0} ne contient pas d'attaquant (fichier défenseur seul).</value>
+  </data>
+  <data name="File_NoDefender" xml:space="preserve">
+    <value>{0} ne contient pas de défenseur (fichier attaquant seul).</value>
+  </data>
   <data name="File_OpenError" xml:space="preserve">
-    <value>Impossible d'ouvrir le scénario : {0}</value>
+    <value>Impossible d'ouvrir le fichier : {0}</value>
   </data>
   <data name="File_Saved" xml:space="preserve">
     <value>Scénario enregistré : {0}</value>
   </data>
   <data name="File_SaveError" xml:space="preserve">
-    <value>Impossible d'enregistrer le scénario : {0}</value>
+    <value>Impossible d'enregistrer le fichier : {0}</value>
   </data>
   <data name="Group_Count" xml:space="preserve">
     <value>Figurines</value>
@@ -467,7 +503,7 @@
     <value>Ouvrir</value>
   </data>
   <data name="Toolbar_OpenHelp" xml:space="preserve">
-    <value>Ouvrir un scénario (Ctrl+O)</value>
+    <value>Ouvrir un scénario, ou un attaquant / défenseur seul qui remplace cette partie (Ctrl+O)</value>
   </data>
   <data name="Toolbar_Save" xml:space="preserve">
     <value>Enregistrer</value>

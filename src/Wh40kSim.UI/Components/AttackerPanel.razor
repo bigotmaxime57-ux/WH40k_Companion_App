@@ -1,7 +1,16 @@
-@* Attaquant : nom, boosts (pour toutes ses armes) et profils d'armes, résolus dans l'ordre de la liste. *@
+@*
+    Attaquant : nom, boosts (pour toutes ses armes) et profils d'armes, résolus dans l'ordre de la liste. Boutons
+    Ouvrir / Enregistrer de l'attaquant seul dans l'en-tête, si la page les fournit.
+*@
 
 <MudPaper Elevation="3" Class="pa-4 wh-section wh-attacker" data-test="attacker-panel">
-    <SectionHeader Icon="@Icons.Material.Filled.GpsFixed" Title="@L["Attacker_Title"]" />
+    <SectionHeader Icon="@Icons.Material.Filled.GpsFixed" Title="@L["Attacker_Title"]">
+        @if (OnOpen.HasDelegate)
+        {
+            <PartFileActions OpenHelp="@L["Attacker_OpenHelp"]" SaveHelp="@L["Attacker_SaveHelp"]" Disabled="FileActionsDisabled"
+                             SaveDisabled="SaveDisabled" OnOpen="OnOpen" OnSave="OnSave" Part="attacker" />
+        }
+    </SectionHeader>
     <MudTextField T="string" Label="@L["Attacker_Name"]" @bind-Value="Attacker.Name" @bind-Value:after="NotifyChanged" />
 
     <AttackerBoostsEditor Boosts="Attacker.Boosts" Changed="NotifyChanged" />
@@ -33,6 +42,22 @@
     /// <summary>Demande l'ouverture du sélecteur de mots-clés pour une arme.</summary>
     [Parameter]
     public EventCallback<WeaponForm> EditKeywords { get; set; }
+
+    /// <summary>Ouvre un attaquant depuis un fichier (bouton affiché seulement si fourni).</summary>
+    [Parameter]
+    public EventCallback OnOpen { get; set; }
+
+    /// <summary>Enregistre l'attaquant seul.</summary>
+    [Parameter]
+    public EventCallback OnSave { get; set; }
+
+    /// <summary>Ouvrir et enregistrer indisponibles (simulation en cours).</summary>
+    [Parameter]
+    public bool FileActionsDisabled { get; set; }
+
+    /// <summary>Enregistrer seul indisponible (saisie de dés illisible).</summary>
+    [Parameter]
+    public bool SaveDisabled { get; set; }
 
     private Task NotifyChanged() => Changed.InvokeAsync();
 

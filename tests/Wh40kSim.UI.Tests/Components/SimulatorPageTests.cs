@@ -1,5 +1,6 @@
 using Bunit;
 using Wh40kSim.Core.Model;
+using Wh40kSim.Core.Serialization;
 using Wh40kSim.UI.Components;
 using Wh40kSim.UI.Services;
 
@@ -109,7 +110,7 @@ public class SimulatorPageTests : ComponentTestContext
     [Fact]
     public void Opening_a_file_replaces_the_form()
     {
-        Files.ToOpen = new OpenedScenario("ouvert.json", Opened());
+        Files.ToOpen = FakeScenarioFileService.File("ouvert.json", Opened());
         var page = Render<SimulatorPage>();
 
         page.Find("[data-test=open]").Click();
@@ -133,28 +134,41 @@ public class SimulatorPageTests : ComponentTestContext
     [Fact]
     public void Invalid_file_shows_an_error()
     {
-        Files.OpenError = FakeScenarioFileService.InvalidJson();
+        Files.ToOpen = new OpenedFile("ancien.json", """{ "defender": { "toughness": 5 } }""");
         var page = Render<SimulatorPage>();
+        var form = page.Instance.Form;
 
         page.Find("[data-test=open]").Click();
 
         string message = page.Find("[data-test=message]").TextContent;
-        Assert.Contains("Impossible d'ouvrir le scénario", message);
+        Assert.Contains("Impossible d'ouvrir le fichier", message);
         Assert.Contains("toughness", message);
+        Assert.Same(form, page.Instance.Form);
+    }
+
+    [Fact]
+    public void Unreadable_file_shows_an_error()
+    {
+        Files.OpenError = new IOException("Accès refusé.");
+        var page = Render<SimulatorPage>();
+
+        page.Find("[data-test=open]").Click();
+
+        Assert.Contains("Accès refusé.", page.Find("[data-test=message]").TextContent);
     }
 
     [Fact]
     public void Saving_writes_the_current_scenario_under_the_opened_name()
     {
-        Files.ToOpen = new OpenedScenario("ouvert.json", Opened());
+        Files.ToOpen = FakeScenarioFileService.File("ouvert.json", Opened());
         var page = Render<SimulatorPage>();
         page.Find("[data-test=open]").Click();
 
         page.Find("[data-test=save]").Click();
 
-        var (scenario, fileName) = Assert.Single(Files.Saved);
+        var (content, fileName) = Assert.Single(Files.Saved);
         Assert.Equal("ouvert.json", fileName);
-        Assert.Equal("Escouade ouverte", scenario.Attacker.Name);
+        Assert.Equal("Escouade ouverte", ScenarioJson.Deserialize(content).Attacker.Name);
         Assert.Contains("Scénario enregistré", page.Find("[data-test=message]").TextContent);
     }
 
@@ -171,7 +185,7 @@ public class SimulatorPageTests : ComponentTestContext
     [Fact]
     public void New_resets_the_form_and_the_results()
     {
-        Files.ToOpen = new OpenedScenario("ouvert.json", Opened());
+        Files.ToOpen = FakeScenarioFileService.File("ouvert.json", Opened());
         var page = Render<SimulatorPage>();
         page.Find("[data-test=open]").Click();
         page.Find("[data-test=run]").Click();
@@ -219,7 +233,7 @@ public class SimulatorPageTests : ComponentTestContext
     [Fact]
     public void Shortcuts_run_save_and_open()
     {
-        Files.ToOpen = new OpenedScenario("ouvert.json", Opened());
+        Files.ToOpen = FakeScenarioFileService.File("ouvert.json", Opened());
         var page = Render<SimulatorPage>();
 
         page.InvokeAsync(() => page.Instance.OnShortcut("enter"));

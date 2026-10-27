@@ -79,6 +79,33 @@ public class NavigationTests() : ComponentTestContext(renderPopoverProvider: fal
     }
 
     [Fact]
+    public void A_tile_shows_a_loading_bar_then_opens_its_screen()
+    {
+        var shell = Render<AppShell>();
+        Assert.Empty(shell.FindAll("[data-test=screen-loading]"));
+
+        shell.Find("[data-test=tile-quick-sim]").Click();
+
+        // La barre est dessinée avant la construction de l'écran, puis retirée une fois l'écran affiché
+        Assert.NotEmpty(shell.FindAll("[data-test=screen-loading]"));
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<SimulatorPage>()));
+        shell.WaitForAssertion(() => Assert.Empty(shell.FindAll("[data-test=screen-loading]")));
+        Assert.EndsWith("/" + AppRoutes.QuickSim, Navigation.Uri);
+    }
+
+    [Fact]
+    public void Going_home_needs_no_loading_bar()
+    {
+        var shell = OpenQuickSim();
+        shell.WaitForAssertion(() => Assert.Empty(shell.FindAll("[data-test=screen-loading]")));
+
+        shell.Find("[data-test=home]").Click();
+
+        Assert.Empty(shell.FindAll("[data-test=screen-loading]"));
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<HomePage>()));
+    }
+
+    [Fact]
     public void Home_button_is_disabled_while_a_simulation_runs()
     {
         Simulations.Gate = new TaskCompletionSource();

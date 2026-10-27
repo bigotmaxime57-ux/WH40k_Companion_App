@@ -437,7 +437,10 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
   panneau ; dans un panneau en demi-largeur, n'utiliser que `xs` / `sm`.
 - **Hôte desktop (Wh40kSim.Desktop)** : réduit au minimum. Toute l'interface est `AppShell` (Wh40kSim.UI) :
   fournisseurs MudBlazor, barre de titre (retour à l'accueil, nom de l'écran, menu des thèmes), puis le routeur Blazor
-  vers les écrans (`HomePage` `/`, `SimulatorPage` `/quick-sim` ; adresses dans `AppRoutes`) ; réutilisable tel quel par
+  vers les écrans (`HomePage` `/`, `SimulatorPage` `/quick-sim` ; adresses dans `AppRoutes`). Ouverture d'un écran
+  depuis l'accueil par `ScreenNavigator` : barre de chargement dessinée avant la construction de l'écran (première
+  construction lente : compilation à la volée), retirée ensuite. Pas de `RegisterLocationChangingHandler` asynchrone :
+  bUnit ne termine pas la navigation dans ce cas. Réutilisable tel quel par
   l'hôte web (phase 7). L'hôte fournit `MauiProgram` (services), la fenêtre (`App` : titre lu dans `Strings.resx`,
   1400 × 900 centrée, minimum 900 × 600, thème au démarrage), `DesktopScenarioFileService`,
   `DesktopPreferenceService` et `wwwroot/index.html` (CSS / JS de MudBlazor). Pas de `Package.appxmanifest`
@@ -511,6 +514,9 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
   107 UI ; UI stables sur 8 exécutions). Skill `/valider-etape` ajouté dans la même branche.
 - Phase 3, étape 3 (JSON partiels) : fusionnée dans `main`. 325 tests verts (166 Core, 41 Simulation, 118 UI ;
   UI stables sur 6 exécutions).
+- Barre de chargement à l'ouverture d'un écran (gel au premier clic sur Quick sim, signalé par l'utilisateur) :
+  branche `phase3/barre-chargement-ecrans`, en attente de validation. 327 tests verts (166 Core, 41 Simulation,
+  120 UI ; UI stables sur 6 exécutions).
 - Prochaine ensuite : phase 3, étape 4 (points, #2 version légère), à préciser et valider avant de coder.
 
 Points notés pour la suite :

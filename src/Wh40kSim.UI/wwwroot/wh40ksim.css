@@ -73,6 +73,37 @@
     margin: 0 .6rem;
 }
 
+/* Barre de chargement à l'ouverture d'un écran (AppShell) : même dessin que celle du démarrage de l'hôte desktop
+   (wwwroot/app.css de Wh40kSim.Desktop), centrée dans la fenêtre, aux couleurs du thème */
+.wh-screen-loading {
+    background: rgba(var(--mud-palette-primary-rgb), .2);
+    height: 4px;
+    left: 50%;
+    overflow: hidden;
+    position: fixed;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(320px, 60vw);
+    z-index: 1500;
+}
+
+.wh-screen-loading-bar {
+    animation: wh-screen-loading 1.2s ease-in-out infinite;
+    background: var(--wh-gradient, var(--mud-palette-primary));
+    height: 100%;
+    width: 40%;
+}
+
+@keyframes wh-screen-loading {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(250%);
+    }
+}
+
 /* Tuiles de l'accueil : la carte entière est un lien, qui se soulève au survol ou au focus clavier */
 .wh-home-tile {
     border-radius: var(--mud-default-borderradius);

@@ -3,13 +3,15 @@
     l'écran, menu des thèmes) et routeur vers les écrans (accueil, Quick sim). Thème au démarrage : celui fourni par
     l'hôte (InitialTheme), sinon le choix mémorisé (IPreferenceService), sinon celui qui correspond au mode clair / sombre
     du navigateur. Un thème choisi dans le menu est mémorisé. Pendant une simulation, le retour à l'accueil est bloqué.
-    Styles complémentaires : wwwroot/wh40ksim.css, chargé par l'hôte.
+    Barre de chargement quand un écran est ouvert par ScreenNavigator (tuiles de l'accueil) : la première construction
+    d'un écran peut prendre un moment. Styles complémentaires : wwwroot/wh40ksim.css, chargé par l'hôte.
 *@
 @using Microsoft.AspNetCore.Components.Routing
 @implements IDisposable
 @inject IPreferenceService Preferences
 @inject NavigationManager Navigation
 @inject ScenarioSession Session
+@inject ScreenNavigator Screens
 
 <MudThemeProvider @ref="_themeProvider" Theme="Wh40kTheme.For(_theme)" IsDarkMode="Wh40kTheme.IsDark(_theme)" />
 <MudPopoverProvider />
@@ -43,6 +45,10 @@
             }
         </MudMenu>
     </MudAppBar>
+    @if (Screens.IsLoading)
+    {
+        <div class="wh-screen-loading" data-test="screen-loading"><div class="wh-screen-loading-bar"></div></div>
+    }
     <MudMainContent>
         <Router AppAssembly="typeof(AppShell).Assembly">
             <Found Context="routeData">
@@ -91,18 +97,29 @@
     {
         _theme = InitialTheme ?? ThemeChoice.Parchment;
         Navigation.LocationChanged += OnLocationChanged;
-        Session.RunningChanged += OnRunningChanged;
+        Screens.LoadingChanged += OnStateChanged;
+        Session.RunningChanged += OnStateChanged;
     }
 
     public void Dispose()
     {
         Navigation.LocationChanged -= OnLocationChanged;
-        Session.RunningChanged -= OnRunningChanged;
+        Screens.LoadingChanged -= OnStateChanged;
+        Session.RunningChanged -= OnStateChanged;
     }
 
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) => InvokeAsync(StateHasChanged);
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) => InvokeAsync(async () =>
+    {
+        StateHasChanged();
+        if (Screens.IsLoading)
+        {
+            // Le routeur construit le nouvel écran pendant ce même événement : la barre est retirée juste après
+            await Task.Yield();
+            Screens.Loaded();
+        }
+    });
 
-    private void OnRunningChanged() => InvokeAsync(StateHasChanged);
+    private void OnStateChanged() => InvokeAsync(StateHasChanged);
 
     private void GoHome()
     {

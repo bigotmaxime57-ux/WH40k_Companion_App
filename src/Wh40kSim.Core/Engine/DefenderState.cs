@@ -59,6 +59,14 @@ public sealed class DefenderState
 
     public int KilledInGroup(int group) => _groups[group].Count - _alive[group];
 
+    /// <summary>
+    /// PV retirés au groupe : figurines tuées, plus ceux de la figurine en tête si elle est entamée (après une
+    /// figurine tuée, la suivante repart avec tous ses PV, d'où un terme nul). La somme sur les groupes vaut
+    /// <see cref="DamageDealt"/>.
+    /// </summary>
+    public int DamageInGroup(int group) =>
+        KilledInGroup(group) * _groups[group].Wounds + (_groups[group].Wounds - _frontWounds[group]);
+
     public int WoundsLeftOnFrontModel(int group) => _frontWounds[group];
 
     /// <summary>Profil d'un groupe, y compris le pseudo-groupe <see cref="ExcessGroup"/>.</summary>

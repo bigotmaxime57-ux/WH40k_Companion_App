@@ -28,6 +28,7 @@ public class ScenarioFormTests
         Attacker = new AttackerUnit
         {
             Name = "Escouade",
+            Points = 120,
             Boosts = new AttackerBoosts
             {
                 Skill = 1,
@@ -74,8 +75,8 @@ public class ScenarioFormTests
             Boosts = new DefenderBoosts { InCover = true, Skill = -1, HitRoll = -1, WoundRoll = 1, Ap = -1, Damage = -1 },
             Groups =
             [
-                new ModelGroup { Name = "Gardes", Count = 5, Toughness = 4, Wounds = 2, Save = 3 },
-                new ModelGroup { Name = "Leader", IsCharacter = true, Toughness = 5, Wounds = 5, Save = 2, InvulnerableSave = 4, FeelNoPain = 5, DamageReduction = 1 },
+                new ModelGroup { Name = "Gardes", Count = 5, Toughness = 4, Wounds = 2, Save = 3, Points = 90 },
+                new ModelGroup { Name = "Leader", IsCharacter = true, Toughness = 5, Wounds = 5, Save = 2, InvulnerableSave = 4, FeelNoPain = 5, DamageReduction = 1, Points = 65 },
             ],
         },
         Context = new AttackContext

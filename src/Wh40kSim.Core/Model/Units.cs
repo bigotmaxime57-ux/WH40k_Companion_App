@@ -7,6 +7,10 @@ public sealed record AttackerUnit
 {
     public string Name { get; init; } = "Attaquant";
 
+    /// <summary>Coût de l'unité en points (null = non renseigné) : sert au rendement (points détruits / points).</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Points { get; init; }
+
     /// <summary>Boosts appliqués à toutes les armes de l'unité.</summary>
     public AttackerBoosts Boosts { get; init; } = new();
 
@@ -57,6 +61,13 @@ public sealed record ModelGroup
     /// <summary>Réduction des dégâts de chaque attaque (minimum 1 dégât).</summary>
     public int DamageReduction { get; init; }
 
+    /// <summary>
+    /// Coût du groupe en points, toutes figurines comprises (null = non renseigné). Un leader a son propre coût, d'où
+    /// des points par groupe. Les points détruits se comptent au prorata des PV retirés.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Points { get; init; }
+
     public string Describe()
     {
         string save = Save >= 7 ? "aucune svg" : $"Sv {Save}+";
@@ -87,6 +98,12 @@ public sealed record DefenderUnit
 
     [JsonIgnore]
     public int TotalWounds => Groups.Sum(g => g.Count * g.Wounds);
+
+    /// <summary>
+    /// Coût total de l'unité, seulement si chaque groupe a ses points (sinon null : un total partiel serait trompeur).
+    /// </summary>
+    [JsonIgnore]
+    public int? TotalPoints => Groups.Count > 0 && Groups.All(g => g.Points is not null) ? Groups.Sum(g => g.Points!.Value) : null;
 
     /// <summary>
     /// Profil des figurines virtuelles qui encaissent l'excédent une fois l'unité détruite : le premier groupe

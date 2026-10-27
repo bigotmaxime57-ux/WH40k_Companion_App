@@ -10,6 +10,7 @@ namespace Wh40kSim.Simulation;
 public sealed class SimulationResult
 {
     private readonly long[] _killedPerGroup; // total des figurines tuées par groupe, toutes simulations confondues
+    private readonly long[] _damagePerGroup; // total des PV retirés par groupe, toutes simulations confondues
 
     internal SimulationResult(
         Scenario scenario,
@@ -18,6 +19,7 @@ public sealed class SimulationResult
         DiscreteDistribution kills,
         DiscreteDistribution damage,
         long[] killedPerGroup,
+        long[] damagePerGroup,
         DiscreteDistribution extendedKills,
         DiscreteDistribution extendedDamage)
     {
@@ -27,6 +29,7 @@ public sealed class SimulationResult
         Kills = kills;
         Damage = damage;
         _killedPerGroup = killedPerGroup;
+        _damagePerGroup = damagePerGroup;
         ExtendedKills = extendedKills;
         ExtendedDamage = extendedDamage;
     }
@@ -55,6 +58,40 @@ public sealed class SimulationResult
 
     /// <summary>Nombre moyen de figurines tuées dans le groupe <paramref name="group"/> (ordre d'allocation du défenseur).</summary>
     public double MeanKilledInGroup(int group) => (double)_killedPerGroup[group] / Iterations;
+
+    /// <summary>Nombre moyen de PV retirés au groupe <paramref name="group"/>, figurine entamée comprise.</summary>
+    public double MeanDamageInGroup(int group) => (double)_damagePerGroup[group] / Iterations;
+
+    /// <summary>
+    /// Points détruits en moyenne, au prorata des PV retirés à chaque groupe (une figurine entamée compte pour sa part :
+    /// la moitié des PV d'un char vaut la moitié de ses points). Null si un groupe n'a pas de points. La marge ne
+    /// rapporte rien : on ne détruit pas plus que la valeur de l'unité.
+    /// </summary>
+    public double? MeanPointsDestroyed
+    {
+        get
+        {
+            if (Scenario.Defender.TotalPoints is null)
+            {
+                return null;
+            }
+
+            double total = 0;
+            for (int g = 0; g < Scenario.Defender.Groups.Count; g++)
+            {
+                var group = Scenario.Defender.Groups[g];
+                total += group.Points!.Value * MeanDamageInGroup(g) / (group.Count * group.Wounds);
+            }
+            return total;
+        }
+    }
+
+    /// <summary>
+    /// Rendement : points détruits en moyenne par point de l'attaquant (0,5 = la moitié de sa propre valeur).
+    /// Null si les points de l'attaquant ou du défenseur manquent, ou si l'attaquant ne coûte rien.
+    /// </summary>
+    public double? Efficiency =>
+        MeanPointsDestroyed is double destroyed && Scenario.Attacker.Points is > 0 and var points ? destroyed / points : null;
 
     /// <summary>
     /// Figurines tuées en prolongeant la séquence après la destruction de l'unité, contre des figurines virtuelles

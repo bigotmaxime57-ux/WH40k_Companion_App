@@ -21,6 +21,7 @@ public sealed class ModelGroupForm
         InvulnerableSave = group.InvulnerableSave;
         FeelNoPain = group.FeelNoPain;
         DamageReduction = group.DamageReduction;
+        Points = group.Points;
     }
 
     public string Name { get; set; }
@@ -44,6 +45,9 @@ public sealed class ModelGroupForm
 
     public int DamageReduction { get; set; }
 
+    /// <summary>Coût du groupe en points (toutes figurines comprises), null = non renseigné.</summary>
+    public int? Points { get; set; }
+
     public ModelGroup ToModelGroup() => new()
     {
         Name = Name,
@@ -55,5 +59,6 @@ public sealed class ModelGroupForm
         InvulnerableSave = InvulnerableSave,
         FeelNoPain = FeelNoPain,
         DamageReduction = DamageReduction,
+        Points = Points,
     };
 }

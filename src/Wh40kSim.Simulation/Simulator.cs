@@ -114,6 +114,7 @@ public static class Simulator
         private readonly long[] _kills = new long[defender.TotalModels + 1];        // _kills[k] = simulations avec exactement k figurines tuées
         private readonly long[] _damage = new long[defender.TotalWounds + 1];       // _damage[d] = simulations avec exactement d PV retirés
         private readonly long[] _killedPerGroup = new long[defender.Groups.Count];  // figurines tuées par groupe, cumulées
+        private readonly long[] _damagePerGroup = new long[defender.Groups.Count];  // PV retirés par groupe, cumulés
 
         // Distributions prolongées (réel + excédent) : pas de maximum connu à l'avance, les tableaux s'agrandissent
         private long[] _extendedKills = new long[defender.TotalModels + 1];
@@ -126,6 +127,7 @@ public static class Simulator
             for (int g = 0; g < _killedPerGroup.Length; g++)
             {
                 _killedPerGroup[g] += state.KilledInGroup(g);
+                _damagePerGroup[g] += state.DamageInGroup(g);
             }
 
             Increment(ref _extendedKills, state.ModelsKilled + state.ExcessModelsKilled);
@@ -137,13 +139,14 @@ public static class Simulator
             for (int i = 0; i < _kills.Length; i++) _kills[i] += other._kills[i];
             for (int i = 0; i < _damage.Length; i++) _damage[i] += other._damage[i];
             for (int i = 0; i < _killedPerGroup.Length; i++) _killedPerGroup[i] += other._killedPerGroup[i];
+            for (int i = 0; i < _damagePerGroup.Length; i++) _damagePerGroup[i] += other._damagePerGroup[i];
             Add(ref _extendedKills, other._extendedKills);
             Add(ref _extendedDamage, other._extendedDamage);
         }
 
         public SimulationResult ToResult(Scenario scenario, int seed, TimeSpan elapsed) =>
             new(scenario, seed, elapsed,
-                new DiscreteDistribution(_kills), new DiscreteDistribution(_damage), _killedPerGroup,
+                new DiscreteDistribution(_kills), new DiscreteDistribution(_damage), _killedPerGroup, _damagePerGroup,
                 new DiscreteDistribution(TrimTrailingZeros(_extendedKills, _kills.Length)),
                 new DiscreteDistribution(TrimTrailingZeros(_extendedDamage, _damage.Length)));
 

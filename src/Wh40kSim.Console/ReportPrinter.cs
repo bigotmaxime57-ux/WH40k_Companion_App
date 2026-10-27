@@ -35,12 +35,17 @@ internal static class ReportPrinter
         Console.WriteLine($"Figurines tuées  : {Summarize(result.Kills)}");
         Console.WriteLine($"PV retirés       : {Summarize(result.Damage)}");
         Console.WriteLine($"Unité détruite   : {result.ProbabilityWipe:P1}");
+        if (result.MeanPointsDestroyed is double destroyed)
+        {
+            string efficiency = result.Efficiency is double e ? $", rendement {e:F2} ({scenario.Attacker.Points} pts engagés)" : "";
+            Console.WriteLine($"Points détruits  : {destroyed:F1} / {defender.TotalPoints} pts (au prorata des PV){efficiency}");
+        }
 
         Console.WriteLine("Pertes moyennes par groupe :");
         for (int g = 0; g < defender.Groups.Count; g++)
         {
             var group = defender.Groups[g];
-            Console.WriteLine($"  {group.Name} : {result.MeanKilledInGroup(g):F2} / {group.Count}");
+            Console.WriteLine($"  {group.Name} : {result.MeanKilledInGroup(g):F2} / {group.Count} fig., {result.MeanDamageInGroup(g):F2} / {group.Count * group.Wounds} PV");
         }
 
         PrintDistribution("Figurines tuées", result.Kills);

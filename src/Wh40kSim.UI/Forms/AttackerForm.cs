@@ -13,11 +13,15 @@ public sealed class AttackerForm
     public AttackerForm(AttackerUnit unit)
     {
         Name = unit.Name;
+        Points = unit.Points;
         Boosts = new AttackerBoostsForm(unit.Boosts);
         Weapons = unit.Weapons.Select(w => new WeaponForm(w)).ToList();
     }
 
     public string Name { get; set; }
+
+    /// <summary>Coût de l'unité en points, null = non renseigné.</summary>
+    public int? Points { get; set; }
 
     /// <summary>Boosts appliqués à toutes les armes de l'unité.</summary>
     public AttackerBoostsForm Boosts { get; set; }
@@ -28,6 +32,7 @@ public sealed class AttackerForm
     public AttackerUnit ToAttackerUnit() => new()
     {
         Name = Name,
+        Points = Points,
         Boosts = Boosts.ToAttackerBoosts(),
         Weapons = Weapons.Select(w => w.ToWeaponGroup()).ToList(),
     };

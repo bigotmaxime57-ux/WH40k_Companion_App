@@ -288,8 +288,10 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 - SDK .NET 10 ; IDE Rider ; historique suivi dans SourceTree. Desktop développé et testé sous Windows uniquement.
 - Charge de travail MAUI : `dotnet workload install maui-windows`, à faire sur chaque machine **et pour chaque
   installation de .NET** (les charges de travail ne sont pas partagées entre `C:\Program Files\dotnet`, qui demande un
-  terminal administrateur, et un .NET installé dans le dossier utilisateur, comme celui de Rider). Sans elle, le build
-  de la solution échoue (projet Wh40kSim.Desktop).
+  terminal administrateur, et un .NET installé dans le dossier utilisateur). Rider affiche le SDK qu'il utilise en tête
+  du build (« Use build tool: … »). Sans la charge de travail, le build de la solution échoue (projet Wh40kSim.Desktop).
+  Après l'avoir installée, relancer `dotnet restore` : sinon l'erreur NETSDK1047 (« project.assets.json n'a aucune
+  cible pour …/win-x64 ») persiste, la restauration précédente ne connaissant pas la cible Windows.
 - Si .NET est installé dans le dossier utilisateur plutôt que dans `C:\Program Files\dotnet`, lancer un `.exe`
   directement échoue (0x80008083, runtime introuvable) sans la variable `DOTNET_ROOT` ; `dotnet run` et Rider fonctionnent.
 - Si les chemins longs Windows sont désactivés (`LongPathsEnabled = 0`), le build MAUI échoue au-delà de 260
@@ -328,6 +330,6 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 - **Prochaine : phase 2b (API + client web)**, à détailler avant de commencer.
 
 Points notés pour la suite :
-- Charge de travail MAUI : installée dans le .NET du dossier utilisateur de la deuxième machine seulement ; à
-  installer aussi dans `C:\Program Files\dotnet` (terminal administrateur) et sur l'autre machine.
+- Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis
+  `dotnet restore`).
 - Ouvrir un scénario quand le formulaire a été modifié remplace la saisie sans confirmation (pas demandé en 2a).

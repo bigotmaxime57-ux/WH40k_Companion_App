@@ -199,9 +199,13 @@
     background-color: var(--mud-palette-primary-darken) !important;
 }
 
-/* Groupe PERSONNAGE : filet et étiquette dans une teinte plus foncée du camp, pour le distinguer des gardes du corps */
+/*
+   Groupe PERSONNAGE : filet plus large et étiquette dans une teinte plus foncée du camp, pour le distinguer des gardes
+   du corps (la teinte seule ressort mal sur fond sombre)
+*/
 .wh-subcard-character {
     border-left-color: var(--wh-character) !important;
+    border-left-width: 6px !important;
 }
 
 .wh-character-chip {

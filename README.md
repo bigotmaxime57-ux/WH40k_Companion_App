@@ -69,10 +69,10 @@ L'application n'est pas empaquetée (pas de Microsoft Store) : le `.exe` est dan
 Deux sortes de bonus et malus, à ne pas confondre :
 - **modificateurs aux jets** (touche, blessure) : ajoutés au résultat du dé, cumulés entre attaquant et défenseur,
   **plafonnés à ±1**, appliqués après les relances ;
-- **modifications de caractéristiques** (CT/CC, A, F, PA, D côté attaquant ; CT/CC des attaquants et PA des attaques
-  reçues côté défenseur ; couvert) : changent le profil avant les jets, **sans plafond**, chaque caractéristique gardant
-  ses bornes (CT/CC entre 2+ et 6+, F, A et D au moins 1, PA jamais au-dessus de 0). Convention : +1 = mieux pour
-  l'attaquant.
+- **modifications de caractéristiques** (CT/CC, A, F, PA, D de toutes les armes, dans la situation ; couvert) :
+  changent le profil avant les jets, **sans plafond**, chaque caractéristique gardant ses bornes (CT/CC entre 2+ et 6+,
+  F, A et D au moins 1, PA jamais au-dessus de 0). Convention : +1 = mieux pour l'attaquant ; une aptitude du
+  défenseur qui dégrade une caractéristique des attaquants se saisit dans la situation, en négatif.
 
 0. **Pools** : les armes aux attaques identiques (même type, CT/CC, F, PA, D et règles, hors nom, A, Blast et Rapid Fire)
    forment un seul pool, comme bolters + pistolets bolter dans l'exemple des règles. Les pools sont résolus dans l'ordre de saisie.

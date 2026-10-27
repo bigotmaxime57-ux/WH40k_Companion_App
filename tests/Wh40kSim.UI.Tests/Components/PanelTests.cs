@@ -107,12 +107,11 @@ public class AttackerPanelTests : ComponentTestContext
 
         panel.Find("[data-test=add-weapon]").Click();
         panel.Find("[data-test=add-weapon]").Click();
-        // Les boutons sont dans des infobulles MudBlazor qui finissent leur rendu de façon asynchrone : on attend que
-        // les deux cartes soient stables avant de cliquer (sinon, rarement, le clic visait un bouton déjà remplacé)
-        panel.WaitForAssertion(() => Assert.Equal(2, panel.FindAll("[data-test=remove-weapon]").Count));
-        panel.FindAll("[data-test=remove-weapon]")[0].Click();
+        Assert.Equal(2, form.Weapons.Count);
+        // Bouton dans une infobulle MudBlazor : voir ClickUntil
+        panel.ClickUntil("[data-test=remove-weapon]", () => form.Weapons.Count == 1);
 
-        panel.WaitForAssertion(() => Assert.Single(form.Weapons));
+        Assert.Single(form.Weapons);
     }
 }
 
@@ -159,7 +158,9 @@ public class ContextPanelTests : ComponentTestContext
 
         Assert.Equal(2, context.SkillModifier);
         Assert.Equal(0, context.HitModifier);
-        Assert.Contains("Caractéristique, sans plafond", panel.Markup);
+        // Les explications sont derrière les bulles « ? », plus sous les champs
+        Assert.True(panel.FindAll("[data-test=help]").Count >= 3);
+        Assert.Empty(panel.FindAll(".mud-input-helper-text"));
     }
 
     [Fact]

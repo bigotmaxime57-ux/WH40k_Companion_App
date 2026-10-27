@@ -1,13 +1,23 @@
 @* Bloc encadré à l'intérieur d'une section (même style que les cartes d'arme et de groupe), avec un petit titre. *@
 
 <MudPaper Outlined="true" Class="pa-3 my-3 wh-subcard" @attributes="Attributes">
-    <MudText Typo="Typo.subtitle2" Class="mb-1">@Title</MudText>
+    <div class="wh-subsection-title mb-1">
+        <MudText Typo="Typo.subtitle2">@Title</MudText>
+        @if (Help is not null)
+        {
+            <HelpBubble Lines="Help" />
+        }
+    </div>
     @ChildContent
 </MudPaper>
 
 @code {
     [Parameter, EditorRequired]
     public string Title { get; set; } = "";
+
+    /// <summary>Explications du bloc, derrière une bulle « ? » à côté du titre.</summary>
+    [Parameter]
+    public IReadOnlyList<string>? Help { get; set; }
 
     [Parameter]
     public RenderFragment? ChildContent { get; set; }

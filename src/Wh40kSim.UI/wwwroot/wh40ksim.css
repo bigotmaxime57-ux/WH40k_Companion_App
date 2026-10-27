@@ -66,6 +66,37 @@
     order: 2;
 }
 
+/* Bulle d'aide « ? » à côté d'un titre (explications au survol) */
+.wh-help-icon {
+    color: var(--mud-palette-text-secondary);
+    cursor: help;
+    opacity: .7;
+}
+
+.wh-help-icon:hover {
+    color: var(--mud-palette-primary);
+    opacity: 1;
+}
+
+.wh-help-content {
+    line-height: 1.45;
+    max-width: 26rem;
+}
+
+.wh-help-content p {
+    margin: 0 0 .35rem 0;
+}
+
+.wh-help-content p:last-child {
+    margin-bottom: 0;
+}
+
+.wh-subsection-title {
+    align-items: center;
+    display: flex;
+    gap: .4rem;
+}
+
 /* Colonne de droite (simulation, résultats) : reste visible sous la barre de titre, avec son propre défilement */
 @media (min-width: 1280px) {
     .wh-sticky-column {

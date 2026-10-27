@@ -25,7 +25,8 @@ public enum RerollPolicy
 /// <see cref="StrengthModifier"/>, <see cref="ApModifier"/>, <see cref="DamageModifier"/>) : changent le profil de
 /// toutes les armes avant les jets, sans plafond, dans les bornes de chaque caractéristique.</item>
 /// </list>
-/// Convention : +1 = mieux pour l'attaquant (CT 3+ → 2+, PA-1 → PA-2).
+/// Convention : +1 = mieux pour l'attaquant (CT 3+ → 2+, PA-1 → PA-2). Une aptitude du défenseur qui dégrade une
+/// caractéristique des attaquants (« PA dégradée de 1 ») s'exprime ici, en négatif : le résultat est le même.
 /// </summary>
 public sealed record AttackContext
 {
@@ -41,7 +42,7 @@ public sealed record AttackContext
     /// <summary>Modificateur aux jets de blessure de l'attaquant (cumulé avec celui du défenseur, plafonné à ±1).</summary>
     public int WoundModifier { get; init; }
 
-    /// <summary>Amélioration de la CT / CC (+1 : 3+ devient 2+), cumulée avec celle du défenseur et le couvert ; résultat borné entre 2+ et 6+.</summary>
+    /// <summary>Amélioration de la CT / CC (+1 : 3+ devient 2+), cumulée avec le couvert ; résultat borné entre 2+ et 6+.</summary>
     public int SkillModifier { get; init; }
 
     /// <summary>Attaques en plus par figurine (A au moins 1).</summary>
@@ -50,7 +51,7 @@ public sealed record AttackContext
     /// <summary>Force en plus (F au moins 1).</summary>
     public int StrengthModifier { get; init; }
 
-    /// <summary>Amélioration de la PA (+1 : PA-1 devient PA-2), cumulée avec celle du défenseur ; la PA ne dépasse jamais 0.</summary>
+    /// <summary>Amélioration de la PA (+1 : PA-1 devient PA-2) ; la PA ne dépasse jamais 0.</summary>
     public int ApModifier { get; init; }
 
     /// <summary>Dégâts en plus par attaque (D au moins 1), avant Melta et la réduction de dégâts du défenseur.</summary>

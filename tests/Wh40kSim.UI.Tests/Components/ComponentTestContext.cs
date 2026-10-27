@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Bunit;
+using Bunit.Extensions.WaitForHelpers;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
 using Wh40kSim.Core.Model;
@@ -42,6 +43,32 @@ public abstract class ComponentTestContext : BunitContext, IAsyncLifetime
     Task IAsyncLifetime.InitializeAsync() => Task.CompletedTask;
 
     Task IAsyncLifetime.DisposeAsync() => DisposeAsync().AsTask();
+}
+
+public static class StableClickExtensions
+{
+    /// <summary>
+    /// Clique jusqu'à ce que l'effet attendu soit là. MudBlazor finit le rendu de certains composants (infobulles…) de
+    /// façon asynchrone : rarement, un clic part vers un bouton qui vient d'être remplacé et se perd. On recherche alors
+    /// le bouton et on reclique, seulement si l'effet n'est pas encore là (sans risque, même pour une bascule).
+    /// </summary>
+    public static void ClickUntil<TComponent>(this IRenderedComponent<TComponent> cut, string selector, Func<bool> done, int attempts = 3)
+        where TComponent : Microsoft.AspNetCore.Components.IComponent
+    {
+        for (int attempt = 1; ; attempt++)
+        {
+            cut.Find(selector).Click();
+            try
+            {
+                cut.WaitForState(done, TimeSpan.FromMilliseconds(500));
+                return;
+            }
+            catch (WaitForFailedException) when (attempt < attempts)
+            {
+                // Clic perdu : on recommence avec le bouton tel qu'il est maintenant rendu
+            }
+        }
+    }
 }
 
 /// <summary>Simulation rapide et observable : nombre d'itérations réduit, porte optionnelle pour la garder « en cours ».</summary>

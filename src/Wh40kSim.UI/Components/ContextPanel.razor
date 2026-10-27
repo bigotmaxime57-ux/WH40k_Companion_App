@@ -6,8 +6,8 @@
 *@
 
 <MudPaper Elevation="3" Class="pa-4 wh-section" data-test="context">
-    <SectionHeader Icon="@Icons.Material.Filled.Terrain" Title="@L["Context_Title"]" />
-    <MudText Typo="Typo.caption">@L["Modifier_AttackerHelp"]</MudText>
+    <SectionHeader Icon="@Icons.Material.Filled.Terrain" Title="@L["Context_Title"]"
+                   Help="@([L["Help_Context"]])" />
 
     @if (HasConditions)
     {
@@ -39,14 +39,14 @@
         </SubSection>
     }
 
-    <SubSection Title="@L["Context_HitSection"]">
+    <SubSection Title="@L["Context_HitSection"]" Help="@([L["Help_Skill"], L["Help_Roll"]])">
         <MudGrid Spacing="3">
             <MudItem xs="12" sm="4">
-                <MudNumericField T="int" Label="@L["Modifier_Skill"]" HelperText="@L["Modifier_SkillHelp"]" Min="-6" Max="6"
+                <MudNumericField T="int" Label="@L["Modifier_Skill"]" Min="-6" Max="6"
                                  @bind-Value="Context.SkillModifier" @bind-Value:after="NotifyChanged" data-test="skill-modifier" />
             </MudItem>
             <MudItem xs="12" sm="4">
-                <MudNumericField T="int" Label="@L["Context_HitModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3"
+                <MudNumericField T="int" Label="@L["Context_HitModifier"]" Min="-3" Max="3"
                                  @bind-Value="Context.HitModifier" @bind-Value:after="NotifyChanged" />
             </MudItem>
             <MudItem xs="12" sm="4">
@@ -57,14 +57,14 @@
         </MudGrid>
     </SubSection>
 
-    <SubSection Title="@L["Context_WoundSection"]">
+    <SubSection Title="@L["Context_WoundSection"]" Help="@([L["Help_Strength"], L["Help_Roll"]])">
         <MudGrid Spacing="3">
             <MudItem xs="12" sm="4">
-                <MudNumericField T="int" Label="@L["Modifier_Strength"]" HelperText="@L["Modifier_MinimumOneHelp"]" Min="-10" Max="10"
+                <MudNumericField T="int" Label="@L["Modifier_Strength"]" Min="-10" Max="10"
                                  @bind-Value="Context.StrengthModifier" @bind-Value:after="NotifyChanged" />
             </MudItem>
             <MudItem xs="12" sm="4">
-                <MudNumericField T="int" Label="@L["Context_WoundModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3"
+                <MudNumericField T="int" Label="@L["Context_WoundModifier"]" Min="-3" Max="3"
                                  @bind-Value="Context.WoundModifier" @bind-Value:after="NotifyChanged" />
             </MudItem>
             <MudItem xs="12" sm="4">
@@ -75,18 +75,18 @@
         </MudGrid>
     </SubSection>
 
-    <SubSection Title="@L["Context_ProfileSection"]">
+    <SubSection Title="@L["Context_ProfileSection"]" Help="@([L["Help_Profile"]])">
         <MudGrid Spacing="3">
             <MudItem xs="12" sm="4">
-                <MudNumericField T="int" Label="@L["Modifier_Attacks"]" HelperText="@L["Modifier_MinimumOneHelp"]" Min="-6" Max="6"
+                <MudNumericField T="int" Label="@L["Modifier_Attacks"]" Min="-6" Max="6"
                                  @bind-Value="Context.AttacksModifier" @bind-Value:after="NotifyChanged" />
             </MudItem>
             <MudItem xs="12" sm="4">
-                <MudNumericField T="int" Label="@L["Modifier_Ap"]" HelperText="@L["Modifier_ApHelp"]" Min="-6" Max="6"
+                <MudNumericField T="int" Label="@L["Modifier_Ap"]" Min="-6" Max="6"
                                  @bind-Value="Context.ApModifier" @bind-Value:after="NotifyChanged" />
             </MudItem>
             <MudItem xs="12" sm="4">
-                <MudNumericField T="int" Label="@L["Modifier_Damage"]" HelperText="@L["Modifier_MinimumOneHelp"]" Min="-6" Max="6"
+                <MudNumericField T="int" Label="@L["Modifier_Damage"]" Min="-6" Max="6"
                                  @bind-Value="Context.DamageModifier" @bind-Value:after="NotifyChanged" />
             </MudItem>
         </MudGrid>

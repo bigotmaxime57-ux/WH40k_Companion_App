@@ -62,8 +62,6 @@ public class ScenarioFormTests
             InCover = true,
             HitModifier = -1,
             WoundModifier = 1,
-            SkillModifier = -1,
-            ApModifier = -1,
             Groups =
             [
                 new ModelGroup { Name = "Gardes", Count = 5, Toughness = 4, Wounds = 2, Save = 3 },

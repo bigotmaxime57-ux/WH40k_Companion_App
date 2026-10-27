@@ -4,7 +4,8 @@
 *@
 
 <MudPaper Elevation="3" Class="pa-4 wh-section" data-test="results">
-    <SectionHeader Icon="@Icons.Material.Filled.Assessment" Title="@L["Results_Title"]" />
+    <SectionHeader Icon="@Icons.Material.Filled.Assessment" Title="@L["Results_Title"]"
+                   Help="@([L["Help_Wipe", WipeUnreliableBelow.ToString("P0"), WipeReliableAbove.ToString("P0")], L["Help_Results"]])" />
     <MudText Typo="Typo.caption" GutterBottom="true" data-test="results-header">
         @L["Results_Header", Result.Iterations.ToString("N0"), Result.Elapsed.TotalSeconds.ToString("F2"), Result.Seed]
     </MudText>
@@ -12,8 +13,7 @@
     <div class="wh-tiles my-3">
         <StatTile Label="@L["Results_Kills"]" Value="@Kills.Mean.ToString("F2")" Detail="@Detail(Kills)" data-test="tile-kills" />
         <StatTile Label="@L["Results_Damage"]" Value="@Damage.Mean.ToString("F2")" Detail="@Detail(Damage)" data-test="tile-damage" />
-        <StatTile Label="@L["Results_Wipe"]" Value="@Result.ProbabilityWipe.ToString("P1")" Tone="WipeTone"
-                  Detail="@L["Results_WipeDetail", WipeUnreliableBelow.ToString("P0"), WipeReliableAbove.ToString("P0")]" data-test="wipe" />
+        <StatTile Label="@L["Results_Wipe"]" Value="@Result.ProbabilityWipe.ToString("P1")" Tone="WipeTone" data-test="wipe" />
     </div>
 
     @if (Result.ProbabilityWipe > 0)

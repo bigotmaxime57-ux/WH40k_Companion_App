@@ -23,7 +23,7 @@ public class AppShellTests() : ComponentTestContext(renderPopoverProvider: false
         var shell = Render<AppShell>();
         shell.WaitForAssertion(() => Assert.True(shell.Instance.IsDarkMode));
 
-        shell.Find("[data-test=toggle-theme]").Click();
+        shell.ClickUntil("[data-test=toggle-theme]", () => !shell.Instance.IsDarkMode);
 
         Assert.False(shell.Instance.IsDarkMode);
     }
@@ -38,7 +38,7 @@ public class AppShellTests() : ComponentTestContext(renderPopoverProvider: false
         shell.WaitForAssertion(() => Assert.True(shell.Instance.IsDarkMode));
 
         Assert.Equal(grimdark, shell.FindAll(".wh-grimdark").Count > 0);
-        shell.Find("[data-test=toggle-theme]").Click();
+        shell.ClickUntil("[data-test=toggle-theme]", () => !shell.Instance.IsDarkMode);
         Assert.Empty(shell.FindAll(".wh-grimdark")); // thème clair : jamais
     }
 

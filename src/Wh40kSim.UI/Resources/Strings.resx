@@ -169,6 +169,36 @@
   <data name="Group_Wounds" xml:space="preserve">
     <value>PV</value>
   </data>
+  <data name="Help_Context" xml:space="preserve">
+    <value>Valeurs du point de vue de l'attaquant, pour toutes ses armes : +1 = mieux pour lui (CT 3+ → 2+, PA-1 → PA-2). Une aptitude du défenseur qui dégrade une caractéristique des attaquants (CT, PA…) se saisit ici, en négatif.</value>
+  </data>
+  <data name="Help_Cover" xml:space="preserve">
+    <value>À couvert : la CT des armes de tir est dégradée de 1 (sauf Ignores Cover). C'est une modification de caractéristique, non plafonnée.</value>
+  </data>
+  <data name="Help_DefenderCharacteristics" xml:space="preserve">
+    <value>Une aptitude qui dégrade une caractéristique des attaquants (CT, PA…) se saisit dans la Situation, en négatif.</value>
+  </data>
+  <data name="Help_Profile" xml:space="preserve">
+    <value>Modifications de caractéristiques, sans plafond : A et D restent au moins à 1, la PA ne dépasse jamais 0.</value>
+  </data>
+  <data name="Help_Results" xml:space="preserve">
+    <value>80 % des cas : du 1er au 9e décile. Prolonger au-delà de l'unité : les attaques restantes continuent contre des figurines virtuelles, pour mesurer la marge.</value>
+  </data>
+  <data name="Help_Roll" xml:space="preserve">
+    <value>Modificateurs au jet : cumulés entre attaquant et défenseur, plafonnés à ±1 au total, appliqués après les relances (ex. -1 pour Stealth).</value>
+  </data>
+  <data name="Help_Simulation" xml:space="preserve">
+    <value>Graine : laisser vide pour la tirer au hasard ; la même graine redonne exactement le même résultat. Ctrl+Entrée lance la simulation.</value>
+  </data>
+  <data name="Help_Skill" xml:space="preserve">
+    <value>CT / CC : modification de caractéristique, sans plafond ; le résultat reste entre 2+ et 6+ (le couvert la dégrade de 1 en plus, pour le tir).</value>
+  </data>
+  <data name="Help_Strength" xml:space="preserve">
+    <value>Force : modification de caractéristique, sans plafond ; la Force reste au moins à 1.</value>
+  </data>
+  <data name="Help_Wipe" xml:space="preserve">
+    <value>Unité détruite : en rouge sous {0}, couleur du thème jusqu'à {1}, en vert au-delà.</value>
+  </data>
   <data name="Keyword_Blast" xml:space="preserve">
     <value>Blast</value>
   </data>
@@ -286,41 +316,14 @@
   <data name="Modifier_Ap" xml:space="preserve">
     <value>PA</value>
   </data>
-  <data name="Modifier_ApHelp" xml:space="preserve">
-    <value>Caractéristique, sans plafond ; jamais au-dessus de 0</value>
-  </data>
-  <data name="Modifier_AttackerHelp" xml:space="preserve">
-    <value>Valeurs du point de vue de l'attaquant : +1 = mieux pour lui (CT 3+ → 2+, PA-1 → PA-2).</value>
-  </data>
   <data name="Modifier_Attacks" xml:space="preserve">
     <value>Attaques (A)</value>
   </data>
   <data name="Modifier_Damage" xml:space="preserve">
     <value>Dégâts (D)</value>
   </data>
-  <data name="Modifier_DefenderAp" xml:space="preserve">
-    <value>PA des attaques reçues</value>
-  </data>
-  <data name="Modifier_DefenderApHelp" xml:space="preserve">
-    <value>Caractéristique : -1 = PA-2 devient PA-1 (jamais au-dessus de 0)</value>
-  </data>
-  <data name="Modifier_DefenderSkill" xml:space="preserve">
-    <value>CT / CC des attaquants</value>
-  </data>
-  <data name="Modifier_DefenderSkillHelp" xml:space="preserve">
-    <value>Caractéristique, cumulée avec le couvert : -1 = 3+ devient 4+</value>
-  </data>
-  <data name="Modifier_MinimumOneHelp" xml:space="preserve">
-    <value>Caractéristique, sans plafond ; au moins 1</value>
-  </data>
-  <data name="Modifier_RollHelp" xml:space="preserve">
-    <value>Au jet : ±1 max au total, après relances</value>
-  </data>
   <data name="Modifier_Skill" xml:space="preserve">
     <value>CT / CC</value>
-  </data>
-  <data name="Modifier_SkillHelp" xml:space="preserve">
-    <value>Caractéristique, sans plafond ; bornée entre 2+ et 6+</value>
   </data>
   <data name="Modifier_Strength" xml:space="preserve">
     <value>Force (F)</value>
@@ -364,9 +367,6 @@
   <data name="Results_Wipe" xml:space="preserve">
     <value>Unité détruite</value>
   </data>
-  <data name="Results_WipeDetail" xml:space="preserve">
-    <value>rouge sous {0}, vert au-delà de {1}</value>
-  </data>
   <data name="Simulation_Cancel" xml:space="preserve">
     <value>Annuler</value>
   </data>
@@ -384,9 +384,6 @@
   </data>
   <data name="Simulation_Seed" xml:space="preserve">
     <value>Graine</value>
-  </data>
-  <data name="Simulation_SeedHelp" xml:space="preserve">
-    <value>Vide : tirée au hasard</value>
   </data>
   <data name="Simulation_Title" xml:space="preserve">
     <value>Simulation</value>

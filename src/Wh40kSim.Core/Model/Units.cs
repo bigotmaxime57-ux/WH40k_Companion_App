@@ -83,18 +83,6 @@ public sealed record DefenderUnit
     /// <summary>Modificateur appliqué aux jets de blessure contre cette unité.</summary>
     public int WoundModifier { get; init; }
 
-    /// <summary>
-    /// Modification de la CT / CC des attaques qui visent cette unité, du point de vue de l'attaquant (-1 : 3+ devient
-    /// 4+) ; cumulée, sans plafond, avec celle de l'attaquant et le couvert (voir <see cref="AttackContext"/>).
-    /// </summary>
-    public int SkillModifier { get; init; }
-
-    /// <summary>
-    /// Modification de la PA des attaques qui visent cette unité, du point de vue de l'attaquant (-1 : PA-2 devient
-    /// PA-1) ; la PA ne dépasse jamais 0.
-    /// </summary>
-    public int ApModifier { get; init; }
-
     public IReadOnlyList<ModelGroup> Groups { get; init; } = [];
 
     [JsonIgnore]

@@ -261,13 +261,16 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
    n'est pas une modification de la CT / CC, non plafonnée ; seul le couvert était géré). Règles confirmées par
    l'utilisateur : pas de limite sur la modification de CT / CC (le résultat reste borné entre 2+ et 6+, 02.02.01, déjà
    appliqué au couvert), PA jamais au-dessus de 0, Force jamais sous 1.
-   - Core, convention +1 = mieux pour celui qui en bénéficie. Situation (attaquant) : CT / CC, A, F, PA, D. Défenseur
-     (attaques qui le visent) : CT / CC des attaquants (cumulée avec le couvert), PA des attaques reçues. Appliquées au
-     profil avant les jets ; A et D au moins 1 (déjà le cas). Modificateurs au jet inchangés.
+   - Core, convention +1 = mieux pour l'attaquant : `AttackContext` CT / CC, A, F, PA, D, appliquées au profil avant
+     les jets ; A et D au moins 1 (déjà le cas) ; couvert cumulé à la CT. Modificateurs au jet inchangés. **Pas de
+     modification de caractéristique côté défenseur** (retirée à la demande de l'utilisateur : doublon avec la
+     Situation, le moteur additionnant les deux) : une aptitude du défenseur se saisit dans la Situation, en négatif.
    - JSON : nouveaux champs à 0 par défaut (anciens fichiers lisibles). Non-régression au bit près sans modification.
-   - Tests : dés scriptés pour chaque modification, cumul non plafonné (couvert + aptitude du défenseur), bornes.
-   - UI : rangée « Modifications de caractéristiques » dans la Situation et le Défenseur, distincte des modificateurs
-     au jet, avec une aide. README : séquence d'attaque mise à jour.
+   - Tests : dés scriptés pour chaque modification, cumul non plafonné avec le couvert, bornes.
+   - UI (retours de l'utilisateur) : Situation en blocs Conditions / Touche / Blessure / Attaques, PA et dégâts
+     (caractéristique et jet côte à côte) ; défenseur : bloc couvert + jets subis. **Aucune annotation sous les
+     champs** : les explications sont dans des bulles « ? » à côté des titres (infobulle après 1 s de survol).
+     README : séquence d'attaque mise à jour.
    - Fin d'étape : tag `v0.2a.1`.
 
 ## Décisions techniques
@@ -309,7 +312,10 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   `Resources/Strings.resx` (clé `Zone_Élément`), `StringsTests` vérifie qu'aucune clé ne manque ni ne traîne.
 - **Tests bUnit** : `ComponentTestContext` (services, culture, faux services, `MudPopoverProvider` rendu d'abord,
   JS en mode `Loose`, `IAsyncLifetime` car des services MudBlazor ne se libèrent qu'en asynchrone). Repérage par
-  attributs `data-test` : MudBlazor les pose sur l'`<input>` lui-même (sélecteur `input[data-test=…]`).
+  attributs `data-test` : MudBlazor les pose sur l'`<input>` lui-même (sélecteur `input[data-test=…]`). Bouton placé
+  dans une infobulle MudBlazor (rendu asynchrone, clic parfois perdu) : cliquer avec `ClickUntil(sélecteur, effet)`.
+- **Aides à l'écran** : pas de `HelperText` ni de légende sous les champs ; explications dans `HelpBubble` (bulle
+  « ? », infobulle après 1 s), via le paramètre `Help` de `SectionHeader` / `SubSection` (liste de textes du `.resx`).
 - **Mise en page** : les points de rupture de MudGrid (`sm`, `md`, `lg`) suivent la largeur de la *fenêtre*, pas du
   panneau ; dans un panneau en demi-largeur, n'utiliser que `xs` / `sm`.
 - **Hôte desktop (Wh40kSim.Desktop)** : réduit au minimum. Toute l'interface est `AppShell` (Wh40kSim.UI) :

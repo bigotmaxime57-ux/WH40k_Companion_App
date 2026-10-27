@@ -45,14 +45,14 @@ public class CharacteristicModifierTests
     }
 
     [Theory]
-    [InlineData(4, 0)] // CT 3+ dégradée deux fois (couvert + aptitude) : 5+, un 4 rate
+    [InlineData(4, 0)] // CT 3+ dégradée deux fois (couvert + aptitude du défenseur saisie côté attaquant) : 5+, un 4 rate
     [InlineData(5, 1)]
     public void Skill_modifications_stack_without_cap_with_cover(int hitRoll, int killed)
     {
-        var defender = OneModel with { InCover = true, SkillModifier = -1 };
+        var defender = OneModel with { InCover = true };
         int[] rolls = killed == 0 ? [hitRoll] : [hitRoll, 2, 1];
 
-        var target = Run(Weapon(skill: 3), defender, new AttackContext(), rolls);
+        var target = Run(Weapon(skill: 3), defender, new AttackContext { SkillModifier = -1 }, rolls);
 
         Assert.Equal(killed, target.ModelsKilled);
     }
@@ -80,14 +80,14 @@ public class CharacteristicModifierTests
     }
 
     [Fact]
-    public void Defender_skill_modification_applies_to_melee_but_cover_does_not()
+    public void Skill_modification_applies_to_melee_but_cover_does_not()
     {
         var melee = Weapon(skill: 3, type: WeaponType.Melee);
 
         // Couvert seul : CC 3+ inchangée, un 3 touche
         Assert.Equal(1, Run(melee, OneModel with { InCover = true }, new AttackContext(), 3, 2, 1).ModelsKilled);
-        // Aptitude du défenseur : CC 4+, un 3 rate
-        Assert.Equal(0, Run(melee, OneModel with { SkillModifier = -1 }, new AttackContext(), 3).ModelsKilled);
+        // CC dégradée de 1 : 4+, un 3 rate
+        Assert.Equal(0, Run(melee, OneModel, new AttackContext { SkillModifier = -1 }, 3).ModelsKilled);
     }
 
     // --- Attaques ------------------------------------------------------------------------
@@ -138,21 +138,21 @@ public class CharacteristicModifierTests
     }
 
     [Fact]
-    public void Defender_ap_worsening_makes_saves_easier()
+    public void Ap_worsening_makes_saves_easier()
     {
-        // PA-1 dégradée de 1 par le défenseur : PA0 ; un 3 sauve contre 3+
-        var armoured = new DefenderUnit { ApModifier = -1, Groups = [new ModelGroup { Count = 1, Wounds = 1, Save = 3 }] };
+        // PA-1 dégradée de 1 (aptitude du défenseur, saisie côté attaquant) : PA0 ; un 3 sauve contre 3+
+        var armoured = new DefenderUnit { Groups = [new ModelGroup { Count = 1, Wounds = 1, Save = 3 }] };
 
-        Assert.Equal(0, Run(Weapon(skill: 2, ap: -1), armoured, new AttackContext(), 2, 2, 3).ModelsKilled);
+        Assert.Equal(0, Run(Weapon(skill: 2, ap: -1), armoured, new AttackContext { ApModifier = -1 }, 2, 2, 3).ModelsKilled);
     }
 
     [Fact]
     public void Ap_never_goes_above_zero()
     {
         // PA0 dégradée de 1 : reste 0 (une PA+1 aurait fait sauver un 2 contre 3+)
-        var armoured = new DefenderUnit { ApModifier = -1, Groups = [new ModelGroup { Count = 1, Wounds = 1, Save = 3 }] };
+        var armoured = new DefenderUnit { Groups = [new ModelGroup { Count = 1, Wounds = 1, Save = 3 }] };
 
-        Assert.Equal(1, Run(Weapon(skill: 2), armoured, new AttackContext(), 2, 2, 2).ModelsKilled);
+        Assert.Equal(1, Run(Weapon(skill: 2), armoured, new AttackContext { ApModifier = -1 }, 2, 2, 2).ModelsKilled);
     }
 
     // --- Dégâts --------------------------------------------------------------------------
@@ -183,20 +183,12 @@ public class CharacteristicModifierTests
     [Fact]
     public void Modifications_default_to_zero_and_round_trip_in_json()
     {
-        var empty = ScenarioJson.Deserialize("""{ "context": {}, "defender": {} }""");
-        Assert.Equal(0, empty.Context.SkillModifier + empty.Context.AttacksModifier + empty.Context.StrengthModifier
-                         + empty.Context.ApModifier + empty.Context.DamageModifier);
-        Assert.Equal(0, empty.Defender.SkillModifier + empty.Defender.ApModifier);
+        var empty = ScenarioJson.Deserialize("""{ "context": {} }""");
+        Assert.Equal(new AttackContext(), empty.Context);
 
-        var scenario = new Scenario
-        {
-            Context = new AttackContext { SkillModifier = 1, AttacksModifier = 2, StrengthModifier = 3, ApModifier = 1, DamageModifier = 1 },
-            Defender = new DefenderUnit { SkillModifier = -1, ApModifier = -1 },
-        };
-        var copy = ScenarioJson.Deserialize(ScenarioJson.Serialize(scenario));
+        var context = new AttackContext { SkillModifier = 1, AttacksModifier = 2, StrengthModifier = 3, ApModifier = -1, DamageModifier = 1 };
+        var copy = ScenarioJson.Deserialize(ScenarioJson.Serialize(new Scenario { Context = context }));
 
-        Assert.Equal(scenario.Context, copy.Context);
-        Assert.Equal(-1, copy.Defender.SkillModifier);
-        Assert.Equal(-1, copy.Defender.ApModifier);
+        Assert.Equal(context, copy.Context);
     }
 }

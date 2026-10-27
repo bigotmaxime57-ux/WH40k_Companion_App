@@ -1,0 +1,24 @@
+@*
+    Bulle « ? » à côté d'un titre : les explications n'apparaissent qu'au survol, après une seconde, pour ne pas
+    encombrer l'écran.
+*@
+
+<MudTooltip Delay="1000" Arrow="true" Placement="Placement.Bottom" RootClass="wh-help">
+    <ChildContent>
+        <MudIcon Icon="@Icons.Material.Outlined.HelpOutline" Size="Size.Small" Class="wh-help-icon" data-test="help" />
+    </ChildContent>
+    <TooltipContent>
+        <div class="wh-help-content">
+            @foreach (string line in Lines)
+            {
+                <p>@line</p>
+            }
+        </div>
+    </TooltipContent>
+</MudTooltip>
+
+@code {
+    /// <summary>Explications affichées dans l'infobulle, un paragraphe par texte.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<string> Lines { get; set; } = [];
+}

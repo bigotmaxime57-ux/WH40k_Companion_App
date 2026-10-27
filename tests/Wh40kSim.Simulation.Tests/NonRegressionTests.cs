@@ -5,9 +5,12 @@ using Wh40kSim.Core.Serialization;
 namespace Wh40kSim.Simulation.Tests;
 
 /// <summary>
-/// Résultats exacts à graine fixe, capturés le 2026-10-27 avec le simulateur d'origine (dans le Core) juste avant son
-/// déplacement dans Wh40kSim.Simulation. Toute différence signale un changement de la séquence d'attaque ou de la
+/// Résultats exacts à graine fixe. Toute différence signale un changement de la séquence d'attaque ou de la
 /// consommation des dés : si elle est voulue (nouvelle règle…), recapturer ces valeurs en le justifiant.
+/// <para>Historique : capturés le 2026-10-27 avant le déplacement du simulateur dans Wh40kSim.Simulation ;
+/// recapturés le 2026-10-27 au passage au générateur xoshiro256** (ticket #10), seul changement de cette étape.
+/// Avant de recapturer, les nouveaux résultats ont été vérifiés : conformes à la théorie sur les cas exacts et à un
+/// générateur indépendant sur ces deux scénarios (l'ancien générateur surestimait les PV retirés d'environ 0,1 %).</para>
 /// </summary>
 public class NonRegressionTests
 {
@@ -20,11 +23,11 @@ public class NonRegressionTests
 
         var result = Simulator.Run(scenario, Iterations, seed: 42);
 
-        Assert.Equal([419L, 4578, 15590, 25830, 24949, 16924, 7990, 2814, 857, 36, 13, 0], result.Kills.Counts);
+        Assert.Equal([387L, 4686, 15757, 25636, 25296, 16711, 7834, 2781, 840, 66, 6, 0], result.Kills.Counts);
         Assert.Equal(
-            [54L, 365, 2092, 2486, 9733, 5857, 18724, 7106, 19700, 5249, 14096, 2828, 6948, 1042, 2508, 306, 838, 19, 34, 2, 12, 0, 0, 1, 0],
+            [58L, 329, 2097, 2589, 9845, 5912, 18594, 7042, 19978, 5318, 13850, 2861, 6769, 1065, 2498, 283, 823, 17, 63, 3, 6, 0, 0, 0, 0],
             result.Damage.Counts);
-        AssertKilledPerGroup(result, 372_550, 62, 0);
+        AssertKilledPerGroup(result, 371_614, 78, 0);
     }
 
     [Fact]
@@ -32,11 +35,11 @@ public class NonRegressionTests
     {
         var result = Simulator.Run(RichScenario(), Iterations, seed: 2026);
 
-        Assert.Equal([1866L, 9662, 21063, 25870, 21246, 12280, 5886, 1983, 133, 9, 2], result.Kills.Counts);
+        Assert.Equal([1827L, 9802, 21250, 25775, 20974, 12247, 5943, 2040, 124, 14, 4], result.Kills.Counts);
         Assert.Equal(
-            [207L, 518, 2669, 1574, 7435, 4173, 11767, 8227, 11984, 11135, 8786, 10677, 4936, 7285, 1989, 3881, 626, 1786, 114, 86, 109, 13, 12, 8, 0, 1, 0, 2],
+            [183L, 534, 2690, 1590, 7643, 4160, 11799, 8355, 11876, 11007, 8633, 10583, 4891, 7315, 2003, 3952, 585, 1841, 102, 115, 106, 5, 14, 12, 0, 1, 1, 4],
             result.Damage.Counts);
-        AssertKilledPerGroup(result, 297_952, 239, 27_951, 2);
+        AssertKilledPerGroup(result, 297_847, 240, 27_763, 4);
     }
 
     private static void AssertKilledPerGroup(SimulationResult result, params long[] totals)

@@ -85,10 +85,10 @@ public static class Simulator
     private const int ExcessStream = 1;
 
     /// <summary>
-    /// Graine indépendante par paquet et par flux de dés (mélange SplitMix64). Le flux principal (0) donne les mêmes
-    /// graines qu'avant l'ajout des flux : les résultats à graine égale n'ont pas changé.
+    /// Graine indépendante par paquet et par flux de dés (mélange SplitMix64), sur 64 bits : deux paquets n'ont en
+    /// pratique jamais la même graine.
     /// </summary>
-    private static int DeriveSeed(int baseSeed, int chunk, int stream)
+    private static ulong DeriveSeed(int baseSeed, int chunk, int stream)
     {
         unchecked
         {
@@ -96,8 +96,7 @@ public static class Simulator
                       + (ulong)stream * 0xD6E8FEB86659FD93UL + 0x94D049BB133111EBUL;
             z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9UL;
             z = (z ^ (z >> 27)) * 0x94D049BB133111EBUL;
-            z ^= z >> 31;
-            return (int)(z & 0x7FFFFFFF);
+            return z ^ (z >> 31);
         }
     }
 

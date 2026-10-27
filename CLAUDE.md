@@ -524,8 +524,8 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
 - Barre de chargement à l'ouverture d'un écran (gel au premier clic sur Quick sim, signalé par l'utilisateur), avec
   fond uni du thème, et barre du démarrage enfin aux couleurs du thème mémorisé : fusionnées dans `main`. 327 tests
   verts (166 Core, 41 Simulation, 120 UI ; UI stables sur 6 exécutions).
-- Phase 3, étape 4 (points, #2 version légère) : branche `phase3/etape4-points`, en attente de validation.
-  340 tests verts (172 Core, 48 Simulation, 120 UI) ; `NonRegressionTests` inchangés. Champs de points retirés du
+- Phase 3, étape 4 (points, #2 version légère) : fusionnée dans `main` (ticket #2 commenté, laissé ouvert).
+  Prochaine étape : 5 (dégâts bruts, #6). 340 tests verts (172 Core, 48 Simulation, 120 UI) ; `NonRegressionTests` inchangés. Champs de points retirés du
   Quick sim à la demande de l'utilisateur (saisie au Full sim).
 
 Points notés pour la suite :

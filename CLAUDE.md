@@ -404,8 +404,8 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   code.
 - Phase 2a, étape 7 (finitions de l'interface) : fusionnée dans `main` (sans tag : `v0.2a.1` à la fin de l'étape 8).
   234 tests verts (114 Core, 33 Simulation, 87 UI). Vérifiée à l'écran par l'utilisateur au fil de l'eau.
-- Phase 2a, étape 8 (modifications de caractéristiques) : terminée sur `phase2a/etape8-modifications-caracteristiques`,
-  en attente de validation avant fusion et du tag `v0.2a.1`. 271 tests verts (145 Core, 33 Simulation, 93 UI) ;
+- Phase 2a, étape 8 (modifications de caractéristiques) : fusionnée dans `main`, **tag `v0.2a.1`**.
+  275 tests verts (145 Core, 35 Simulation, 95 UI) ;
   `NonRegressionTests` inchangés (sans modification, résultats identiques au bit près).
 - Prochaine ensuite : phase 2b (API + client web).
 

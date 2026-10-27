@@ -16,7 +16,8 @@
     <MudButtonGroup Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="mt-2">
         @foreach (int preset in Presets)
         {
-            <MudButton Variant="@(preset == Iterations ? Variant.Filled : Variant.Outlined)" Disabled="Running"
+            @* Le groupe impose son style « contour » à ses boutons : le choix courant est rempli par une classe CSS *@
+            <MudButton Class="@(preset == Iterations ? "wh-preset-active" : null)" Disabled="Running"
                        OnClick="() => IterationsChanged.InvokeAsync(preset)" data-test="@($"preset-{preset}")">@preset.ToString("N0")</MudButton>
         }
     </MudButtonGroup>

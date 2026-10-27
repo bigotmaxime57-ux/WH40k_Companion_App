@@ -189,6 +189,16 @@
     text-transform: uppercase;
 }
 
+/* Choix rapide du nombre de simulations égal à la valeur saisie : rempli comme le bouton Lancer */
+.wh-preset-active:not(:disabled) {
+    background-color: var(--mud-palette-primary) !important;
+    color: var(--mud-palette-primary-text) !important;
+}
+
+.wh-preset-active:not(:disabled):hover {
+    background-color: var(--mud-palette-primary-darken) !important;
+}
+
 /* Groupe PERSONNAGE : filet or (le rouge est la couleur de l'attaquant), pour le distinguer des gardes du corps */
 .wh-subcard-character {
     border-left-color: var(--wh-gold) !important;

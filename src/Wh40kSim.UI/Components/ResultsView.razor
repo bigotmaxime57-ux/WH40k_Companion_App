@@ -1,13 +1,20 @@
 @*
-    Résultats d'une simulation, en texte et tableaux. Mise en forme uniquement : tous les chiffres viennent de
-    SimulationResult (Wh40kSim.Simulation).
+    Résultats d'une simulation : tuiles de synthèse, pertes par groupe et tableaux de distribution. Mise en forme
+    uniquement : tous les chiffres viennent de SimulationResult (Wh40kSim.Simulation).
 *@
 
-<MudPaper Outlined="true" Class="pa-3" data-test="results">
-    <MudText Typo="Typo.h6">@L["Results_Title"]</MudText>
-    <MudText Typo="Typo.body2" GutterBottom="true">
+<MudPaper Elevation="3" Class="pa-4 wh-section" data-test="results">
+    <SectionHeader Icon="@Icons.Material.Filled.Assessment" Title="@L["Results_Title"]" />
+    <MudText Typo="Typo.caption" GutterBottom="true" data-test="results-header">
         @L["Results_Header", Result.Iterations.ToString("N0"), Result.Elapsed.TotalSeconds.ToString("F2"), Result.Seed]
     </MudText>
+
+    <div class="wh-tiles my-3">
+        <StatTile Label="@L["Results_Kills"]" Value="@Kills.Mean.ToString("F2")" Detail="@Detail(Kills)" data-test="tile-kills" />
+        <StatTile Label="@L["Results_Damage"]" Value="@Damage.Mean.ToString("F2")" Detail="@Detail(Damage)" data-test="tile-damage" />
+        <StatTile Label="@L["Results_Wipe"]" Value="@Result.ProbabilityWipe.ToString("P1")" Tone="WipeTone"
+                  Detail="@L["Results_WipeDetail", WipeUnreliableBelow.ToString("P0"), WipeReliableAbove.ToString("P0")]" data-test="wipe" />
+    </div>
 
     @if (Result.ProbabilityWipe > 0)
     {
@@ -20,24 +27,6 @@
         }
     }
 
-    <MudSimpleTable Dense="true" Class="mb-3">
-        <thead>
-            <tr>
-                <th></th>
-                <th>@L["Results_Mean"]</th>
-                <th>@L["Results_StdDev"]</th>
-                <th>@L["Results_Median"]</th>
-                <th>@L["Results_CentralRange"]</th>
-            </tr>
-        </thead>
-        <tbody>
-            <SummaryRow Label="@L["Results_Kills"]" Distribution="Kills" />
-            <SummaryRow Label="@L["Results_Damage"]" Distribution="Damage" />
-        </tbody>
-    </MudSimpleTable>
-
-    <MudText Typo="Typo.body1" data-test="wipe"><b>@L["Results_Wipe"]</b> @Result.ProbabilityWipe.ToString("P1")</MudText>
-
     <MudText Typo="Typo.subtitle2" Class="mt-3">@L["Results_LossesPerGroup"]</MudText>
     <MudSimpleTable Dense="true" Class="mb-3">
         <tbody>
@@ -46,24 +35,30 @@
                 var group = Result.Scenario.Defender.Groups[g];
                 <tr>
                     <td>@group.Name</td>
-                    <td>@Result.MeanKilledInGroup(g).ToString("F2") / @group.Count</td>
+                    <td class="wh-number">@Result.MeanKilledInGroup(g).ToString("F2") / @group.Count</td>
                 </tr>
             }
         </tbody>
     </MudSimpleTable>
 
-    <MudGrid Spacing="3">
-        <MudItem xs="12" md="6">
-            <DistributionTable Title="@L["Results_Kills"]" Distribution="Kills" />
-        </MudItem>
-        <MudItem xs="12" md="6">
-            <DistributionTable Title="@L["Results_Damage"]" Distribution="Damage" />
-        </MudItem>
-    </MudGrid>
+    <DistributionTable Title="@L["Results_Kills"]" Distribution="Kills" />
+    <DistributionTable Title="@L["Results_Damage"]" Distribution="Damage" />
 </MudPaper>
 
 @code {
+    /// <summary>Seuils de fiabilité de la destruction de l'unité (choix de l'utilisateur) : rouge en dessous, vert au-delà.</summary>
+    private const double WipeUnreliableBelow = 0.50;
+
+    private const double WipeReliableAbove = 0.84;
+
     private bool _extended;
+
+    private StatTile.TileTone WipeTone => Result.ProbabilityWipe switch
+    {
+        < WipeUnreliableBelow => StatTile.TileTone.Bad,
+        > WipeReliableAbove => StatTile.TileTone.Good,
+        _ => StatTile.TileTone.Neutral,
+    };
 
     [Parameter, EditorRequired]
     public SimulationResult Result { get; set; } = null!;
@@ -72,4 +67,7 @@
     private DiscreteDistribution Kills => _extended ? Result.ExtendedKills : Result.Kills;
 
     private DiscreteDistribution Damage => _extended ? Result.ExtendedDamage : Result.Damage;
+
+    private string Detail(DiscreteDistribution distribution) => L["Results_TileDetail",
+        distribution.Median, distribution.StdDev.ToString("F2"), distribution.CentralRange.Low, distribution.CentralRange.High];
 }

@@ -3,8 +3,8 @@
     (UsesHalfRange, UsesRemainedStationary, UsesCharged, PrecisionTargetMatters), aucune règle n'est écrite ici.
 *@
 
-<MudPaper Outlined="true" Class="pa-3" data-test="context">
-    <MudText Typo="Typo.h6" GutterBottom="true">@L["Context_Title"]</MudText>
+<MudPaper Elevation="3" Class="pa-4 wh-section" data-test="context">
+    <SectionHeader Icon="@Icons.Material.Filled.Terrain" Title="@L["Context_Title"]" />
 
     @if (Reference.Attacker.UsesHalfRange)
     {
@@ -22,10 +22,10 @@
 
     <MudGrid Spacing="2">
         <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Context_HitModifier"]" Min="-3" Max="3" @bind-Value="Context.HitModifier" @bind-Value:after="NotifyChanged" />
+            <MudNumericField T="int" Label="@L["Context_HitModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3" @bind-Value="Context.HitModifier" @bind-Value:after="NotifyChanged" />
         </MudItem>
         <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Context_WoundModifier"]" Min="-3" Max="3" @bind-Value="Context.WoundModifier" @bind-Value:after="NotifyChanged" />
+            <MudNumericField T="int" Label="@L["Context_WoundModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3" @bind-Value="Context.WoundModifier" @bind-Value:after="NotifyChanged" />
         </MudItem>
         <MudItem xs="6">
             <MudSelect T="RerollPolicy" Label="@L["Context_HitReroll"]" @bind-Value="Context.HitReroll" @bind-Value:after="NotifyChanged">

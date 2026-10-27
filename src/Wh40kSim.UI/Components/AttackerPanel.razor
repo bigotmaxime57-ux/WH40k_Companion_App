@@ -1,13 +1,14 @@
 @* Attaquant : nom et profils d'armes, résolus dans l'ordre de la liste. *@
 
-<MudPaper Outlined="true" Class="pa-3">
-    <MudText Typo="Typo.h6" GutterBottom="true">@L["Attacker_Title"]</MudText>
+<MudPaper Elevation="3" Class="pa-4 wh-section">
+    <SectionHeader Icon="@Icons.Material.Filled.GpsFixed" Title="@L["Attacker_Title"]" />
     <MudTextField T="string" Label="@L["Attacker_Name"]" @bind-Value="Attacker.Name" @bind-Value:after="NotifyChanged" />
 
     @foreach (var weapon in Attacker.Weapons)
     {
         <WeaponEditor @key="weapon" Weapon="weapon" Changed="NotifyChanged"
-                      OnDuplicate="() => Duplicate(weapon)" OnRemove="() => Remove(weapon)" />
+                      OnDuplicate="() => Duplicate(weapon)" OnRemove="() => Remove(weapon)"
+                      OnEditKeywords="() => EditKeywords.InvokeAsync(weapon)" />
     }
 
     <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Text" Color="Color.Primary" OnClick="Add"
@@ -21,6 +22,10 @@
     /// <summary>Appelé après chaque modification, pour que la page revalide le scénario.</summary>
     [Parameter]
     public EventCallback Changed { get; set; }
+
+    /// <summary>Demande l'ouverture du sélecteur de mots-clés pour une arme.</summary>
+    [Parameter]
+    public EventCallback<WeaponForm> EditKeywords { get; set; }
 
     private Task NotifyChanged() => Changed.InvokeAsync();
 

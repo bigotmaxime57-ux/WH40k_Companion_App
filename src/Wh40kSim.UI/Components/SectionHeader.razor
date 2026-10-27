@@ -1,0 +1,22 @@
+@* En-tête de section : icône du thème, titre, et éventuellement des actions à droite. *@
+
+<div class="wh-section-header">
+    <MudIcon Icon="@Icon" />
+    <MudText Typo="Typo.h6">@Title</MudText>
+    @if (ChildContent is not null)
+    {
+        <div class="wh-section-actions">@ChildContent</div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Icon { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    /// <summary>Actions affichées à droite du titre (boutons…).</summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

@@ -218,7 +218,9 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
    - Projet MAUI Blazor Hybrid qui affiche les composants de Wh40kSim.UI dans un `BlazorWebView`. Ce que Wh40kSim.UI
      attend de l'hôte (étape 5) : `services.AddWh40kSimUI()`, `UiCulture.Apply()` au démarrage, les fournisseurs
      MudBlazor dans la mise en page (`MudThemeProvider`, `MudPopoverProvider`, `MudDialogProvider`,
-     `MudSnackbarProvider`), les CSS / JS de MudBlazor, puis `<SimulatorPage />` (composant non routé).
+     `MudSnackbarProvider`), les CSS / JS de MudBlazor, puis `<SimulatorPage />` (composant non routé). Depuis
+     l'étape 7 : `AppShell` fournit déjà tout cela ; l'hôte charge en plus `_content/Wh40kSim.UI/wh40ksim.css`
+     (le module `wh40ksim.js` des raccourcis est importé par la page elle-même).
    - Cible Windows uniquement : `net10.0-windows10.0.19041.0`, `WindowsPackageType=None` (non empaqueté).
      macOS écarté (compilation impossible sous Windows, non testable). `Directory.Build.props` impose
      `TargetFramework=net10.0` : le projet redéfinit `TargetFramework` (au singulier).
@@ -231,6 +233,39 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
      de commande, Windows uniquement ; roadmap du README et commentaires du code alignés sur la nouvelle
      numérotation des phases.
    - Fin de phase 2a : tag `v0.2a`.
+7. **Finitions de l'interface** (ajoutée après `v0.2a` : interface jugée « encore un peu austère »). Tout dans
+   Wh40kSim.UI, aucune règle ni calcul ajouté côté interface.
+   - Style : thème à identité Warhammer 40k, en-têtes de section avec icônes, cartes en relief. Prototype validé sur
+     captures. **Deux styles sombres gardés** : Grimdark (presque noir, or terni, rouge sang, matière ; par défaut) et
+     Acier (acier et laiton, le premier prototype), plus le clair parchemin. Choix par l'utilisateur : ticket #9.
+   - Résultats : tuiles de synthèse en tête (figurines tuées, PV retirés, unité détruite) ; barre proportionnelle dans
+     la colonne P(= k) des tableaux (pas encore les graphiques de la phase 4).
+   - Mise en page en deux colonnes : saisie à gauche, simulation et résultats à droite, toujours visibles.
+   - Profils d'armes et groupes du défenseur repliables, avec un résumé en en-tête (`Describe()` du Core).
+   - **Sélecteur de mots-clés** (idée de l'utilisateur, remplace les puces) : sur la carte d'une arme, les mots-clés
+     actifs en étiquettes (rappel de règle au survol, croix pour retirer) et un bouton « Mots-clés » qui ouvre un
+     **panneau latéral** : recherche (Entrée ajoute), filtre par catégorie, valeur modifiable sur place. Composant
+     générique `KeywordPicker<TTarget>` + catalogue `KeywordDefinition` (dans l'UI : accès aux champs du formulaire
+     seulement), réutilisable en phase 5 avec une portée (arme, unité…).
+   - Raccourcis clavier : Ctrl+Entrée lancer, Ctrl+S enregistrer, Ctrl+O ouvrir.
+   - Confirmation avant de perdre une saisie modifiée (Nouveau / Ouvrir) ; « * » après le nom du fichier si modifié.
+   - Nombre de simulations en choix rapides (10 000 / 100 000 / 1 000 000 / 10 000 000) ; rappel de règle en une
+     phrase pour chaque mot-clé (sélecteur et infobulles des étiquettes).
+   - Retours de l'utilisateur intégrés : groupes du défenseur en cartes aérées (numéro, filet rouge pour un
+     PERSONNAGE), libellés des champs à 85 % et non coupés, tuile « Unité détruite » rouge sous 50 %, verte au-delà de
+     84 %, libellés « modificateur au jet » précisés.
+8. **Modifications de caractéristiques** (ajoutée pendant l'étape 7 : un modificateur au jet de touche, plafonné à ±1,
+   n'est pas une modification de la CT / CC, non plafonnée ; seul le couvert était géré). Règles confirmées par
+   l'utilisateur : pas de limite sur la modification de CT / CC (le résultat reste borné entre 2+ et 6+, 02.02.01, déjà
+   appliqué au couvert), PA jamais au-dessus de 0, Force jamais sous 1.
+   - Core, convention +1 = mieux pour celui qui en bénéficie. Situation (attaquant) : CT / CC, A, F, PA, D. Défenseur
+     (attaques qui le visent) : CT / CC des attaquants (cumulée avec le couvert), PA des attaques reçues. Appliquées au
+     profil avant les jets ; A et D au moins 1 (déjà le cas). Modificateurs au jet inchangés.
+   - JSON : nouveaux champs à 0 par défaut (anciens fichiers lisibles). Non-régression au bit près sans modification.
+   - Tests : dés scriptés pour chaque modification, cumul non plafonné (couvert + aptitude du défenseur), bornes.
+   - UI : rangée « Modifications de caractéristiques » dans la Situation et le Défenseur, distincte des modificateurs
+     au jet, avec une aide. README : séquence d'attaque mise à jour.
+   - Fin d'étape : tag `v0.2a.1`.
 
 ## Décisions techniques
 
@@ -327,10 +362,13 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   (captures) : fenêtre, thème, saisie, simulation et résultats ; deux défauts de mise en page corrigés (groupe
   d'allocation, valeurs de Sustained Hits / Rapid Fire / Melta). Numérotation des phases alignée dans le README et le
   code.
-- **Prochaine : amélioration du style et de l'ergonomie de l'interface** (demandée après la 2a : « encore un peu
-  austère »), à définir ensemble avant la phase 2b (API + client web).
+- Phase 2a, étape 7 (finitions de l'interface) : fusionnée dans `main` (sans tag : `v0.2a.1` à la fin de l'étape 8).
+  234 tests verts (114 Core, 33 Simulation, 87 UI). Vérifiée à l'écran par l'utilisateur au fil de l'eau.
+- **En cours : phase 2a, étape 8 (modifications de caractéristiques)**. Prochaine ensuite : phase 2b (API + client
+  web).
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis
   `dotnet restore`).
-- Ouvrir un scénario quand le formulaire a été modifié remplace la saisie sans confirmation (pas demandé en 2a).
+- Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier
+  dans un vrai navigateur en phase 2b.

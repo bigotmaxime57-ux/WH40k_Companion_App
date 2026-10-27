@@ -1,0 +1,252 @@
+/*
+   Styles globaux de Wh40kSim.UI (en plus du thème MudBlazor, Theme/Wh40kTheme.cs).
+   L'hôte les charge après MudBlazor : <link rel="stylesheet" href="_content/Wh40kSim.UI/wh40ksim.css" />
+   .wh-shell : toute l'application ; .wh-grimdark : thème sombre de style Grimdark seulement (classe posée par AppShell).
+*/
+
+/* --- Commun aux deux thèmes ------------------------------------------------------------------------ */
+
+.wh-shell .mud-main-content {
+    background: radial-gradient(ellipse at top, var(--mud-palette-background-gray) 0%, var(--mud-palette-background) 70%);
+    min-height: 100vh;
+}
+
+.wh-shell .mud-appbar {
+    border-bottom: 2px solid var(--mud-palette-primary);
+}
+
+.wh-brand {
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+/* Libellés des champs : MudBlazor les limite à une ligne de 1.15rem et masque le dépassement ; avec Segoe UI, le bas
+   des lettres à jambage (p, g) était coupé. Un peu de marge en bas agrandit la zone visible sans déplacer le texte.
+   Sélecteur aussi précis que celui de MudBlazor (qui impose padding: 0), préfixé pour l'emporter. */
+.wh-shell .mud-input-control > .mud-input-control-input-container > .mud-input-label-inputcontrol {
+    padding-bottom: .3rem;
+}
+
+/* Libellés au-dessus d'un champ rempli : 85 % de la taille du contenu au lieu de 75 % (MudBlazor), plus lisibles avec
+   Segoe UI ; largeur maximale ajustée en conséquence (100 / 0,85). Mêmes cas que la règle de MudBlazor. */
+.wh-shell .mud-shrink ~ label.mud-input-label.mud-input-label-inputcontrol,
+.wh-shell .mud-input:focus-within ~ label.mud-input-label.mud-input-label-inputcontrol,
+.wh-shell .mud-input:has(:-webkit-autofill) ~ label.mud-input-label.mud-input-label-inputcontrol {
+    max-width: 117.6%;
+    transform: translate(0, 1px) scale(.85);
+}
+
+/* Sections (attaquant, défenseur…) : carte soulignée d'un filet or */
+.wh-section {
+    border-top: 3px solid var(--mud-palette-primary);
+}
+
+.wh-section-header {
+    align-items: center;
+    display: flex;
+    gap: .6rem;
+    margin-bottom: .75rem;
+}
+
+.wh-section-header > .mud-icon-root {
+    color: var(--mud-palette-primary);
+}
+
+/* Trait décoratif qui prolonge le titre jusqu'aux actions */
+.wh-section-header::after {
+    background: linear-gradient(90deg, var(--mud-palette-primary) 0%, transparent 100%);
+    content: "";
+    flex: 1;
+    height: 1px;
+    opacity: .45;
+    order: 1;
+}
+
+.wh-section-header > .wh-section-actions {
+    order: 2;
+}
+
+/* Colonne de droite (simulation, résultats) : reste visible sous la barre de titre, avec son propre défilement */
+@media (min-width: 1280px) {
+    .wh-sticky-column {
+        max-height: calc(100vh - 64px);
+        overflow-y: auto;
+        padding-right: 4px;
+        position: sticky;
+        top: 56px;
+    }
+}
+
+/* Cartes d'arme repliées : une ligne de résumé */
+.wh-summary {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wh-subcard {
+    border-left: 3px solid var(--mud-palette-primary) !important;
+}
+
+/* Groupe PERSONNAGE : filet rouge, pour le distinguer des gardes du corps */
+.wh-subcard-character {
+    border-left-color: var(--mud-palette-secondary) !important;
+}
+
+/* Numéro d'ordre d'allocation d'un groupe */
+.wh-group-number {
+    color: var(--mud-palette-primary);
+    font-family: Bahnschrift, "Segoe UI", sans-serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    min-width: 1.6rem;
+    text-align: center;
+}
+
+/* Étiquettes de mots-clés sur la carte d'une arme */
+.wh-keywords {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem .4rem;
+}
+
+/* Sélecteur de mots-clés (panneau latéral) */
+.wh-keyword-panel {
+    border-left: 2px solid var(--mud-palette-primary);
+}
+
+.wh-keyword-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem;
+}
+
+.wh-keyword-row {
+    align-items: center;
+    border-radius: var(--mud-default-borderradius);
+    display: flex;
+    gap: .25rem;
+    padding: .15rem .25rem;
+}
+
+.wh-keyword-row:hover {
+    background: var(--mud-palette-table-hover);
+}
+
+.wh-keyword-active {
+    background: var(--mud-palette-table-striped);
+    box-shadow: inset 2px 0 0 var(--mud-palette-primary);
+}
+
+.wh-keyword-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.wh-keyword-value {
+    width: 6rem;
+}
+
+/* Tuiles de synthèse des résultats */
+.wh-tiles {
+    display: grid;
+    gap: .75rem;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+}
+
+.wh-tile {
+    background: var(--mud-palette-background-gray);
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: var(--mud-default-borderradius);
+    padding: .6rem .8rem;
+}
+
+.wh-tile-label {
+    color: var(--mud-palette-text-secondary);
+    font-size: .8rem;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.wh-tile-value {
+    color: var(--mud-palette-primary);
+    font-family: Bahnschrift, "Segoe UI", sans-serif;
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+/* Tonalités : mauvaise (rouge), bonne (vert) ; neutre = couleur du thème */
+.wh-tile-bad {
+    border-color: var(--mud-palette-error);
+}
+
+.wh-tile-bad .wh-tile-value {
+    color: var(--mud-palette-error);
+}
+
+.wh-tile-good {
+    border-color: var(--mud-palette-success);
+}
+
+.wh-tile-good .wh-tile-value {
+    color: var(--mud-palette-success);
+}
+
+.wh-tile-detail {
+    color: var(--mud-palette-text-secondary);
+    font-size: .8rem;
+}
+
+/* Tableaux de distribution : nombres alignés, barre proportionnelle à P(= k) */
+.wh-number {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.wh-bar-cell {
+    min-width: 7rem;
+}
+
+.wh-bar-cell .wh-number {
+    display: block;
+}
+
+.wh-bar {
+    background: linear-gradient(90deg, var(--mud-palette-primary-darken), var(--mud-palette-primary));
+    border-radius: 1px;
+    height: 4px;
+    margin-top: 2px;
+}
+
+/* --- Thème sombre, style Grimdark --------------------------------------------------------------------- */
+
+/* Fond : vignette sombre et grain discret (rayures très fines) */
+.wh-shell.wh-grimdark .mud-main-content {
+    background:
+        repeating-linear-gradient(135deg, rgba(255, 255, 255, .012) 0 1px, transparent 1px 4px),
+        radial-gradient(ellipse at top, #1a1a1d 0%, var(--mud-palette-background) 65%);
+}
+
+/* Barre de titre : double filet or et sang */
+.wh-shell.wh-grimdark .mud-appbar {
+    border-bottom: 2px solid var(--mud-palette-secondary);
+    box-shadow: 0 1px 0 var(--mud-palette-primary), 0 6px 18px rgba(0, 0, 0, .6);
+}
+
+/* Cartes : plaques de métal (dégradé, bord ferreux, ombre profonde) */
+.wh-shell.wh-grimdark .wh-section {
+    background: linear-gradient(180deg, #1b1b1e 0%, var(--mud-palette-surface) 40%);
+    border-left: 1px solid #2b2b2f;
+    border-right: 1px solid #2b2b2f;
+    border-bottom: 1px solid #2b2b2f;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .04);
+}
+
+.wh-shell.wh-grimdark .wh-section-header .mud-typography-h6 {
+    color: var(--mud-palette-primary);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .8);
+}

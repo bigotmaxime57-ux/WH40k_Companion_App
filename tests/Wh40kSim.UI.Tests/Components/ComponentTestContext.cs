@@ -28,8 +28,12 @@ public abstract class ComponentTestContext : BunitContext, IAsyncLifetime
         if (renderPopoverProvider)
         {
             Render<MudPopoverProvider>();
+            Dialogs = Render<MudDialogProvider>();
         }
     }
+
+    /// <summary>Fournisseur des boîtes de dialogue (confirmations) : c'est là qu'elles s'affichent.</summary>
+    protected IRenderedComponent<MudDialogProvider>? Dialogs { get; }
 
     protected FakeSimulationService Simulations { get; } = new();
 

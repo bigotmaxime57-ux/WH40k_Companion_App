@@ -1,0 +1,36 @@
+@* Tuile de synthèse : libellé, grande valeur, détail optionnel, et une tonalité (neutre, bonne, mauvaise). *@
+
+<div class="@($"wh-tile wh-tile-{Tone.ToString().ToLowerInvariant()}")" @attributes="Attributes">
+    <div class="wh-tile-label">@Label</div>
+    <div class="wh-tile-value">@Value</div>
+    @if (Detail is not null)
+    {
+        <div class="wh-tile-detail">@Detail</div>
+    }
+</div>
+
+@code {
+    /// <summary>Tonalité de la valeur : couleur du thème (neutre), vert (bonne) ou rouge (mauvaise).</summary>
+    public enum TileTone
+    {
+        Neutral,
+        Good,
+        Bad,
+    }
+
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public string Value { get; set; } = "";
+
+    [Parameter]
+    public string? Detail { get; set; }
+
+    [Parameter]
+    public TileTone Tone { get; set; }
+
+    /// <summary>Attributs supplémentaires (data-test…) posés sur la tuile.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? Attributes { get; set; }
+}

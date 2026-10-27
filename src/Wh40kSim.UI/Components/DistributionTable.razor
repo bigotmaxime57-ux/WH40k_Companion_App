@@ -1,6 +1,9 @@
-@* Tableau P(= k) / P(≥ k) d'une distribution, sans les lignes négligeables aux extrémités. *@
+@*
+    Tableau P(= k) / P(≥ k) d'une distribution, sans les lignes négligeables aux extrémités, avec une barre
+    proportionnelle à P(= k) (la plus probable fait toute la largeur). Pas encore les graphiques de la phase 4.
+*@
 
-<MudText Typo="Typo.subtitle2">@Title</MudText>
+<MudText Typo="Typo.subtitle2" Class="mt-3">@Title</MudText>
 <MudSimpleTable Dense="true" Striped="true" data-test="distribution">
     <thead>
         <tr>
@@ -10,21 +13,39 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var row in Distribution.Rows())
+        @foreach (var row in _rows)
         {
             <tr>
-                <td>@row.Value</td>
-                <td>@row.Exactly.ToString("P1")</td>
-                <td>@row.AtLeast.ToString("P1")</td>
+                <td class="wh-number">@row.Value</td>
+                <td>
+                    <div class="wh-bar-cell">
+                        <span class="wh-number">@row.Exactly.ToString("P1")</span>
+                        <div class="wh-bar" style="width: @BarWidth(row.Exactly)" data-test="bar"></div>
+                    </div>
+                </td>
+                <td class="wh-number">@row.AtLeast.ToString("P1")</td>
             </tr>
         }
     </tbody>
 </MudSimpleTable>
 
 @code {
+    private IReadOnlyList<DistributionRow> _rows = [];
+    private double _max;
+
     [Parameter, EditorRequired]
     public string Title { get; set; } = "";
 
     [Parameter, EditorRequired]
     public DiscreteDistribution Distribution { get; set; } = null!;
+
+    protected override void OnParametersSet()
+    {
+        _rows = Distribution.Rows();
+        _max = _rows.Max(r => r.Exactly);
+    }
+
+    /// <summary>Largeur CSS de la barre, en pourcentage (culture invariante : « 37.5% »).</summary>
+    private string BarWidth(double probability) =>
+        (_max > 0 ? probability / _max * 100 : 0).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture) + "%";
 }

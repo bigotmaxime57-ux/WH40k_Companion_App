@@ -1,7 +1,7 @@
 @* Défenseur : ses groupes d'allocation, dans l'ordre où ils encaissent (le premier d'abord). *@
 
-<MudPaper Outlined="true" Class="pa-3">
-    <MudText Typo="Typo.h6" GutterBottom="true">@L["Defender_Title"]</MudText>
+<MudPaper Elevation="3" Class="pa-4 wh-section">
+    <SectionHeader Icon="@Icons.Material.Filled.Shield" Title="@L["Defender_Title"]" />
     <MudGrid Spacing="2">
         <MudItem xs="12" sm="6">
             <MudTextField T="string" Label="@L["Defender_Name"]" @bind-Value="Defender.Name" @bind-Value:after="NotifyChanged" />
@@ -10,10 +10,10 @@
             <MudCheckBox T="bool" Label="@L["Defender_InCover"]" @bind-Value="Defender.InCover" @bind-Value:after="NotifyChanged" />
         </MudItem>
         <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Defender_HitModifier"]" Min="-3" Max="3" @bind-Value="Defender.HitModifier" @bind-Value:after="NotifyChanged" />
+            <MudNumericField T="int" Label="@L["Defender_HitModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3" @bind-Value="Defender.HitModifier" @bind-Value:after="NotifyChanged" />
         </MudItem>
         <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Defender_WoundModifier"]" Min="-3" Max="3" @bind-Value="Defender.WoundModifier" @bind-Value:after="NotifyChanged" />
+            <MudNumericField T="int" Label="@L["Defender_WoundModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3" @bind-Value="Defender.WoundModifier" @bind-Value:after="NotifyChanged" />
         </MudItem>
     </MudGrid>
 
@@ -24,26 +24,9 @@
     {
         int index = i;
         var group = Defender.Groups[index];
-        <MudStack @key="group" Row="true" AlignItems="AlignItems.Center" Class="my-2" data-test="group">
-            <MudText Typo="Typo.h6" Style="min-width: 1.5rem">@(index + 1)</MudText>
-            <div style="flex: 1">
-                <ModelGroupEditor Group="group" Changed="NotifyChanged" />
-            </div>
-            <MudStack Spacing="0">
-                <MudTooltip Text="@L["Defender_MoveUp"]">
-                    <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" Disabled="@(index == 0)"
-                                   OnClick="() => Move(index, -1)" data-test="move-up" />
-                </MudTooltip>
-                <MudTooltip Text="@L["Defender_MoveDown"]">
-                    <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Size="Size.Small" Disabled="@(index == Defender.Groups.Count - 1)"
-                                   OnClick="() => Move(index, 1)" data-test="move-down" />
-                </MudTooltip>
-                <MudTooltip Text="@L["Defender_RemoveGroup"]">
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
-                                   OnClick="() => Remove(group)" data-test="remove-group" />
-                </MudTooltip>
-            </MudStack>
-        </MudStack>
+        <ModelGroupEditor @key="group" Group="group" Number="index + 1" Changed="NotifyChanged"
+                          CanMoveUp="index > 0" CanMoveDown="index < Defender.Groups.Count - 1"
+                          OnMoveUp="() => Move(index, -1)" OnMoveDown="() => Move(index, 1)" OnRemove="() => Remove(group)" />
     }
 
     <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Text" Color="Color.Primary" OnClick="Add"

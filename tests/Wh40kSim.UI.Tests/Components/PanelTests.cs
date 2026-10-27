@@ -198,6 +198,27 @@ public class ResultsViewTests : ComponentTestContext
         Assert.Contains("Gardes", view.Find("[data-test=excess-explanation]").TextContent);
     }
 
+    /// <summary>Une attaque Torrent contre une seule figurine à 1 PV sans sauvegarde : P(détruite) = P(blesser).</summary>
+    private static SimulationResult OneShot(int strength, int toughness, bool twinLinked) => Simulator.Run(new Scenario
+    {
+        Attacker = new AttackerUnit
+        {
+            Weapons = [new WeaponGroup { Weapon = new WeaponProfile { Strength = strength, Abilities = new WeaponAbilities { Torrent = true, TwinLinked = twinLinked } } }],
+        },
+        Defender = new DefenderUnit { Groups = [new ModelGroup { Toughness = toughness }] },
+    }, 20_000, seed: 1);
+
+    [Theory]
+    [InlineData(1, 10, false, "wh-tile-bad")]     // blessure sur 6+ : 17 %
+    [InlineData(8, 4, false, "wh-tile-neutral")]  // blessure sur 2+ : 83 %
+    [InlineData(8, 4, true, "wh-tile-good")]      // 2+ avec relance des échecs : 97 %
+    public void Wipe_tile_is_red_below_50_percent_and_green_above_84_percent(int strength, int toughness, bool twinLinked, string tone)
+    {
+        var view = Render<ResultsView>(p => p.Add(c => c.Result, OneShot(strength, toughness, twinLinked)));
+
+        Assert.Contains(tone, view.Find("[data-test=wipe]").ClassList);
+    }
+
     [Fact]
     public void Numbers_use_the_french_format()
     {

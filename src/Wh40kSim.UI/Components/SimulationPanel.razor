@@ -1,7 +1,7 @@
 @* Lancement de la simulation : nombre d'itérations, graine, progression et annulation. *@
 
-<MudPaper Outlined="true" Class="pa-3">
-    <MudText Typo="Typo.h6" GutterBottom="true">@L["Simulation_Title"]</MudText>
+<MudPaper Elevation="3" Class="pa-4 wh-section">
+    <SectionHeader Icon="@Icons.Material.Filled.Casino" Title="@L["Simulation_Title"]" />
     <MudGrid Spacing="2">
         <MudItem xs="6">
             <MudNumericField T="int" Label="@L["Simulation_Iterations"]" Min="1" Max="100_000_000" Step="100_000" Disabled="Running"
@@ -13,9 +13,19 @@
         </MudItem>
     </MudGrid>
 
+    <MudButtonGroup Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="mt-2">
+        @foreach (int preset in Presets)
+        {
+            <MudButton Variant="@(preset == Iterations ? Variant.Filled : Variant.Outlined)" Disabled="Running"
+                       OnClick="() => IterationsChanged.InvokeAsync(preset)" data-test="@($"preset-{preset}")">@preset.ToString("N0")</MudButton>
+        }
+    </MudButtonGroup>
+
     <MudStack Row="true" AlignItems="AlignItems.Center" Class="mt-3">
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PlayArrow"
-                   Disabled="@(!CanRun)" OnClick="OnRun" data-test="run">@L["Simulation_Run"]</MudButton>
+        <MudTooltip Text="@L["Simulation_RunHelp"]">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PlayArrow"
+                       Disabled="@(!CanRun)" OnClick="OnRun" data-test="run">@L["Simulation_Run"]</MudButton>
+        </MudTooltip>
         @if (Running)
         {
             <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Stop"
@@ -31,6 +41,9 @@
 </MudPaper>
 
 @code {
+    /// <summary>Choix rapides du nombre de simulations.</summary>
+    private static readonly int[] Presets = [10_000, 100_000, 1_000_000, 10_000_000];
+
     [Parameter]
     public int Iterations { get; set; }
 

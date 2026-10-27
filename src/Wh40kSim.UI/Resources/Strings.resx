@@ -13,48 +13,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Ability_Blast" xml:space="preserve">
-    <value>Blast</value>
-  </data>
-  <data name="Ability_CriticalHitOn" xml:space="preserve">
-    <value>Touche critique sur</value>
-  </data>
-  <data name="Ability_CriticalWoundOn" xml:space="preserve">
-    <value>Blessure critique sur</value>
-  </data>
-  <data name="Ability_DevastatingWounds" xml:space="preserve">
-    <value>Devastating Wounds</value>
-  </data>
-  <data name="Ability_Heavy" xml:space="preserve">
-    <value>Heavy</value>
-  </data>
-  <data name="Ability_IgnoresCover" xml:space="preserve">
-    <value>Ignores Cover</value>
-  </data>
-  <data name="Ability_Lance" xml:space="preserve">
-    <value>Lance</value>
-  </data>
-  <data name="Ability_LethalHits" xml:space="preserve">
-    <value>Lethal Hits</value>
-  </data>
-  <data name="Ability_Melta" xml:space="preserve">
-    <value>Melta</value>
-  </data>
-  <data name="Ability_Precision" xml:space="preserve">
-    <value>Precision</value>
-  </data>
-  <data name="Ability_RapidFire" xml:space="preserve">
-    <value>Rapid Fire</value>
-  </data>
-  <data name="Ability_SustainedHits" xml:space="preserve">
-    <value>Sustained Hits</value>
-  </data>
-  <data name="Ability_Torrent" xml:space="preserve">
-    <value>Torrent</value>
-  </data>
-  <data name="Ability_TwinLinked" xml:space="preserve">
-    <value>Twin-linked</value>
-  </data>
   <data name="App_Title" xml:space="preserve">
     <value>Wh40kSim – Simulateur de dégâts</value>
   </data>
@@ -73,6 +31,18 @@
   <data name="Attacker_Title" xml:space="preserve">
     <value>Attaquant</value>
   </data>
+  <data name="Confirm_Cancel" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+  <data name="Confirm_Discard" xml:space="preserve">
+    <value>Abandonner</value>
+  </data>
+  <data name="Confirm_Message" xml:space="preserve">
+    <value>Le scénario en cours a été modifié et n'est pas enregistré. Abandonner ces modifications ?</value>
+  </data>
+  <data name="Confirm_Title" xml:space="preserve">
+    <value>Modifications non enregistrées</value>
+  </data>
   <data name="Context_Charged" xml:space="preserve">
     <value>A chargé ce tour</value>
   </data>
@@ -80,7 +50,7 @@
     <value>À demi-portée</value>
   </data>
   <data name="Context_HitModifier" xml:space="preserve">
-    <value>Modificateur de touche</value>
+    <value>Modificateur au jet de touche</value>
   </data>
   <data name="Context_HitReroll" xml:space="preserve">
     <value>Relance des touches</value>
@@ -98,7 +68,7 @@
     <value>Situation</value>
   </data>
   <data name="Context_WoundModifier" xml:space="preserve">
-    <value>Modificateur de blessure</value>
+    <value>Modificateur au jet de blessure</value>
   </data>
   <data name="Context_WoundReroll" xml:space="preserve">
     <value>Relance des blessures</value>
@@ -113,7 +83,7 @@
     <value>Dans l'ordre où ils encaissent : le premier groupe d'abord, les PERSONNAGES en dernier.</value>
   </data>
   <data name="Defender_HitModifier" xml:space="preserve">
-    <value>Modificateur aux touches subies</value>
+    <value>Modificateur aux jets de touche subis</value>
   </data>
   <data name="Defender_InCover" xml:space="preserve">
     <value>À couvert</value>
@@ -134,7 +104,7 @@
     <value>Défenseur</value>
   </data>
   <data name="Defender_WoundModifier" xml:space="preserve">
-    <value>Modificateur aux blessures subies</value>
+    <value>Modificateur aux jets de blessure subis</value>
   </data>
   <data name="Dice_Invalid" xml:space="preserve">
     <value>Expression de dés invalide (ex. 2, D6, 2D3, D6+1)</value>
@@ -148,11 +118,11 @@
   <data name="File_OpenError" xml:space="preserve">
     <value>Impossible d'ouvrir le scénario : {0}</value>
   </data>
-  <data name="File_SaveError" xml:space="preserve">
-    <value>Impossible d'enregistrer le scénario : {0}</value>
-  </data>
   <data name="File_Saved" xml:space="preserve">
     <value>Scénario enregistré : {0}</value>
+  </data>
+  <data name="File_SaveError" xml:space="preserve">
+    <value>Impossible d'enregistrer le scénario : {0}</value>
   </data>
   <data name="Group_Count" xml:space="preserve">
     <value>Figurines</value>
@@ -184,6 +154,123 @@
   <data name="Group_Wounds" xml:space="preserve">
     <value>PV</value>
   </data>
+  <data name="Keyword_Blast" xml:space="preserve">
+    <value>Blast</value>
+  </data>
+  <data name="Keyword_Blast_Help" xml:space="preserve">
+    <value>+1 attaque par tranche de 5 figurines dans l'unité ciblée.</value>
+  </data>
+  <data name="Keyword_CriticalHitOn" xml:space="preserve">
+    <value>Touche critique</value>
+  </data>
+  <data name="Keyword_CriticalHitOn_Help" xml:space="preserve">
+    <value>Les jets de touche non modifiés à partir de X sont critiques (6 sinon).</value>
+  </data>
+  <data name="Keyword_CriticalWoundOn" xml:space="preserve">
+    <value>Blessure critique</value>
+  </data>
+  <data name="Keyword_CriticalWoundOn_Help" xml:space="preserve">
+    <value>Les jets de blessure non modifiés à partir de X sont critiques (6 sinon). Sert aussi pour approcher Anti-X.</value>
+  </data>
+  <data name="Keyword_DevastatingWounds" xml:space="preserve">
+    <value>Devastating Wounds</value>
+  </data>
+  <data name="Keyword_DevastatingWounds_Help" xml:space="preserve">
+    <value>Une blessure critique inflige ses dégâts en blessures mortelles, sans sauvegarde.</value>
+  </data>
+  <data name="Keyword_Heavy" xml:space="preserve">
+    <value>Heavy</value>
+  </data>
+  <data name="Keyword_Heavy_Help" xml:space="preserve">
+    <value>+1 pour toucher si l'unité est restée immobile (armes de tir).</value>
+  </data>
+  <data name="Keyword_IgnoresCover" xml:space="preserve">
+    <value>Ignores Cover</value>
+  </data>
+  <data name="Keyword_IgnoresCover_Help" xml:space="preserve">
+    <value>Le couvert de la cible ne s'applique pas.</value>
+  </data>
+  <data name="Keyword_Lance" xml:space="preserve">
+    <value>Lance</value>
+  </data>
+  <data name="Keyword_Lance_Help" xml:space="preserve">
+    <value>+1 pour blesser si l'unité a chargé ce tour.</value>
+  </data>
+  <data name="Keyword_LethalHits" xml:space="preserve">
+    <value>Lethal Hits</value>
+  </data>
+  <data name="Keyword_LethalHits_Help" xml:space="preserve">
+    <value>Une touche critique blesse automatiquement.</value>
+  </data>
+  <data name="Keyword_Melta" xml:space="preserve">
+    <value>Melta</value>
+  </data>
+  <data name="Keyword_Melta_Help" xml:space="preserve">
+    <value>À demi-portée : +X dégâts par attaque.</value>
+  </data>
+  <data name="Keyword_Precision" xml:space="preserve">
+    <value>Precision</value>
+  </data>
+  <data name="Keyword_Precision_Help" xml:space="preserve">
+    <value>Les attaques peuvent viser un PERSONNAGE de l'unité ciblée.</value>
+  </data>
+  <data name="Keyword_RapidFire" xml:space="preserve">
+    <value>Rapid Fire</value>
+  </data>
+  <data name="Keyword_RapidFire_Help" xml:space="preserve">
+    <value>À demi-portée : +X attaques par figurine.</value>
+  </data>
+  <data name="Keyword_SustainedHits" xml:space="preserve">
+    <value>Sustained Hits</value>
+  </data>
+  <data name="Keyword_SustainedHits_Help" xml:space="preserve">
+    <value>Une touche critique génère X touches supplémentaires (X peut être un jet de dés, ex. D3).</value>
+  </data>
+  <data name="Keyword_Torrent" xml:space="preserve">
+    <value>Torrent</value>
+  </data>
+  <data name="Keyword_Torrent_Help" xml:space="preserve">
+    <value>Touche automatiquement : pas de jet de touche, donc pas de touche critique.</value>
+  </data>
+  <data name="Keyword_TwinLinked" xml:space="preserve">
+    <value>Twin-linked</value>
+  </data>
+  <data name="Keyword_TwinLinked_Help" xml:space="preserve">
+    <value>Relance les jets de blessure ratés.</value>
+  </data>
+  <data name="KeywordCategory_Attacks" xml:space="preserve">
+    <value>Attaques</value>
+  </data>
+  <data name="KeywordCategory_Damage" xml:space="preserve">
+    <value>Dégâts</value>
+  </data>
+  <data name="KeywordCategory_Hit" xml:space="preserve">
+    <value>Touche</value>
+  </data>
+  <data name="KeywordCategory_Targeting" xml:space="preserve">
+    <value>Ciblage</value>
+  </data>
+  <data name="KeywordCategory_Wound" xml:space="preserve">
+    <value>Blessure</value>
+  </data>
+  <data name="Keywords_AllCategories" xml:space="preserve">
+    <value>Tous</value>
+  </data>
+  <data name="Keywords_ForWeapon" xml:space="preserve">
+    <value>Arme : {0}</value>
+  </data>
+  <data name="Keywords_NoResult" xml:space="preserve">
+    <value>Aucun mot-clé ne correspond à la recherche.</value>
+  </data>
+  <data name="Keywords_Search" xml:space="preserve">
+    <value>Rechercher un mot-clé (Entrée pour l'ajouter)</value>
+  </data>
+  <data name="Keywords_Title" xml:space="preserve">
+    <value>Mots-clés</value>
+  </data>
+  <data name="Modifier_RollHelp" xml:space="preserve">
+    <value>Cumulé avec les autres, plafonné à ±1 (après relances)</value>
+  </data>
   <data name="Reroll_Failed" xml:space="preserve">
     <value>Les échecs</value>
   </data>
@@ -195,9 +282,6 @@
   </data>
   <data name="Reroll_Ones" xml:space="preserve">
     <value>Les 1</value>
-  </data>
-  <data name="Results_CentralRange" xml:space="preserve">
-    <value>80 % des cas</value>
   </data>
   <data name="Results_Damage" xml:space="preserve">
     <value>PV retirés</value>
@@ -217,20 +301,17 @@
   <data name="Results_LossesPerGroup" xml:space="preserve">
     <value>Pertes moyennes par groupe</value>
   </data>
-  <data name="Results_Mean" xml:space="preserve">
-    <value>Moyenne</value>
-  </data>
-  <data name="Results_Median" xml:space="preserve">
-    <value>Médiane</value>
-  </data>
-  <data name="Results_StdDev" xml:space="preserve">
-    <value>Écart-type</value>
+  <data name="Results_TileDetail" xml:space="preserve">
+    <value>médiane {0} · écart-type {1} · 80 % des cas : {2} à {3}</value>
   </data>
   <data name="Results_Title" xml:space="preserve">
     <value>Résultats</value>
   </data>
   <data name="Results_Wipe" xml:space="preserve">
-    <value>Unité détruite :</value>
+    <value>Unité détruite</value>
+  </data>
+  <data name="Results_WipeDetail" xml:space="preserve">
+    <value>rouge sous {0}, vert au-delà de {1}</value>
   </data>
   <data name="Simulation_Cancel" xml:space="preserve">
     <value>Annuler</value>
@@ -244,6 +325,9 @@
   <data name="Simulation_Run" xml:space="preserve">
     <value>Lancer</value>
   </data>
+  <data name="Simulation_RunHelp" xml:space="preserve">
+    <value>Lancer la simulation (Ctrl+Entrée)</value>
+  </data>
   <data name="Simulation_Seed" xml:space="preserve">
     <value>Graine</value>
   </data>
@@ -256,11 +340,23 @@
   <data name="Toolbar_New" xml:space="preserve">
     <value>Nouveau</value>
   </data>
+  <data name="Toolbar_NewHelp" xml:space="preserve">
+    <value>Repartir d'un scénario vierge</value>
+  </data>
   <data name="Toolbar_Open" xml:space="preserve">
     <value>Ouvrir</value>
   </data>
+  <data name="Toolbar_OpenHelp" xml:space="preserve">
+    <value>Ouvrir un scénario (Ctrl+O)</value>
+  </data>
   <data name="Toolbar_Save" xml:space="preserve">
     <value>Enregistrer</value>
+  </data>
+  <data name="Toolbar_SaveHelp" xml:space="preserve">
+    <value>Enregistrer le scénario (Ctrl+S)</value>
+  </data>
+  <data name="Toolbar_Untitled" xml:space="preserve">
+    <value>Nouveau scénario</value>
   </data>
   <data name="Weapon_Abilities" xml:space="preserve">
     <value>Mots-clés</value>
@@ -280,6 +376,9 @@
   <data name="Weapon_Duplicate" xml:space="preserve">
     <value>Dupliquer</value>
   </data>
+  <data name="Weapon_EditKeywords" xml:space="preserve">
+    <value>Mots-clés</value>
+  </data>
   <data name="Weapon_Melee" xml:space="preserve">
     <value>Mêlée</value>
   </data>
@@ -297,6 +396,9 @@
   </data>
   <data name="Weapon_Strength" xml:space="preserve">
     <value>F</value>
+  </data>
+  <data name="Weapon_SummaryInvalid" xml:space="preserve">
+    <value>{0} (expression de dés invalide)</value>
   </data>
   <data name="Weapon_Type" xml:space="preserve">
     <value>Type</value>

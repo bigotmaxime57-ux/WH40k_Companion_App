@@ -8,7 +8,8 @@ résultats, et une console de debug.
 
 1. Moteur de simulation (11e édition) et console : **terminé**.
 2. Interface graphique : application desktop Windows (MAUI Blazor Hybrid + MudBlazor) : **terminée** (`v0.2a`).
-3. Graphiques et comparaison : distributions, probabilités cumulées P(≥ k), comparaison de profils côte à côte.
+3. Graphiques et comparaison : écran d'accueil, Quick sim (l'écran actuel), Full sim (statistiques détaillées,
+   graphiques), comparaison de plusieurs attaquants ou de plusieurs cibles.
 4. Traduction : anglais, choix de la langue, messages du Core.
 5. Mots-clés du défenseur (vrai Anti-X…), règles d'armée et détachements, stockage des règles.
 6. Gestion et sauvegarde des unités : bibliothèque, choix du loadout et des leaders.

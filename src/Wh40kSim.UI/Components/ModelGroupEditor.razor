@@ -20,7 +20,7 @@
         }
         @if (Group.IsCharacter)
         {
-            <MudChip T="string" Size="Size.Small" Color="Color.Secondary" Variant="Variant.Filled">@L["Group_IsCharacter"]</MudChip>
+            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Filled" Class="wh-character-chip">@L["Group_IsCharacter"]</MudChip>
         }
         <MudTooltip Text="@L["Defender_MoveUp"]">
             <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" Disabled="@(!CanMoveUp)" OnClick="OnMoveUp" data-test="move-up" />

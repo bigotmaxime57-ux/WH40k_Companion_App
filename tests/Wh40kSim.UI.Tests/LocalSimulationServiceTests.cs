@@ -1,5 +1,5 @@
-using Wh40kSim.Core.Engine;
 using Wh40kSim.Core.Model;
+using Wh40kSim.Simulation;
 using Wh40kSim.UI.Services;
 
 namespace Wh40kSim.UI.Tests;
@@ -21,8 +21,8 @@ public class LocalSimulationServiceTests
 
         var actual = await _service.RunAsync(Scenario, 30_000, seed: 5);
 
-        Assert.Equal(expected.KillsHistogram, actual.KillsHistogram);
-        Assert.Equal(expected.DamageHistogram, actual.DamageHistogram);
+        Assert.Equal(expected.Kills.Counts, actual.Kills.Counts);
+        Assert.Equal(expected.Damage.Counts, actual.Damage.Counts);
     }
 
     [Fact]

@@ -253,10 +253,13 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 - Phase 2a, étape 2 (Wh40kSim.UI, services, formulaires) : fusionnée dans `main`.
 - Roadmap refaite et renumérotée le 2026-10-27 (web local abandonné, traduction en phase 3, étape « Séparation
   Core / Simulation » insérée en 2a).
-- **Prochaine : étape 3 (séparation Core / Simulation)**, nom et principe validés, en attente du feu vert.
+- Phase 2a, étape 3 (séparation Core / Simulation) : terminée sur `phase2a/etape3-simulation`, en attente de
+  validation avant fusion. 156 tests verts (95 Core, 28 Simulation, 33 UI) ; non-régression au bit près sur deux
+  scénarios (`NonRegressionTests`) ; sortie de la console identique à celle d'avant le refactor.
+- **Prochaine : étape 4 (composants)**, en attente du feu vert.
 
 Points notés pour les étapes suivantes :
 - **Ancienne numérotation** dans le code : `WeaponAbilities.cs` (« phase 3 » pour les mots-clés, et un commentaire
-  qui cite Precision comme non géré alors qu'il l'est), `ReportPrinter.cs` (graphiques en « phase 5 ») : à corriger
-  quand ces fichiers sont touchés, au plus tard à l'étape 5.
+  qui cite Precision comme non géré alors qu'il l'est) : à corriger quand ce fichier est touché, au plus tard à
+  l'étape 5.
 - `UsesHalfRange` / `UsesRemainedStationary` / `UsesCharged` n'existent pas encore (prévu à l'étape 4).

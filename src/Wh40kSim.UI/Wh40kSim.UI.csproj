@@ -2,7 +2,7 @@
 
   <!--
     Interface graphique partagée par les hôtes (desktop MAUI, puis web) : composants, services, modèles de formulaire.
-    Aucune règle de jeu ici : tout passe par Wh40kSim.Core.
+    Aucune règle de jeu ni aucun calcul ici : tout passe par Wh40kSim.Core et Wh40kSim.Simulation.
   -->
   <PropertyGroup>
     <RootNamespace>Wh40kSim.UI</RootNamespace>
@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Wh40kSim.Core\Wh40kSim.Core.csproj" />
+    <ProjectReference Include="..\Wh40kSim.Simulation\Wh40kSim.Simulation.csproj" />
   </ItemGroup>
 
 </Project>

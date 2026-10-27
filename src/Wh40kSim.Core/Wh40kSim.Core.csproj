@@ -1,6 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <!-- Bibliothèque pure : modèles + moteur de simulation. Aucune dépendance UI ni IO (hors JSON). -->
+  <!--
+    Bibliothèque pure : règles du jeu. Modèles + résolution d'une séquence d'attaque (le Monte Carlo et les statistiques
+    sont dans Wh40kSim.Simulation). Aucune dépendance UI ni IO (hors JSON).
+  -->
   <PropertyGroup>
     <RootNamespace>Wh40kSim.Core</RootNamespace>
   </PropertyGroup>

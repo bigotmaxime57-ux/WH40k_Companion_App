@@ -2,9 +2,9 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using Wh40kSim.ConsoleApp;
-using Wh40kSim.Core.Engine;
 using Wh40kSim.Core.Model;
 using Wh40kSim.Core.Serialization;
+using Wh40kSim.Simulation;
 
 // Usage :
 //   wh40ksim                                   -> saisie interactive
@@ -68,8 +68,8 @@ static int Run(string[] args)
         : 1_000_000);
 
     Console.WriteLine($"Simulation en cours ({n:N0} itérations)...");
-    var summary = Simulator.Run(scenario, n, seed);
-    ReportPrinter.Print(summary);
+    var result = Simulator.Run(scenario, n, seed);
+    ReportPrinter.Print(result);
     return 0;
 }
 

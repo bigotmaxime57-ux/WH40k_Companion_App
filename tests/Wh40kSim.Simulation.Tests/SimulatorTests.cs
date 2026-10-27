@@ -1,9 +1,8 @@
 using Wh40kSim.Core.Dice;
-using Wh40kSim.Core.Engine;
 using Wh40kSim.Core.Model;
 using Wh40kSim.Core.Serialization;
 
-namespace Wh40kSim.Core.Tests;
+namespace Wh40kSim.Simulation.Tests;
 
 /// <summary>
 /// Le Monte Carlo doit retrouver les moyennes calculées à la main.
@@ -18,8 +17,8 @@ public class SimulatorTests
 
     private static void AssertMeanKills(double expected, Scenario scenario)
     {
-        var summary = Simulator.Run(scenario, Iterations, seed: 12345);
-        Assert.InRange(summary.MeanKills, expected - Tolerance, expected + Tolerance);
+        var result = Simulator.Run(scenario, Iterations, seed: 12345);
+        Assert.InRange(result.Kills.Mean, expected - Tolerance, expected + Tolerance);
     }
 
     [Fact]
@@ -75,16 +74,16 @@ public class SimulatorTests
         var first = Simulator.Run(scenario, 50_000, seed: 7);
         var second = Simulator.Run(scenario, 50_000, seed: 7);
 
-        Assert.Equal(first.KillsHistogram, second.KillsHistogram);
-        Assert.Equal(first.DamageHistogram, second.DamageHistogram);
+        Assert.Equal(first.Kills.Counts, second.Kills.Counts);
+        Assert.Equal(first.Damage.Counts, second.Damage.Counts);
     }
 
     [Fact]
     public void Iteration_count_is_exact_even_when_not_a_multiple_of_the_chunk_size()
     {
-        var summary = Simulator.Run(Build.Scenario(BaseWeapon, Build.Horde()), 25_001, seed: 1);
-        Assert.Equal(25_001, summary.Iterations);
-        Assert.Equal(25_001, summary.KillsHistogram.Sum());
+        var result = Simulator.Run(Build.Scenario(BaseWeapon, Build.Horde()), 25_001, seed: 1);
+        Assert.Equal(25_001, result.Iterations);
+        Assert.Equal(25_001, result.Kills.Counts.Sum());
     }
 
     [Fact]
@@ -135,8 +134,8 @@ public class SimulatorTests
         var without = Simulator.Run(scenario, 50_000, seed: 7);
         var with = Simulator.Run(scenario, 50_000, seed: 7, new RecordingProgress());
 
-        Assert.Equal(without.KillsHistogram, with.KillsHistogram);
-        Assert.Equal(without.DamageHistogram, with.DamageHistogram);
+        Assert.Equal(without.Kills.Counts, with.Kills.Counts);
+        Assert.Equal(without.Damage.Counts, with.Damage.Counts);
         Assert.Equal(without.MeanKilledInGroup(0), with.MeanKilledInGroup(0));
     }
 
@@ -155,22 +154,12 @@ public class SimulatorTests
     [Fact]
     public void Example_scenario_file_loads_and_runs()
     {
-        string path = Path.Combine(FindRepositoryRoot(), "scenarios", "exemple-escouade-vs-leader.json");
+        string path = Path.Combine(Build.RepositoryRoot(), "scenarios", "exemple-escouade-vs-leader.json");
         var scenario = ScenarioJson.Load(path);
 
-        var summary = Simulator.Run(scenario, 10_000, seed: 3);
+        var result = Simulator.Run(scenario, 10_000, seed: 3);
 
-        Assert.Equal(11, summary.TotalModels);
-        Assert.InRange(summary.MeanKills, 0.5, 11);
-    }
-
-    private static string FindRepositoryRoot()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "Wh40kSim.sln")))
-        {
-            directory = directory.Parent;
-        }
-        return directory?.FullName ?? throw new DirectoryNotFoundException("Racine de la solution introuvable.");
+        Assert.Equal(11, result.TotalModels);
+        Assert.InRange(result.Kills.Mean, 0.5, 11);
     }
 }

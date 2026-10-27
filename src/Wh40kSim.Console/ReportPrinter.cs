@@ -5,7 +5,7 @@ using static Wh40kSim.ConsoleApp.ConsoleInput;
 namespace Wh40kSim.ConsoleApp;
 
 /// <summary>
-/// Affichage texte des résultats (en attendant les graphiques de la phase 4). Mise en forme uniquement :
+/// Affichage texte des résultats (en attendant les graphiques de la phase 3). Mise en forme uniquement :
 /// tous les chiffres viennent de <see cref="SimulationResult"/>.
 /// </summary>
 internal static class ReportPrinter

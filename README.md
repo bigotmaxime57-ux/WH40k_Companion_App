@@ -7,12 +7,12 @@ résultats, et une console de debug.
 ## Roadmap
 
 1. Moteur de simulation (11e édition) et console : **terminé**.
-2. Interface graphique : **2a** application desktop Windows (MAUI Blazor Hybrid + MudBlazor) : **terminée** (`v0.2a`) ;
-   **2b** API serveur + client web.
-3. Traduction : anglais, choix de la langue, messages du Core.
-4. Graphiques et comparaison : distributions, probabilités cumulées P(≥ k), comparaison de profils côte à côte.
+2. Interface graphique : application desktop Windows (MAUI Blazor Hybrid + MudBlazor) : **terminée** (`v0.2a`).
+3. Graphiques et comparaison : distributions, probabilités cumulées P(≥ k), comparaison de profils côte à côte.
+4. Traduction : anglais, choix de la langue, messages du Core.
 5. Mots-clés du défenseur (vrai Anti-X…), règles d'armée et détachements, stockage des règles.
 6. Gestion et sauvegarde des unités : bibliothèque, choix du loadout et des leaders.
+7. Intégration web : API serveur + client web.
 
 Détail des étapes et décisions : `CLAUDE.md`. Idées non planifiées : tickets GitHub du dépôt.
 

@@ -1,16 +1,18 @@
 @*
     Coquille de l'application, commune aux hôtes : fournisseurs MudBlazor, barre de titre avec bascule clair / sombre,
-    et la page « Simulateur ». Le thème suit celui du système au démarrage (préférence lue par le navigateur ou la WebView).
+    et la page « Simulateur ». Thème Wh40kTheme ; le mode sombre suit celui du système au démarrage (préférence lue par le
+    navigateur ou la WebView). Styles complémentaires : wwwroot/wh40ksim.css, chargé par l'hôte.
 *@
 
-<MudThemeProvider @ref="_themeProvider" @bind-IsDarkMode="_isDarkMode" />
+<MudThemeProvider @ref="_themeProvider" Theme="Wh40kTheme.Theme" @bind-IsDarkMode="_isDarkMode" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<MudLayout>
-    <MudAppBar Elevation="1" Dense="true">
-        <MudText Typo="Typo.h6">@L["App_Title"]</MudText>
+<MudLayout Class="wh-shell">
+    <MudAppBar Elevation="2" Dense="true">
+        <MudIcon Icon="@Icons.Material.Filled.MilitaryTech" Class="mr-2" />
+        <MudText Typo="Typo.h6" Class="wh-brand">@L["App_Title"]</MudText>
         <MudSpacer />
         <MudTooltip Text="@L["App_ToggleTheme"]">
             <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)" Color="Color.Inherit"

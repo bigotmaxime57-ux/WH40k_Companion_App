@@ -1,0 +1,40 @@
+/*
+   Styles globaux de Wh40kSim.UI (en plus du thème MudBlazor, Theme/Wh40kTheme.cs).
+   L'hôte les charge après MudBlazor : <link rel="stylesheet" href="_content/Wh40kSim.UI/wh40ksim.css" />
+*/
+
+/* Fond légèrement assombri sur les bords, pour l'ambiance « grimdark » (sans effet en thème clair : couleur du thème) */
+.wh-shell .mud-main-content {
+    background: radial-gradient(ellipse at top, var(--mud-palette-background-gray) 0%, var(--mud-palette-background) 70%);
+    min-height: 100vh;
+}
+
+/* Barre de titre : nom de l'application en capitales espacées, filet laiton */
+.wh-shell .mud-appbar {
+    border-bottom: 2px solid var(--mud-palette-primary);
+}
+
+.wh-brand {
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+/* Sections (attaquant, défenseur…) : carte en relief soulignée d'un filet laiton */
+.wh-section {
+    border-top: 3px solid var(--mud-palette-primary);
+}
+
+.wh-section-header {
+    align-items: center;
+    display: flex;
+    gap: .6rem;
+    margin-bottom: .75rem;
+}
+
+.wh-section-header > .mud-icon-root {
+    color: var(--mud-palette-primary);
+}
+
+.wh-section-header > .wh-section-actions {
+    margin-left: auto;
+}

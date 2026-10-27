@@ -3,8 +3,8 @@
     SimulationResult (Wh40kSim.Simulation).
 *@
 
-<MudPaper Outlined="true" Class="pa-3" data-test="results">
-    <MudText Typo="Typo.h6">@L["Results_Title"]</MudText>
+<MudPaper Elevation="3" Class="pa-4 wh-section" data-test="results">
+    <SectionHeader Icon="@Icons.Material.Filled.Assessment" Title="@L["Results_Title"]" />
     <MudText Typo="Typo.body2" GutterBottom="true">
         @L["Results_Header", Result.Iterations.ToString("N0"), Result.Elapsed.TotalSeconds.ToString("F2"), Result.Seed]
     </MudText>

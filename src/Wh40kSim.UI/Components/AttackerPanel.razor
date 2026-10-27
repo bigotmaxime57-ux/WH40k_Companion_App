@@ -1,7 +1,7 @@
 @* Attaquant : nom et profils d'armes, résolus dans l'ordre de la liste. *@
 
-<MudPaper Outlined="true" Class="pa-3">
-    <MudText Typo="Typo.h6" GutterBottom="true">@L["Attacker_Title"]</MudText>
+<MudPaper Elevation="3" Class="pa-4 wh-section">
+    <SectionHeader Icon="@Icons.Material.Filled.GpsFixed" Title="@L["Attacker_Title"]" />
     <MudTextField T="string" Label="@L["Attacker_Name"]" @bind-Value="Attacker.Name" @bind-Value:after="NotifyChanged" />
 
     @foreach (var weapon in Attacker.Weapons)

@@ -1,7 +1,7 @@
 @* Défenseur : ses groupes d'allocation, dans l'ordre où ils encaissent (le premier d'abord). *@
 
-<MudPaper Outlined="true" Class="pa-3">
-    <MudText Typo="Typo.h6" GutterBottom="true">@L["Defender_Title"]</MudText>
+<MudPaper Elevation="3" Class="pa-4 wh-section">
+    <SectionHeader Icon="@Icons.Material.Filled.Shield" Title="@L["Defender_Title"]" />
     <MudGrid Spacing="2">
         <MudItem xs="12" sm="6">
             <MudTextField T="string" Label="@L["Defender_Name"]" @bind-Value="Defender.Name" @bind-Value:after="NotifyChanged" />

@@ -231,6 +231,21 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
      de commande, Windows uniquement ; roadmap du README et commentaires du code alignés sur la nouvelle
      numérotation des phases.
    - Fin de phase 2a : tag `v0.2a`.
+7. **Finitions de l'interface** (ajoutée après `v0.2a` : interface jugée « encore un peu austère »). Tout dans
+   Wh40kSim.UI, aucune règle ni calcul ajouté côté interface.
+   - Style : thème à identité Warhammer 40k (sombre « grimdark » : acier, laiton / or, rouge sombre ; pendant clair
+     cohérent), en-têtes de section avec icônes, cartes en relief. **Prototype du thème d'abord, validé sur captures
+     avant le reste.**
+   - Résultats : tuiles de synthèse en tête (figurines tuées, PV retirés, unité détruite) ; barre proportionnelle dans
+     la colonne P(= k) des tableaux (pas encore les graphiques de la phase 4).
+   - Mise en page en deux colonnes : saisie à gauche, simulation et résultats à droite, toujours visibles.
+   - Profils d'armes et groupes du défenseur repliables, avec un résumé en en-tête (`Describe()` du Core).
+   - Mots-clés en puces cliquables ; le champ des mots-clés à valeur n'apparaît que s'ils sont actifs.
+   - Raccourcis clavier : Ctrl+Entrée lancer, Ctrl+S enregistrer, Ctrl+O ouvrir.
+   - Confirmation avant de perdre une saisie modifiée (Nouveau / Ouvrir) ; « * » après le nom du fichier si modifié.
+   - Nombre de simulations en choix rapides (10 000 / 100 000 / 1 000 000 / 10 000 000) ; infobulle sur chaque
+     mot-clé (rappel de la règle en une phrase).
+   - Fin d'étape : tag `v0.2a.1`.
 
 ## Décisions techniques
 
@@ -327,8 +342,8 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   (captures) : fenêtre, thème, saisie, simulation et résultats ; deux défauts de mise en page corrigés (groupe
   d'allocation, valeurs de Sustained Hits / Rapid Fire / Melta). Numérotation des phases alignée dans le README et le
   code.
-- **Prochaine : amélioration du style et de l'ergonomie de l'interface** (demandée après la 2a : « encore un peu
-  austère »), à définir ensemble avant la phase 2b (API + client web).
+- **En cours : phase 2a, étape 7 (finitions de l'interface)** sur `phase2a/etape7-finitions-ui`. Toutes les
+  propositions retenues, identité Warhammer pour le thème. Prochaine ensuite : phase 2b (API + client web).
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

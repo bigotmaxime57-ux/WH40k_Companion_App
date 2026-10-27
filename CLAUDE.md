@@ -251,6 +251,20 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
    - Confirmation avant de perdre une saisie modifiée (Nouveau / Ouvrir) ; « * » après le nom du fichier si modifié.
    - Nombre de simulations en choix rapides (10 000 / 100 000 / 1 000 000 / 10 000 000) ; rappel de règle en une
      phrase pour chaque mot-clé (sélecteur et infobulles des étiquettes).
+   - Retours de l'utilisateur intégrés : groupes du défenseur en cartes aérées (numéro, filet rouge pour un
+     PERSONNAGE), libellés des champs à 85 % et non coupés, tuile « Unité détruite » rouge sous 50 %, verte au-delà de
+     84 %, libellés « modificateur au jet » précisés.
+8. **Modifications de caractéristiques** (ajoutée pendant l'étape 7 : un modificateur au jet de touche, plafonné à ±1,
+   n'est pas une modification de la CT / CC, non plafonnée ; seul le couvert était géré). Règles confirmées par
+   l'utilisateur : pas de limite sur la modification de CT / CC (le résultat reste borné entre 2+ et 6+, 02.02.01, déjà
+   appliqué au couvert), PA jamais au-dessus de 0, Force jamais sous 1.
+   - Core, convention +1 = mieux pour celui qui en bénéficie. Situation (attaquant) : CT / CC, A, F, PA, D. Défenseur
+     (attaques qui le visent) : CT / CC des attaquants (cumulée avec le couvert), PA des attaques reçues. Appliquées au
+     profil avant les jets ; A et D au moins 1 (déjà le cas). Modificateurs au jet inchangés.
+   - JSON : nouveaux champs à 0 par défaut (anciens fichiers lisibles). Non-régression au bit près sans modification.
+   - Tests : dés scriptés pour chaque modification, cumul non plafonné (couvert + aptitude du défenseur), bornes.
+   - UI : rangée « Modifications de caractéristiques » dans la Situation et le Défenseur, distincte des modificateurs
+     au jet, avec une aide. README : séquence d'attaque mise à jour.
    - Fin d'étape : tag `v0.2a.1`.
 
 ## Décisions techniques
@@ -348,12 +362,13 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   (captures) : fenêtre, thème, saisie, simulation et résultats ; deux défauts de mise en page corrigés (groupe
   d'allocation, valeurs de Sustained Hits / Rapid Fire / Melta). Numérotation des phases alignée dans le README et le
   code.
-- **En cours : phase 2a, étape 7 (finitions de l'interface)** sur `phase2a/etape7-finitions-ui`. Toutes les
-  propositions retenues, identité Warhammer pour le thème, sélecteur de mots-clés en panneau latéral. Tout est codé
-  et testé (231 tests verts : 114 Core, 33 Simulation, 84 UI) ; reste la vérification à l'écran avec l'utilisateur.
-  Prochaine ensuite : phase 2b (API + client web).
+- Phase 2a, étape 7 (finitions de l'interface) : fusionnée dans `main` (sans tag : `v0.2a.1` à la fin de l'étape 8).
+  234 tests verts (114 Core, 33 Simulation, 87 UI). Vérifiée à l'écran par l'utilisateur au fil de l'eau.
+- **En cours : phase 2a, étape 8 (modifications de caractéristiques)**. Prochaine ensuite : phase 2b (API + client
+  web).
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis
   `dotnet restore`).
-- Ouvrir un scénario quand le formulaire a été modifié remplace la saisie sans confirmation (pas demandé en 2a).
+- Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier
+  dans un vrai navigateur en phase 2b.

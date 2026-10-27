@@ -11,19 +11,29 @@
     </MudText>
 
     <div class="wh-tiles my-3">
-        <StatTile Label="@L["Results_Kills"]" Value="@Kills.Mean.ToString("F2")" Detail="@Detail(Kills)" data-test="tile-kills" />
-        <StatTile Label="@L["Results_Damage"]" Value="@Damage.Mean.ToString("F2")" Detail="@Detail(Damage)" data-test="tile-damage" />
+        <StatTile Label="@L["Results_Kills"]" Value="@Result.Kills.Mean.ToString("F2")" Detail="@Detail(Result.Kills)" data-test="tile-kills" />
+        <StatTile Label="@L["Results_Damage"]" Value="@Result.Damage.Mean.ToString("F2")" Detail="@Detail(Result.Damage)" data-test="tile-damage" />
         <StatTile Label="@L["Results_Wipe"]" Value="@Result.ProbabilityWipe.ToString("P1")" Tone="WipeTone" data-test="wipe" />
     </div>
 
+    @* La marge s'ajoute aux pertes réelles sans les remplacer : les tuiles du haut restent plafonnées à l'unité *@
     @if (Result.ProbabilityWipe > 0)
     {
-        <MudSwitch T="bool" Color="Color.Primary" Label="@L["Results_Extended"]" @bind-Value="_extended" data-test="extended" />
+        <div class="wh-subsection-title">
+            <MudSwitch T="bool" Color="Color.Primary" Label="@L["Results_Extended"]" @bind-Value="_extended" data-test="extended" />
+            <HelpBubble Lines="@([L["Help_Margin"], L["Help_MarginTable"]])" />
+        </div>
         @if (_extended)
         {
-            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2" data-test="excess-explanation">
+            <div class="wh-tiles mt-2">
+                <StatTile Label="@L["Results_MarginKills"]" Value="@Margin(Result.KillMarginWhenWiped)"
+                          Detail="@L["Results_MarginDetail"]" data-test="margin-kills" />
+                <StatTile Label="@L["Results_MarginDamage"]" Value="@Margin(Result.DamageMarginWhenWiped)"
+                          Detail="@L["Results_MarginDetail"]" data-test="margin-damage" />
+            </div>
+            <MudText Typo="Typo.caption" Class="wh-muted d-block mt-1 mb-2" data-test="excess-explanation">
                 @L["Results_ExtendedHelp", (Result.ExcessProfile with { Count = 1 }).Describe()]
-            </MudAlert>
+            </MudText>
         }
     }
 
@@ -41,8 +51,8 @@
         </tbody>
     </MudSimpleTable>
 
-    <DistributionTable Title="@L["Results_Kills"]" Distribution="Kills" />
-    <DistributionTable Title="@L["Results_Damage"]" Distribution="Damage" />
+    <DistributionTable Title="@L["Results_Kills"]" Distribution="Kills" UnitSize="@(_extended ? Result.TotalModels : null)" />
+    <DistributionTable Title="@L["Results_Damage"]" Distribution="Damage" UnitSize="@(_extended ? Result.TotalWounds : null)" />
 </MudPaper>
 
 @code {
@@ -63,7 +73,9 @@
     [Parameter, EditorRequired]
     public SimulationResult Result { get; set; } = null!;
 
-    /// <summary>Distributions réelles, ou prolongées au-delà de la destruction de l'unité (excédent).</summary>
+    private static string Margin(double value) => "+" + value.ToString("F2");
+
+    /// <summary>Distributions des tableaux : réelles, ou prolongées au-delà de la destruction de l'unité (marge).</summary>
     private DiscreteDistribution Kills => _extended ? Result.ExtendedKills : Result.Kills;
 
     private DiscreteDistribution Damage => _extended ? Result.ExtendedDamage : Result.Damage;

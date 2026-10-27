@@ -266,6 +266,15 @@
     grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
 }
 
+/* Tableaux prolongés : lignes au-delà de l'unité (pertes virtuelles), sous un trait pointillé */
+.wh-row-beyond td {
+    color: var(--mud-palette-text-secondary);
+}
+
+.wh-row-beyond-first td {
+    border-top: 2px dashed var(--mud-palette-primary) !important;
+}
+
 .wh-tile {
     background: var(--mud-palette-background-gray);
     border: 1px solid var(--mud-palette-lines-default);

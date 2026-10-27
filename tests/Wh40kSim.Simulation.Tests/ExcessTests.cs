@@ -61,6 +61,17 @@ public class ExcessTests
     }
 
     [Fact]
+    public void Margin_when_wiped_is_the_extra_part_of_the_extended_mean_spread_over_the_wipes()
+    {
+        var result = Simulator.Run(OftenWiped(), 100_000, seed: 11);
+
+        // Sous le maximum les deux distributions coïncident : l'écart des moyennes vient des seules destructions
+        Assert.Equal((result.ExtendedKills.Mean - result.Kills.Mean) / result.ProbabilityWipe, result.KillMarginWhenWiped, 9);
+        Assert.Equal((result.ExtendedDamage.Mean - result.Damage.Mean) / result.ProbabilityWipe, result.DamageMarginWhenWiped, 9);
+        Assert.True(result.KillMarginWhenWiped > 0);
+    }
+
+    [Fact]
     public void Without_wipe_the_extended_distributions_are_the_real_ones()
     {
         var scenario = Build.Scenario(new WeaponProfile { Skill = 3 }, Build.Horde(models: 100), models: 5);
@@ -70,6 +81,7 @@ public class ExcessTests
         Assert.Equal(0, result.ProbabilityWipe);
         Assert.Equal(result.Kills.Counts, result.ExtendedKills.Counts);
         Assert.Equal(result.Damage.Counts, result.ExtendedDamage.Counts);
+        Assert.Equal(0, result.KillMarginWhenWiped);
     }
 
     [Fact]

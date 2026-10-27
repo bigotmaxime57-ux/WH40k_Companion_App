@@ -108,6 +108,11 @@ le dernier tué, souvent le leader, unique et plus résistant. L'excédent de d�
 Ces dés sont tirés à part : les résultats réels sont les mêmes que sans ce calcul. La console affiche la section
 « Au-delà de l'unité » dès que l'unité peut être détruite.
 
+La **marge** résume ces distributions : figurines virtuelles tuées et PV retirés en plus, en moyenne sur les
+simulations où l'unité est détruite. Dans l'interface, les tuiles du haut restent les pertes réelles ; « Afficher la
+marge » ajoute les tuiles de marge et prolonge les tableaux, dont les lignes au-delà de l'unité sont notées
+« 5 + 2 » (les 5 figurines de l'unité, plus 2 virtuelles).
+
 ## Hypothèses restantes
 
 - **Réduction de dégâts** : non appliquée aux blessures mortelles (elles ne sont pas une attaque allouée).

@@ -84,6 +84,23 @@ public sealed class DiscreteDistribution
         return (double)_countsAtLeast[value] / Total;
     }
 
+    /// <summary>
+    /// Dépassement moyen au-delà d'un seuil, sachant qu'il est atteint : E[X - seuil | X ≥ seuil]
+    /// (0 si le seuil n'est jamais atteint). Pour une distribution prolongée, avec l'effectif de l'unité comme seuil :
+    /// la marge moyenne quand l'unité est détruite.
+    /// </summary>
+    public double MeanExcessAbove(int threshold)
+    {
+        long reached = 0;
+        double excess = 0;
+        for (int k = Math.Max(threshold, 0); k < _counts.Length; k++)
+        {
+            reached += _counts[k];
+            excess += (double)(k - threshold) * _counts[k];
+        }
+        return reached == 0 ? 0 : excess / reached;
+    }
+
     /// <summary>Plus petite valeur k telle que P(X ≤ k) ≥ p (p entre 0 et 1, 0,5 = médiane).</summary>
     public int Percentile(double p)
     {

@@ -17,6 +17,16 @@ public class DiscreteDistributionTests
     }
 
     [Fact]
+    public void Mean_excess_is_measured_only_where_the_threshold_is_reached()
+    {
+        // Seuil 1 atteint 3 fois sur 4 : dépassements 0, 0 et 1 → 1/3
+        Assert.Equal(1.0 / 3, Small.MeanExcessAbove(1), 12);
+        Assert.Equal(0, Small.MeanExcessAbove(2));
+        Assert.Equal(0, Small.MeanExcessAbove(3)); // jamais atteint
+        Assert.Equal(Small.Mean, Small.MeanExcessAbove(0));
+    }
+
+    [Fact]
     public void Probabilities_cover_every_value_and_beyond()
     {
         Assert.Equal(0.25, Small.ProbabilityExactly(0));

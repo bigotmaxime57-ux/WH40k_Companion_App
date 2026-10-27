@@ -284,7 +284,13 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
    - Retours de l'utilisateur : titre « Armement » entre les boosts et les armes (comme « Groupes d'allocation ») ;
      bloc Boosts teinté ; **couleurs de camp** façon cartes de déploiement, dans tous les thèmes : rouge pour
      l'attaquant, vert pour le défenseur (variable CSS `--wh-accent` des sections `.wh-attacker` / `.wh-defender`) ;
-     filet du PERSONNAGE passé en or (le rouge désigne l'attaquant).
+     filet du PERSONNAGE passé en or (le rouge désigne l'attaquant) ; choix rapide du nombre de simulations en
+     surbrillance.
+   - **Marge (excédent de l'étape 4) clarifiée** : la moyenne des figurines tuées changeait avec le mode prolongé et
+     dépassait l'effectif. Les tuiles restent toujours les pertes réelles ; « Afficher la marge » ajoute deux tuiles
+     (figurines et PV en plus, en moyenne quand l'unité est détruite : `SimulationResult.KillMarginWhenWiped` /
+     `DamageMarginWhenWiped`, via `DiscreteDistribution.MeanExcessAbove`) et prolonge les tableaux, lignes au-delà
+     de l'unité notées « 5 + 2 » sous un trait. La console affiche aussi la marge.
    - Fin d'étape : tag `v0.2a.1`.
 
 ## Décisions techniques

@@ -277,12 +277,20 @@ public class ResultsViewTests : ComponentTestContext
         var result = Run(defenders: 2);
         var view = Render<ResultsView>(p => p.Add(c => c.Result, result));
         int realRows = view.Find("[data-test=distribution]").QuerySelectorAll("tbody tr").Length;
+        string kills = view.Find("[data-test=tile-kills]").TextContent;
+        Assert.Empty(view.FindAll("[data-test=beyond]"));
 
         view.Find("input[data-test=extended]").Change(true);
 
         int extendedRows = view.Find("[data-test=distribution]").QuerySelectorAll("tbody tr").Length;
         Assert.True(extendedRows > realRows);
         Assert.Contains("Gardes", view.Find("[data-test=excess-explanation]").TextContent);
+        // Les tuiles restent les pertes réelles ; la marge a ses propres tuiles
+        Assert.Equal(kills, view.Find("[data-test=tile-kills]").TextContent);
+        Assert.Contains(result.KillMarginWhenWiped.ToString("F2"), view.Find("[data-test=margin-kills]").TextContent);
+        Assert.Contains(result.DamageMarginWhenWiped.ToString("F2"), view.Find("[data-test=margin-damage]").TextContent);
+        // Lignes au-delà de l'unité notées « 2 + n »
+        Assert.StartsWith("2 + 1", view.Find("[data-test=beyond]").TextContent.Trim());
     }
 
     /// <summary>Une attaque Torrent contre une seule figurine à 1 PV sans sauvegarde : P(détruite) = P(blesser).</summary>

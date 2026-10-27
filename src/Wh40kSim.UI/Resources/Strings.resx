@@ -200,7 +200,13 @@
     <value>Modifications de caractéristiques, sans plafond : A et D restent au moins à 1, la PA ne dépasse jamais 0.</value>
   </data>
   <data name="Help_Results" xml:space="preserve">
-    <value>80 % des cas : du 1er au 9e décile. Prolonger au-delà de l'unité : les attaques restantes continuent contre des figurines virtuelles, pour mesurer la marge.</value>
+    <value>80 % des cas : du 1er au 9e décile. Les tuiles et les pertes par groupe sont toujours les pertes réelles, plafonnées à l'effectif de l'unité.</value>
+  </data>
+  <data name="Help_Margin" xml:space="preserve">
+    <value>Une fois l'unité détruite, les attaques restantes continuent contre des figurines virtuelles, copies du premier garde du corps. La marge dit de combien l'unité est détruite : figurines virtuelles tuées et PV retirés en plus, en moyenne sur les simulations où elle est détruite.</value>
+  </data>
+  <data name="Help_MarginTable" xml:space="preserve">
+    <value>Dans les tableaux, sous le trait, « 5 + 2 » signifie : les 5 figurines de l'unité, plus 2 figurines virtuelles.</value>
   </data>
   <data name="Help_Roll" xml:space="preserve">
     <value>Modificateurs au jet : cumulés entre attaquant et défenseur, plafonnés à ±1 au total, appliqués après les relances (ex. -1 pour Stealth).</value>
@@ -371,10 +377,22 @@
     <value>PV retirés</value>
   </data>
   <data name="Results_Extended" xml:space="preserve">
-    <value>Prolonger au-delà de l'unité (excédent)</value>
+    <value>Afficher la marge au-delà de l'unité</value>
   </data>
   <data name="Results_ExtendedHelp" xml:space="preserve">
-    <value>Après la destruction de l'unité, les attaques restantes continuent contre des figurines virtuelles : {0}.</value>
+    <value>Figurines virtuelles : {0}.</value>
+  </data>
+  <data name="Results_Beyond" xml:space="preserve">
+    <value>{0} + {1}</value>
+  </data>
+  <data name="Results_MarginDamage" xml:space="preserve">
+    <value>Marge : PV retirés</value>
+  </data>
+  <data name="Results_MarginDetail" xml:space="preserve">
+    <value>en plus, en moyenne, quand l'unité est détruite</value>
+  </data>
+  <data name="Results_MarginKills" xml:space="preserve">
+    <value>Marge : figurines tuées</value>
   </data>
   <data name="Results_Header" xml:space="preserve">
     <value>{0} simulations en {1} s (graine {2})</value>

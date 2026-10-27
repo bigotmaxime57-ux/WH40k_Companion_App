@@ -66,6 +66,12 @@ public sealed class SimulationResult
     /// <summary>PV retirés en prolongeant la séquence (voir <see cref="ExtendedKills"/>).</summary>
     public DiscreteDistribution ExtendedDamage { get; }
 
+    /// <summary>Marge moyenne quand l'unité est détruite : figurines virtuelles tuées en plus (0 si jamais détruite).</summary>
+    public double KillMarginWhenWiped => ExtendedKills.MeanExcessAbove(TotalModels);
+
+    /// <summary>Marge moyenne quand l'unité est détruite : PV retirés en plus aux figurines virtuelles (0 si jamais détruite).</summary>
+    public double DamageMarginWhenWiped => ExtendedDamage.MeanExcessAbove(TotalWounds);
+
     /// <summary>Profil des figurines virtuelles qui encaissent l'excédent (voir <see cref="DefenderUnit.ExcessProfile"/>).</summary>
     public ModelGroup ExcessProfile => Scenario.Defender.ExcessProfile!;
 }

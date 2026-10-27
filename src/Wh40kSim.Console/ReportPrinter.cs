@@ -59,6 +59,9 @@ internal static class ReportPrinter
         Console.WriteLine("Après la destruction de l'unité, les attaques restantes continuent contre des figurines virtuelles :");
         Console.WriteLine($"  {(result.ExcessProfile with { Count = 1 }).Describe()}");
         Console.WriteLine();
+        Console.WriteLine($"Marge quand l'unité est détruite : +{result.KillMarginWhenWiped:F2} figurine(s), " +
+                          $"+{result.DamageMarginWhenWiped:F2} PV en moyenne");
+        Console.WriteLine();
         Console.WriteLine($"Figurines tuées  : {Summarize(result.ExtendedKills)}");
         Console.WriteLine($"PV retirés       : {Summarize(result.ExtendedDamage)}");
 

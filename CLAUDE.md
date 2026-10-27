@@ -95,21 +95,18 @@ sur les statistiques avant le web), traduction en 4, l'ancienne 2b (API + client
 comparaison de plusieurs profils côte à côte » (qui tue le mieux l'adversaire).
 
 Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que les dessiner, dans Wh40kSim.UI
-(desktop maintenant, web en phase 7).
+(desktop maintenant, web en phase 7). Trois modes, ouverts depuis un écran d'accueil (décision du 2026-10-27) :
 
-1. **Graphiques d'un résultat** : choix de la bibliothèque (`MudChart` ou bibliothèque dédiée, à vérifier en début de
-   phase) ; histogramme P(= k) et courbe P(≥ k) pour les figurines tuées et les PV retirés, à partir des mêmes lignes
-   que les tableaux (`DiscreteDistribution`) ; les tableaux restent.
-   **Le choix des technologies doit tenir compte de la phase 7** : la bibliothèque (et tout ce qu'on ajoute à
-   Wh40kSim.UI) doit fonctionner aussi bien dans le `BlazorWebView` du desktop que dans le client Blazor WebAssembly,
-   sans API propre au desktop, avec un poids raisonnable à télécharger dans le navigateur. Les résultats (simple et
-   comparaison) doivent rester sérialisables : ils formeront le contrat JSON de l'API.
-2. **Comparaison, côté Simulation** : une cible et une situation communes, N profils d'attaquant nommés ; simulation de
-   chacun (progression globale, annulation) ; résultats alignés sur le même axe ; indicateurs calculés dans
-   Simulation : moyenne, P(détruire l'unité), P(≥ k) pour un k choisi, meilleur profil pour chacun (pas de « meilleur »
-   unique). Format JSON d'une comparaison (enregistrer / rouvrir).
-3. **Comparaison, côté UI** : profils ajoutés depuis le scénario courant, par duplication ou depuis un JSON ; courbes
-   P(≥ k) superposées et histogrammes ; tableau côte à côte, meilleur profil mis en évidence par indicateur.
+- **Quick sim** : l'écran actuel, gardé tel quel (une page, A contre B, les grandes lignes, pas de graphique en plus).
+- **Full sim** : A contre B, même scénario que le Quick sim (partagé), avec beaucoup plus de stats, graphiques et
+  analyses (tableau de bord).
+- **Comparaison** : distributions superposées, N attaquants contre une cible ou un attaquant contre N cibles (#1).
+
+Étapes détaillées dans « Phase 3 : étapes ». **Le choix des technologies doit tenir compte de la phase 7** : tout ce
+qu'on ajoute à Wh40kSim.UI (bibliothèque de graphiques, navigation) doit fonctionner aussi bien dans le
+`BlazorWebView` du desktop que dans le client Blazor WebAssembly, sans API propre au desktop, avec un poids raisonnable
+à télécharger dans le navigateur. Les résultats (simple, détaillé, comparaison) doivent rester sérialisables : ils
+formeront le contrat JSON de l'API.
 
 ### Phase 4 : traduction
 
@@ -158,7 +155,8 @@ de codes.
 Le « web local » prévu à l'origine est abandonné (2026-10-27) : le desktop couvre l'usage local, et ce qu'il devait
 apporter (fichiers côté navigateur, Wh40kSim.UI dans un hôte web) est repris ici. Structure Blazor Web App :
 `Wh40kSim.Web` (serveur ASP.NET Core : API + service du client) et `Wh40kSim.Web.Client` (WebAssembly). Le calcul se
-fait sur le serveur. Ce qu'auront apporté les phases 3 à 6 (comparaison, langue, règles, bibliothèque d'unités) est à
+fait sur le serveur. Ce qu'auront apporté les phases 3 à 6 (Full sim, comparaison, fichiers partiels, langue, règles,
+bibliothèque d'unités) est à
 couvrir par l'API et le client ; le découpage sera revu en début de phase.
 
 1. **Contrat et API** (Minimal API) : contrat JSON du résultat (et de la comparaison), `POST` d'un scénario validé par
@@ -327,6 +325,53 @@ couvrir par l'API et le client ; le découpage sera revu en début de phase.
      `Background`, `NameKey`.
    - Fin d'étape : tag `v0.2a.2`.
 
+## Phase 3 : étapes
+
+Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisée et validée avant d'être codée.
+
+1. **Générateur aléatoire sans biais** (#10). `new Random(graine)` garde l'ancien algorithme de .NET, légèrement biaisé
+   (~0,15 point de trop sur P(unité détruite) dans le cas mesuré, ~10 fois l'erreur statistique).
+   - Générateur à graine écrit dans le Core (`Dice/`) : xoshiro256** initialisé par SplitMix64, utilisé par
+     `RandomDiceRoller` ; tirage d'un dé sans biais de modulo. Vitesse mesurée (au moins aussi rapide).
+   - Déterminisme à graine égale conservé, mais résultats changés une fois : références de `NonRegressionTests`
+     recapturées (changement noté ici).
+   - Test statistique contre une valeur théorique exacte (cas binomial du ticket, recréé dans le test), tolérance de
+     quelques écarts-types.
+2. **Écran d'accueil et navigation.** Tuiles vers les modes existants seulement (Quick sim, puis Full sim et
+   Comparaison quand ils arrivent ; unités en phase 6). Routeur Blazor (`/`, `/quick-sim`…), utilisable tel quel par le
+   client web ; barre de titre commune (thèmes, retour à l'accueil). `SimulatorPage` devient le Quick sim sans
+   changement. Scénario courant tenu par un service (et non par la page) : conservé en changeant d'écran, partagé avec
+   le Full sim.
+3. **JSON partiels.** Même format, sections facultatives : `{ "attacker": … }` (fichier attaquant), `{ "defender": … }`
+   (fichier défenseur), les trois sections (scénario, inchangé). Boosts inclus dans leur partie. Lecture stricte (rien
+   d'utile, ou une situation seule, est refusé). On peut reprendre l'attaquant ou le défenseur de n'importe quel
+   fichier, scénario complet compris. Quick sim : Ouvrir / Enregistrer dans les cartes Attaquant et Défenseur (le
+   scénario complet garde ses boutons) ; `IScenarioFileService` étendu, hôte desktop adapté. Premier pas vers la phase 6,
+   sans figer la fiche d'unité.
+4. **Points (#2, version légère).** Points optionnels sur l'attaquant et sur chaque groupe du défenseur (un leader a son
+   propre coût) ; JSON et UI. Indicateurs dans Simulation : points détruits, rendement (points détruits / points de
+   l'attaquant). Mode de calcul des points détruits (au prorata des figurines ou des PV) à trancher dans l'étape.
+5. **Dégâts bruts (#6).** Dégâts de chaque attaque non sauvegardée comptés en entier (après réduction de dégâts et FNP),
+   sans plafond par figurine ni arrêt à la destruction de l'unité ; distribution et gaspillage (bruts - PV retirés)
+   dans Simulation. Fait tôt pour figurer dans le Full sim.
+6. **Statistiques détaillées, côté Simulation** (tout ce que le Full sim affichera, calculé et testé, affiché par la
+   console) : distribution des pertes par groupe (% de kill par groupe, P(tuer le PERSONNAGE)) ; PV retirés et
+   figurines tuées par profil d'arme ; part des pertes de PERSONNAGE dues aux attaques Precision ; analyses en points
+   (tanking, kill threat : définitions à arrêter avec l'utilisateur). Si ces suivis ralentissent la boucle : option de
+   simulation, pour garder le Quick sim rapide.
+7. **Full sim, côté UI.** Choix de la technique de graphiques en début d'étape, prototype sur captures (critères :
+   desktop et WebAssembly, 4 thèmes et couleurs de camp, barres + courbe, infobulles, N courbes superposées, poids,
+   testable avec bUnit ; essayer `MudChart` d'abord, sinon composants SVG maison ; bibliothèque JS déconseillée).
+   Tableau de bord : histogramme enrichi, P(≥ k), dégâts par arme, % de kill par groupe, gaspillage, points.
+   Tag intermédiaire proposé : `v0.3`.
+8. **Comparaison, côté Simulation.** Deux sens (#1) : N attaquants contre une cible, ou un attaquant contre N cibles ;
+   situation commune. Même graine pour toutes les entrées (tirages partagés : écarts plus fiables). Indicateurs :
+   moyennes, P(détruire l'unité), P(≥ k), % de l'unité détruite et points détruits (comparables entre cibles
+   différentes) ; meilleure entrée pour chaque indicateur, ex æquo compris. JSON d'une comparaison ; console.
+9. **Comparaison, côté UI.** Entrées prises dans le scénario courant ou dans des fichiers (partiels ou complets),
+   dupliquées, renommées ; distributions superposées ; tableau côte à côte, meilleure entrée mise en évidence ;
+   ouvrir / enregistrer. Fin de phase : README, tag (`v0.3.1` si `v0.3` a été posé à l'étape 7).
+
 ## Décisions techniques
 
 - **Hôte desktop : MAUI Blazor Hybrid**, pas Photino.Blazor. Photino.Blazor 4.0.13 (janvier 2025) ne cible que
@@ -444,8 +489,8 @@ couvrir par l'API et le client ; le découpage sera revu en début de phase.
   35 Simulation, 100 UI). Branche `essai/theme-neon` reprise dans l'étape, puis supprimée.
 - Phase 2a validée par l'utilisateur ; roadmap renumérotée le 2026-10-27 : graphiques et comparaison en 3,
   traduction en 4, web (ex-2b) en 7.
-- Prochaine ensuite : phase 3 (graphiques et comparaison). Étapes à détailler et valider avant de coder ; tickets
-  proches à trancher en ouverture : #10 (générateur biaisé, à traiter avant d'ajouter des statistiques), #1, #2, #6.
+- Phase 3 découpée le 2026-10-27 (voir « Phase 3 : étapes ») : #10, #2 (version légère), #6 et #1 y entrent.
+- Prochaine ensuite : phase 3, étape 1 (générateur sans biais), en attente du feu vert.
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

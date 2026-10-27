@@ -4,23 +4,7 @@
     <SectionHeader Icon="@Icons.Material.Filled.Shield" Title="@L["Defender_Title"]" />
     <MudTextField T="string" Label="@L["Defender_Name"]" @bind-Value="Defender.Name" @bind-Value:after="NotifyChanged" />
 
-    @* Couvert et modificateurs aux jets subis ; les modifications de caractéristiques se saisissent dans la Situation *@
-    <SubSection Title="@L["Defender_AgainstUnit"]" Help="@([L["Help_Cover"], L["Help_Roll"], L["Help_DefenderCharacteristics"]])"
-                data-test="defender-modifiers">
-        <MudGrid Spacing="3">
-            <MudItem xs="12" sm="4">
-                <MudCheckBox T="bool" Label="@L["Defender_InCover"]" @bind-Value="Defender.InCover" @bind-Value:after="NotifyChanged" />
-            </MudItem>
-            <MudItem xs="12" sm="4">
-                <MudNumericField T="int" Label="@L["Defender_HitModifier"]" Min="-3" Max="3"
-                                 @bind-Value="Defender.HitModifier" @bind-Value:after="NotifyChanged" />
-            </MudItem>
-            <MudItem xs="12" sm="4">
-                <MudNumericField T="int" Label="@L["Defender_WoundModifier"]" Min="-3" Max="3"
-                                 @bind-Value="Defender.WoundModifier" @bind-Value:after="NotifyChanged" />
-            </MudItem>
-        </MudGrid>
-    </SubSection>
+    <DefenderBoosts Defender="Defender" Changed="NotifyChanged" />
 
     <div class="wh-subsection-title mt-4">
         <MudText Typo="Typo.subtitle1">@L["Defender_Groups"]</MudText>

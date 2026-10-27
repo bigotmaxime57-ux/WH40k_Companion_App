@@ -178,6 +178,64 @@ public class CharacteristicModifierTests
         Assert.Equal(1, target.DamageDealt);
     }
 
+    // --- Boosts du défenseur (cumulés avec ceux de l'attaquant) ---------------------------
+
+    [Theory]
+    [InlineData(3, 0)] // CT 3+ : attaquant +1, défenseur -1, couvert -1 → 4+, un 3 rate
+    [InlineData(4, 1)]
+    public void Defender_skill_boost_stacks_with_the_attacker_and_cover(int hitRoll, int killed)
+    {
+        var defender = OneModel with { InCover = true, SkillModifier = -1 };
+        int[] rolls = killed == 0 ? [hitRoll] : [hitRoll, 2, 1];
+
+        var target = Run(Weapon(skill: 3), defender, new AttackContext { SkillModifier = 1 }, rolls);
+
+        Assert.Equal(killed, target.ModelsKilled);
+    }
+
+    [Fact]
+    public void Defender_ap_boost_makes_saves_easier_and_never_pushes_ap_above_zero()
+    {
+        var armoured = new DefenderUnit { ApModifier = -1, Groups = [new ModelGroup { Count = 1, Wounds = 1, Save = 3 }] };
+
+        // PA-1 dégradée de 1 : PA0 ; un 3 sauve contre 3+
+        Assert.Equal(0, Run(Weapon(skill: 2, ap: -1), armoured, new AttackContext(), 2, 2, 3).ModelsKilled);
+        // PA0 dégradée de 1 : reste 0 ; un 2 rate contre 3+
+        Assert.Equal(1, Run(Weapon(skill: 2), armoured, new AttackContext(), 2, 2, 2).ModelsKilled);
+    }
+
+    [Fact]
+    public void Attacker_and_defender_damage_boosts_interact()
+    {
+        // D1, +2 dégâts (attaquant), -1 dégât (défenseur) : 2 dégâts, la figurine à 3 PV survit
+        var defender = new DefenderUnit { DamageModifier = -1, Groups = [new ModelGroup { Count = 1, Wounds = 3, Save = 7 }] };
+
+        var target = Run(Weapon(skill: 2), defender, new AttackContext { DamageModifier = 2 }, 2, 2, 1);
+
+        Assert.Equal(2, target.DamageDealt);
+        Assert.Equal(0, target.ModelsKilled);
+    }
+
+    [Fact]
+    public void Defender_damage_boost_stacks_with_damage_reduction_and_never_drops_below_one()
+    {
+        var defender = new DefenderUnit { DamageModifier = -1, Groups = [new ModelGroup { Count = 1, Wounds = 5, Save = 7, DamageReduction = 1 }] };
+
+        var target = Run(Weapon(skill: 2, damage: 3), defender, new AttackContext(), 2, 2, 1);
+
+        Assert.Equal(1, target.DamageDealt);
+    }
+
+    [Fact]
+    public void Defender_damage_boost_does_not_apply_to_mortal_wounds()
+    {
+        // Devastating Wounds : la blessure critique (6) inflige 2 blessures mortelles, sans le -1 du défenseur
+        var weapon = Weapon(skill: 2, damage: 2) with { Abilities = new WeaponAbilities { DevastatingWounds = true } };
+        var defender = new DefenderUnit { DamageModifier = -1, Groups = [new ModelGroup { Count = 1, Wounds = 2, Save = 7 }] };
+
+        Assert.Equal(1, Run(weapon, defender, new AttackContext(), 2, 6).ModelsKilled);
+    }
+
     // --- JSON ----------------------------------------------------------------------------
 
     [Fact]
@@ -187,8 +245,11 @@ public class CharacteristicModifierTests
         Assert.Equal(new AttackContext(), empty.Context);
 
         var context = new AttackContext { SkillModifier = 1, AttacksModifier = 2, StrengthModifier = 3, ApModifier = -1, DamageModifier = 1 };
-        var copy = ScenarioJson.Deserialize(ScenarioJson.Serialize(new Scenario { Context = context }));
+        var defender = new DefenderUnit { SkillModifier = -1, ApModifier = -1, DamageModifier = -1 };
+        var copy = ScenarioJson.Deserialize(ScenarioJson.Serialize(new Scenario { Context = context, Defender = defender }));
 
         Assert.Equal(context, copy.Context);
+        Assert.Equal((-1, -1, -1), (copy.Defender.SkillModifier, copy.Defender.ApModifier, copy.Defender.DamageModifier));
+        Assert.Equal(0, ScenarioJson.Deserialize("""{ "defender": {} }""").Defender.DamageModifier);
     }
 }

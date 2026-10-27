@@ -83,6 +83,21 @@ public sealed record DefenderUnit
     /// <summary>Modificateur appliqué aux jets de blessure contre cette unité.</summary>
     public int WoundModifier { get; init; }
 
+    // Boosts du défenseur sur les caractéristiques des attaques qui le visent : exprimés du point de vue de l'attaquant
+    // (négatif = moins bon pour lui), sans plafond, cumulés avec ceux de l'attaquant (voir AttackContext).
+
+    /// <summary>CT / CC des attaquants (-1 : 3+ devient 4+), cumulée avec celle de l'attaquant et le couvert.</summary>
+    public int SkillModifier { get; init; }
+
+    /// <summary>PA des attaques reçues (-1 : PA-2 devient PA-1) ; la PA ne dépasse jamais 0.</summary>
+    public int ApModifier { get; init; }
+
+    /// <summary>
+    /// Dégâts des attaques reçues (-1 : un dégât de moins), appliqués comme la réduction de dégâts des groupes : après
+    /// Melta, minimum 1, pas sur les blessures mortelles.
+    /// </summary>
+    public int DamageModifier { get; init; }
+
     public IReadOnlyList<ModelGroup> Groups { get; init; } = [];
 
     [JsonIgnore]

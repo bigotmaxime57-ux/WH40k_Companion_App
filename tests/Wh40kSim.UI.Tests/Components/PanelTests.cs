@@ -180,17 +180,11 @@ public class ContextPanelTests : ComponentTestContext
     }
 
     [Fact]
-    public void Characteristic_modifications_are_separate_from_roll_modifiers()
+    public void Without_conditions_the_situation_says_so()
     {
-        var context = new ContextForm();
-        var panel = RenderPanel(new Scenario(), context);
+        var panel = RenderPanel(new Scenario());
 
-        panel.Find("input[data-test=skill-modifier]").Change("2");
-
-        Assert.Equal(2, context.SkillModifier);
-        Assert.Equal(0, context.HitModifier);
-        // Les explications sont derrière les bulles « ? », plus sous les champs
-        Assert.True(panel.FindAll("[data-test=help]").Count >= 3);
+        Assert.NotNull(panel.Find("[data-test=context-none]"));
         Assert.Empty(panel.FindAll(".mud-input-helper-text"));
     }
 
@@ -214,6 +208,50 @@ public class ContextPanelTests : ComponentTestContext
         Assert.Empty(panel.FindAll("[data-test=half-range]"));
         Assert.NotEmpty(panel.FindAll("[data-test=remained-stationary]"));
         Assert.NotEmpty(panel.FindAll("[data-test=charged]"));
+    }
+}
+
+public class BoostTests : ComponentTestContext
+{
+    [Fact]
+    public void Attacker_boosts_start_collapsed_and_count_active_boosts()
+    {
+        var context = new ContextForm();
+        var boosts = Render<AttackerBoosts>(p => p.Add(c => c.Context, context));
+        Assert.Empty(boosts.FindAll("[data-test=boosts-content]"));
+        Assert.Empty(boosts.FindAll("[data-test=boosts-count]"));
+
+        boosts.Find("[data-test=toggle-boosts]").Click();
+        boosts.Find("input[data-test=skill-modifier]").Change("2");
+
+        Assert.Equal(2, context.SkillModifier);
+        Assert.Equal(0, context.HitModifier);
+        Assert.Contains("1", boosts.Find("[data-test=boosts-count]").TextContent);
+        // Les explications sont derrière la bulle « ? », pas sous les champs
+        Assert.NotEmpty(boosts.FindAll("[data-test=help]"));
+        Assert.Empty(boosts.FindAll(".mud-input-helper-text"));
+    }
+
+    [Fact]
+    public void Defender_boosts_start_expanded_when_some_are_set()
+    {
+        var defender = new DefenderForm(new DefenderUnit { InCover = true, DamageModifier = -1 });
+
+        var boosts = Render<DefenderBoosts>(p => p.Add(c => c.Defender, defender));
+
+        Assert.NotNull(boosts.Find("[data-test=boosts-content]"));
+        Assert.Contains("2", boosts.Find("[data-test=boosts-count]").TextContent);
+        boosts.Find("input[data-test=defender-damage-modifier]").Change("-2");
+        Assert.Equal(-2, defender.DamageModifier);
+    }
+
+    [Fact]
+    public void Attacker_card_shows_its_boosts_on_the_page()
+    {
+        var page = Render<SimulatorPage>();
+
+        Assert.NotNull(page.Find("[data-test=attacker-boosts]"));
+        Assert.NotNull(page.Find("[data-test=defender-boosts]"));
     }
 }
 

@@ -30,7 +30,7 @@
     <MudGrid Spacing="3">
         <MudItem xs="12" lg="7">
             <MudStack Spacing="3">
-                <AttackerPanel Attacker="Form.Attacker" Changed="OnFormChanged" EditKeywords="EditKeywords" />
+                <AttackerPanel Attacker="Form.Attacker" Boosts="Form.Context" Changed="OnFormChanged" EditKeywords="EditKeywords" />
                 <DefenderPanel Defender="Form.Defender" Changed="OnFormChanged" />
                 <ContextPanel Context="Form.Context" Reference="_reference" Changed="OnFormChanged" />
             </MudStack>

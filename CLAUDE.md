@@ -261,16 +261,23 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
    n'est pas une modification de la CT / CC, non plafonnée ; seul le couvert était géré). Règles confirmées par
    l'utilisateur : pas de limite sur la modification de CT / CC (le résultat reste borné entre 2+ et 6+, 02.02.01, déjà
    appliqué au couvert), PA jamais au-dessus de 0, Force jamais sous 1.
-   - Core, convention +1 = mieux pour l'attaquant : `AttackContext` CT / CC, A, F, PA, D, appliquées au profil avant
-     les jets ; A et D au moins 1 (déjà le cas) ; couvert cumulé à la CT. Modificateurs au jet inchangés. **Pas de
-     modification de caractéristique côté défenseur** (retirée à la demande de l'utilisateur : doublon avec la
-     Situation, le moteur additionnant les deux) : une aptitude du défenseur se saisit dans la Situation, en négatif.
-   - JSON : nouveaux champs à 0 par défaut (anciens fichiers lisibles). Non-régression au bit près sans modification.
-   - Tests : dés scriptés pour chaque modification, cumul non plafonné avec le couvert, bornes.
-   - UI (retours de l'utilisateur) : Situation en blocs Conditions / Touche / Blessure / Attaques, PA et dégâts
-     (caractéristique et jet côte à côte) ; défenseur : bloc couvert + jets subis. **Aucune annotation sous les
-     champs** : les explications sont dans des bulles « ? » à côté des titres (infobulle après 1 s de survol).
-     README : séquence d'attaque mise à jour.
+   - **Boosts de chaque côté** (choix final de l'utilisateur, après deux essais : tout dans la Situation, puis
+     défenseur sans boosts) : chacun saisit les siens, le moteur les cumule (ex. +2 dégâts de l'attaquant et -1 dégât
+     du défenseur interagissent, sans calcul à la main). Convention : valeurs du point de vue de l'attaquant (+1 =
+     mieux pour lui).
+     - Attaquant (`AttackContext`, JSON « context », inchangé pour garder les anciens fichiers lisibles) : CT / CC,
+       jet de touche, relance des touches ; Force, jet de blessure, relance des blessures ; A, PA, D.
+     - Défenseur (`DefenderUnit`) : couvert, CT / CC des attaquants, jet de touche ; jet de blessure, PA des attaques
+       reçues, dégâts des attaques reçues (`DamageModifier` : avec la réduction de dégâts des groupes, après Melta,
+       minimum 1, pas sur les blessures mortelles).
+     - Caractéristiques appliquées au profil avant les jets, sans plafond, dans leurs bornes (CT / CC 2+ à 6+ ; F, A,
+       D au moins 1 ; PA jamais au-dessus de 0) ; modificateurs au jet inchangés (±1 au total).
+   - JSON : nouveaux champs à 0 par défaut (anciens fichiers lisibles). Non-régression au bit près sans boost.
+   - Tests : dés scriptés pour chaque boost des deux côtés, cumuls (couvert, attaquant + défenseur), bornes, JSON.
+   - UI : bloc **« Boosts »** repliable dans la carte de l'attaquant et dans celle du défenseur (replié tant qu'aucun
+     boost n'est saisi, nombre de boosts actifs dans l'en-tête), rangées Touche / Blessure / Profil. La **Situation**
+     ne garde que les conditions (demi-portée, immobile, a chargé, cible de Precision). **Aucune annotation sous les
+     champs** : explications dans des bulles « ? » (infobulle après 1 s de survol). README : séquence d'attaque.
    - Fin d'étape : tag `v0.2a.1`.
 
 ## Décisions techniques

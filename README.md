@@ -66,13 +66,14 @@ L'application n'est pas empaquetée (pas de Microsoft Store) : le `.exe` est dan
 
 ## Séquence d'attaque implémentée (règles 05 et 02.02.01, 11e édition)
 
-Deux sortes de bonus et malus, à ne pas confondre :
+**Boosts** (auras, stratagèmes, aptitudes) : l'attaquant et le défenseur ont chacun les leurs, que le moteur cumule.
+Valeurs du point de vue de l'attaquant (+1 = mieux pour lui). Deux sortes, à ne pas confondre :
 - **modificateurs aux jets** (touche, blessure) : ajoutés au résultat du dé, cumulés entre attaquant et défenseur,
   **plafonnés à ±1**, appliqués après les relances ;
-- **modifications de caractéristiques** (CT/CC, A, F, PA, D de toutes les armes, dans la situation ; couvert) :
-  changent le profil avant les jets, **sans plafond**, chaque caractéristique gardant ses bornes (CT/CC entre 2+ et 6+,
-  F, A et D au moins 1, PA jamais au-dessus de 0). Convention : +1 = mieux pour l'attaquant ; une aptitude du
-  défenseur qui dégrade une caractéristique des attaquants se saisit dans la situation, en négatif.
+- **modifications de caractéristiques** : CT/CC, A, F, PA, D pour l'attaquant ; couvert, CT/CC des attaquants, PA et
+  dégâts des attaques reçues pour le défenseur. Elles changent le profil avant les jets, **sans plafond**, chaque
+  caractéristique gardant ses bornes (CT/CC entre 2+ et 6+, F, A et D au moins 1, PA jamais au-dessus de 0). Les dégâts
+  du défenseur s'appliquent avec la réduction de dégâts des groupes (après Melta, minimum 1, pas sur les mortelles).
 
 0. **Pools** : les armes aux attaques identiques (même type, CT/CC, F, PA, D et règles, hors nom, A, Blast et Rapid Fire)
    forment un seul pool, comme bolters + pistolets bolter dans l'exemple des règles. Les pools sont résolus dans l'ordre de saisie.

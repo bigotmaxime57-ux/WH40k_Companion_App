@@ -97,6 +97,19 @@
     gap: .4rem;
 }
 
+/* Petits titres des rangées de boosts (Touche, Blessure…) */
+.wh-boost-row-title {
+    color: var(--mud-palette-primary);
+    display: block;
+    letter-spacing: .06em;
+    margin-top: .5rem;
+    text-transform: uppercase;
+}
+
+.wh-muted {
+    color: var(--mud-palette-text-secondary);
+}
+
 /* Colonne de droite (simulation, résultats) : reste visible sous la barre de titre, avec son propre défilement */
 @media (min-width: 1280px) {
     .wh-sticky-column {

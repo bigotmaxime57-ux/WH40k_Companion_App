@@ -16,11 +16,13 @@ public sealed class DefenderState
     private readonly IReadOnlyList<ModelGroup> _groups;
     private readonly int[] _alive;
     private readonly int[] _frontWounds;
+    private readonly int _damageModifier; // boost de dégâts du défenseur (DefenderUnit.DamageModifier)
     private int _excessFrontWounds;
 
     public DefenderState(DefenderUnit unit)
     {
         _groups = unit.Groups;
+        _damageModifier = unit.DamageModifier;
         _alive = new int[_groups.Count];
         _frontWounds = new int[_groups.Count];
         TotalModels = unit.TotalModels;
@@ -123,8 +125,9 @@ public sealed class DefenderState
 
     /// <summary>
     /// Applique les dégâts d'UNE attaque (ou les blessures mortelles d'UNE blessure critique Devastating Wounds)
-    /// à la figurine en tête du groupe : réduction de dégâts (attaques uniquement), puis Feel No Pain point par point.
-    /// Une seule figurine peut être affectée : l'excédent est perdu. Le groupe peut être <see cref="ExcessGroup"/>.
+    /// à la figurine en tête du groupe : boost de dégâts du défenseur et réduction de dégâts du groupe (attaques
+    /// uniquement, minimum 1), puis Feel No Pain point par point. Une seule figurine peut être affectée : l'excédent est
+    /// perdu. Le groupe peut être <see cref="ExcessGroup"/>.
     /// </summary>
     internal void ApplyDamage(int group, int damage, bool mortalWounds, IDiceRoller dice)
     {
@@ -137,7 +140,7 @@ public sealed class DefenderState
         var profile = Profile(group);
         if (!mortalWounds)
         {
-            damage = Math.Max(1, damage - profile.DamageReduction);
+            damage = Math.Max(1, damage + _damageModifier - profile.DamageReduction);
         }
 
         int lost = 0;

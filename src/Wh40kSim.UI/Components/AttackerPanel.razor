@@ -1,8 +1,13 @@
-@* Attaquant : nom et profils d'armes, résolus dans l'ordre de la liste. *@
+@* Attaquant : nom, boosts (pour toutes ses armes) et profils d'armes, résolus dans l'ordre de la liste. *@
 
 <MudPaper Elevation="3" Class="pa-4 wh-section">
     <SectionHeader Icon="@Icons.Material.Filled.GpsFixed" Title="@L["Attacker_Title"]" />
     <MudTextField T="string" Label="@L["Attacker_Name"]" @bind-Value="Attacker.Name" @bind-Value:after="NotifyChanged" />
+
+    @if (Boosts is not null)
+    {
+        <AttackerBoosts Context="Boosts" Changed="NotifyChanged" />
+    }
 
     @foreach (var weapon in Attacker.Weapons)
     {
@@ -18,6 +23,10 @@
 @code {
     [Parameter, EditorRequired]
     public AttackerForm Attacker { get; set; } = null!;
+
+    /// <summary>Boosts de l'attaquant (stockés dans la situation du scénario) ; non affichés si absents.</summary>
+    [Parameter]
+    public ContextForm? Boosts { get; set; }
 
     /// <summary>Appelé après chaque modification, pour que la page revalide le scénario.</summary>
     [Parameter]

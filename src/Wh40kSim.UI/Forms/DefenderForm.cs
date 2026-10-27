@@ -16,6 +16,9 @@ public sealed class DefenderForm
         InCover = unit.InCover;
         HitModifier = unit.HitModifier;
         WoundModifier = unit.WoundModifier;
+        SkillModifier = unit.SkillModifier;
+        ApModifier = unit.ApModifier;
+        DamageModifier = unit.DamageModifier;
         Groups = unit.Groups.Select(g => new ModelGroupForm(g)).ToList();
     }
 
@@ -27,6 +30,15 @@ public sealed class DefenderForm
 
     public int WoundModifier { get; set; }
 
+    /// <summary>Boost : CT / CC des attaquants, de leur point de vue (-1 = 3+ devient 4+).</summary>
+    public int SkillModifier { get; set; }
+
+    /// <summary>Boost : PA des attaques reçues, du point de vue de l'attaquant (-1 = PA-2 devient PA-1).</summary>
+    public int ApModifier { get; set; }
+
+    /// <summary>Boost : dégâts des attaques reçues (-1 = un dégât de moins).</summary>
+    public int DamageModifier { get; set; }
+
     /// <summary>Groupes dans l'ordre d'allocation : le premier encaisse en premier.</summary>
     public List<ModelGroupForm> Groups { get; set; }
 
@@ -36,6 +48,9 @@ public sealed class DefenderForm
         InCover = InCover,
         HitModifier = HitModifier,
         WoundModifier = WoundModifier,
+        SkillModifier = SkillModifier,
+        ApModifier = ApModifier,
+        DamageModifier = DamageModifier,
         Groups = Groups.Select(g => g.ToModelGroup()).ToList(),
     };
 }

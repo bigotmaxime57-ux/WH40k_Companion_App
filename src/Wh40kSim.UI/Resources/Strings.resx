@@ -31,6 +31,24 @@
   <data name="Attacker_Title" xml:space="preserve">
     <value>Attaquant</value>
   </data>
+  <data name="Boosts_Active" xml:space="preserve">
+    <value>{0} actif(s)</value>
+  </data>
+  <data name="Boosts_Hit" xml:space="preserve">
+    <value>Touche</value>
+  </data>
+  <data name="Boosts_Profile" xml:space="preserve">
+    <value>Attaques, PA et dégâts</value>
+  </data>
+  <data name="Boosts_Title" xml:space="preserve">
+    <value>Boosts</value>
+  </data>
+  <data name="Boosts_Wound" xml:space="preserve">
+    <value>Blessure</value>
+  </data>
+  <data name="Boosts_WoundAndDamage" xml:space="preserve">
+    <value>Blessure et dégâts</value>
+  </data>
   <data name="Confirm_Cancel" xml:space="preserve">
     <value>Annuler</value>
   </data>
@@ -46,29 +64,23 @@
   <data name="Context_Charged" xml:space="preserve">
     <value>A chargé ce tour</value>
   </data>
-  <data name="Context_Conditions" xml:space="preserve">
-    <value>Conditions</value>
-  </data>
   <data name="Context_HalfRange" xml:space="preserve">
     <value>À demi-portée</value>
   </data>
   <data name="Context_HitModifier" xml:space="preserve">
-    <value>Modificateur au jet de touche</value>
+    <value>Jet de touche</value>
   </data>
   <data name="Context_HitReroll" xml:space="preserve">
     <value>Relance des touches</value>
   </data>
-  <data name="Context_HitSection" xml:space="preserve">
-    <value>Touche</value>
+  <data name="Context_None" xml:space="preserve">
+    <value>Aucune condition ne concerne ces armes (demi-portée, immobile, charge, Precision).</value>
   </data>
   <data name="Context_PrecisionFirst" xml:space="preserve">
     <value>Premier PERSONNAGE en jeu</value>
   </data>
   <data name="Context_PrecisionTarget" xml:space="preserve">
     <value>PERSONNAGE visé par Precision</value>
-  </data>
-  <data name="Context_ProfileSection" xml:space="preserve">
-    <value>Attaques, PA et dégâts</value>
   </data>
   <data name="Context_RemainedStationary" xml:space="preserve">
     <value>Restée immobile</value>
@@ -77,19 +89,13 @@
     <value>Situation</value>
   </data>
   <data name="Context_WoundModifier" xml:space="preserve">
-    <value>Modificateur au jet de blessure</value>
+    <value>Jet de blessure</value>
   </data>
   <data name="Context_WoundReroll" xml:space="preserve">
     <value>Relance des blessures</value>
   </data>
-  <data name="Context_WoundSection" xml:space="preserve">
-    <value>Blessure</value>
-  </data>
   <data name="Defender_AddGroup" xml:space="preserve">
     <value>Ajouter un groupe</value>
-  </data>
-  <data name="Defender_AgainstUnit" xml:space="preserve">
-    <value>Contre les attaques qui visent cette unité</value>
   </data>
   <data name="Defender_Groups" xml:space="preserve">
     <value>Groupes d'allocation</value>
@@ -98,7 +104,7 @@
     <value>Dans l'ordre où ils encaissent : le premier groupe d'abord. Les PERSONNAGES restent toujours après les gardes du corps : cocher PERSONNAGE place le groupe en fin de liste, et les flèches ne permettent pas de le faire remonter devant un garde du corps.</value>
   </data>
   <data name="Defender_HitModifier" xml:space="preserve">
-    <value>Modificateur aux jets de touche subis</value>
+    <value>Jet de touche des attaquants</value>
   </data>
   <data name="Defender_InCover" xml:space="preserve">
     <value>À couvert</value>
@@ -119,7 +125,7 @@
     <value>Défenseur</value>
   </data>
   <data name="Defender_WoundModifier" xml:space="preserve">
-    <value>Modificateur aux jets de blessure subis</value>
+    <value>Jet de blessure des attaquants</value>
   </data>
   <data name="Dice_Invalid" xml:space="preserve">
     <value>Expression de dés invalide (ex. 2, D6, 2D3, D6+1)</value>
@@ -169,14 +175,20 @@
   <data name="Group_Wounds" xml:space="preserve">
     <value>PV</value>
   </data>
+  <data name="Help_AttackerBoosts" xml:space="preserve">
+    <value>Boosts de l'attaquant (auras, stratagèmes…), pour toutes ses armes : +1 = mieux pour lui (CT 3+ → 2+, PA-1 → PA-2). Ils se cumulent avec ceux du défenseur.</value>
+  </data>
   <data name="Help_Context" xml:space="preserve">
-    <value>Valeurs du point de vue de l'attaquant, pour toutes ses armes : +1 = mieux pour lui (CT 3+ → 2+, PA-1 → PA-2). Une aptitude du défenseur qui dégrade une caractéristique des attaquants (CT, PA…) se saisit ici, en négatif.</value>
+    <value>Conditions qui changent quelque chose pour les armes saisies : demi-portée (Rapid Fire, Melta), restée immobile (Heavy), a chargé (Lance), cible de Precision. Les boosts (auras, stratagèmes, aptitudes…) se saisissent dans les cartes de l'attaquant et du défenseur.</value>
   </data>
   <data name="Help_Cover" xml:space="preserve">
     <value>À couvert : la CT des armes de tir est dégradée de 1 (sauf Ignores Cover). C'est une modification de caractéristique, non plafonnée.</value>
   </data>
-  <data name="Help_DefenderCharacteristics" xml:space="preserve">
-    <value>Une aptitude qui dégrade une caractéristique des attaquants (CT, PA…) se saisit dans la Situation, en négatif.</value>
+  <data name="Help_DefenderBoosts" xml:space="preserve">
+    <value>Boosts du défenseur contre les attaques qui le visent, du point de vue de l'attaquant : -1 = moins bon pour lui (CT 3+ → 4+, PA-2 → PA-1, un dégât de moins). Ils se cumulent avec ceux de l'attaquant.</value>
+  </data>
+  <data name="Help_DefenderDamage" xml:space="preserve">
+    <value>Dégâts des attaques reçues : appliqués comme la réduction de dégâts des groupes, après Melta, avec un minimum de 1 ; pas sur les blessures mortelles.</value>
   </data>
   <data name="Help_Profile" xml:space="preserve">
     <value>Modifications de caractéristiques, sans plafond : A et D restent au moins à 1, la PA ne dépasse jamais 0.</value>
@@ -191,7 +203,7 @@
     <value>Graine : laisser vide pour la tirer au hasard ; la même graine redonne exactement le même résultat. Ctrl+Entrée lance la simulation.</value>
   </data>
   <data name="Help_Skill" xml:space="preserve">
-    <value>CT / CC : modification de caractéristique, sans plafond ; le résultat reste entre 2+ et 6+ (le couvert la dégrade de 1 en plus, pour le tir).</value>
+    <value>CT / CC : modification de caractéristique, sans plafond, cumulée entre attaquant, défenseur et couvert ; le résultat reste entre 2+ et 6+.</value>
   </data>
   <data name="Help_Strength" xml:space="preserve">
     <value>Force : modification de caractéristique, sans plafond ; la Force reste au moins à 1.</value>
@@ -321,6 +333,15 @@
   </data>
   <data name="Modifier_Damage" xml:space="preserve">
     <value>Dégâts (D)</value>
+  </data>
+  <data name="Modifier_DefenderAp" xml:space="preserve">
+    <value>PA des attaques reçues</value>
+  </data>
+  <data name="Modifier_DefenderDamage" xml:space="preserve">
+    <value>Dégâts des attaques reçues</value>
+  </data>
+  <data name="Modifier_DefenderSkill" xml:space="preserve">
+    <value>CT / CC des attaquants</value>
   </data>
   <data name="Modifier_Skill" xml:space="preserve">
     <value>CT / CC</value>

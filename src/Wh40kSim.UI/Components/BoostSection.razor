@@ -1,0 +1,43 @@
+@*
+    Bloc « Boosts » repliable, dans la carte de l'attaquant ou du défenseur : titre, bulle d'aide, nombre de boosts actifs.
+    Replié au départ tant qu'aucun boost n'est saisi, pour ne pas encombrer la carte.
+*@
+
+<MudPaper Outlined="true" Class="pa-3 my-3 wh-subcard" @attributes="Attributes">
+    <div class="wh-subsection-title">
+        <MudIconButton Icon="@(_expanded ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)" Size="Size.Small"
+                       OnClick="() => _expanded = !_expanded" data-test="toggle-boosts" />
+        <MudIcon Icon="@Icons.Material.Filled.Bolt" Size="Size.Small" Color="Color.Primary" />
+        <MudText Typo="Typo.subtitle2">@L["Boosts_Title"]</MudText>
+        <HelpBubble Lines="Help" />
+        @if (ActiveCount > 0)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" data-test="boosts-count">
+                @L["Boosts_Active", ActiveCount]
+            </MudChip>
+        }
+    </div>
+    @if (_expanded)
+    {
+        <div class="mt-2" data-test="boosts-content">@ChildContent</div>
+    }
+</MudPaper>
+
+@code {
+    private bool _expanded;
+
+    /// <summary>Nombre de boosts différents de leur valeur neutre (affiché dans l'en-tête).</summary>
+    [Parameter]
+    public int ActiveCount { get; set; }
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<string> Help { get; set; } = [];
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? Attributes { get; set; }
+
+    protected override void OnInitialized() => _expanded = ActiveCount > 0;
+}

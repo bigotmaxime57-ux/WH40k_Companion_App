@@ -315,12 +315,12 @@ public sealed class AttackResolver
     // caractéristique garde ses bornes. Convention : +1 = mieux pour l'attaquant.
 
     /// <summary>
-    /// CT / CC après modification et couvert (11e : CT dégradée de 1, armes de tir seulement, sauf Ignores Cover) ;
-    /// ni 1+ ni 7+ (bornée entre 2+ et 6+).
+    /// CT / CC après boosts de l'attaquant et du défenseur, et couvert (11e : CT dégradée de 1, armes de tir seulement,
+    /// sauf Ignores Cover) ; ni 1+ ni 7+ (bornée entre 2+ et 6+).
     /// </summary>
     private int EffectiveSkill(WeaponProfile weapon)
     {
-        int improvement = _scenario.Context.SkillModifier;
+        int improvement = _scenario.Context.SkillModifier + _scenario.Defender.SkillModifier;
         if (weapon.Type == WeaponType.Ranged && _scenario.Defender.InCover && !weapon.Abilities.IgnoresCover)
         {
             improvement -= 1;
@@ -332,10 +332,11 @@ public sealed class AttackResolver
     private int EffectiveStrength(WeaponProfile weapon) => Math.Max(1, weapon.Strength + _scenario.Context.StrengthModifier);
 
     /// <summary>
-    /// PA (valeur négative ou nulle, ex. -2) après modification ; ne dépasse jamais 0.
+    /// PA (valeur négative ou nulle, ex. -2) après boosts de l'attaquant et du défenseur ; ne dépasse jamais 0.
     /// La PA du profil est lue comme négative même si elle est saisie positive.
     /// </summary>
-    private int EffectiveAp(WeaponProfile weapon) => Math.Min(0, -Math.Abs(weapon.Ap) - _scenario.Context.ApModifier);
+    private int EffectiveAp(WeaponProfile weapon) =>
+        Math.Min(0, -Math.Abs(weapon.Ap) - (_scenario.Context.ApModifier + _scenario.Defender.ApModifier));
 
     // --- Utilitaires ----------------------------------------------------------------------
 

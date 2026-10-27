@@ -490,7 +490,11 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
 - Phase 2a validée par l'utilisateur ; roadmap renumérotée le 2026-10-27 : graphiques et comparaison en 3,
   traduction en 4, web (ex-2b) en 7.
 - Phase 3 découpée le 2026-10-27 (voir « Phase 3 : étapes ») : #10, #2 (version légère), #6 et #1 y entrent.
-- Prochaine ensuite : phase 3, étape 1 (générateur sans biais), en attente du feu vert.
+- Phase 3, étape 1 (générateur sans biais, #10) : branche `phase3/etape1-generateur`, en attente de validation.
+  295 tests verts (154 Core, 41 Simulation, 100 UI). Vérifié avant de recapturer `NonRegressionTests` : cas à
+  valeur exacte conformes à la théorie (20 graines × 4 M, |z| < 2 ; l'ancien générateur s'en écartait, jusqu'à
+  z ≈ -5,6) ; scénarios sans valeur exacte conformes à un générateur indépendant (`new Random()` de .NET, 32 M) ;
+  l'ancien surestimait les PV retirés d'environ 0,1 % sur le scénario riche (≈ 16 écarts-types). ~28 % plus rapide.
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

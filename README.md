@@ -21,7 +21,7 @@ Détail des étapes et décisions : `CLAUDE.md`. Idées non planifiées : ticket
 
 ```
 src/Wh40kSim.Core            Règles du jeu, bibliothèque pure : modèles + résolution d'une séquence d'attaque
-  Dice/                      Dés et expressions "D6+1"
+  Dice/                      Dés (générateur xoshiro256**, sans biais) et expressions "D6+1"
   Model/                     Arme, unités, situation, scénario
   Engine/                    Séquence d'attaque (pools, touche, blessure, allocation, dégâts)
   Serialization/             Lecture / écriture des scénarios en JSON

@@ -42,19 +42,109 @@ Voir aussi `README.md` (structure de la solution, règles de jeu implémentées,
 
 ## Roadmap
 
-- **Phase 1** (terminée) : moteur de simulation Monte Carlo (11e édition) + console pour l'interroger.
-- **Phase 2** (en cours) : remplacement de la console par une interface graphique.
-  - **2a** : desktop (MAUI Blazor Hybrid + MudBlazor), étapes détaillées ci-dessous ;
-  - **2b** : web local ;
-  - **2c** : API serveur + client web.
-- **Phase 3** : graphiques. Distributions façon WarpHammer Math : histogrammes, probabilités cumulées P(≥ k),
-  comparaison de plusieurs profils côte à côte.
-- **Phase 4** : mots-clés, règles d'armée, détachements. Mots-clés du défenseur (vrai Anti-X…), règles d'armée et
-  détachements, avec un stockage des règles.
-- **Phase 5** : gestion et sauvegarde des unités. Bibliothèque d'unités, choix du loadout et des leaders.
-- **Phase « Traduction »** (place à définir) : anglais, choix de la langue, messages du Core.
+Chaque phase garde une ligne **Objectif** : sa formulation d'origine, qui ne se modifie qu'avec l'accord de
+l'utilisateur. Le découpage en étapes peut évoluer ; celui des phases futures est indicatif et sera précisé au début
+de chaque phase. Numérotation fixée le 2026-10-27 : le README et des commentaires du code suivent encore l'ancienne
+(mots-clés en « phase 3 », graphiques en « phase 5 »), à corriger à l'étape 5 de la phase 2a.
 
-Le README parle encore de « phase 3 » pour les mots-clés : c'est l'ancienne numérotation (à corriger à l'étape 4).
+### État de l'existant (2026-10-27)
+
+- **Core** : expressions de dés (`D6+1`) ; modèle (armes et mots-clés d'arme, unités, groupes d'allocation, situation) ;
+  séquence d'attaque 11e édition (pools, couvert sur la CT, Endurance recalculée à chaque pool 05.02.01, allocation
+  05.03, Precision, Devastating Wounds, FNP, réduction de dégâts, relances) ; simulation parallèle déterministe à graine
+  égale, avec progression et annulation ; JSON strict (les anciens formats sont refusés).
+- **Console** : saisie interactive ou fichier JSON, rapport texte.
+- **Wh40kSim.UI** : formulaires modifiables (allers-retours testés), services de simulation et de fichiers ; aucun
+  composant visuel.
+- **Hypothèses restantes** : réduction de dégâts non appliquée aux mortelles ; cible de Precision supposée visible ;
+  ordre des pools = ordre de saisie ; Anti-X approché par « blessure critique sur X+ ».
+- 143 tests verts (110 Core, 33 UI), build sans avertissement.
+
+### Phase 1 : moteur de simulation (terminée)
+
+**Objectif** : moteur de simulation Monte Carlo (11e édition) + console pour l'interroger.
+
+### Phase 2 : interface graphique (en cours)
+
+**Objectif** : remplacement de la console par une interface graphique.
+
+- **2a : desktop** (MAUI Blazor Hybrid + MudBlazor) : étapes détaillées dans « Phase 2a : étapes ».
+- **2b : API + client web.** Le « web local » prévu à l'origine est abandonné (2026-10-27) : le desktop couvre l'usage
+  local, et ce qu'il devait apporter (fichiers côté navigateur, Wh40kSim.UI dans un hôte web) est repris ici.
+  Structure Blazor Web App : `Wh40kSim.Web` (serveur ASP.NET Core : API + service du client) et
+  `Wh40kSim.Web.Client` (WebAssembly).
+  1. **Contrat et API** (Minimal API) : contrat JSON du résultat, `POST` d'un scénario validé par `Scenario.Validate`
+     (erreurs en `ProblemDetails`), plafond d'itérations, tests d'intégration (`WebApplicationFactory`).
+  2. **Progression et annulation** : progression envoyée au client (Server-Sent Events), annulation si le client se
+     déconnecte.
+  3. **Client WebAssembly** : `ApiSimulationService` implémente `ISimulationService` ; `IScenarioFileService` côté
+     navigateur (`InputFile`, téléchargement) ; composants de Wh40kSim.UI inchangés.
+  4. **Finitions** : configuration, README, tag `v0.2b`. Hébergement public hors périmètre sauf décision contraire.
+
+### Phase 3 : traduction
+
+**Objectif** : anglais, choix de la langue, messages du Core.
+
+Placée avant les mots-clés : la phase 5 ajoutera beaucoup de messages au Core, autant qu'ils soient déjà sous forme
+de codes.
+
+1. **Messages du Core sous forme de codes** : `Validate()` renvoie des erreurs typées (code + paramètres) traduites par
+   l'UI ; idem pour les erreurs de lecture JSON et de dés.
+2. **Anglais** : `.resx` anglais, choix de la langue dans l'interface (mémorisé), nombres formatés selon la langue.
+
+### Phase 4 : graphiques et comparaison
+
+**Objectif** : « Affichage des distributions façon WarpHammer Math : histogrammes, probabilités cumulées P(≥ k) et
+comparaison de plusieurs profils côte à côte » (qui tue le mieux l'adversaire).
+
+Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que les dessiner, dans Wh40kSim.UI
+(desktop et web en profitent).
+
+1. **Graphiques d'un résultat** : choix de la bibliothèque (`MudChart` ou bibliothèque dédiée, à vérifier en début de
+   phase) ; histogramme P(= k) et courbe P(≥ k) pour les figurines tuées et les PV retirés, à partir des mêmes lignes
+   que les tableaux (`DiscreteDistribution`) ; les tableaux restent.
+2. **Comparaison, côté Simulation** : une cible et une situation communes, N profils d'attaquant nommés ; simulation de
+   chacun (progression globale, annulation) ; résultats alignés sur le même axe ; indicateurs calculés dans
+   Simulation : moyenne, P(détruire l'unité), P(≥ k) pour un k choisi, meilleur profil pour chacun (pas de « meilleur »
+   unique). Format JSON d'une comparaison (enregistrer / rouvrir).
+3. **Comparaison, côté UI** : profils ajoutés depuis le scénario courant, par duplication ou depuis un JSON ; courbes
+   P(≥ k) superposées et histogrammes ; tableau côte à côte, meilleur profil mis en évidence par indicateur.
+
+### Phase 5 : mots-clés, règles d'armée, détachements
+
+**Objectif** : mots-clés du défenseur (vrai Anti-X…), règles d'armée et détachements, avec un stockage des règles.
+
+1. **Mots-clés du défenseur** (INFANTERIE, VÉHICULE, MONSTRE… ; PERSONNAGE reste sur les groupes) ; vrai Anti-X ;
+   évolution compatible du JSON et de l'UI.
+2. **Mots-clés d'arme restants** influant sur les dégâts : liste à établir ensemble d'après les règles 11e édition.
+3. **Moteur d'effets** : catalogue d'effets typés dans le Core (relances, modificateurs, PA, critiques sur X+, FNP,
+   réduction de dégâts…), chacun avec une condition (a chargé, contre tel mot-clé, demi-portée…) et une étape de la
+   séquence d'attaque où il s'applique. Étape la plus structurante de la roadmap.
+4. **Stockage des règles** : règles d'armée, détachements et stratagèmes en JSON (`data/`), qui référencent les effets
+   du catalogue ; service de catalogue. On stocke la mécanique, pas le texte des règles de GW.
+5. **UI** : choix de la faction et du détachement, stratagèmes activables, effets actifs visibles.
+
+À trancher en début de phase : traduction du contenu (noms de règles, de factions).
+
+### Phase 6 : gestion et sauvegarde des unités
+
+**Objectif** : bibliothèque d'unités, choix du loadout et des leaders.
+
+1. **Modèle « fiche d'unité »** : caractéristiques, armes et options, mots-clés, composition (min / max), leaders
+   compatibles, règles d'unité (effets de la phase 5).
+2. **Bibliothèque d'unités** : `IUnitRepository`, d'abord en fichiers JSON locaux (stockage serveur pour le web ensuite).
+3. **Éditeur d'unités** (UI) : créer, modifier, dupliquer, supprimer.
+4. **Composition d'un scénario** : choix du loadout et du leader attaché → génération du `Scenario` (groupes d'armes de
+   l'attaquant, groupes d'allocation et ordre du défenseur).
+
+### Backlog (non planifié)
+
+- Comparer plusieurs cibles pour un même attaquant.
+- Efficacité rapportée au coût en points (le modèle n'a pas de points ; plutôt après la phase 6).
+- Ordre des pools choisi pour maximiser les dégâts (au lieu de l'ordre de saisie).
+- Import de listes d'armée depuis des outils tiers.
+- Outillage : intégration continue (GitHub Actions, build + tests à chaque push) ; `.gitattributes` pour fixer les fins
+  de ligne dans le dépôt plutôt que par machine.
 
 ## Phase 2a : étapes
 
@@ -64,30 +154,45 @@ Le README parle encore de « phase 3 » pour les mots-clés : c'est l'ancienne n
    `LocalSimulationService` (Core exécuté hors du thread UI) ; `IScenarioFileService` implémenté par l'hôte ;
    formulaires modifiables (`ScenarioForm`…) avec `ToScenario()` et construction depuis un `Scenario` ;
    projet `Wh40kSim.UI.Tests` (allers-retours).
-3. **Composants : page « Simulateur ».**
+3. **Séparation Core / Simulation.** Le Core ne garde que les règles (résolution d'**une** séquence d'attaque) ;
+   tout ce qui se calcule sur les résultats va dans un nouveau projet, que la console et l'UI ne font qu'afficher.
+   - Capturer d'abord un résultat de référence (histogrammes à graine fixe) pour la non-régression.
+   - `Wh40kSim.Simulation` (référence Core) : `Simulator` (parallélisme, paquets, graines dérivées, progression,
+     annulation) et `SimulationResult` (ex-`SimulationSummary`) : scénario, graine, itérations, durée, `Kills`,
+     `Damage`, pertes moyennes par groupe, probabilité de détruire l'unité.
+   - `Statistics/DiscreteDistribution`, construite depuis un histogramme : moyenne, écart-type, médiane, centiles,
+     fourchette 10-90 %, P(= k), P(≥ k), lignes de tableau sans les extrémités négligeables (seuil 0,05 %).
+   - Console (`ReportPrinter` réduit à l'affichage) et UI (`ISimulationService`, `LocalSimulationService`) branchées
+     sur la nouvelle API ; boucle de simulation toujours sans allocation par itération.
+   - `Wh40kSim.Simulation.Tests` : `SimulatorTests` déplacés, tests de `DiscreteDistribution`, non-régression à graine
+     égale (résultats identiques au bit près). Projets ajoutés au `.sln` à la main.
+   - Pas d'anticipation de la phase 4 (pas de comparaison, pas de distribution par groupe).
+4. **Composants : page « Simulateur ».**
    - Attaquant : liste de profils d'armes (ajout / suppression / duplication) ; nom, tir/mêlée, nombre de figurines,
      A, CT/CC, F, PA, D (A et D acceptent "D6+1") ; mots-clés en cases à cocher / champs numériques (Torrent,
      Lethal Hits, Sustained Hits X, Devastating Wounds, Twin-linked, Blast, Rapid Fire X, Melta X, Heavy, Lance,
      Ignores Cover, Precision, touche / blessure critique sur X+).
    - Défenseur : nom, couvert, modificateurs ; liste **ordonnée** des groupes d'allocation (monter / descendre), avec
      nom, PERSONNAGE, nombre, PV, Endurance, Sv, InSv, FNP, réduction de dégâts. **Pas d'Endurance au niveau du
-     défenseur** : elle est obligatoire sur chaque groupe (refactor du Core) ; un nouveau groupe reprend celle du précédent.
+     défenseur** : elle est portée par chaque groupe (déjà le cas dans le Core) ; un nouveau groupe reprend celle du
+     précédent.
    - Situation : demi-portée / immobile / a chargé affichés seulement si une arme est concernée ; modificateurs ;
      relances ; cible de Precision s'il y a plusieurs PERSONNAGES et au moins une arme Precision.
      Pour ne pas mettre de règle dans l'UI, ajouter au Core des propriétés en lecture seule sur `WeaponProfile` :
      `UsesHalfRange` (Rapid Fire, Melta), `UsesRemainedStationary` (Heavy sur arme de tir), `UsesCharged` (Lance),
-     utilisées par le moteur, la console et l'UI. Version minimale : la vraie gestion des mots-clés reste en phase 4.
+     utilisées par le moteur, la console et l'UI. Version minimale : la vraie gestion des mots-clés reste en phase 5.
    - Erreurs de `Scenario.Validate()` affichées clairement ; erreur de saisie de dés affichée sous le champ concerné ;
      bouton Lancer désactivé tant que le scénario est invalide.
    - Panneau de simulation : nombre de simulations (défaut 1 000 000), graine optionnelle, Lancer, barre de
      progression, Annuler.
-   - Résultats en texte et tableaux (pas de graphique, c'est la phase 3) : les mêmes informations que `ReportPrinter`
-     (moyennes, écarts-types, médianes, fourchette 10-90 %, unité détruite, pertes par groupe, tableaux P(= k) et
-     P(≥ k) pour les figurines tuées et les PV retirés, lignes négligeables masquées aux extrémités).
+   - Résultats en texte et tableaux (pas de graphique, c'est la phase 4), lus dans `SimulationResult` sans aucun
+     calcul : les mêmes informations que la console (moyennes, écarts-types, médianes, fourchette 10-90 %, unité
+     détruite, pertes par groupe, tableaux P(= k) et P(≥ k) pour les figurines tuées et les PV retirés, lignes
+     négligeables masquées aux extrémités).
    - Boutons Ouvrir / Enregistrer (JSON compatible avec `scenarios/`) et Nouveau.
    - Textes de l'interface via `IStringLocalizer` + `.resx` (voir Traduction).
    - Tests de composants avec bUnit : Lancer désactivé si invalide, situation conditionnelle, monter / descendre.
-4. **Wh40kSim.Desktop (MAUI Blazor Hybrid).**
+5. **Wh40kSim.Desktop (MAUI Blazor Hybrid).**
    - Vérifier `dotnet workload list` (sinon indiquer `dotnet workload install maui-windows`).
    - Projet MAUI Blazor Hybrid qui affiche les composants de Wh40kSim.UI dans un `BlazorWebView`.
    - Cible Windows uniquement : `net10.0-windows10.0.19041.0`, `WindowsPackageType=None` (non empaqueté).
@@ -99,13 +204,20 @@ Le README parle encore de « phase 3 » pour les mots-clés : c'est l'ancienne n
    - Thème MudBlazor qui suit Windows au démarrage + bouton de bascule clair / sombre ; fenêtre ~1400 × 900 centrée,
      redimensionnable avec une taille minimale ; titre « Wh40kSim – Simulateur de dégâts ».
    - Projet ajouté à la solution ; README : prérequis (workload MAUI, WebView2), lancement depuis Rider et en ligne
-     de commande, Windows uniquement ; roadmap du README renumérotée.
+     de commande, Windows uniquement ; roadmap du README et commentaires du code alignés sur la nouvelle
+     numérotation des phases.
    - Fin de phase 2a : tag `v0.2a`.
 
 ## Décisions techniques
 
 - **Hôte desktop : MAUI Blazor Hybrid**, pas Photino.Blazor. Photino.Blazor 4.0.13 (janvier 2025) ne cible que
   net8 / net9 et le support .NET 10 n'est pas publié (issue #164, PR #168 ouvertes) ; MAUI est maintenu par Microsoft.
+- **Core = règles, Simulation = Monte Carlo et statistiques** (2026-10-27) : le Core résout une séquence d'attaque et
+  ne connaît ni le nombre d'itérations, ni les threads, ni les statistiques. `Wh40kSim.Simulation` répète, agrège en
+  histogrammes (dans la boucle parallèle, pas de stockage des résultats bruts) et calcule toutes les statistiques.
+  La console et les composants ne font que mettre en forme : aucun calcul dupliqué entre eux.
+- **Web (phase 2b)** : Blazor Web App, serveur `Wh40kSim.Web` (API + client) et client WebAssembly
+  `Wh40kSim.Web.Client` ; le calcul se fait sur le serveur.
 - **Versions** (vérifiées le 2026-10-26) : MudBlazor 9.11.0, Microsoft.AspNetCore.Components.Web 10.0.14,
   CommunityToolkit.Maui 15.0.1, bUnit 2.13.3, MAUI 10.0.1xx. Tests xUnit : mêmes versions que `Wh40kSim.Core.Tests`.
 - **Formulaires (Wh40kSim.UI/Forms)** : classes modifiables avec un constructeur depuis le record du Core, un
@@ -116,8 +228,10 @@ Le README parle encore de « phase 3 » pour les mots-clés : c'est l'ancienne n
 - **IScenarioFileService** : `OpenAsync()` → `OpenedScenario(FileName, Scenario)` ou null si annulé ;
   `SaveAsync(scenario, suggestedFileName)` → nom du fichier écrit ou null si annulé.
 - **Traduction** préparée dès la phase 2 : textes de l'UI dans des `.resx` (français seulement pour l'instant), nombres
-  formatés selon la culture de l'appli, fixée à fr-FR (pas celle de la machine). Messages du Core et anglais : phase
-  Traduction. Traduction du contenu (règles d'armée, unités) : à trancher en phase 4.
+  formatés selon la culture de l'appli, fixée à fr-FR (pas celle de la machine). Messages du Core et anglais : phase 3.
+  Traduction du contenu (règles d'armée, unités) : à trancher en phase 5.
+- **Endurance** : portée par chaque groupe, valeur par défaut E4 conservée (un groupe JSON sans `toughness` reçoit E4).
+  Les anciens fichiers avec `toughness` sur le défenseur sont refusés au chargement (JSON strict, testé).
 - **Tests aller-retour** : comparer les scénarios via `ScenarioJson.Serialize` (les records contenant des listes ne sont
   pas égaux par valeur).
 
@@ -137,16 +251,12 @@ Le README parle encore de « phase 3 » pour les mots-clés : c'est l'ancienne n
 
 - Phase 2a, étape 1 (progression) : fusionnée dans `main`.
 - Phase 2a, étape 2 (Wh40kSim.UI, services, formulaires) : fusionnée dans `main`.
-- **Prochaine : étape 3 (composants)**, en attente du feu vert.
+- Roadmap refaite et renumérotée le 2026-10-27 (web local abandonné, traduction en phase 3, étape « Séparation
+  Core / Simulation » insérée en 2a).
+- **Prochaine : étape 3 (séparation Core / Simulation)**, nom et principe validés, en attente du feu vert.
 
-État vérifié le 2026-10-27 (deuxième machine, `main` à `c062271`) : build sans avertissement, 143 tests verts
-(110 Core, 33 UI). Wh40kSim.UI ne contient encore que `Forms/` et `Services/` : aucun composant `.razor`, pas de
-`.resx`, pas de bUnit.
-
-Points relevés à la relecture, à trancher au début de l'étape 3 :
-- **Endurance par groupe** : déjà faite (commit `c6f233b`) : `ModelGroup.Toughness`, rien sur `DefenderUnit`, JSON
-  strict. Mais elle a une valeur par défaut (4) : un groupe JSON sans `toughness` reçoit E4 sans erreur. Le
-  « refactor du Core » prévu à l'étape 3 se réduit donc à décider si elle devient vraiment obligatoire (`required`).
-- **Ancienne numérotation** : « phase 3 » pour les mots-clés du défenseur subsiste aussi dans les commentaires de
-  `WeaponAbilities.cs` (dont un qui cite Precision comme non géré, alors qu'il l'est), pas seulement dans le README.
-- `UsesHalfRange` / `UsesRemainedStationary` / `UsesCharged` n'existent pas encore (prévu à l'étape 3).
+Points notés pour les étapes suivantes :
+- **Ancienne numérotation** dans le code : `WeaponAbilities.cs` (« phase 3 » pour les mots-clés, et un commentaire
+  qui cite Precision comme non géré alors qu'il l'est), `ReportPrinter.cs` (graphiques en « phase 5 ») : à corriger
+  quand ces fichiers sont touchés, au plus tard à l'étape 5.
+- `UsesHalfRange` / `UsesRemainedStationary` / `UsesCharged` n'existent pas encore (prévu à l'étape 4).

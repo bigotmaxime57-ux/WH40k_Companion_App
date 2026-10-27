@@ -62,6 +62,8 @@ public class ScenarioFormTests
             InCover = true,
             HitModifier = -1,
             WoundModifier = 1,
+            SkillModifier = -1,
+            ApModifier = -1,
             Groups =
             [
                 new ModelGroup { Name = "Gardes", Count = 5, Toughness = 4, Wounds = 2, Save = 3 },
@@ -75,6 +77,11 @@ public class ScenarioFormTests
             Charged = true,
             HitModifier = 1,
             WoundModifier = -1,
+            SkillModifier = 1,
+            AttacksModifier = 2,
+            StrengthModifier = 3,
+            ApModifier = 1,
+            DamageModifier = 1,
             HitReroll = RerollPolicy.Ones,
             WoundReroll = RerollPolicy.NonCritical,
             PrecisionTarget = "Leader",

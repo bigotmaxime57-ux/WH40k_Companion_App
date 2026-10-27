@@ -364,8 +364,10 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   code.
 - Phase 2a, étape 7 (finitions de l'interface) : fusionnée dans `main` (sans tag : `v0.2a.1` à la fin de l'étape 8).
   234 tests verts (114 Core, 33 Simulation, 87 UI). Vérifiée à l'écran par l'utilisateur au fil de l'eau.
-- **En cours : phase 2a, étape 8 (modifications de caractéristiques)**. Prochaine ensuite : phase 2b (API + client
-  web).
+- Phase 2a, étape 8 (modifications de caractéristiques) : terminée sur `phase2a/etape8-modifications-caracteristiques`,
+  en attente de validation avant fusion et du tag `v0.2a.1`. 253 tests verts (132 Core, 33 Simulation, 88 UI) ;
+  `NonRegressionTests` inchangés (sans modification, résultats identiques au bit près).
+- Prochaine ensuite : phase 2b (API + client web).
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

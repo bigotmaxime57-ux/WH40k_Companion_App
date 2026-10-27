@@ -107,9 +107,12 @@ public class AttackerPanelTests : ComponentTestContext
 
         panel.Find("[data-test=add-weapon]").Click();
         panel.Find("[data-test=add-weapon]").Click();
+        // Les boutons sont dans des infobulles MudBlazor qui finissent leur rendu de façon asynchrone : on attend que
+        // les deux cartes soient stables avant de cliquer (sinon, rarement, le clic visait un bouton déjà remplacé)
+        panel.WaitForAssertion(() => Assert.Equal(2, panel.FindAll("[data-test=remove-weapon]").Count));
         panel.FindAll("[data-test=remove-weapon]")[0].Click();
 
-        Assert.Single(form.Weapons);
+        panel.WaitForAssertion(() => Assert.Single(form.Weapons));
     }
 }
 
@@ -144,6 +147,19 @@ public class ContextPanelTests : ComponentTestContext
         var panel = RenderPanel(WithCharacters(1, precision: false), new ContextForm { PrecisionTarget = "Ancien leader" });
 
         Assert.NotEmpty(panel.FindAll("[data-test=precision-target]"));
+    }
+
+    [Fact]
+    public void Characteristic_modifications_are_separate_from_roll_modifiers()
+    {
+        var context = new ContextForm();
+        var panel = RenderPanel(new Scenario(), context);
+
+        panel.Find("input[data-test=skill-modifier]").Change("2");
+
+        Assert.Equal(2, context.SkillModifier);
+        Assert.Equal(0, context.HitModifier);
+        Assert.Contains("Modifications de caractéristiques", panel.Markup);
     }
 
     [Fact]

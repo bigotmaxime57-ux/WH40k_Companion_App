@@ -138,8 +138,8 @@ public sealed class AttackResolver
 
             for (int model = 0; model < member.ModelCount; model++)
             {
-                // A ne peut pas être inférieur à 1 (02.02.01)
-                attacks += Math.Max(1, member.Weapon.Attacks.Roll(Dice)) + bonusPerModel;
+                // A modifiée, puis jamais inférieure à 1 (02.02.01) ; Blast et Rapid Fire s'ajoutent ensuite
+                attacks += Math.Max(1, member.Weapon.Attacks.Roll(Dice) + _scenario.Context.AttacksModifier) + bonusPerModel;
             }
         }
         return attacks;
@@ -161,16 +161,7 @@ public sealed class AttackResolver
 
         var context = _scenario.Context;
         var defender = _scenario.Defender;
-        bool ranged = weapon.Type == WeaponType.Ranged;
-
-        // Couvert (11e) : CT dégradée de 1. Modification de caractéristique, donc non plafonnée à ±1,
-        // mais la CT ne peut être ni 1+ ni 7+ (02.02.01).
-        int skill = weapon.Skill;
-        if (ranged && defender.InCover && !abilities.IgnoresCover)
-        {
-            skill += 1;
-        }
-        skill = Math.Clamp(skill, 2, 6);
+        int skill = EffectiveSkill(weapon);
 
         int modifier = context.HitModifier + defender.HitModifier;
         if (weapon.UsesRemainedStationary && context.RemainedStationary)
@@ -220,7 +211,7 @@ public sealed class AttackResolver
         normalWounds = 0;
         devastatingWounds = 0;
 
-        int target = WoundTable.RequiredRoll(weapon.Strength, _target.EffectiveToughness());
+        int target = WoundTable.RequiredRoll(EffectiveStrength(weapon), _target.EffectiveToughness());
 
         int modifier = context.WoundModifier + _scenario.Defender.WoundModifier;
         if (weapon.UsesCharged && context.Charged)
@@ -274,7 +265,7 @@ public sealed class AttackResolver
             _saveRollCounts[Dice.D6()]++;
         }
 
-        int ap = -Math.Abs(weapon.Ap);
+        int ap = EffectiveAp(weapon);
 
         for (int face = 1; face <= 6; face++)
         {
@@ -319,12 +310,40 @@ public sealed class AttackResolver
         }
     }
 
+    // --- Caractéristiques modifiées (02.02.01) ---------------------------------------------
+    // Modifications de caractéristiques : sans plafond (contrairement aux modificateurs aux jets), mais chaque
+    // caractéristique garde ses bornes. Convention : +1 = mieux pour l'attaquant.
+
+    /// <summary>
+    /// CT / CC après modifications de l'attaquant et du défenseur, et couvert (11e : CT dégradée de 1, armes de tir
+    /// seulement, sauf Ignores Cover) ; ni 1+ ni 7+ (bornée entre 2+ et 6+).
+    /// </summary>
+    private int EffectiveSkill(WeaponProfile weapon)
+    {
+        int improvement = _scenario.Context.SkillModifier + _scenario.Defender.SkillModifier;
+        if (weapon.Type == WeaponType.Ranged && _scenario.Defender.InCover && !weapon.Abilities.IgnoresCover)
+        {
+            improvement -= 1;
+        }
+        return Math.Clamp(weapon.Skill - improvement, 2, 6);
+    }
+
+    /// <summary>Force après modification ; jamais inférieure à 1.</summary>
+    private int EffectiveStrength(WeaponProfile weapon) => Math.Max(1, weapon.Strength + _scenario.Context.StrengthModifier);
+
+    /// <summary>
+    /// PA (valeur négative ou nulle, ex. -2) après modifications de l'attaquant et du défenseur ; ne dépasse jamais 0.
+    /// La PA du profil est lue comme négative même si elle est saisie positive.
+    /// </summary>
+    private int EffectiveAp(WeaponProfile weapon) =>
+        Math.Min(0, -Math.Abs(weapon.Ap) - (_scenario.Context.ApModifier + _scenario.Defender.ApModifier));
+
     // --- Utilitaires ----------------------------------------------------------------------
 
     private int RollDamage(WeaponProfile weapon)
     {
-        // D ne peut pas être inférieur à 1 (02.02.01)
-        int damage = Math.Max(1, weapon.Damage.Roll(Dice));
+        // D modifié, puis jamais inférieur à 1 (02.02.01) ; Melta s'ajoute ensuite
+        int damage = Math.Max(1, weapon.Damage.Roll(Dice) + _scenario.Context.DamageModifier);
         if (weapon.Abilities.Melta > 0 && _scenario.Context.HalfRange)
         {
             damage += weapon.Abilities.Melta;

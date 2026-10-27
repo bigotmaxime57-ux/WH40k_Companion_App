@@ -15,6 +15,14 @@
         <MudItem xs="6">
             <MudNumericField T="int" Label="@L["Defender_WoundModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3" @bind-Value="Defender.WoundModifier" @bind-Value:after="NotifyChanged" />
         </MudItem>
+        <MudItem xs="6">
+            <MudNumericField T="int" Label="@L["Modifier_DefenderSkill"]" HelperText="@L["Modifier_DefenderSkillHelp"]" Min="-6" Max="6"
+                             @bind-Value="Defender.SkillModifier" @bind-Value:after="NotifyChanged" data-test="defender-skill-modifier" />
+        </MudItem>
+        <MudItem xs="6">
+            <MudNumericField T="int" Label="@L["Modifier_DefenderAp"]" HelperText="@L["Modifier_DefenderApHelp"]" Min="-6" Max="6"
+                             @bind-Value="Defender.ApModifier" @bind-Value:after="NotifyChanged" data-test="defender-ap-modifier" />
+        </MudItem>
     </MudGrid>
 
     <MudText Typo="Typo.subtitle1" Class="mt-4">@L["Defender_Groups"]</MudText>

@@ -268,8 +268,41 @@
   <data name="Keywords_Title" xml:space="preserve">
     <value>Mots-clés</value>
   </data>
+  <data name="Modifier_Ap" xml:space="preserve">
+    <value>PA</value>
+  </data>
+  <data name="Modifier_AttackerHelp" xml:space="preserve">
+    <value>Changent le profil de toutes les armes avant les jets, sans plafond : +1 = mieux pour l'attaquant (CT 3+ → 2+, PA-1 → PA-2). CT / CC bornée entre 2+ et 6+, Force, A et D au moins 1, PA jamais au-dessus de 0.</value>
+  </data>
+  <data name="Modifier_Attacks" xml:space="preserve">
+    <value>Attaques (A)</value>
+  </data>
+  <data name="Modifier_CharacteristicsTitle" xml:space="preserve">
+    <value>Modifications de caractéristiques</value>
+  </data>
+  <data name="Modifier_Damage" xml:space="preserve">
+    <value>Dégâts (D)</value>
+  </data>
+  <data name="Modifier_DefenderAp" xml:space="preserve">
+    <value>PA des attaques reçues</value>
+  </data>
+  <data name="Modifier_DefenderApHelp" xml:space="preserve">
+    <value>-1 = PA-2 devient PA-1 (jamais au-dessus de 0)</value>
+  </data>
+  <data name="Modifier_DefenderSkill" xml:space="preserve">
+    <value>CT / CC des attaquants</value>
+  </data>
+  <data name="Modifier_DefenderSkillHelp" xml:space="preserve">
+    <value>Modification sans plafond, cumulée avec le couvert : -1 = 3+ devient 4+</value>
+  </data>
   <data name="Modifier_RollHelp" xml:space="preserve">
     <value>Cumulé avec les autres, plafonné à ±1 (après relances)</value>
+  </data>
+  <data name="Modifier_Skill" xml:space="preserve">
+    <value>CT / CC</value>
+  </data>
+  <data name="Modifier_Strength" xml:space="preserve">
+    <value>Force (F)</value>
   </data>
   <data name="Reroll_Failed" xml:space="preserve">
     <value>Les échecs</value>

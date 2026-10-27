@@ -95,7 +95,7 @@
     <value>Groupes d'allocation</value>
   </data>
   <data name="Defender_GroupsHelp" xml:space="preserve">
-    <value>Dans l'ordre où ils encaissent : le premier groupe d'abord, les PERSONNAGES en dernier.</value>
+    <value>Dans l'ordre où ils encaissent : le premier groupe d'abord. Les PERSONNAGES restent toujours après les gardes du corps : cocher PERSONNAGE place le groupe en fin de liste, et les flèches ne permettent pas de le faire remonter devant un garde du corps.</value>
   </data>
   <data name="Defender_HitModifier" xml:space="preserve">
     <value>Modificateur aux jets de touche subis</value>

@@ -316,6 +316,11 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   dans une infobulle MudBlazor (rendu asynchrone, clic parfois perdu) : cliquer avec `ClickUntil(sélecteur, effet)`.
 - **Aides à l'écran** : pas de `HelperText` ni de légende sous les champs ; explications dans `HelpBubble` (bulle
   « ? », infobulle après 1 s), via le paramètre `Help` de `SectionHeader` / `SubSection` (liste de textes du `.resx`).
+- **Ordre d'allocation (05.03)** : règle portée par le Core (`AllocationOrder` : `FindViolation`, `IsValid`, `Arrange`),
+  utilisée par `Scenario.Validate` et par l'interface. Le panneau du défenseur l'impose à la saisie : flèches désactivées
+  si un PERSONNAGE passerait devant un garde du corps, groupes remis en ordre après chaque modification (cocher
+  PERSONNAGE envoie le groupe en fin de liste), nouveau groupe inséré avant les PERSONNAGES. Un fichier JSON mal ordonné
+  reste signalé par la validation.
 - **Mise en page** : les points de rupture de MudGrid (`sm`, `md`, `lg`) suivent la largeur de la *fenêtre*, pas du
   panneau ; dans un panneau en demi-largeur, n'utiliser que `xs` / `sm`.
 - **Hôte desktop (Wh40kSim.Desktop)** : réduit au minimum. Toute l'interface est `AppShell` (Wh40kSim.UI) :

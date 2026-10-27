@@ -27,7 +27,7 @@ public class DefenderPanelTests : ComponentTestContext
         var form = ThreeGroups();
         var panel = RenderPanel(form);
 
-        panel.FindAll("[data-test=move-down]")[0].Click();
+        panel.ClickUntil("[data-test=move-down]", () => form.Groups[0].Name == "B");
 
         Assert.Equal(["B", "A", "C"], form.Groups.Select(g => g.Name));
     }
@@ -38,23 +38,53 @@ public class DefenderPanelTests : ComponentTestContext
         var form = ThreeGroups();
         var panel = RenderPanel(form);
 
-        panel.FindAll("[data-test=move-up]")[2].Click();
+        // Le premier bouton « monter » actif est celui de B (A est en tête, C est un PERSONNAGE)
+        panel.ClickUntil("[data-test=move-up]:not([disabled])", () => form.Groups[0].Name == "B");
 
-        Assert.Equal(["A", "C", "B"], form.Groups.Select(g => g.Name));
+        Assert.Equal(["B", "A", "C"], form.Groups.Select(g => g.Name));
     }
 
     [Fact]
-    public void First_group_cannot_move_up_and_last_cannot_move_down()
+    public void Moves_stay_in_the_list_and_never_put_a_character_before_a_bodyguard()
     {
         var panel = RenderPanel(ThreeGroups());
+        var up = panel.FindAll("[data-test=move-up]");
+        var down = panel.FindAll("[data-test=move-down]");
 
-        Assert.True(panel.FindAll("[data-test=move-up]")[0].HasAttribute("disabled"));
-        Assert.False(panel.FindAll("[data-test=move-up]")[1].HasAttribute("disabled"));
-        Assert.True(panel.FindAll("[data-test=move-down]")[2].HasAttribute("disabled"));
+        Assert.True(up[0].HasAttribute("disabled"));    // A est déjà en tête
+        Assert.False(up[1].HasAttribute("disabled"));   // B peut passer devant A
+        Assert.True(up[2].HasAttribute("disabled"));    // C (PERSONNAGE) ne peut pas passer devant B
+        Assert.True(down[1].HasAttribute("disabled"));  // B ne peut pas passer derrière C
+        Assert.True(down[2].HasAttribute("disabled"));  // C est déjà en dernier
     }
 
     [Fact]
-    public void New_group_takes_the_toughness_of_the_previous_one()
+    public void Checking_character_sends_the_group_after_the_bodyguards()
+    {
+        var form = ThreeGroups();
+        var panel = RenderPanel(form);
+
+        panel.FindAll("input[data-test=is-character]")[0].Change(true);
+
+        Assert.Equal(["B", "A", "C"], form.Groups.Select(g => g.Name));
+    }
+
+    [Fact]
+    public void Unchecking_character_puts_the_group_back_before_the_characters()
+    {
+        var form = new DefenderForm(new DefenderUnit
+        {
+            Groups = [new ModelGroup { Name = "A", Count = 5 }, new ModelGroup { Name = "L1", IsCharacter = true }, new ModelGroup { Name = "L2", IsCharacter = true, Wounds = 3 }],
+        });
+        var panel = RenderPanel(form);
+
+        panel.FindAll("input[data-test=is-character]")[2].Change(false);
+
+        Assert.Equal(["A", "L2", "L1"], form.Groups.Select(g => g.Name));
+    }
+
+    [Fact]
+    public void New_group_is_added_before_the_characters_with_the_last_bodyguard_toughness()
     {
         var form = ThreeGroups();
         var panel = RenderPanel(form);
@@ -62,8 +92,9 @@ public class DefenderPanelTests : ComponentTestContext
         panel.Find("[data-test=add-group]").Click();
 
         Assert.Equal(4, form.Groups.Count);
-        Assert.Equal(6, form.Groups[^1].Toughness);
-        Assert.Equal(new ModelGroup().Wounds, form.Groups[^1].Wounds);
+        Assert.Equal("C", form.Groups[^1].Name);
+        Assert.Equal(5, form.Groups[2].Toughness);
+        Assert.Equal(new ModelGroup().Wounds, form.Groups[2].Wounds);
     }
 
     [Fact]

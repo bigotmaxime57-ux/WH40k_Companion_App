@@ -32,7 +32,7 @@
         int index = i;
         var group = Defender.Groups[index];
         <ModelGroupEditor @key="group" Group="group" Number="index + 1" Changed="NotifyChanged"
-                          CanMoveUp="index > 0" CanMoveDown="index < Defender.Groups.Count - 1"
+                          CanMoveUp="CanMove(index, -1)" CanMoveDown="CanMove(index, 1)"
                           OnMoveUp="() => Move(index, -1)" OnMoveDown="() => Move(index, 1)" OnRemove="() => Remove(group)" />
     }
 
@@ -47,22 +47,48 @@
     [Parameter]
     public EventCallback Changed { get; set; }
 
-    private Task NotifyChanged() => Changed.InvokeAsync();
+    /// <summary>
+    /// Après chaque modification, les PERSONNAGES sont remis après les gardes du corps (règle 05.03, portée par le Core) :
+    /// cocher PERSONNAGE envoie le groupe en fin de liste, décocher le replace avant les PERSONNAGES.
+    /// </summary>
+    private Task NotifyChanged()
+    {
+        Defender.Groups = AllocationOrder.Arrange(Defender.Groups, g => g.IsCharacter);
+        return Changed.InvokeAsync();
+    }
 
-    /// <summary>Nouveau groupe : valeurs par défaut du Core, et l'Endurance du groupe précédent.</summary>
+    /// <summary>Nouveau groupe : valeurs par défaut du Core, et l'Endurance du dernier garde du corps (à défaut, du dernier groupe).</summary>
     private Task Add()
     {
         var group = new ModelGroupForm();
-        if (Defender.Groups.Count > 0)
+        var previous = Defender.Groups.LastOrDefault(g => !g.IsCharacter) ?? Defender.Groups.LastOrDefault();
+        if (previous is not null)
         {
-            group.Toughness = Defender.Groups[^1].Toughness;
+            group.Toughness = previous.Toughness;
         }
         Defender.Groups.Add(group);
         return NotifyChanged();
     }
 
+    /// <summary>Déplacement possible : dans la liste, et sans faire passer un PERSONNAGE devant un garde du corps.</summary>
+    private bool CanMove(int index, int offset)
+    {
+        int target = index + offset;
+        if (target < 0 || target >= Defender.Groups.Count)
+        {
+            return false;
+        }
+        var isCharacter = Defender.Groups.Select(g => g.IsCharacter).ToArray();
+        (isCharacter[index], isCharacter[target]) = (isCharacter[target], isCharacter[index]);
+        return AllocationOrder.IsValid(isCharacter);
+    }
+
     private Task Move(int index, int offset)
     {
+        if (!CanMove(index, offset))
+        {
+            return Task.CompletedTask;
+        }
         int target = index + offset;
         (Defender.Groups[index], Defender.Groups[target]) = (Defender.Groups[target], Defender.Groups[index]);
         return NotifyChanged();

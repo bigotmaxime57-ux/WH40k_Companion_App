@@ -1,9 +1,9 @@
-using System.Text.Json;
 using Bunit;
 using Bunit.Extensions.WaitForHelpers;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
 using Wh40kSim.Core.Model;
+using Wh40kSim.Core.Serialization;
 using Wh40kSim.Simulation;
 using Wh40kSim.UI.Services;
 using Wh40kSim.UI.Theme;
@@ -104,26 +104,32 @@ public sealed class FakeSimulationService : ISimulationService
     }
 }
 
+/// <summary>Fichiers en mémoire : prochain fichier « choisi » par l'utilisateur, contenus écrits.</summary>
 public sealed class FakeScenarioFileService : IScenarioFileService
 {
     /// <summary>Résultat de la prochaine ouverture (null = l'utilisateur annule).</summary>
-    public OpenedScenario? ToOpen { get; set; }
+    public OpenedFile? ToOpen { get; set; }
 
-    /// <summary>Erreur levée par la prochaine ouverture, par exemple un JSON invalide.</summary>
+    /// <summary>Erreur levée par la prochaine ouverture (fichier illisible).</summary>
     public Exception? OpenError { get; set; }
 
-    public List<(Scenario Scenario, string SuggestedFileName)> Saved { get; } = [];
+    /// <summary>Contenus écrits, dans l'ordre, avec le nom proposé.</summary>
+    public List<(string Content, string SuggestedFileName)> Saved { get; } = [];
 
-    public Task<OpenedScenario?> OpenAsync(CancellationToken cancellationToken = default) =>
-        OpenError is not null ? Task.FromException<OpenedScenario?>(OpenError) : Task.FromResult(ToOpen);
+    public Task<OpenedFile?> OpenAsync(CancellationToken cancellationToken = default) =>
+        OpenError is not null ? Task.FromException<OpenedFile?>(OpenError) : Task.FromResult(ToOpen);
 
-    public Task<string?> SaveAsync(Scenario scenario, string suggestedFileName, CancellationToken cancellationToken = default)
+    public Task<string?> SaveAsync(string content, string suggestedFileName, CancellationToken cancellationToken = default)
     {
-        Saved.Add((scenario, suggestedFileName));
+        Saved.Add((content, suggestedFileName));
         return Task.FromResult<string?>(suggestedFileName);
     }
 
-    public static JsonException InvalidJson() => new("Propriété inconnue 'toughness'.");
+    public static OpenedFile File(string fileName, Scenario scenario) => new(fileName, ScenarioJson.Serialize(scenario));
+
+    public static OpenedFile File(string fileName, AttackerUnit attacker) => new(fileName, ScenarioJson.Serialize(attacker));
+
+    public static OpenedFile File(string fileName, DefenderUnit defender) => new(fileName, ScenarioJson.Serialize(defender));
 }
 
 /// <summary>Préférences en mémoire : thème mémorisé lisible et modifiable par les tests.</summary>

@@ -1,7 +1,16 @@
-@* Défenseur : ses groupes d'allocation, dans l'ordre où ils encaissent (le premier d'abord). *@
+@*
+    Défenseur : ses groupes d'allocation, dans l'ordre où ils encaissent (le premier d'abord). Boutons Ouvrir /
+    Enregistrer du défenseur seul dans l'en-tête, si la page les fournit.
+*@
 
 <MudPaper Elevation="3" Class="pa-4 wh-section wh-defender" data-test="defender-panel">
-    <SectionHeader Icon="@Icons.Material.Filled.Shield" Title="@L["Defender_Title"]" />
+    <SectionHeader Icon="@Icons.Material.Filled.Shield" Title="@L["Defender_Title"]">
+        @if (OnOpen.HasDelegate)
+        {
+            <PartFileActions OpenHelp="@L["Defender_OpenHelp"]" SaveHelp="@L["Defender_SaveHelp"]" Disabled="FileActionsDisabled"
+                             OnOpen="OnOpen" OnSave="OnSave" Part="defender" />
+        }
+    </SectionHeader>
     <MudTextField T="string" Label="@L["Defender_Name"]" @bind-Value="Defender.Name" @bind-Value:after="NotifyChanged" />
 
     <DefenderBoostsEditor Boosts="Defender.Boosts" Changed="NotifyChanged" />
@@ -30,6 +39,18 @@
 
     [Parameter]
     public EventCallback Changed { get; set; }
+
+    /// <summary>Ouvre un défenseur depuis un fichier (bouton affiché seulement si fourni).</summary>
+    [Parameter]
+    public EventCallback OnOpen { get; set; }
+
+    /// <summary>Enregistre le défenseur seul.</summary>
+    [Parameter]
+    public EventCallback OnSave { get; set; }
+
+    /// <summary>Ouvrir et enregistrer indisponibles (simulation en cours).</summary>
+    [Parameter]
+    public bool FileActionsDisabled { get; set; }
 
     /// <summary>
     /// Après chaque modification, les PERSONNAGES sont remis après les gardes du corps (règle 05.03, portée par le Core) :

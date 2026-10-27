@@ -1,0 +1,36 @@
+@* Boutons Ouvrir / Enregistrer d'une partie du scénario (attaquant ou défenseur), dans l'en-tête de sa carte. *@
+
+<MudTooltip Text="@OpenHelp">
+    <MudIconButton Icon="@Icons.Material.Filled.FolderOpen" Size="Size.Small" Disabled="Disabled" OnClick="OnOpen"
+                   aria-label="@OpenHelp" data-test="@($"open-{Part}")" />
+</MudTooltip>
+<MudTooltip Text="@SaveHelp">
+    <MudIconButton Icon="@Icons.Material.Filled.Save" Size="Size.Small" Disabled="@(Disabled || SaveDisabled)" OnClick="OnSave"
+                   aria-label="@SaveHelp" data-test="@($"save-{Part}")" />
+</MudTooltip>
+
+@code {
+    [Parameter, EditorRequired]
+    public string OpenHelp { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public string SaveHelp { get; set; } = "";
+
+    /// <summary>Suffixe des attributs data-test : « attacker » ou « defender ».</summary>
+    [Parameter, EditorRequired]
+    public string Part { get; set; } = "";
+
+    [Parameter]
+    public EventCallback OnOpen { get; set; }
+
+    [Parameter]
+    public EventCallback OnSave { get; set; }
+
+    /// <summary>Les deux boutons indisponibles (simulation en cours).</summary>
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    /// <summary>Enregistrer seul indisponible.</summary>
+    [Parameter]
+    public bool SaveDisabled { get; set; }
+}

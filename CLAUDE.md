@@ -350,7 +350,10 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
    d'utile, ou une situation seule, est refusé). On peut reprendre l'attaquant ou le défenseur de n'importe quel
    fichier, scénario complet compris. Quick sim : Ouvrir / Enregistrer dans les cartes Attaquant et Défenseur (le
    scénario complet garde ses boutons) ; `IScenarioFileService` étendu, hôte desktop adapté. Premier pas vers la phase 6,
-   sans figer la fiche d'unité.
+   sans figer la fiche d'unité. Décisions de l'utilisateur : « Ouvrir » de la barre accepte un fichier partiel et ne
+   remplace que cette partie ; confirmation avant de remplacer une partie seulement si la saisie est modifiée ; mêmes
+   dossiers que les scénarios. Conséquence : un scénario complet exige désormais attaquant et défenseur (une partie
+   absente était remplacée en silence par une unité vide).
 4. **Points (#2, version légère).** Points optionnels sur l'attaquant et sur chaque groupe du défenseur (un leader a son
    propre coût) ; JSON et UI. Indicateurs dans Simulation : points détruits, rendement (points détruits / points de
    l'attaquant). Mode de calcul des points détruits (au prorata des figurines ou des PV) à trancher dans l'étape.
@@ -398,8 +401,11 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
   `WeaponForm` regroupe `WeaponGroup` + `WeaponProfile`. Expressions de dés en texte, lues par le Core.
   Sustained Hits / Rapid Fire / Melta : case à cocher + valeur séparées. `ToScenario()` lève `FormatException` si une
   expression de dés est invalide.
-- **IScenarioFileService** : `OpenAsync()` → `OpenedScenario(FileName, Scenario)` ou null si annulé ;
-  `SaveAsync(scenario, suggestedFileName)` → nom du fichier écrit ou null si annulé.
+- **IScenarioFileService** (depuis la phase 3, étape 3) : l'hôte ne manipule que du texte. `OpenAsync()` →
+  `OpenedFile(FileName, Content)` ou null si annulé ; `SaveAsync(content, suggestedFileName)` → nom du fichier écrit ou
+  null si annulé. L'interface interprète le contenu avec le Core : `ScenarioJson.ReadFile` (scénario complet ou
+  partiel, `ScenarioFile` et `Kind`), `Deserialize` (scénario complet exigé), `Serialize` (scénario, attaquant seul,
+  défenseur seul).
 - **Traduction** préparée dès la phase 2 : textes de l'UI dans des `.resx` (français seulement pour l'instant), nombres
   formatés selon la culture de l'appli, fixée à fr-FR (pas celle de la machine). Messages du Core et anglais : phase 4.
   Traduction du contenu (règles d'armée, unités) : à trancher en phase 5.
@@ -503,7 +509,8 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
   l'ancien surestimait les PV retirés d'environ 0,1 % sur le scénario riche (≈ 16 écarts-types). ~28 % plus rapide.
 - Phase 3, étape 2 (accueil et navigation) : fusionnée dans `main`. 302 tests verts (154 Core, 41 Simulation,
   107 UI ; UI stables sur 8 exécutions). Skill `/valider-etape` ajouté dans la même branche.
-- Prochaine ensuite : phase 3, étape 3 (JSON partiels), à préciser et valider avant de coder.
+- Phase 3, étape 3 (JSON partiels) : branche `phase3/etape3-json-partiels`, en attente de validation. 325 tests verts
+  (166 Core, 41 Simulation, 118 UI ; UI stables sur 6 exécutions).
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

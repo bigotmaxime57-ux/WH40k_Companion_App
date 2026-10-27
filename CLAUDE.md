@@ -265,14 +265,17 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
      défenseur sans boosts) : chacun saisit les siens, le moteur les cumule (ex. +2 dégâts de l'attaquant et -1 dégât
      du défenseur interagissent, sans calcul à la main). Convention : valeurs du point de vue de l'attaquant (+1 =
      mieux pour lui).
-     - Attaquant (`AttackContext`, JSON « context », inchangé pour garder les anciens fichiers lisibles) : CT / CC,
-       jet de touche, relance des touches ; Force, jet de blessure, relance des blessures ; A, PA, D.
-     - Défenseur (`DefenderUnit`) : couvert, CT / CC des attaquants, jet de touche ; jet de blessure, PA des attaques
-       reçues, dégâts des attaques reçues (`DamageModifier` : avec la réduction de dégâts des groupes, après Melta,
-       minimum 1, pas sur les blessures mortelles).
+     - Attaquant (`AttackerUnit.Boosts`, record `AttackerBoosts`) : CT / CC, jet de touche, relance des touches ;
+       Force, jet de blessure, relance des blessures ; A, PA, D.
+     - Défenseur (`DefenderUnit.Boosts`, record `DefenderBoosts`) : couvert, CT / CC des attaquants, jet de touche ;
+       jet de blessure, PA des attaques reçues, dégâts des attaques reçues (`Damage` : avec la réduction de dégâts
+       des groupes, après Melta, minimum 1, pas sur les blessures mortelles).
+     - `AttackContext` ne garde que la situation (demi-portée, immobile, a chargé, cible de Precision).
      - Caractéristiques appliquées au profil avant les jets, sans plafond, dans leurs bornes (CT / CC 2+ à 6+ ; F, A,
        D au moins 1 ; PA jamais au-dessus de 0) ; modificateurs au jet inchangés (±1 au total).
-   - JSON : nouveaux champs à 0 par défaut (anciens fichiers lisibles). Non-régression au bit près sans boost.
+   - JSON calqué sur l'interface (pas d'ancien fichier à préserver, choix de l'utilisateur) : `attacker.boosts`,
+     `defender.boosts`, `context` réduit à la situation ; les anciens champs (`context.hitReroll`,
+     `defender.inCover`…) sont refusés. Boosts absents = neutres. Non-régression au bit près.
    - Tests : dés scriptés pour chaque boost des deux côtés, cumuls (couvert, attaquant + défenseur), bornes, JSON.
    - UI : bloc **« Boosts »** repliable dans la carte de l'attaquant et dans celle du défenseur (replié tant qu'aucun
      boost n'est saisi, nombre de boosts actifs dans l'en-tête), rangées Touche / Blessure / Profil. La **Situation**
@@ -388,7 +391,7 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 - Phase 2a, étape 7 (finitions de l'interface) : fusionnée dans `main` (sans tag : `v0.2a.1` à la fin de l'étape 8).
   234 tests verts (114 Core, 33 Simulation, 87 UI). Vérifiée à l'écran par l'utilisateur au fil de l'eau.
 - Phase 2a, étape 8 (modifications de caractéristiques) : terminée sur `phase2a/etape8-modifications-caracteristiques`,
-  en attente de validation avant fusion et du tag `v0.2a.1`. 253 tests verts (132 Core, 33 Simulation, 88 UI) ;
+  en attente de validation avant fusion et du tag `v0.2a.1`. 271 tests verts (145 Core, 33 Simulation, 93 UI) ;
   `NonRegressionTests` inchangés (sans modification, résultats identiques au bit près).
 - Prochaine ensuite : phase 2b (API + client web).
 

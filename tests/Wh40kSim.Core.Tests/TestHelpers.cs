@@ -25,9 +25,10 @@ internal sealed class ScriptedDiceRoller : IDiceRoller
 
 internal static class Build
 {
-    public static Scenario Scenario(WeaponProfile weapon, DefenderUnit defender, int models = 1, AttackContext? context = null) => new()
+    public static Scenario Scenario(
+        WeaponProfile weapon, DefenderUnit defender, int models = 1, AttackContext? context = null, AttackerBoosts? boosts = null) => new()
     {
-        Attacker = new AttackerUnit { Weapons = [new WeaponGroup { ModelCount = models, Weapon = weapon }] },
+        Attacker = new AttackerUnit { Boosts = boosts ?? new AttackerBoosts(), Weapons = [new WeaponGroup { ModelCount = models, Weapon = weapon }] },
         Defender = defender,
         Context = context ?? new AttackContext(),
     };

@@ -14,6 +14,7 @@ public class ScenarioJsonTests
         Attacker = new AttackerUnit
         {
             Name = "Escouade",
+            Boosts = new AttackerBoosts { WoundRoll = 1, HitReroll = RerollPolicy.Ones, WoundReroll = RerollPolicy.NonCritical },
             Weapons =
             [
                 new WeaponGroup
@@ -45,15 +46,14 @@ public class ScenarioJsonTests
         Defender = new DefenderUnit
         {
             Name = "Escouade + Leader",
-            InCover = true,
-            HitModifier = -1,
+            Boosts = new DefenderBoosts { InCover = true, HitRoll = -1 },
             Groups =
             [
                 new ModelGroup { Name = "Gardes", Count = 5, Toughness = 4, Wounds = 2, Save = 3 },
                 new ModelGroup { Name = "Leader", IsCharacter = true, Toughness = 5, Wounds = 5, Save = 2, InvulnerableSave = 4, FeelNoPain = 5, DamageReduction = 1 },
             ],
         },
-        Context = new AttackContext { HalfRange = true, Charged = true, WoundModifier = 1, HitReroll = RerollPolicy.Ones, WoundReroll = RerollPolicy.NonCritical, PrecisionTarget = "Leader" },
+        Context = new AttackContext { HalfRange = true, Charged = true, PrecisionTarget = "Leader" },
     };
 
     private static JsonNode Node(string json) => JsonNode.Parse(json) ?? throw new InvalidOperationException("JSON vide.");
@@ -67,6 +67,7 @@ public class ScenarioJsonTests
 
         // Les listes des records sont comparées par référence : on compare élément par élément
         Assert.Equal(scenario.Attacker.Name, copy.Attacker.Name);
+        Assert.Equal(scenario.Attacker.Boosts, copy.Attacker.Boosts);
         Assert.Equal(scenario.Attacker.Weapons, copy.Attacker.Weapons);
         Assert.Equal(scenario.Defender with { Groups = [] }, copy.Defender with { Groups = [] });
         Assert.Equal(scenario.Defender.Groups, copy.Defender.Groups);
@@ -138,8 +139,8 @@ public class ScenarioJsonTests
         var root = Node(ScenarioJson.Serialize(FullScenario()));
 
         Assert.Equal("Melee", root["attacker"]!["weapons"]![1]!["weapon"]!["type"]!.GetValue<string>());
-        Assert.Equal("Ones", root["context"]!["hitReroll"]!.GetValue<string>());
-        Assert.Equal("NonCritical", root["context"]!["woundReroll"]!.GetValue<string>());
+        Assert.Equal("Ones", root["attacker"]!["boosts"]!["hitReroll"]!.GetValue<string>());
+        Assert.Equal("NonCritical", root["attacker"]!["boosts"]!["woundReroll"]!.GetValue<string>());
     }
 
     [Fact]
@@ -147,21 +148,20 @@ public class ScenarioJsonTests
     {
         const string json = """
             {
-              "attacker": { "weapons": [{ "weapon": { "type": "melee" } }] },
-              "context": { "hitReroll": "FAILED" }
+              "attacker": { "boosts": { "hitReroll": "FAILED" }, "weapons": [{ "weapon": { "type": "melee" } }] }
             }
             """;
 
         var scenario = ScenarioJson.Deserialize(json);
 
         Assert.Equal(WeaponType.Melee, scenario.Attacker.Weapons[0].Weapon.Type);
-        Assert.Equal(RerollPolicy.Failed, scenario.Context.HitReroll);
+        Assert.Equal(RerollPolicy.Failed, scenario.Attacker.Boosts.HitReroll);
     }
 
     [Fact]
     public void Unknown_enum_value_is_rejected()
     {
-        Assert.Throws<JsonException>(() => ScenarioJson.Deserialize("""{ "context": { "hitReroll": "Toutes" } }"""));
+        Assert.Throws<JsonException>(() => ScenarioJson.Deserialize("""{ "attacker": { "boosts": { "hitReroll": "Toutes" } } }"""));
     }
 
     [Fact]

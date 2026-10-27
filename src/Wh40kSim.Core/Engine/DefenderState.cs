@@ -16,13 +16,13 @@ public sealed class DefenderState
     private readonly IReadOnlyList<ModelGroup> _groups;
     private readonly int[] _alive;
     private readonly int[] _frontWounds;
-    private readonly int _damageModifier; // boost de dégâts du défenseur (DefenderUnit.DamageModifier)
+    private readonly int _damageModifier; // boost de dégâts du défenseur (DefenderBoosts.Damage)
     private int _excessFrontWounds;
 
     public DefenderState(DefenderUnit unit)
     {
         _groups = unit.Groups;
-        _damageModifier = unit.DamageModifier;
+        _damageModifier = unit.Boosts.Damage;
         _alive = new int[_groups.Count];
         _frontWounds = new int[_groups.Count];
         TotalModels = unit.TotalModels;

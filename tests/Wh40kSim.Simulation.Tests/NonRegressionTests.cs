@@ -56,6 +56,7 @@ public class NonRegressionTests
     {
         Attacker = new AttackerUnit
         {
+            Boosts = new AttackerBoosts { HitRoll = 1, HitReroll = RerollPolicy.Ones, WoundReroll = RerollPolicy.NonCritical },
             Weapons =
             [
                 new WeaponGroup { ModelCount = 5, Weapon = new WeaponProfile { Name = "Bolter", Attacks = 2, Skill = 3, Strength = 4, Abilities = new WeaponAbilities { SustainedHits = DiceExpression.Parse("D3"), LethalHits = true, RapidFire = 1 } } },
@@ -65,8 +66,7 @@ public class NonRegressionTests
         },
         Defender = new DefenderUnit
         {
-            InCover = true,
-            HitModifier = -1,
+            Boosts = new DefenderBoosts { InCover = true, HitRoll = -1 },
             Groups =
             [
                 new ModelGroup { Name = "Gardes", Count = 6, Toughness = 4, Wounds = 2, Save = 3, FeelNoPain = 6 },
@@ -75,6 +75,6 @@ public class NonRegressionTests
                 new ModelGroup { Name = "Lieutenant", IsCharacter = true, Toughness = 4, Wounds = 4, Save = 3 },
             ],
         },
-        Context = new AttackContext { HalfRange = true, Charged = true, HitModifier = 1, HitReroll = RerollPolicy.Ones, WoundReroll = RerollPolicy.NonCritical, PrecisionTarget = "Leader" },
+        Context = new AttackContext { HalfRange = true, Charged = true, PrecisionTarget = "Leader" },
     };
 }

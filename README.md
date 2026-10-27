@@ -121,3 +121,11 @@ Voir `scenarios/exemple-escouade-vs-leader.json`. Les expressions de dés s'écr
 la PA `-1`, une sauvegarde `3` pour 3+ (`7` = aucune), `"isCharacter": true` pour un leader,
 `"toughness"` (Endurance) et `"wounds"` (PV) sur chaque groupe de figurines. Les commentaires `//` sont autorisés ;
 une propriété inconnue ou mal placée est refusée au chargement.
+
+Le fichier suit l'interface :
+- `"attacker"` : `"name"`, `"boosts"` (`skill`, `hitRoll`, `hitReroll`, `strength`, `woundRoll`, `woundReroll`,
+  `attacks`, `ap`, `damage`) et `"weapons"` ;
+- `"defender"` : `"name"`, `"boosts"` (`inCover`, `skill`, `hitRoll`, `woundRoll`, `ap`, `damage`) et `"groups"` ;
+- `"context"` : la situation seulement (`halfRange`, `remainedStationary`, `charged`, `precisionTarget`).
+
+Un boost absent vaut 0 (ou `"None"` pour une relance, `false` pour le couvert).

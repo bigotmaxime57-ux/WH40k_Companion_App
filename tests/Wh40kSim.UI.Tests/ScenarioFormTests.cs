@@ -28,6 +28,18 @@ public class ScenarioFormTests
         Attacker = new AttackerUnit
         {
             Name = "Escouade",
+            Boosts = new AttackerBoosts
+            {
+                Skill = 1,
+                HitRoll = 1,
+                HitReroll = RerollPolicy.Ones,
+                Strength = 3,
+                WoundRoll = -1,
+                WoundReroll = RerollPolicy.NonCritical,
+                Attacks = 2,
+                Ap = 1,
+                Damage = 1,
+            },
             Weapons =
             [
                 new WeaponGroup
@@ -59,12 +71,7 @@ public class ScenarioFormTests
         Defender = new DefenderUnit
         {
             Name = "Escouade + Leader",
-            InCover = true,
-            HitModifier = -1,
-            WoundModifier = 1,
-            SkillModifier = -1,
-            ApModifier = -1,
-            DamageModifier = -1,
+            Boosts = new DefenderBoosts { InCover = true, Skill = -1, HitRoll = -1, WoundRoll = 1, Ap = -1, Damage = -1 },
             Groups =
             [
                 new ModelGroup { Name = "Gardes", Count = 5, Toughness = 4, Wounds = 2, Save = 3 },
@@ -76,15 +83,6 @@ public class ScenarioFormTests
             HalfRange = true,
             RemainedStationary = true,
             Charged = true,
-            HitModifier = 1,
-            WoundModifier = -1,
-            SkillModifier = 1,
-            AttacksModifier = 2,
-            StrengthModifier = 3,
-            ApModifier = 1,
-            DamageModifier = 1,
-            HitReroll = RerollPolicy.Ones,
-            WoundReroll = RerollPolicy.NonCritical,
             PrecisionTarget = "Leader",
         },
     };
@@ -192,14 +190,16 @@ public class ScenarioFormTests
         form.Attacker.Weapons[0].Attacks = "D6+2";
         form.Attacker.Weapons.RemoveAt(1);
         form.Defender.Groups[0].Toughness = 6;
-        form.Context.HitReroll = RerollPolicy.Failed;
+        form.Attacker.Boosts.HitReroll = RerollPolicy.Failed;
+        form.Defender.Boosts.Damage = 0;
 
         var scenario = form.ToScenario();
 
         Assert.Equal(DiceExpression.Parse("D6+2"), scenario.Attacker.Weapons[0].Weapon.Attacks);
         Assert.Single(scenario.Attacker.Weapons);
         Assert.Equal(6, scenario.Defender.Groups[0].Toughness);
-        Assert.Equal(RerollPolicy.Failed, scenario.Context.HitReroll);
+        Assert.Equal(RerollPolicy.Failed, scenario.Attacker.Boosts.HitReroll);
+        Assert.Equal(0, scenario.Defender.Boosts.Damage);
     }
 
     [Fact]

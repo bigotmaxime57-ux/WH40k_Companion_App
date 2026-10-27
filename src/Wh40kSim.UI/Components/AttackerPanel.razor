@@ -4,10 +4,7 @@
     <SectionHeader Icon="@Icons.Material.Filled.GpsFixed" Title="@L["Attacker_Title"]" />
     <MudTextField T="string" Label="@L["Attacker_Name"]" @bind-Value="Attacker.Name" @bind-Value:after="NotifyChanged" />
 
-    @if (Boosts is not null)
-    {
-        <AttackerBoosts Context="Boosts" Changed="NotifyChanged" />
-    }
+    <AttackerBoostsEditor Boosts="Attacker.Boosts" Changed="NotifyChanged" />
 
     @foreach (var weapon in Attacker.Weapons)
     {
@@ -23,10 +20,6 @@
 @code {
     [Parameter, EditorRequired]
     public AttackerForm Attacker { get; set; } = null!;
-
-    /// <summary>Boosts de l'attaquant (stockés dans la situation du scénario) ; non affichés si absents.</summary>
-    [Parameter]
-    public ContextForm? Boosts { get; set; }
 
     /// <summary>Appelé après chaque modification, pour que la page revalide le scénario.</summary>
     [Parameter]

@@ -4,7 +4,7 @@
     <SectionHeader Icon="@Icons.Material.Filled.Shield" Title="@L["Defender_Title"]" />
     <MudTextField T="string" Label="@L["Defender_Name"]" @bind-Value="Defender.Name" @bind-Value:after="NotifyChanged" />
 
-    <DefenderBoosts Defender="Defender" Changed="NotifyChanged" />
+    <DefenderBoostsEditor Boosts="Defender.Boosts" Changed="NotifyChanged" />
 
     <div class="wh-subsection-title mt-4">
         <MudText Typo="Typo.subtitle1">@L["Defender_Groups"]</MudText>

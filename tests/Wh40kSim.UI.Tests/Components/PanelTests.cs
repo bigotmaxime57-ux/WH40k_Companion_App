@@ -215,16 +215,16 @@ public class BoostTests : ComponentTestContext
     [Fact]
     public void Attacker_boosts_start_collapsed_and_count_active_boosts()
     {
-        var context = new ContextForm();
-        var boosts = Render<AttackerBoosts>(p => p.Add(c => c.Context, context));
+        var form = new AttackerBoostsForm();
+        var boosts = Render<AttackerBoostsEditor>(p => p.Add(c => c.Boosts, form));
         Assert.Empty(boosts.FindAll("[data-test=boosts-content]"));
         Assert.Empty(boosts.FindAll("[data-test=boosts-count]"));
 
         boosts.Find("[data-test=toggle-boosts]").Click();
         boosts.Find("input[data-test=skill-modifier]").Change("2");
 
-        Assert.Equal(2, context.SkillModifier);
-        Assert.Equal(0, context.HitModifier);
+        Assert.Equal(2, form.Skill);
+        Assert.Equal(0, form.HitRoll);
         Assert.Contains("1", boosts.Find("[data-test=boosts-count]").TextContent);
         // Les explications sont derrière la bulle « ? », pas sous les champs
         Assert.NotEmpty(boosts.FindAll("[data-test=help]"));
@@ -234,14 +234,14 @@ public class BoostTests : ComponentTestContext
     [Fact]
     public void Defender_boosts_start_expanded_when_some_are_set()
     {
-        var defender = new DefenderForm(new DefenderUnit { InCover = true, DamageModifier = -1 });
+        var form = new DefenderBoostsForm(new DefenderBoosts { InCover = true, Damage = -1 });
 
-        var boosts = Render<DefenderBoosts>(p => p.Add(c => c.Defender, defender));
+        var boosts = Render<DefenderBoostsEditor>(p => p.Add(c => c.Boosts, form));
 
         Assert.NotNull(boosts.Find("[data-test=boosts-content]"));
         Assert.Contains("2", boosts.Find("[data-test=boosts-count]").TextContent);
         boosts.Find("input[data-test=defender-damage-modifier]").Change("-2");
-        Assert.Equal(-2, defender.DamageModifier);
+        Assert.Equal(-2, form.Damage);
     }
 
     [Fact]

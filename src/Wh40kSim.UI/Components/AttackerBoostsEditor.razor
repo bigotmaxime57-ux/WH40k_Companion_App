@@ -1,0 +1,61 @@
+@*
+    Boosts de l'attaquant (auras, stratagèmes…), pour toutes ses armes : caractéristiques (sans plafond) et modificateurs
+    aux jets (±1 au total), rangés par étape de la séquence d'attaque. Stockés dans AttackerUnit.Boosts (JSON : « attacker.boosts »).
+*@
+
+<BoostSection ActiveCount="Boosts.ActiveCount" Help="@([L["Help_AttackerBoosts"], L["Help_Skill"], L["Help_Strength"], L["Help_Roll"], L["Help_Profile"]])"
+              data-test="attacker-boosts">
+    <MudText Typo="Typo.caption" Class="wh-boost-row-title">@L["Boosts_Hit"]</MudText>
+    <MudGrid Spacing="3">
+        <MudItem xs="12" sm="4">
+            <MudNumericField T="int" Label="@L["Modifier_Skill"]" Min="-6" Max="6" @bind-Value="Boosts.Skill" @bind-Value:after="NotifyChanged"
+                             data-test="skill-modifier" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudNumericField T="int" Label="@L["Context_HitModifier"]" Min="-3" Max="3" @bind-Value="Boosts.HitRoll" @bind-Value:after="NotifyChanged" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudSelect T="RerollPolicy" Label="@L["Context_HitReroll"]" @bind-Value="Boosts.HitReroll" @bind-Value:after="NotifyChanged">
+                <RerollItems />
+            </MudSelect>
+        </MudItem>
+    </MudGrid>
+
+    <MudText Typo="Typo.caption" Class="wh-boost-row-title">@L["Boosts_Wound"]</MudText>
+    <MudGrid Spacing="3">
+        <MudItem xs="12" sm="4">
+            <MudNumericField T="int" Label="@L["Modifier_Strength"]" Min="-10" Max="10" @bind-Value="Boosts.Strength" @bind-Value:after="NotifyChanged" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudNumericField T="int" Label="@L["Context_WoundModifier"]" Min="-3" Max="3" @bind-Value="Boosts.WoundRoll" @bind-Value:after="NotifyChanged" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudSelect T="RerollPolicy" Label="@L["Context_WoundReroll"]" @bind-Value="Boosts.WoundReroll" @bind-Value:after="NotifyChanged">
+                <RerollItems />
+            </MudSelect>
+        </MudItem>
+    </MudGrid>
+
+    <MudText Typo="Typo.caption" Class="wh-boost-row-title">@L["Boosts_Profile"]</MudText>
+    <MudGrid Spacing="3">
+        <MudItem xs="12" sm="4">
+            <MudNumericField T="int" Label="@L["Modifier_Attacks"]" Min="-6" Max="6" @bind-Value="Boosts.Attacks" @bind-Value:after="NotifyChanged" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudNumericField T="int" Label="@L["Modifier_Ap"]" Min="-6" Max="6" @bind-Value="Boosts.Ap" @bind-Value:after="NotifyChanged" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudNumericField T="int" Label="@L["Modifier_Damage"]" Min="-6" Max="6" @bind-Value="Boosts.Damage" @bind-Value:after="NotifyChanged" />
+        </MudItem>
+    </MudGrid>
+</BoostSection>
+
+@code {
+    [Parameter, EditorRequired]
+    public AttackerBoostsForm Boosts { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback Changed { get; set; }
+
+    private Task NotifyChanged() => Changed.InvokeAsync();
+}

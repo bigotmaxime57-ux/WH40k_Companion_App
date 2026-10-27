@@ -25,7 +25,7 @@ internal static class ReportPrinter
             Console.WriteLine($"  {group.ModelCount} × {group.Weapon.Describe()}");
         }
 
-        Console.WriteLine($"Défenseur : {defender.Name}{(defender.InCover ? " (à couvert)" : "")}");
+        Console.WriteLine($"Défenseur : {defender.Name}{(defender.Boosts.InCover ? " (à couvert)" : "")}");
         for (int g = 0; g < defender.Groups.Count; g++)
         {
             Console.WriteLine($"  {g + 1}. {defender.Groups[g].Describe()}");

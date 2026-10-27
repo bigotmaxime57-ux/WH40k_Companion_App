@@ -63,6 +63,41 @@
     text-transform: uppercase;
 }
 
+/* Nom de l'écran affiché, après le titre de l'application */
+.wh-screen-name {
+    opacity: .75;
+}
+
+.wh-screen-name::before {
+    content: "›";
+    margin: 0 .6rem;
+}
+
+/* Tuiles de l'accueil : la carte entière est un lien, qui se soulève au survol ou au focus clavier */
+.wh-home-tile {
+    border-radius: var(--mud-default-borderradius);
+    color: inherit;
+    display: block;
+    height: 100%;
+    text-decoration: none;
+}
+
+.wh-home-tile > .mud-paper {
+    height: 100%;
+    transition: box-shadow .15s ease, transform .15s ease;
+}
+
+.wh-home-tile:hover > .mud-paper,
+.wh-home-tile:focus-visible > .mud-paper {
+    box-shadow: var(--mud-elevation-8);
+    transform: translateY(-3px);
+}
+
+.wh-home-tile:focus-visible {
+    outline: 2px solid var(--mud-palette-primary);
+    outline-offset: 3px;
+}
+
 /* Libellés des champs : MudBlazor les limite à une ligne de 1.15rem et masque le dépassement ; avec Segoe UI, le bas
    des lettres à jambage (p, g) était coupé. Un peu de marge en bas agrandit la zone visible sans déplacer le texte.
    Sélecteur aussi précis que celui de MudBlazor (qui impose padding: 0), préfixé pour l'emporter. */

@@ -1,18 +1,19 @@
 @*
-    Page « Simulateur » : saisie du scénario à gauche ; erreurs, simulation et résultats à droite (colonne qui reste
-    visible au défilement) ; sélecteur de mots-clés dans un panneau latéral. L'hôte la place dans sa mise en page.
-    Raccourcis : Ctrl+Entrée lancer, Ctrl+S enregistrer, Ctrl+O ouvrir.
+    Écran « Quick sim » : saisie du scénario à gauche ; erreurs, simulation et résultats à droite (colonne qui reste
+    visible au défilement) ; sélecteur de mots-clés dans un panneau latéral. Ouvert depuis l'accueil (route
+    AppRoutes.QuickSim), dans la mise en page d'AppShell. Raccourcis : Ctrl+Entrée lancer, Ctrl+S enregistrer, Ctrl+O ouvrir.
 *@
+@page "/quick-sim"
 @using Wh40kSim.UI.Keywords
 
 <MudStack Spacing="3" Class="pa-4">
     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
         <MudTooltip Text="@L["Toolbar_NewHelp"]">
-            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.NoteAdd" Disabled="_running" OnClick="NewScenarioAsync"
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.NoteAdd" Disabled="Running" OnClick="NewScenarioAsync"
                        data-test="new">@L["Toolbar_New"]</MudButton>
         </MudTooltip>
         <MudTooltip Text="@L["Toolbar_OpenHelp"]">
-            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.FolderOpen" Disabled="_running" OnClick="OpenAsync"
+            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.FolderOpen" Disabled="Running" OnClick="OpenAsync"
                        data-test="open">@L["Toolbar_Open"]</MudButton>
         </MudTooltip>
         <MudTooltip Text="@L["Toolbar_SaveHelp"]">
@@ -39,11 +40,11 @@
             <div class="wh-sticky-column">
                 <MudStack Spacing="3">
                     <ScenarioErrors Errors="_errors" HasDiceErrors="_hasDiceErrors" />
-                    <SimulationPanel @bind-Iterations="_iterations" @bind-Seed="_seed" CanRun="CanRun" Running="_running" Progress="_progress"
+                    <SimulationPanel @bind-Iterations="Session.Iterations" @bind-Seed="Session.Seed" CanRun="CanRun" Running="Running" Progress="_progress"
                                      OnRun="RunAsync" OnCancel="Cancel" />
-                    @if (_result is not null)
+                    @if (Session.Result is not null)
                     {
-                        <ResultsView Result="_result" />
+                        <ResultsView Result="Session.Result" />
                     }
                 </MudStack>
             </div>

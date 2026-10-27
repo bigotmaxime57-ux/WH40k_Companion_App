@@ -341,7 +341,8 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
    Comparaison quand ils arrivent ; unités en phase 6). Routeur Blazor (`/`, `/quick-sim`…), utilisable tel quel par le
    client web ; barre de titre commune (thèmes, retour à l'accueil). `SimulatorPage` devient le Quick sim sans
    changement. Scénario courant tenu par un service (et non par la page) : conservé en changeant d'écran, partagé avec
-   le Full sim.
+   le Full sim. Décisions de l'utilisateur : noms « Quick sim » / « Full sim » gardés dans l'interface française ;
+   accueil avec les seules tuiles des écrans existants ; retour à l'accueil bloqué pendant une simulation.
 3. **JSON partiels.** Même format, sections facultatives : `{ "attacker": … }` (fichier attaquant), `{ "defender": … }`
    (fichier défenseur), les trois sections (scénario, inchangé). Boosts inclus dans leur partie. Lecture stricte (rien
    d'utile, ou une situation seule, est refusé). On peut reprendre l'attaquant ou le défenseur de n'importe quel
@@ -404,7 +405,9 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
   Les anciens fichiers avec `toughness` sur le défenseur sont refusés au chargement (JSON strict, testé).
 - **Tests aller-retour** : comparer les scénarios via `ScenarioJson.Serialize` (les records contenant des listes ne sont
   pas égaux par valeur).
-- **Composants (Wh40kSim.UI/Components)** : `SimulatorPage` tient le `ScenarioForm` et le revalide (`ToScenario()` puis
+- **Composants (Wh40kSim.UI/Components)** : le scénario courant (`ScenarioForm`, fichier, modifications, dernier
+  résultat, nombre de simulations, graine, simulation en cours) est tenu par `ScenarioSession` (service scoped, enregistré
+  par `AddWh40kSimUI`), qui survit au changement d'écran ; `SimulatorPage` le revalide (`ToScenario()` puis
   `Validate()`) à chaque `Changed` remonté par un panneau. Les options de situation dépendent du dernier scénario lisible
   (stable pendant une saisie de dés invalide). Listes « aucune » / « premier PERSONNAGE » : valeur sentinelle (0, "")
   convertie en null dans le composant. Textes : `IStringLocalizer<Strings>` injecté dans `_Imports.razor`, un seul
@@ -425,7 +428,8 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
 - **Mise en page** : les points de rupture de MudGrid (`sm`, `md`, `lg`) suivent la largeur de la *fenêtre*, pas du
   panneau ; dans un panneau en demi-largeur, n'utiliser que `xs` / `sm`.
 - **Hôte desktop (Wh40kSim.Desktop)** : réduit au minimum. Toute l'interface est `AppShell` (Wh40kSim.UI) :
-  fournisseurs MudBlazor, barre de titre avec le menu des thèmes, puis `SimulatorPage` ; réutilisable tel quel par
+  fournisseurs MudBlazor, barre de titre (retour à l'accueil, nom de l'écran, menu des thèmes), puis le routeur Blazor
+  vers les écrans (`HomePage` `/`, `SimulatorPage` `/quick-sim` ; adresses dans `AppRoutes`) ; réutilisable tel quel par
   l'hôte web (phase 7). L'hôte fournit `MauiProgram` (services), la fenêtre (`App` : titre lu dans `Strings.resx`,
   1400 × 900 centrée, minimum 900 × 600, thème au démarrage), `DesktopScenarioFileService`,
   `DesktopPreferenceService` et `wwwroot/index.html` (CSS / JS de MudBlazor). Pas de `Package.appxmanifest`
@@ -490,11 +494,13 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
 - Phase 2a validée par l'utilisateur ; roadmap renumérotée le 2026-10-27 : graphiques et comparaison en 3,
   traduction en 4, web (ex-2b) en 7.
 - Phase 3 découpée le 2026-10-27 (voir « Phase 3 : étapes ») : #10, #2 (version légère), #6 et #1 y entrent.
-- Phase 3, étape 1 (générateur sans biais, #10) : branche `phase3/etape1-generateur`, en attente de validation.
+- Phase 3, étape 1 (générateur sans biais, #10) : fusionnée dans `main`.
   295 tests verts (154 Core, 41 Simulation, 100 UI). Vérifié avant de recapturer `NonRegressionTests` : cas à
   valeur exacte conformes à la théorie (20 graines × 4 M, |z| < 2 ; l'ancien générateur s'en écartait, jusqu'à
   z ≈ -5,6) ; scénarios sans valeur exacte conformes à un générateur indépendant (`new Random()` de .NET, 32 M) ;
   l'ancien surestimait les PV retirés d'environ 0,1 % sur le scénario riche (≈ 16 écarts-types). ~28 % plus rapide.
+- Phase 3, étape 2 (accueil et navigation) : branche `phase3/etape2-accueil-navigation`, en attente de validation.
+  302 tests verts (154 Core, 41 Simulation, 107 UI ; UI stables sur 8 exécutions).
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

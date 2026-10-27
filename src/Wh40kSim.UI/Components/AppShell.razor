@@ -1,10 +1,15 @@
 @*
-    Coquille de l'application, commune aux hôtes : fournisseurs MudBlazor, barre de titre avec le menu des thèmes, et la
-    page « Simulateur ». Thème au démarrage : celui fourni par l'hôte (InitialTheme), sinon le choix mémorisé
-    (IPreferenceService), sinon celui qui correspond au mode clair / sombre du navigateur. Un thème choisi dans le menu
-    est mémorisé. Styles complémentaires : wwwroot/wh40ksim.css, chargé par l'hôte.
+    Coquille de l'application, commune aux hôtes : fournisseurs MudBlazor, barre de titre (retour à l'accueil, nom de
+    l'écran, menu des thèmes) et routeur vers les écrans (accueil, Quick sim). Thème au démarrage : celui fourni par
+    l'hôte (InitialTheme), sinon le choix mémorisé (IPreferenceService), sinon celui qui correspond au mode clair / sombre
+    du navigateur. Un thème choisi dans le menu est mémorisé. Pendant une simulation, le retour à l'accueil est bloqué.
+    Styles complémentaires : wwwroot/wh40ksim.css, chargé par l'hôte.
 *@
+@using Microsoft.AspNetCore.Components.Routing
+@implements IDisposable
 @inject IPreferenceService Preferences
+@inject NavigationManager Navigation
+@inject ScenarioSession Session
 
 <MudThemeProvider @ref="_themeProvider" Theme="Wh40kTheme.For(_theme)" IsDarkMode="Wh40kTheme.IsDark(_theme)" />
 <MudPopoverProvider />
@@ -13,8 +18,19 @@
 
 <MudLayout Class="@ShellClass">
     <MudAppBar Elevation="2" Dense="true">
+        @if (ScreenName is not null)
+        {
+            <MudTooltip Text="@L["Nav_Home"]">
+                <MudIconButton Icon="@Icons.Material.Filled.Home" Color="Color.Inherit" Disabled="Session.IsRunning" OnClick="GoHome"
+                               aria-label="@L["Nav_Home"]" data-test="home" />
+            </MudTooltip>
+        }
         <MudIcon Icon="@Icons.Material.Filled.MilitaryTech" Class="mr-2" />
         <MudText Typo="Typo.h6" Class="wh-brand">@L["App_Title"]</MudText>
+        @if (ScreenName is not null)
+        {
+            <MudText Typo="Typo.h6" Class="wh-brand wh-screen-name" data-test="screen-name">@ScreenName</MudText>
+        }
         <MudSpacer />
         <MudMenu Icon="@Icons.Material.Filled.Palette" Color="Color.Inherit" AriaLabel="@L["App_Theme"]"
                  AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" data-test="theme-menu">
@@ -28,13 +44,30 @@
         </MudMenu>
     </MudAppBar>
     <MudMainContent>
-        <SimulatorPage />
+        <Router AppAssembly="typeof(AppShell).Assembly">
+            <Found Context="routeData">
+                <RouteView RouteData="routeData" />
+            </Found>
+            <NotFound>
+                <HomePage />
+            </NotFound>
+        </Router>
     </MudMainContent>
 </MudLayout>
 
 @code {
     private MudThemeProvider _themeProvider = null!;
     private ThemeChoice _theme;
+
+    /// <summary>Nom de l'écran affiché après le titre, null sur l'accueil (pas de bouton de retour non plus).</summary>
+    private string? ScreenName => CurrentRoute switch
+    {
+        AppRoutes.QuickSim => L["Mode_QuickSim"].Value,
+        _ => null,
+    };
+
+    /// <summary>Adresse de l'écran affiché, sans la base de l'application, la requête ni l'ancre.</summary>
+    private string CurrentRoute => Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0].TrimEnd('/');
 
     /// <summary>
     /// Thème au démarrage, fourni par l'hôte s'il le connaît (choix mémorisé, à défaut mode du système) : le premier
@@ -54,7 +87,30 @@
         _ => "wh-shell",
     };
 
-    protected override void OnInitialized() => _theme = InitialTheme ?? ThemeChoice.Parchment;
+    protected override void OnInitialized()
+    {
+        _theme = InitialTheme ?? ThemeChoice.Parchment;
+        Navigation.LocationChanged += OnLocationChanged;
+        Session.RunningChanged += OnRunningChanged;
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+        Session.RunningChanged -= OnRunningChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e) => InvokeAsync(StateHasChanged);
+
+    private void OnRunningChanged() => InvokeAsync(StateHasChanged);
+
+    private void GoHome()
+    {
+        if (!Session.IsRunning)
+        {
+            Navigation.NavigateTo(AppRoutes.Home);
+        }
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

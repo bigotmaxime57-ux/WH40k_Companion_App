@@ -7,12 +7,13 @@ namespace Wh40kSim.UI.Tests.Components;
 public class AppShellTests() : ComponentTestContext(renderPopoverProvider: false)
 {
     [Fact]
-    public void Shell_shows_the_title_and_the_simulator()
+    public void Shell_shows_the_title_and_opens_on_the_home_screen()
     {
         var shell = Render<AppShell>();
 
         Assert.Contains("Wh40kSim – Simulateur de dégâts", shell.Markup);
-        Assert.NotNull(shell.FindComponent<SimulatorPage>());
+        Assert.NotNull(shell.FindComponent<HomePage>());
+        Assert.Empty(shell.FindComponents<SimulatorPage>());
     }
 
     [Theory]

@@ -61,8 +61,8 @@ Les idées non planifiées, bugs et points d'outillage sont des **tickets GitHub
 
 Chaque phase garde une ligne **Objectif** : sa formulation d'origine, qui ne se modifie qu'avec l'accord de
 l'utilisateur. Le découpage en étapes peut évoluer ; celui des phases futures est indicatif et sera précisé au début
-de chaque phase. Numérotation fixée le 2026-10-27 : le README et des commentaires du code suivent encore l'ancienne
-(mots-clés en « phase 3 »), à corriger à l'étape 6 de la phase 2a.
+de chaque phase. Numérotation revue le 2026-10-27, après la phase 2a : graphiques et comparaison en 3 (pour avancer
+sur les statistiques avant le web), traduction en 4, l'ancienne 2b (API + client web) devient la phase 7.
 
 ### État de l'existant (2026-10-27)
 
@@ -81,24 +81,37 @@ de chaque phase. Numérotation fixée le 2026-10-27 : le README et des commentai
 
 **Objectif** : moteur de simulation Monte Carlo (11e édition) + console pour l'interroger.
 
-### Phase 2 : interface graphique (en cours)
+### Phase 2 : interface graphique (terminée)
 
 **Objectif** : remplacement de la console par une interface graphique.
 
-- **2a : desktop** (MAUI Blazor Hybrid + MudBlazor) : étapes détaillées dans « Phase 2a : étapes ».
-- **2b : API + client web.** Le « web local » prévu à l'origine est abandonné (2026-10-27) : le desktop couvre l'usage
-  local, et ce qu'il devait apporter (fichiers côté navigateur, Wh40kSim.UI dans un hôte web) est repris ici.
-  Structure Blazor Web App : `Wh40kSim.Web` (serveur ASP.NET Core : API + service du client) et
-  `Wh40kSim.Web.Client` (WebAssembly).
-  1. **Contrat et API** (Minimal API) : contrat JSON du résultat, `POST` d'un scénario validé par `Scenario.Validate`
-     (erreurs en `ProblemDetails`), plafond d'itérations, tests d'intégration (`WebApplicationFactory`).
-  2. **Progression et annulation** : progression envoyée au client (Server-Sent Events), annulation si le client se
-     déconnecte.
-  3. **Client WebAssembly** : `ApiSimulationService` implémente `ISimulationService` ; `IScenarioFileService` côté
-     navigateur (`InputFile`, téléchargement) ; composants de Wh40kSim.UI inchangés.
-  4. **Finitions** : configuration, README, tag `v0.2b`. Hébergement public hors périmètre sauf décision contraire.
+- **2a : desktop** (MAUI Blazor Hybrid + MudBlazor) : étapes détaillées dans « Phase 2a : étapes ». Tags `v0.2a`,
+  `v0.2a.1`, `v0.2a.2`.
+- L'ancienne **2b** (API + client web) est devenue la phase 7 (2026-10-27).
 
-### Phase 3 : traduction
+### Phase 3 : graphiques et comparaison
+
+**Objectif** : « Affichage des distributions façon WarpHammer Math : histogrammes, probabilités cumulées P(≥ k) et
+comparaison de plusieurs profils côte à côte » (qui tue le mieux l'adversaire).
+
+Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que les dessiner, dans Wh40kSim.UI
+(desktop maintenant, web en phase 7).
+
+1. **Graphiques d'un résultat** : choix de la bibliothèque (`MudChart` ou bibliothèque dédiée, à vérifier en début de
+   phase) ; histogramme P(= k) et courbe P(≥ k) pour les figurines tuées et les PV retirés, à partir des mêmes lignes
+   que les tableaux (`DiscreteDistribution`) ; les tableaux restent.
+   **Le choix des technologies doit tenir compte de la phase 7** : la bibliothèque (et tout ce qu'on ajoute à
+   Wh40kSim.UI) doit fonctionner aussi bien dans le `BlazorWebView` du desktop que dans le client Blazor WebAssembly,
+   sans API propre au desktop, avec un poids raisonnable à télécharger dans le navigateur. Les résultats (simple et
+   comparaison) doivent rester sérialisables : ils formeront le contrat JSON de l'API.
+2. **Comparaison, côté Simulation** : une cible et une situation communes, N profils d'attaquant nommés ; simulation de
+   chacun (progression globale, annulation) ; résultats alignés sur le même axe ; indicateurs calculés dans
+   Simulation : moyenne, P(détruire l'unité), P(≥ k) pour un k choisi, meilleur profil pour chacun (pas de « meilleur »
+   unique). Format JSON d'une comparaison (enregistrer / rouvrir).
+3. **Comparaison, côté UI** : profils ajoutés depuis le scénario courant, par duplication ou depuis un JSON ; courbes
+   P(≥ k) superposées et histogrammes ; tableau côte à côte, meilleur profil mis en évidence par indicateur.
+
+### Phase 4 : traduction
 
 **Objectif** : anglais, choix de la langue, messages du Core.
 
@@ -106,26 +119,9 @@ Placée avant les mots-clés : la phase 5 ajoutera beaucoup de messages au Core,
 de codes.
 
 1. **Messages du Core sous forme de codes** : `Validate()` renvoie des erreurs typées (code + paramètres) traduites par
-   l'UI ; idem pour les erreurs de lecture JSON et de dés.
-2. **Anglais** : `.resx` anglais, choix de la langue dans l'interface (mémorisé), nombres formatés selon la langue.
-
-### Phase 4 : graphiques et comparaison
-
-**Objectif** : « Affichage des distributions façon WarpHammer Math : histogrammes, probabilités cumulées P(≥ k) et
-comparaison de plusieurs profils côte à côte » (qui tue le mieux l'adversaire).
-
-Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que les dessiner, dans Wh40kSim.UI
-(desktop et web en profitent).
-
-1. **Graphiques d'un résultat** : choix de la bibliothèque (`MudChart` ou bibliothèque dédiée, à vérifier en début de
-   phase) ; histogramme P(= k) et courbe P(≥ k) pour les figurines tuées et les PV retirés, à partir des mêmes lignes
-   que les tableaux (`DiscreteDistribution`) ; les tableaux restent.
-2. **Comparaison, côté Simulation** : une cible et une situation communes, N profils d'attaquant nommés ; simulation de
-   chacun (progression globale, annulation) ; résultats alignés sur le même axe ; indicateurs calculés dans
-   Simulation : moyenne, P(détruire l'unité), P(≥ k) pour un k choisi, meilleur profil pour chacun (pas de « meilleur »
-   unique). Format JSON d'une comparaison (enregistrer / rouvrir).
-3. **Comparaison, côté UI** : profils ajoutés depuis le scénario courant, par duplication ou depuis un JSON ; courbes
-   P(≥ k) superposées et histogrammes ; tableau côte à côte, meilleur profil mis en évidence par indicateur.
+   l'UI ; idem pour les erreurs de lecture JSON et de dés (et celles de la comparaison, phase 3).
+2. **Anglais** : `.resx` anglais, choix de la langue dans l'interface (mémorisé), nombres formatés selon la langue
+   (graphiques compris).
 
 ### Phase 5 : mots-clés, règles d'armée, détachements
 
@@ -149,10 +145,32 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 
 1. **Modèle « fiche d'unité »** : caractéristiques, armes et options, mots-clés, composition (min / max), leaders
    compatibles, règles d'unité (effets de la phase 5).
-2. **Bibliothèque d'unités** : `IUnitRepository`, d'abord en fichiers JSON locaux (stockage serveur pour le web ensuite).
+2. **Bibliothèque d'unités** : `IUnitRepository`, d'abord en fichiers JSON locaux (stockage serveur pour le web en
+   phase 7).
 3. **Éditeur d'unités** (UI) : créer, modifier, dupliquer, supprimer.
 4. **Composition d'un scénario** : choix du loadout et du leader attaché → génération du `Scenario` (groupes d'armes de
    l'attaquant, groupes d'allocation et ordre du défenseur).
+
+### Phase 7 : intégration web
+
+**Objectif** : API serveur + client web (ancienne phase 2b, déplacée le 2026-10-27).
+
+Le « web local » prévu à l'origine est abandonné (2026-10-27) : le desktop couvre l'usage local, et ce qu'il devait
+apporter (fichiers côté navigateur, Wh40kSim.UI dans un hôte web) est repris ici. Structure Blazor Web App :
+`Wh40kSim.Web` (serveur ASP.NET Core : API + service du client) et `Wh40kSim.Web.Client` (WebAssembly). Le calcul se
+fait sur le serveur. Ce qu'auront apporté les phases 3 à 6 (comparaison, langue, règles, bibliothèque d'unités) est à
+couvrir par l'API et le client ; le découpage sera revu en début de phase.
+
+1. **Contrat et API** (Minimal API) : contrat JSON du résultat (et de la comparaison), `POST` d'un scénario validé par
+   `Scenario.Validate` (erreurs en `ProblemDetails`), plafond d'itérations, tests d'intégration
+   (`WebApplicationFactory`).
+2. **Progression et annulation** : progression envoyée au client (Server-Sent Events), annulation si le client se
+   déconnecte.
+3. **Client WebAssembly** : `ApiSimulationService` implémente `ISimulationService` ; `IScenarioFileService` et
+   `IPreferenceService` côté navigateur (`InputFile`, téléchargement, stockage du navigateur) ; composants de
+   Wh40kSim.UI inchangés.
+4. **Finitions** : configuration, README, tag de fin de phase. Hébergement public hors périmètre sauf décision
+   contraire.
 
 ## Phase 2a : étapes
 
@@ -174,7 +192,7 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
      sur la nouvelle API ; boucle de simulation toujours sans allocation par itération.
    - `Wh40kSim.Simulation.Tests` : `SimulatorTests` déplacés, tests de `DiscreteDistribution`, non-régression à graine
      égale (résultats identiques au bit près). Projets ajoutés au `.sln` à la main.
-   - Pas d'anticipation de la phase 4 (pas de comparaison, pas de distribution par groupe).
+   - Pas d'anticipation de la phase 3 (pas de comparaison, pas de distribution par groupe).
 4. **Excédent de dégâts (overflow).** Aujourd'hui la distribution des PV retirés est plafonnée aux PV de l'unité :
    tout ce qui dépasse est compté au maximum (le pic final vaut P(unité détruite)), sans rien dire de la marge.
    - Définition : la séquence est inchangée jusqu'à la destruction de l'unité ; ensuite, les attaques restantes
@@ -208,7 +226,7 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
      bouton Lancer désactivé tant que le scénario est invalide.
    - Panneau de simulation : nombre de simulations (défaut 1 000 000), graine optionnelle, Lancer, barre de
      progression, Annuler.
-   - Résultats en texte et tableaux (pas de graphique, c'est la phase 4), lus dans `SimulationResult` sans aucun
+   - Résultats en texte et tableaux (pas de graphique, c'est la phase 3), lus dans `SimulationResult` sans aucun
      calcul : les mêmes informations que la console (moyennes, écarts-types, médianes, fourchette 10-90 %, unité
      détruite, pertes par groupe, tableaux P(= k) et P(≥ k) pour les figurines tuées et les PV retirés, lignes
      négligeables masquées aux extrémités). Choix d'affichage réel / prolongé (excédent de l'étape 4), avec le
@@ -242,7 +260,7 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
      captures. **Deux styles sombres gardés** : Grimdark (presque noir, or terni, rouge sang, matière ; par défaut) et
      Acier (acier et laiton, le premier prototype), plus le clair parchemin. Choix par l'utilisateur : ticket #9.
    - Résultats : tuiles de synthèse en tête (figurines tuées, PV retirés, unité détruite) ; barre proportionnelle dans
-     la colonne P(= k) des tableaux (pas encore les graphiques de la phase 4).
+     la colonne P(= k) des tableaux (pas encore les graphiques de la phase 3).
    - Mise en page en deux colonnes : saisie à gauche, simulation et résultats à droite, toujours visibles.
    - Profils d'armes et groupes du défenseur repliables, avec un résumé en en-tête (`Describe()` du Core).
    - **Sélecteur de mots-clés** (idée de l'utilisateur, remplace les puces) : sur la carte d'une arme, les mots-clés
@@ -301,7 +319,7 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
    - **Premier lancement** : Parchemin si le système est clair, Grimdark s'il est sombre ; ensuite, le dernier thème
      choisi, quel que soit le système (pas d'option « automatique »).
    - **Mémorisation par l'hôte** : `IPreferenceService` (Wh40kSim.UI), implémenté par `DesktopPreferenceService`
-     (préférences MAUI) ; en web (2b), stockage du navigateur. L'hôte desktop lit le thème avant le premier affichage
+     (préférences MAUI) ; en web (phase 7), stockage du navigateur. L'hôte desktop lit le thème avant le premier affichage
      et le passe à `AppShell` (`InitialTheme`) : pas de flash, fond de la fenêtre et barre de chargement aux couleurs
      du thème.
    - Retour de l'utilisateur : poubelles (armes, groupes) de la couleur du camp, qui passent au rouge au survol.
@@ -320,7 +338,7 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 - **Excédent de dégâts** (2026-10-27) : « PV retirés » reste la mesure réelle (règles du jeu, plafonnée) ;
   l'excédent est une distribution prolongée à part, contre des copies du premier garde du corps (pas du dernier tué,
   souvent le leader, unique et plus résistant). Flux de dés séparé pour ne pas modifier les résultats réels.
-- **Web (phase 2b)** : Blazor Web App, serveur `Wh40kSim.Web` (API + client) et client WebAssembly
+- **Web (phase 7)** : Blazor Web App, serveur `Wh40kSim.Web` (API + client) et client WebAssembly
   `Wh40kSim.Web.Client` ; le calcul se fait sur le serveur.
 - **Versions** (vérifiées le 2026-10-27) : MudBlazor 9.11.0, Microsoft.AspNetCore.Components.Web 10.0.14,
   Microsoft.Extensions.Localization 10.0.14, CommunityToolkit.Maui 15.0.1, bUnit 2.13.3, Microsoft.Maui.Controls et
@@ -335,7 +353,7 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 - **IScenarioFileService** : `OpenAsync()` → `OpenedScenario(FileName, Scenario)` ou null si annulé ;
   `SaveAsync(scenario, suggestedFileName)` → nom du fichier écrit ou null si annulé.
 - **Traduction** préparée dès la phase 2 : textes de l'UI dans des `.resx` (français seulement pour l'instant), nombres
-  formatés selon la culture de l'appli, fixée à fr-FR (pas celle de la machine). Messages du Core et anglais : phase 3.
+  formatés selon la culture de l'appli, fixée à fr-FR (pas celle de la machine). Messages du Core et anglais : phase 4.
   Traduction du contenu (règles d'armée, unités) : à trancher en phase 5.
 - **Endurance** : portée par chaque groupe, valeur par défaut E4 conservée (un groupe JSON sans `toughness` reçoit E4).
   Les anciens fichiers avec `toughness` sur le défenseur sont refusés au chargement (JSON strict, testé).
@@ -363,7 +381,7 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   panneau ; dans un panneau en demi-largeur, n'utiliser que `xs` / `sm`.
 - **Hôte desktop (Wh40kSim.Desktop)** : réduit au minimum. Toute l'interface est `AppShell` (Wh40kSim.UI) :
   fournisseurs MudBlazor, barre de titre avec le menu des thèmes, puis `SimulatorPage` ; réutilisable tel quel par
-  l'hôte web (2b). L'hôte fournit `MauiProgram` (services), la fenêtre (`App` : titre lu dans `Strings.resx`,
+  l'hôte web (phase 7). L'hôte fournit `MauiProgram` (services), la fenêtre (`App` : titre lu dans `Strings.resx`,
   1400 × 900 centrée, minimum 900 × 600, thème au démarrage), `DesktopScenarioFileService`,
   `DesktopPreferenceService` et `wwwroot/index.html` (CSS / JS de MudBlazor). Pas de `Package.appxmanifest`
   (application non empaquetée). Démarrage sans flash : l'hôte passe le thème (mémorisé, sinon selon Windows) à
@@ -424,10 +442,13 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   `NonRegressionTests` inchangés (sans modification, résultats identiques au bit près).
 - Phase 2a, étape 9 (choix du thème) : fusionnée dans `main`, **tag `v0.2a.2`**. 280 tests verts (145 Core,
   35 Simulation, 100 UI). Branche `essai/theme-neon` reprise dans l'étape, puis supprimée.
-- Prochaine ensuite : phase 2b (API + client web).
+- Phase 2a validée par l'utilisateur ; roadmap renumérotée le 2026-10-27 : graphiques et comparaison en 3,
+  traduction en 4, web (ex-2b) en 7.
+- Prochaine ensuite : phase 3 (graphiques et comparaison). Étapes à détailler et valider avant de coder ; tickets
+  proches à trancher en ouverture : #10 (générateur biaisé, à traiter avant d'ajouter des statistiques), #1, #2, #6.
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis
   `dotnet restore`).
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier
-  dans un vrai navigateur en phase 2b.
+  dans un vrai navigateur en phase 7.

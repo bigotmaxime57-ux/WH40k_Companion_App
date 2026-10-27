@@ -8,7 +8,7 @@ namespace Wh40kSim.UI.Tests;
 /// <summary>
 /// Les textes de l'interface viennent de Resources/Strings.resx. Une clé absente ne provoque aucune erreur : l'interface
 /// afficherait simplement la clé. On vérifie donc que chaque clé utilisée existe, et que le fichier n'en garde pas
-/// d'inutiles (il servira de modèle aux traductions de la phase 3).
+/// d'inutiles (il servira de modèle aux traductions de la phase 4).
 /// </summary>
 public class StringsTests
 {

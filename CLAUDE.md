@@ -2,7 +2,8 @@
 
 Ce fichier est lu automatiquement par Claude Code au début de chaque session. Il garde les règles, la roadmap et les
 décisions du projet, pour reprendre le travail sur n'importe quelle machine. **Le tenir à jour** : l'avancement est mis
-à jour à la fin de chaque étape, dans le commit de l'étape.
+à jour à la fin de chaque étape, dans le commit de l'étape (en attente de validation), puis à sa validation
+(`/valider-etape`).
 
 **Deux machines.** L'utilisateur travaille en alternance sur deux PC Windows. Ce fichier (versionné) contient
 uniquement ce qui vaut pour les deux : règles, décisions, avancement. Ce qui est propre à une machine (chemin du SDK,
@@ -34,13 +35,11 @@ Voir aussi `README.md` (structure de la solution, règles de jeu implémentées,
 
 - Une branche par étape, créée depuis `main` à jour (ex. `phase2a/etape3-composants`).
 - Un ou quelques commits cohérents par étape, messages en français, terminés par la ligne `Co-Authored-By` de Claude.
-- **Validation d'une étape** (autorisation permanente du 2026-10-27) : quand l'utilisateur valide une étape, Claude
-  enchaîne sans redemander fusion dans `main`, build et tests, push, suppression de la branche et fermeture des tickets
-  traités : skill `/valider-etape` (`.claude/skills/valider-etape/SKILL.md`). Les tags restent soumis à accord.
-- Présenter l'étape, puis fusionner dans `main` **uniquement après accord** de l'utilisateur, **toujours avec
-  `git merge --no-ff`** (l'historique est suivi dans SourceTree, les branches doivent rester visibles ;
-  `git config merge.ff false` est aussi réglé dans la config locale du dépôt, sur chaque machine).
-- Après le merge : build + tests sur `main`, `git push origin main`, puis suppression de la branche.
+- **Fusion dans `main`** : présenter l'étape, puis fusionner **uniquement quand l'utilisateur la valide**, avec le
+  skill `/valider-etape` (`.claude/skills/valider-etape/SKILL.md`), qui décrit toute la procédure (avancement,
+  `git merge --no-ff`, build et tests, push, suppression de la branche, tickets). Autorisation permanente du
+  2026-10-27 : à la validation, Claude enchaîne sans redemander ; les tags restent soumis à accord.
+  `git config merge.ff false` est aussi réglé dans la config locale du dépôt, sur chaque machine.
 - Jamais de réécriture d'historique publié (`push --force`) sans demande explicite.
 - `Wh40kSim.sln` : ne pas utiliser `dotnet sln add` (il ajoute des dossiers de solution, des plateformes x64/x86 et un BOM).
   Ajouter les projets à la main dans le style existant : type de projet `{9A19103F-16F7-4668-BE54-9A1E7A4F7556}`,

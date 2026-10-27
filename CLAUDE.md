@@ -356,7 +356,11 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
    absente était remplacée en silence par une unité vide).
 4. **Points (#2, version légère).** Points optionnels sur l'attaquant et sur chaque groupe du défenseur (un leader a son
    propre coût) ; JSON et UI. Indicateurs dans Simulation : points détruits, rendement (points détruits / points de
-   l'attaquant). Mode de calcul des points détruits (au prorata des figurines ou des PV) à trancher dans l'étape.
+   l'attaquant). Décisions de l'utilisateur : points détruits **au prorata des PV retirés** (calcul lissé : un char à
+   moitié détruit vaut la moitié de ses points), via les PV retirés par groupe (`DefenderState.DamageInGroup`, cumulés
+   par le simulateur, aucun dé consommé : non-régression au bit près) ; indicateurs seulement si **tous** les groupes ont
+   des points ; résultats affichés **au Full sim seulement** (console en attendant), champs de saisie dans le Quick sim.
+   Marge exclue (on ne détruit pas plus que la valeur de l'unité). Ticket #2 commenté, pas fermé.
 5. **Dégâts bruts (#6).** Dégâts de chaque attaque non sauvegardée comptés en entier (après réduction de dégâts et FNP),
    sans plafond par figurine ni arrêt à la destruction de l'unité ; distribution et gaspillage (bruts - PV retirés)
    dans Simulation. Fait tôt pour figurer dans le Full sim.
@@ -519,7 +523,8 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
 - Barre de chargement à l'ouverture d'un écran (gel au premier clic sur Quick sim, signalé par l'utilisateur), avec
   fond uni du thème, et barre du démarrage enfin aux couleurs du thème mémorisé : fusionnées dans `main`. 327 tests
   verts (166 Core, 41 Simulation, 120 UI ; UI stables sur 6 exécutions).
-- Prochaine ensuite : phase 3, étape 4 (points, #2 version légère), à préciser et valider avant de coder.
+- Phase 3, étape 4 (points, #2 version légère) : branche `phase3/etape4-points`, en attente de validation.
+  341 tests verts (172 Core, 48 Simulation, 121 UI ; UI stables sur 6 exécutions) ; `NonRegressionTests` inchangés.
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

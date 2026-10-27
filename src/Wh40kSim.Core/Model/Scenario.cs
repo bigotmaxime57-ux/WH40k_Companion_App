@@ -28,6 +28,10 @@ public sealed record Scenario
         {
             errors.Add("L'attaquant doit avoir au moins un profil d'arme.");
         }
+        if (Attacker.Points < 0)
+        {
+            errors.Add("Les points de l'attaquant ne peuvent pas être négatifs.");
+        }
 
         foreach (var group in Attacker.Weapons)
         {
@@ -57,6 +61,7 @@ public sealed record Scenario
             if (group.DamageReduction < 0) errors.Add($"{label} : la réduction de dégâts ne peut pas être négative.");
             if (group.Toughness < 1) errors.Add($"{label} : l'Endurance doit être d'au moins 1.");
             if (group.IsCharacter && group.Count != 1) errors.Add($"{label} : un groupe PERSONNAGE contient exactement une figurine.");
+            if (group.Points < 0) errors.Add($"{label} : les points ne peuvent pas être négatifs.");
         }
 
         if (Context.PrecisionTarget is string precisionTarget

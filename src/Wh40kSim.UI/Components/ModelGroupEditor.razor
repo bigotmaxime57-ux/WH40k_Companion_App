@@ -43,7 +43,10 @@
                 <MudCheckBox T="bool" Label="@L["Group_IsCharacter"]" @bind-Value="Group.IsCharacter" @bind-Value:after="NotifyChanged"
                              data-test="is-character" />
             </MudItem>
-            <MudItem xs="12" sm="4" Class="d-none d-sm-flex" />
+            <MudItem xs="6" sm="4">
+                <MudNumericField T="int?" Label="@L["Group_Points"]" Min="0" @bind-Value="Group.Points" @bind-Value:after="NotifyChanged"
+                                 data-test="group-points" />
+            </MudItem>
             <MudItem xs="6" sm="4">
                 <MudNumericField T="int" Label="@L["Group_Toughness"]" Min="1" @bind-Value="Group.Toughness" @bind-Value:after="NotifyChanged"
                                  data-test="toughness" />

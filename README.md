@@ -137,6 +137,11 @@ Le fichier suit l'interface :
 
 Un boost absent vaut 0 (ou `"None"` pour une relance, `false` pour le couvert).
 
+Points (facultatifs) : `"points"` sur l'attaquant (coût de l'unité) et sur chaque groupe du défenseur (coût du groupe
+entier : un leader a son propre coût). Les points détruits se comptent au prorata des PV retirés (la moitié des PV d'un
+char vaut la moitié de ses points), seulement si chaque groupe a ses points ; le rendement les rapporte aux points de
+l'attaquant. Affichés par la console, et dans l'interface au Full sim.
+
 Un scénario complet contient `"attacker"` et `"defender"` (`"context"` facultatif). Un fichier peut aussi ne contenir
 qu'une partie, pour la réutiliser dans d'autres scénarios : `{ "attacker": { … } }` (fichier attaquant) ou
 `{ "defender": { … } }` (fichier défenseur), boosts compris. Dans le Quick sim, les boutons des cartes Attaquant et

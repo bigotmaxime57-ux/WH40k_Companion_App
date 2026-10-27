@@ -410,6 +410,9 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 - Prochaine ensuite : phase 2b (API + client web).
 
 Points notés pour la suite :
+- Thème **Néon** (violet pour l'attaquant, bleu pour le défenseur, halos et dégradés) : essai validé par l'utilisateur,
+  gardé de côté sur la branche `essai/theme-neon` (poussée, non fusionnée ; Néon y est le style par défaut). À reprendre
+  avec le sélecteur de thème (ticket #9).
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis
   `dotnet restore`).
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

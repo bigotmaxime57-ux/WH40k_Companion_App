@@ -40,6 +40,20 @@ Voir aussi `README.md` (structure de la solution, règles de jeu implémentées,
   Ajouter les projets à la main dans le style existant : type de projet `{9A19103F-16F7-4668-BE54-9A1E7A4F7556}`,
   configurations `Any CPU` seulement, fins de ligne LF.
 
+## Backlog : GitHub Issues
+
+Les idées non planifiées, bugs et points d'outillage sont des **tickets GitHub** du dépôt
+(`bigotmaxime57-ux/WH40k_Companion_App`), pas des listes dans ce fichier. CLAUDE.md ne garde que la roadmap décidée.
+
+- Labels : `idée` (fonctionnalité non planifiée), `outillage` (build, CI, configuration du dépôt), `bug`,
+  `dette technique`. Pas de milestones : quand une idée entre dans une phase, elle est décrite dans la roadmap
+  ci-dessous, qui cite le ticket, et le ticket est fermé par le commit qui la réalise.
+- **Claude crée un ticket sans redemander dès qu'une idée est validée en discussion** (autorisation donnée le
+  2026-10-27) : titre court, contexte de la discussion, phase concernée, points à trancher.
+- Un commit qui réalise un ticket le référence (`Closes #n`) ; consulter les tickets ouverts avant de planifier une
+  phase (`gh issue list`).
+- Outil : CLI GitHub `gh`, à installer et authentifier sur chaque machine (voir « Environnement de développement »).
+
 ## Roadmap
 
 Chaque phase garde une ligne **Objectif** : sa formulation d'origine, qui ne se modifie qu'avec l'accord de
@@ -137,20 +151,6 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 4. **Composition d'un scénario** : choix du loadout et du leader attaché → génération du `Scenario` (groupes d'armes de
    l'attaquant, groupes d'allocation et ordre du défenseur).
 
-### Backlog (non planifié)
-
-- Comparer plusieurs cibles pour un même attaquant.
-- Efficacité rapportée au coût en points (le modèle n'a pas de points ; plutôt après la phase 6).
-- Ordre des pools choisi pour maximiser les dégâts (au lieu de l'ordre de saisie).
-- Import de listes d'armée depuis des outils tiers.
-- Excédent de dégâts : laisser l'utilisateur choisir le profil qui encaisse l'excédent (par défaut le premier groupe
-  non-PERSONNAGE, voir étape 4 de la phase 2a).
-- « Dégâts bruts » : dégâts de chaque attaque non sauvegardée comptés en entier, sans plafond par figurine ; l'écart
-  avec les PV retirés mesure le gaspillage (arme à gros dégâts contre des figurines à 1 PV). Plutôt avec la
-  comparaison de profils (phase 4).
-- Outillage : intégration continue (GitHub Actions, build + tests à chaque push) ; `.gitattributes` pour fixer les fins
-  de ligne dans le dépôt plutôt que par machine.
-
 ## Phase 2a : étapes
 
 1. **Core : progression.** Paramètre optionnel `IProgress<double>` sur `Simulator.Run` (0 → 1, rapporté par paquet),
@@ -177,7 +177,8 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
    - Définition : la séquence est inchangée jusqu'à la destruction de l'unité ; ensuite, les attaques restantes
      continuent contre des figurines virtuelles identiques au **premier groupe non-PERSONNAGE dans l'ordre
      d'allocation** (à défaut, le premier groupe). Chacune arrive avec tous ses PV, l'excédent par figurine reste
-     perdu, l'Endurance est celle de ce profil, Precision n'a plus de cible.
+     perdu, l'Endurance est celle de ce profil, Precision n'a plus de cible. Choix du profil par l'utilisateur : #5 ;
+     « dégâts bruts » (gaspillage) : #6.
    - Core : `AttackResolver` peut continuer après la destruction ; `DefenderState` compte figurines et PV au-delà de
      l'unité. Les dés de l'excédent sont tirés sur un **flux séparé** : les résultats réels restent identiques au bit
      près (`NonRegressionTests` inchangés).
@@ -267,7 +268,11 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 - Si les chemins longs Windows sont désactivés (`LongPathsEnabled = 0`), le build MAUI échoue au-delà de 260
   caractères : ne pas placer le dépôt dans un dossier trop profond (dans le dépôt, le chemin le plus long fait ~180).
 - Le modèle `dotnet new maui-blazor` cible aussi Android / iOS : ne garder que la cible Windows.
-- Pas de `.gitattributes` : avec `core.autocrlf=true`, la copie de travail est en CRLF et l'index en LF. La règle
+- CLI GitHub (tickets) : `winget install --id GitHub.cli -e --source winget --accept-source-agreements
+  --accept-package-agreements` (sans ces options, winget bloque sur les conditions du Microsoft Store), puis
+  `gh auth login` dans un terminal séparé (questions interactives : GitHub.com, HTTPS, navigateur). Une session ouverte
+  avant l'installation n'a pas `gh` dans son PATH : `C:\Program Files\GitHub CLI\gh.exe`.
+- Pas de `.gitattributes` (ticket #8) : avec `core.autocrlf=true`, la copie de travail est en CRLF et l'index en LF. La règle
   « fins de ligne LF » du `.sln` porte sur le contenu versionné (vérifier avec `git ls-files --eol`).
 
 ## Avancement
@@ -280,6 +285,9 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   28 Simulation, 33 UI) ; non-régression au bit près sur deux scénarios (`NonRegressionTests`) ; sortie de la console
   identique à celle d'avant le refactor.
 - Étape « Excédent de dégâts » insérée en 4 le 2026-10-27 (composants en 5, desktop en 6).
+- Backlog passé en GitHub Issues le 2026-10-27 : labels `idée`, `outillage`, `dette technique` (+ `bug` par défaut),
+  tickets #1 à #8 repris de l'ancienne section Backlog. `gh` installé et authentifié sur la deuxième machine
+  seulement : **à faire sur l'autre machine** (voir « Environnement de développement »).
 - **Prochaine : étape 4 (excédent de dégâts)**, en attente du feu vert.
 
 Points notés pour les étapes suivantes :

@@ -213,6 +213,17 @@
     color: #ffffff !important;
 }
 
+/* Suppression d'une arme ou d'un groupe : couleur du camp, qui passe progressivement au rouge au survol */
+.wh-delete {
+    color: var(--wh-accent) !important;
+    transition: color .35s ease, background-color .35s ease;
+}
+
+.wh-delete:hover {
+    background-color: color-mix(in srgb, var(--mud-palette-error) 12%, transparent) !important;
+    color: var(--mud-palette-error) !important;
+}
+
 /* Numéro d'ordre d'allocation d'un groupe */
 .wh-group-number {
     color: var(--wh-accent);

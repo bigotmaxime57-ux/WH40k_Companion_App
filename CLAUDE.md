@@ -304,6 +304,7 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
      (préférences MAUI) ; en web (2b), stockage du navigateur. L'hôte desktop lit le thème avant le premier affichage
      et le passe à `AppShell` (`InitialTheme`) : pas de flash, fond de la fenêtre et barre de chargement aux couleurs
      du thème.
+   - Retour de l'utilisateur : poubelles (armes, groupes) de la couleur du camp, qui passent au rouge au survol.
    - `ThemeChoice` (Parchment, Grimdark, Steel, Neon) remplace `DarkStyle` ; `Wh40kTheme.For`, `IsDark`, `Default`,
      `Background`, `NameKey`.
    - Fin d'étape : tag `v0.2a.2`.

@@ -10,10 +10,10 @@
             <MudCheckBox T="bool" Label="@L["Defender_InCover"]" @bind-Value="Defender.InCover" @bind-Value:after="NotifyChanged" />
         </MudItem>
         <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Defender_HitModifier"]" Min="-3" Max="3" @bind-Value="Defender.HitModifier" @bind-Value:after="NotifyChanged" />
+            <MudNumericField T="int" Label="@L["Defender_HitModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3" @bind-Value="Defender.HitModifier" @bind-Value:after="NotifyChanged" />
         </MudItem>
         <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Defender_WoundModifier"]" Min="-3" Max="3" @bind-Value="Defender.WoundModifier" @bind-Value:after="NotifyChanged" />
+            <MudNumericField T="int" Label="@L["Defender_WoundModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3" @bind-Value="Defender.WoundModifier" @bind-Value:after="NotifyChanged" />
         </MudItem>
     </MudGrid>
 

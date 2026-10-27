@@ -178,12 +178,21 @@
     line-height: 1.2;
 }
 
-.wh-tile-highlight {
-    border-color: var(--mud-palette-secondary);
+/* Tonalités : mauvaise (rouge), bonne (vert) ; neutre = couleur du thème */
+.wh-tile-bad {
+    border-color: var(--mud-palette-error);
 }
 
-.wh-tile-highlight .wh-tile-value {
-    color: var(--mud-palette-secondary-lighten);
+.wh-tile-bad .wh-tile-value {
+    color: var(--mud-palette-error);
+}
+
+.wh-tile-good {
+    border-color: var(--mud-palette-success);
+}
+
+.wh-tile-good .wh-tile-value {
+    color: var(--mud-palette-success);
 }
 
 .wh-tile-detail {

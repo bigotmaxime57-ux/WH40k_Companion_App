@@ -22,10 +22,10 @@
 
     <MudGrid Spacing="2">
         <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Context_HitModifier"]" Min="-3" Max="3" @bind-Value="Context.HitModifier" @bind-Value:after="NotifyChanged" />
+            <MudNumericField T="int" Label="@L["Context_HitModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3" @bind-Value="Context.HitModifier" @bind-Value:after="NotifyChanged" />
         </MudItem>
         <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Context_WoundModifier"]" Min="-3" Max="3" @bind-Value="Context.WoundModifier" @bind-Value:after="NotifyChanged" />
+            <MudNumericField T="int" Label="@L["Context_WoundModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3" @bind-Value="Context.WoundModifier" @bind-Value:after="NotifyChanged" />
         </MudItem>
         <MudItem xs="6">
             <MudSelect T="RerollPolicy" Label="@L["Context_HitReroll"]" @bind-Value="Context.HitReroll" @bind-Value:after="NotifyChanged">

@@ -12,7 +12,8 @@
     <div class="wh-tiles my-3">
         <StatTile Label="@L["Results_Kills"]" Value="@Kills.Mean.ToString("F2")" Detail="@Detail(Kills)" data-test="tile-kills" />
         <StatTile Label="@L["Results_Damage"]" Value="@Damage.Mean.ToString("F2")" Detail="@Detail(Damage)" data-test="tile-damage" />
-        <StatTile Label="@L["Results_Wipe"]" Value="@Result.ProbabilityWipe.ToString("P1")" Highlight="true" data-test="wipe" />
+        <StatTile Label="@L["Results_Wipe"]" Value="@Result.ProbabilityWipe.ToString("P1")" Tone="WipeTone"
+                  Detail="@L["Results_WipeDetail", WipeUnreliableBelow.ToString("P0"), WipeReliableAbove.ToString("P0")]" data-test="wipe" />
     </div>
 
     @if (Result.ProbabilityWipe > 0)
@@ -45,7 +46,19 @@
 </MudPaper>
 
 @code {
+    /// <summary>Seuils de fiabilité de la destruction de l'unité (choix de l'utilisateur) : rouge en dessous, vert au-delà.</summary>
+    private const double WipeUnreliableBelow = 0.50;
+
+    private const double WipeReliableAbove = 0.84;
+
     private bool _extended;
+
+    private StatTile.TileTone WipeTone => Result.ProbabilityWipe switch
+    {
+        < WipeUnreliableBelow => StatTile.TileTone.Bad,
+        > WipeReliableAbove => StatTile.TileTone.Good,
+        _ => StatTile.TileTone.Neutral,
+    };
 
     [Parameter, EditorRequired]
     public SimulationResult Result { get; set; } = null!;

@@ -502,8 +502,9 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
   valeur exacte conformes à la théorie (20 graines × 4 M, |z| < 2 ; l'ancien générateur s'en écartait, jusqu'à
   z ≈ -5,6) ; scénarios sans valeur exacte conformes à un générateur indépendant (`new Random()` de .NET, 32 M) ;
   l'ancien surestimait les PV retirés d'environ 0,1 % sur le scénario riche (≈ 16 écarts-types). ~28 % plus rapide.
-- Phase 3, étape 2 (accueil et navigation) : branche `phase3/etape2-accueil-navigation`, en attente de validation.
-  302 tests verts (154 Core, 41 Simulation, 107 UI ; UI stables sur 8 exécutions).
+- Phase 3, étape 2 (accueil et navigation) : fusionnée dans `main`. 302 tests verts (154 Core, 41 Simulation,
+  107 UI ; UI stables sur 8 exécutions). Skill `/valider-etape` ajouté dans la même branche.
+- Prochaine ensuite : phase 3, étape 3 (JSON partiels), à préciser et valider avant de coder.
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

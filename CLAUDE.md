@@ -4,6 +4,13 @@ Ce fichier est lu automatiquement par Claude Code au début de chaque session. I
 décisions du projet, pour reprendre le travail sur n'importe quelle machine. **Le tenir à jour** : l'avancement est mis
 à jour à la fin de chaque étape, dans le commit de l'étape.
 
+**Deux machines.** L'utilisateur travaille en alternance sur deux PC Windows. Ce fichier (versionné) contient
+uniquement ce qui vaut pour les deux : règles, décisions, avancement. Ce qui est propre à une machine (chemin du SDK,
+charges de travail installées, identité git, réglages Windows…) va dans la mémoire utilisateur de Claude Code de
+cette machine (`~/.claude/projects/<projet>/memory/`), jamais dans le dépôt. En début de session : `git fetch` et
+vérifier que `main` est à jour avant toute chose ; en fin de session : tout pousser, et mettre à jour
+« Avancement » si l'état a changé (étape en cours, branche non fusionnée, point en suspens).
+
 Voir aussi `README.md` (structure de la solution, règles de jeu implémentées, format JSON).
 
 ## Règles de travail
@@ -25,8 +32,8 @@ Voir aussi `README.md` (structure de la solution, règles de jeu implémentées,
 - Une branche par étape, créée depuis `main` à jour (ex. `phase2a/etape3-composants`).
 - Un ou quelques commits cohérents par étape, messages en français, terminés par la ligne `Co-Authored-By` de Claude.
 - Présenter l'étape, puis fusionner dans `main` **uniquement après accord** de l'utilisateur, **toujours avec
-  `git merge --no-ff`** (l'historique est suivi dans SourceTree, les branches doivent rester visibles ; `merge.ff=false`
-  est aussi réglé dans la config locale du dépôt de la machine principale).
+  `git merge --no-ff`** (l'historique est suivi dans SourceTree, les branches doivent rester visibles ;
+  `git config merge.ff false` est aussi réglé dans la config locale du dépôt, sur chaque machine).
 - Après le merge : build + tests sur `main`, `git push origin main`, puis suppression de la branche.
 - Jamais de réécriture d'historique publié (`push --force`) sans demande explicite.
 - `Wh40kSim.sln` : ne pas utiliser `dotnet sln add` (il ajoute des dossiers de solution, des plateformes x64/x86 et un BOM).
@@ -123,9 +130,23 @@ Le README parle encore de « phase 3 » pour les mots-clés : c'est l'ancienne n
 - Si les chemins longs Windows sont désactivés (`LongPathsEnabled = 0`), le build MAUI échoue au-delà de 260
   caractères : ne pas placer le dépôt dans un dossier trop profond (dans le dépôt, le chemin le plus long fait ~180).
 - Le modèle `dotnet new maui-blazor` cible aussi Android / iOS : ne garder que la cible Windows.
+- Pas de `.gitattributes` : avec `core.autocrlf=true`, la copie de travail est en CRLF et l'index en LF. La règle
+  « fins de ligne LF » du `.sln` porte sur le contenu versionné (vérifier avec `git ls-files --eol`).
 
 ## Avancement
 
 - Phase 2a, étape 1 (progression) : fusionnée dans `main`.
 - Phase 2a, étape 2 (Wh40kSim.UI, services, formulaires) : fusionnée dans `main`.
 - **Prochaine : étape 3 (composants)**, en attente du feu vert.
+
+État vérifié le 2026-10-27 (deuxième machine, `main` à `c062271`) : build sans avertissement, 143 tests verts
+(110 Core, 33 UI). Wh40kSim.UI ne contient encore que `Forms/` et `Services/` : aucun composant `.razor`, pas de
+`.resx`, pas de bUnit.
+
+Points relevés à la relecture, à trancher au début de l'étape 3 :
+- **Endurance par groupe** : déjà faite (commit `c6f233b`) : `ModelGroup.Toughness`, rien sur `DefenderUnit`, JSON
+  strict. Mais elle a une valeur par défaut (4) : un groupe JSON sans `toughness` reçoit E4 sans erreur. Le
+  « refactor du Core » prévu à l'étape 3 se réduit donc à décider si elle devient vraiment obligatoire (`required`).
+- **Ancienne numérotation** : « phase 3 » pour les mots-clés du défenseur subsiste aussi dans les commentaires de
+  `WeaponAbilities.cs` (dont un qui cite Precision comme non géré, alors qu'il l'est), pas seulement dans le README.
+- `UsesHalfRange` / `UsesRemainedStationary` / `UsesCharged` n'existent pas encore (prévu à l'étape 3).

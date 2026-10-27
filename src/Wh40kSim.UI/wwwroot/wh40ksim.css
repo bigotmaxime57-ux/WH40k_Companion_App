@@ -1,10 +1,36 @@
 /*
    Styles globaux de Wh40kSim.UI (en plus du thème MudBlazor, Theme/Wh40kTheme.cs).
    L'hôte les charge après MudBlazor : <link rel="stylesheet" href="_content/Wh40kSim.UI/wh40ksim.css" />
-   .wh-shell : toute l'application ; .wh-grimdark : thème sombre de style Grimdark seulement (classe posée par AppShell).
+   .wh-shell : toute l'application ; .wh-dark : thème sombre, quel que soit son style ; .wh-grimdark : thème sombre de
+   style Grimdark seulement (classes posées par AppShell).
 */
 
 /* --- Commun aux deux thèmes ------------------------------------------------------------------------ */
+
+/*
+   Couleur de camp (--wh-accent) : filets, titres et boosts d'une section. Comme sur les cartes de déploiement de
+   Warhammer, rouge pour l'attaquant et vert pour le défenseur, dans tous les thèmes ; or (couleur principale) ailleurs.
+   .wh-dark (posée par AppShell en sombre) éclaircit les deux teintes pour qu'elles restent lisibles sur fond noir.
+*/
+.wh-shell {
+    --wh-accent: var(--mud-palette-primary);
+}
+
+.wh-shell .wh-attacker {
+    --wh-accent: #a8321f;
+}
+
+.wh-shell .wh-defender {
+    --wh-accent: #2b6e5c;
+}
+
+.wh-shell.wh-dark .wh-attacker {
+    --wh-accent: #c9472f;
+}
+
+.wh-shell.wh-dark .wh-defender {
+    --wh-accent: #3f9a80;
+}
 
 .wh-shell .mud-main-content {
     background: radial-gradient(ellipse at top, var(--mud-palette-background-gray) 0%, var(--mud-palette-background) 70%);
@@ -38,7 +64,7 @@
 
 /* Sections (attaquant, défenseur…) : carte soulignée d'un filet or */
 .wh-section {
-    border-top: 3px solid var(--mud-palette-primary);
+    border-top: 3px solid var(--wh-accent);
 }
 
 .wh-section-header {
@@ -49,12 +75,12 @@
 }
 
 .wh-section-header > .mud-icon-root {
-    color: var(--mud-palette-primary);
+    color: var(--wh-accent);
 }
 
 /* Trait décoratif qui prolonge le titre jusqu'aux actions */
 .wh-section-header::after {
-    background: linear-gradient(90deg, var(--mud-palette-primary) 0%, transparent 100%);
+    background: linear-gradient(90deg, var(--wh-accent) 0%, transparent 100%);
     content: "";
     flex: 1;
     height: 1px;
@@ -99,7 +125,7 @@
 
 /* Petits titres des rangées de boosts (Touche, Blessure…) */
 .wh-boost-row-title {
-    color: var(--mud-palette-primary);
+    color: var(--wh-accent);
     display: block;
     letter-spacing: .06em;
     margin-top: .5rem;
@@ -130,30 +156,30 @@
 }
 
 .wh-subcard {
-    border-left: 3px solid var(--mud-palette-primary) !important;
+    border-left: 3px solid var(--wh-accent) !important;
 }
 
-/* Bloc « Boosts » : fond et contour teintés de la couleur principale, pour le distinguer des armes et des groupes */
+/* Bloc « Boosts » : fond et contour teintés de la couleur de camp, pour le distinguer des armes et des groupes */
 .wh-boosts {
-    background-color: color-mix(in srgb, var(--mud-palette-primary) 7%, var(--mud-palette-surface)) !important;
-    border-color: color-mix(in srgb, var(--mud-palette-primary) 45%, transparent) !important;
+    background-color: color-mix(in srgb, var(--wh-accent) 7%, var(--mud-palette-surface)) !important;
+    border-color: color-mix(in srgb, var(--wh-accent) 45%, transparent) !important;
     border-left-width: 5px !important;
 }
 
 .wh-boosts .wh-subsection-title .mud-typography {
-    color: var(--mud-palette-primary);
+    color: var(--wh-accent);
     letter-spacing: .06em;
     text-transform: uppercase;
 }
 
-/* Groupe PERSONNAGE : filet rouge, pour le distinguer des gardes du corps */
+/* Groupe PERSONNAGE : filet or (le rouge est la couleur de l'attaquant), pour le distinguer des gardes du corps */
 .wh-subcard-character {
-    border-left-color: var(--mud-palette-secondary) !important;
+    border-left-color: var(--mud-palette-primary) !important;
 }
 
 /* Numéro d'ordre d'allocation d'un groupe */
 .wh-group-number {
-    color: var(--mud-palette-primary);
+    color: var(--wh-accent);
     font-family: Bahnschrift, "Segoe UI", sans-serif;
     font-size: 1.4rem;
     font-weight: 600;
@@ -304,6 +330,6 @@
 }
 
 .wh-shell.wh-grimdark .wh-section-header .mud-typography-h6 {
-    color: var(--mud-palette-primary);
+    color: var(--wh-accent);
     text-shadow: 0 1px 2px rgba(0, 0, 0, .8);
 }

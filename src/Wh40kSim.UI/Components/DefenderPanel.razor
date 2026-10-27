@@ -1,6 +1,6 @@
 @* Défenseur : ses groupes d'allocation, dans l'ordre où ils encaissent (le premier d'abord). *@
 
-<MudPaper Elevation="3" Class="pa-4 wh-section">
+<MudPaper Elevation="3" Class="pa-4 wh-section wh-defender" data-test="defender-panel">
     <SectionHeader Icon="@Icons.Material.Filled.Shield" Title="@L["Defender_Title"]" />
     <MudTextField T="string" Label="@L["Defender_Name"]" @bind-Value="Defender.Name" @bind-Value:after="NotifyChanged" />
 

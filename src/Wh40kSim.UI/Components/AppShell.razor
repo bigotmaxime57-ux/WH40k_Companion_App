@@ -35,7 +35,8 @@
     /// <summary>Thème sombre actif (bascule par le bouton de la barre de titre).</summary>
     public bool IsDarkMode => _isDarkMode;
 
-    private string ShellClass => _isDarkMode && DarkStyle == DarkStyle.Grimdark ? "wh-shell wh-grimdark" : "wh-shell";
+    private string ShellClass => !_isDarkMode ? "wh-shell"
+        : DarkStyle == DarkStyle.Grimdark ? "wh-shell wh-dark wh-grimdark" : "wh-shell wh-dark";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

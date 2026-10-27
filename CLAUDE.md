@@ -281,6 +281,10 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
      boost n'est saisi, nombre de boosts actifs dans l'en-tête), rangées Touche / Blessure / Profil. La **Situation**
      ne garde que les conditions (demi-portée, immobile, a chargé, cible de Precision). **Aucune annotation sous les
      champs** : explications dans des bulles « ? » (infobulle après 1 s de survol). README : séquence d'attaque.
+   - Retours de l'utilisateur : titre « Armement » entre les boosts et les armes (comme « Groupes d'allocation ») ;
+     bloc Boosts teinté ; **couleurs de camp** façon cartes de déploiement, dans tous les thèmes : rouge pour
+     l'attaquant, vert pour le défenseur (variable CSS `--wh-accent` des sections `.wh-attacker` / `.wh-defender`) ;
+     filet du PERSONNAGE passé en or (le rouge désigne l'attaquant).
    - Fin d'étape : tag `v0.2a.1`.
 
 ## Décisions techniques

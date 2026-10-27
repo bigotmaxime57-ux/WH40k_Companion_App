@@ -103,16 +103,15 @@ internal static class ScenarioWizard
     private static AttackContext ReadContext(AttackerUnit attacker, DefenderUnit defender)
     {
         WriteTitle("Situation");
-        var abilities = attacker.Weapons.Select(w => w.Weapon.Abilities).ToList();
 
-        // On ne pose les questions de situation que si une arme est concernée
-        bool halfRange = abilities.Any(a => a.RapidFire > 0 || a.Melta > 0) && ReadBool("À demi-portée", false);
-        bool stationary = abilities.Any(a => a.Heavy) && ReadBool("Restée immobile", false);
-        bool charged = abilities.Any(a => a.Lance) && ReadBool("A chargé ce tour", false);
+        // On ne pose les questions de situation que si une arme est concernée (règles portées par le Core)
+        bool halfRange = attacker.UsesHalfRange && ReadBool("À demi-portée", false);
+        bool stationary = attacker.UsesRemainedStationary && ReadBool("Restée immobile", false);
+        bool charged = attacker.UsesCharged && ReadBool("A chargé ce tour", false);
 
         var characters = defender.Groups.Where(g => g.IsCharacter).Select(g => g.Name).ToList();
         string? precisionTarget = null;
-        if (abilities.Any(a => a.Precision) && characters.Count > 1)
+        if (new Scenario { Attacker = attacker, Defender = defender }.PrecisionTargetMatters)
         {
             precisionTarget = ReadParsedName("PERSONNAGE visé par Precision (" + string.Join(" / ", characters) + ")", characters);
         }

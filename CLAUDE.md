@@ -215,7 +215,10 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
    - Tests de composants avec bUnit : Lancer désactivé si invalide, situation conditionnelle, monter / descendre.
 6. **Wh40kSim.Desktop (MAUI Blazor Hybrid).**
    - Vérifier `dotnet workload list` (sinon indiquer `dotnet workload install maui-windows`).
-   - Projet MAUI Blazor Hybrid qui affiche les composants de Wh40kSim.UI dans un `BlazorWebView`.
+   - Projet MAUI Blazor Hybrid qui affiche les composants de Wh40kSim.UI dans un `BlazorWebView`. Ce que Wh40kSim.UI
+     attend de l'hôte (étape 5) : `services.AddWh40kSimUI()`, `UiCulture.Apply()` au démarrage, les fournisseurs
+     MudBlazor dans la mise en page (`MudThemeProvider`, `MudPopoverProvider`, `MudDialogProvider`,
+     `MudSnackbarProvider`), les CSS / JS de MudBlazor, puis `<SimulatorPage />` (composant non routé).
    - Cible Windows uniquement : `net10.0-windows10.0.19041.0`, `WindowsPackageType=None` (non empaqueté).
      macOS écarté (compilation impossible sous Windows, non testable). `Directory.Build.props` impose
      `TargetFramework=net10.0` : le projet redéfinit `TargetFramework` (au singulier).
@@ -258,6 +261,14 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   Les anciens fichiers avec `toughness` sur le défenseur sont refusés au chargement (JSON strict, testé).
 - **Tests aller-retour** : comparer les scénarios via `ScenarioJson.Serialize` (les records contenant des listes ne sont
   pas égaux par valeur).
+- **Composants (Wh40kSim.UI/Components)** : `SimulatorPage` tient le `ScenarioForm` et le revalide (`ToScenario()` puis
+  `Validate()`) à chaque `Changed` remonté par un panneau. Les options de situation dépendent du dernier scénario lisible
+  (stable pendant une saisie de dés invalide). Listes « aucune » / « premier PERSONNAGE » : valeur sentinelle (0, "")
+  convertie en null dans le composant. Textes : `IStringLocalizer<Strings>` injecté dans `_Imports.razor`, un seul
+  `Resources/Strings.resx` (clé `Zone_Élément`), `StringsTests` vérifie qu'aucune clé ne manque ni ne traîne.
+- **Tests bUnit** : `ComponentTestContext` (services, culture, faux services, `MudPopoverProvider` rendu d'abord,
+  JS en mode `Loose`, `IAsyncLifetime` car des services MudBlazor ne se libèrent qu'en asynchrone). Repérage par
+  attributs `data-test` : MudBlazor les pose sur l'`<input>` lui-même (sélecteur `input[data-test=…]`).
 
 ## Environnement de développement
 
@@ -291,10 +302,12 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 - Phase 2a, étape 4 (excédent de dégâts) : fusionnée dans `main`.
   169 tests verts (103 Core, 33 Simulation, 33 UI) ; `NonRegressionTests` inchangés (résultats réels
   identiques au bit près) ; pas de surcoût mesurable (5 M simulations, unité détruite à 89 %), donc pas d'option.
-- **Prochaine : étape 5 (composants)**, en attente du feu vert.
+- Phase 2a, étape 5 (composants) : terminée sur `phase2a/etape5-composants`, en attente de validation avant fusion.
+  211 tests verts (114 Core, 33 Simulation, 64 UI dont bUnit). Pas encore vue à l'écran : aucun hôte avant l'étape 6.
+- **Prochaine : étape 6 (Wh40kSim.Desktop)**, en attente du feu vert.
 
 Points notés pour les étapes suivantes :
 - **Ancienne numérotation** dans le code : `WeaponAbilities.cs` (« phase 3 » pour les mots-clés, et un commentaire
   qui cite Precision comme non géré alors qu'il l'est) : à corriger quand ce fichier est touché, au plus tard à
   l'étape 6.
-- `UsesHalfRange` / `UsesRemainedStationary` / `UsesCharged` n'existent pas encore (prévu à l'étape 5).
+- Étape 6 : première vue réelle de la page ; prévoir des retouches de mise en page (non vérifiable avec bUnit).

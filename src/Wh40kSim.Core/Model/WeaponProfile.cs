@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Wh40kSim.Core.Dice;
 
 namespace Wh40kSim.Core.Model;
@@ -28,6 +29,18 @@ public sealed record WeaponProfile
     public DiceExpression Damage { get; init; } = 1;
 
     public WeaponAbilities Abilities { get; init; } = new();
+
+    /// <summary>La situation « à demi-portée » change quelque chose pour cette arme (Rapid Fire, Melta).</summary>
+    [JsonIgnore]
+    public bool UsesHalfRange => Abilities.RapidFire > 0 || Abilities.Melta > 0;
+
+    /// <summary>La situation « restée immobile » change quelque chose pour cette arme (Heavy, armes de tir uniquement).</summary>
+    [JsonIgnore]
+    public bool UsesRemainedStationary => Abilities.Heavy && Type == WeaponType.Ranged;
+
+    /// <summary>La situation « a chargé » change quelque chose pour cette arme (Lance).</summary>
+    [JsonIgnore]
+    public bool UsesCharged => Abilities.Lance;
 
     public string Describe()
     {

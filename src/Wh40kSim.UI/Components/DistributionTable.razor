@@ -1,0 +1,30 @@
+@* Tableau P(= k) / P(≥ k) d'une distribution, sans les lignes négligeables aux extrémités. *@
+
+<MudText Typo="Typo.subtitle2">@Title</MudText>
+<MudSimpleTable Dense="true" Striped="true" data-test="distribution">
+    <thead>
+        <tr>
+            <th>k</th>
+            <th>P(= k)</th>
+            <th>P(≥ k)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var row in Distribution.Rows())
+        {
+            <tr>
+                <td>@row.Value</td>
+                <td>@row.Exactly.ToString("P1")</td>
+                <td>@row.AtLeast.ToString("P1")</td>
+            </tr>
+        }
+    </tbody>
+</MudSimpleTable>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public DiscreteDistribution Distribution { get; set; } = null!;
+}

@@ -1,0 +1,86 @@
+@* Défenseur : ses groupes d'allocation, dans l'ordre où ils encaissent (le premier d'abord). *@
+
+<MudPaper Outlined="true" Class="pa-3">
+    <MudText Typo="Typo.h6" GutterBottom="true">@L["Defender_Title"]</MudText>
+    <MudGrid Spacing="2">
+        <MudItem xs="12" sm="6">
+            <MudTextField T="string" Label="@L["Defender_Name"]" @bind-Value="Defender.Name" @bind-Value:after="NotifyChanged" />
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudCheckBox T="bool" Label="@L["Defender_InCover"]" @bind-Value="Defender.InCover" @bind-Value:after="NotifyChanged" />
+        </MudItem>
+        <MudItem xs="6">
+            <MudNumericField T="int" Label="@L["Defender_HitModifier"]" Min="-3" Max="3" @bind-Value="Defender.HitModifier" @bind-Value:after="NotifyChanged" />
+        </MudItem>
+        <MudItem xs="6">
+            <MudNumericField T="int" Label="@L["Defender_WoundModifier"]" Min="-3" Max="3" @bind-Value="Defender.WoundModifier" @bind-Value:after="NotifyChanged" />
+        </MudItem>
+    </MudGrid>
+
+    <MudText Typo="Typo.subtitle1" Class="mt-4">@L["Defender_Groups"]</MudText>
+    <MudText Typo="Typo.caption">@L["Defender_GroupsHelp"]</MudText>
+
+    @for (int i = 0; i < Defender.Groups.Count; i++)
+    {
+        int index = i;
+        var group = Defender.Groups[index];
+        <MudStack @key="group" Row="true" AlignItems="AlignItems.Center" Class="my-2" data-test="group">
+            <MudText Typo="Typo.h6" Style="min-width: 1.5rem">@(index + 1)</MudText>
+            <div style="flex: 1">
+                <ModelGroupEditor Group="group" Changed="NotifyChanged" />
+            </div>
+            <MudStack Spacing="0">
+                <MudTooltip Text="@L["Defender_MoveUp"]">
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" Disabled="@(index == 0)"
+                                   OnClick="() => Move(index, -1)" data-test="move-up" />
+                </MudTooltip>
+                <MudTooltip Text="@L["Defender_MoveDown"]">
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Size="Size.Small" Disabled="@(index == Defender.Groups.Count - 1)"
+                                   OnClick="() => Move(index, 1)" data-test="move-down" />
+                </MudTooltip>
+                <MudTooltip Text="@L["Defender_RemoveGroup"]">
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                   OnClick="() => Remove(group)" data-test="remove-group" />
+                </MudTooltip>
+            </MudStack>
+        </MudStack>
+    }
+
+    <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Text" Color="Color.Primary" OnClick="Add"
+               data-test="add-group">@L["Defender_AddGroup"]</MudButton>
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired]
+    public DefenderForm Defender { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback Changed { get; set; }
+
+    private Task NotifyChanged() => Changed.InvokeAsync();
+
+    /// <summary>Nouveau groupe : valeurs par défaut du Core, et l'Endurance du groupe précédent.</summary>
+    private Task Add()
+    {
+        var group = new ModelGroupForm();
+        if (Defender.Groups.Count > 0)
+        {
+            group.Toughness = Defender.Groups[^1].Toughness;
+        }
+        Defender.Groups.Add(group);
+        return NotifyChanged();
+    }
+
+    private Task Move(int index, int offset)
+    {
+        int target = index + offset;
+        (Defender.Groups[index], Defender.Groups[target]) = (Defender.Groups[target], Defender.Groups[index]);
+        return NotifyChanged();
+    }
+
+    private Task Remove(ModelGroupForm group)
+    {
+        Defender.Groups.Remove(group);
+        return NotifyChanged();
+    }
+}

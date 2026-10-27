@@ -1,0 +1,78 @@
+@* Un groupe d'allocation : figurines aux mêmes caractéristiques, ou un PERSONNAGE. *@
+
+<MudGrid Spacing="2">
+    <MudItem xs="12" sm="6" md="4">
+        <MudTextField T="string" Label="@L["Group_Name"]" @bind-Value="Group.Name" @bind-Value:after="NotifyChanged" data-test="group-name" />
+    </MudItem>
+    <MudItem xs="6" sm="3" md="2">
+        <MudNumericField T="int" Label="@L["Group_Count"]" Min="1" @bind-Value="Group.Count" @bind-Value:after="NotifyChanged" />
+    </MudItem>
+    <MudItem xs="6" sm="3" md="2">
+        <MudCheckBox T="bool" Label="@L["Group_IsCharacter"]" @bind-Value="Group.IsCharacter" @bind-Value:after="NotifyChanged"
+                     data-test="is-character" />
+    </MudItem>
+    <MudItem xs="4" sm="3" md="2">
+        <MudNumericField T="int" Label="@L["Group_Toughness"]" Min="1" @bind-Value="Group.Toughness" @bind-Value:after="NotifyChanged"
+                         data-test="toughness" />
+    </MudItem>
+    <MudItem xs="4" sm="3" md="2">
+        <MudNumericField T="int" Label="@L["Group_Wounds"]" Min="1" @bind-Value="Group.Wounds" @bind-Value:after="NotifyChanged" />
+    </MudItem>
+    <MudItem xs="4" sm="3" md="3">
+        <MudSelect T="int" Label="@L["Group_Save"]" @bind-Value="Group.Save" @bind-Value:after="NotifyChanged">
+            @foreach (int value in TwoToSix)
+            {
+                <MudSelectItem T="int" Value="value">@($"{value}+")</MudSelectItem>
+            }
+            <MudSelectItem T="int" Value="7">@L["Group_None"]</MudSelectItem>
+        </MudSelect>
+    </MudItem>
+    <MudItem xs="4" sm="3" md="3">
+        <MudSelect T="int" Label="@L["Group_InvulnerableSave"]" @bind-Value="InvulnerableChoice" @bind-Value:after="NotifyChanged">
+            <MudSelectItem T="int" Value="None">@L["Group_None"]</MudSelectItem>
+            @foreach (int value in TwoToSix)
+            {
+                <MudSelectItem T="int" Value="value">@($"{value}++")</MudSelectItem>
+            }
+        </MudSelect>
+    </MudItem>
+    <MudItem xs="4" sm="3" md="3">
+        <MudSelect T="int" Label="@L["Group_FeelNoPain"]" @bind-Value="FeelNoPainChoice" @bind-Value:after="NotifyChanged">
+            <MudSelectItem T="int" Value="None">@L["Group_None"]</MudSelectItem>
+            @foreach (int value in TwoToSix)
+            {
+                <MudSelectItem T="int" Value="value">@($"{value}+")</MudSelectItem>
+            }
+        </MudSelect>
+    </MudItem>
+    <MudItem xs="4" sm="3" md="3">
+        <MudNumericField T="int" Label="@L["Group_DamageReduction"]" Min="0" @bind-Value="Group.DamageReduction" @bind-Value:after="NotifyChanged" />
+    </MudItem>
+</MudGrid>
+
+@code {
+    private static readonly int[] TwoToSix = [2, 3, 4, 5, 6];
+
+    /// <summary>Valeur des listes déroulantes pour « aucune » (le formulaire utilise null).</summary>
+    private const int None = 0;
+
+    [Parameter, EditorRequired]
+    public ModelGroupForm Group { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback Changed { get; set; }
+
+    private int InvulnerableChoice
+    {
+        get => Group.InvulnerableSave ?? None;
+        set => Group.InvulnerableSave = value == None ? null : value;
+    }
+
+    private int FeelNoPainChoice
+    {
+        get => Group.FeelNoPain ?? None;
+        set => Group.FeelNoPain = value == None ? null : value;
+    }
+
+    private Task NotifyChanged() => Changed.InvokeAsync();
+}

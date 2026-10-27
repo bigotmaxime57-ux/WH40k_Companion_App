@@ -1,0 +1,93 @@
+@*
+    Situation de l'attaque. Les options qui ne concernent aucune arme sont masquées : ce choix vient du Core
+    (UsesHalfRange, UsesRemainedStationary, UsesCharged, PrecisionTargetMatters), aucune règle n'est écrite ici.
+*@
+
+<MudPaper Outlined="true" Class="pa-3" data-test="context">
+    <MudText Typo="Typo.h6" GutterBottom="true">@L["Context_Title"]</MudText>
+
+    @if (Reference.Attacker.UsesHalfRange)
+    {
+        <MudCheckBox T="bool" Label="@L["Context_HalfRange"]" @bind-Value="Context.HalfRange" @bind-Value:after="NotifyChanged" data-test="half-range" />
+    }
+    @if (Reference.Attacker.UsesRemainedStationary)
+    {
+        <MudCheckBox T="bool" Label="@L["Context_RemainedStationary"]" @bind-Value="Context.RemainedStationary" @bind-Value:after="NotifyChanged"
+                     data-test="remained-stationary" />
+    }
+    @if (Reference.Attacker.UsesCharged)
+    {
+        <MudCheckBox T="bool" Label="@L["Context_Charged"]" @bind-Value="Context.Charged" @bind-Value:after="NotifyChanged" data-test="charged" />
+    }
+
+    <MudGrid Spacing="2">
+        <MudItem xs="6">
+            <MudNumericField T="int" Label="@L["Context_HitModifier"]" Min="-3" Max="3" @bind-Value="Context.HitModifier" @bind-Value:after="NotifyChanged" />
+        </MudItem>
+        <MudItem xs="6">
+            <MudNumericField T="int" Label="@L["Context_WoundModifier"]" Min="-3" Max="3" @bind-Value="Context.WoundModifier" @bind-Value:after="NotifyChanged" />
+        </MudItem>
+        <MudItem xs="6">
+            <MudSelect T="RerollPolicy" Label="@L["Context_HitReroll"]" @bind-Value="Context.HitReroll" @bind-Value:after="NotifyChanged">
+                <RerollItems />
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="6">
+            <MudSelect T="RerollPolicy" Label="@L["Context_WoundReroll"]" @bind-Value="Context.WoundReroll" @bind-Value:after="NotifyChanged">
+                <RerollItems />
+            </MudSelect>
+        </MudItem>
+        @if (ShowPrecisionTarget)
+        {
+            <MudItem xs="12">
+                <MudSelect T="string" Label="@L["Context_PrecisionTarget"]" @bind-Value="PrecisionChoice" @bind-Value:after="NotifyChanged"
+                           data-test="precision-target">
+                    <MudSelectItem T="string" Value="FirstCharacter">@L["Context_PrecisionFirst"]</MudSelectItem>
+                    @foreach (string name in PrecisionNames)
+                    {
+                        <MudSelectItem T="string" Value="name">@name</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
+        }
+    </MudGrid>
+</MudPaper>
+
+@code {
+    /// <summary>Valeur de la liste déroulante pour « le premier PERSONNAGE en jeu » (le formulaire utilise null).</summary>
+    private const string FirstCharacter = "";
+
+    [Parameter, EditorRequired]
+    public ContextForm Context { get; set; } = null!;
+
+    /// <summary>Dernier scénario lisible : décide des options à afficher (inchangé pendant une saisie de dés invalide).</summary>
+    [Parameter, EditorRequired]
+    public Scenario Reference { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback Changed { get; set; }
+
+    /// <summary>Affichée aussi si une cible est encore choisie, pour pouvoir la retirer si elle n'a plus lieu d'être.</summary>
+    private bool ShowPrecisionTarget => Reference.PrecisionTargetMatters || Context.PrecisionTarget is not null;
+
+    private IEnumerable<string> PrecisionNames
+    {
+        get
+        {
+            var names = Reference.Defender.Groups.Where(g => g.IsCharacter).Select(g => g.Name).ToList();
+            if (Context.PrecisionTarget is string current && !names.Contains(current))
+            {
+                names.Add(current); // cible qui n'existe plus : la validation le signale, on la garde visible
+            }
+            return names;
+        }
+    }
+
+    private string PrecisionChoice
+    {
+        get => Context.PrecisionTarget ?? FirstCharacter;
+        set => Context.PrecisionTarget = value == FirstCharacter ? null : value;
+    }
+
+    private Task NotifyChanged() => Changed.InvokeAsync();
+}

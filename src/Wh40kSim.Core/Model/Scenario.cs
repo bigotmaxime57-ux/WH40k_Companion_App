@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Wh40kSim.Core.Model;
 
 /// <summary>Tout ce qu'il faut pour simuler : attaquant, défenseur et situation.</summary>
@@ -8,6 +10,14 @@ public sealed record Scenario
     public DefenderUnit Defender { get; init; } = new();
 
     public AttackContext Context { get; init; } = new();
+
+    /// <summary>
+    /// Le choix du PERSONNAGE visé par Precision change quelque chose : au moins une arme Precision et plusieurs
+    /// PERSONNAGES (avec un seul, c'est forcément lui).
+    /// </summary>
+    [JsonIgnore]
+    public bool PrecisionTargetMatters =>
+        Attacker.Weapons.Any(w => w.Weapon.Abilities.Precision) && Defender.Groups.Count(g => g.IsCharacter) > 1;
 
     /// <summary>Renvoie la liste des incohérences (vide si le scénario est valide).</summary>
     public IReadOnlyList<string> Validate()

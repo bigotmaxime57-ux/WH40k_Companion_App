@@ -1,0 +1,46 @@
+@* Attaquant : nom et profils d'armes, résolus dans l'ordre de la liste. *@
+
+<MudPaper Outlined="true" Class="pa-3">
+    <MudText Typo="Typo.h6" GutterBottom="true">@L["Attacker_Title"]</MudText>
+    <MudTextField T="string" Label="@L["Attacker_Name"]" @bind-Value="Attacker.Name" @bind-Value:after="NotifyChanged" />
+
+    @foreach (var weapon in Attacker.Weapons)
+    {
+        <WeaponEditor @key="weapon" Weapon="weapon" Changed="NotifyChanged"
+                      OnDuplicate="() => Duplicate(weapon)" OnRemove="() => Remove(weapon)" />
+    }
+
+    <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Text" Color="Color.Primary" OnClick="Add"
+               data-test="add-weapon">@L["Attacker_AddWeapon"]</MudButton>
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired]
+    public AttackerForm Attacker { get; set; } = null!;
+
+    /// <summary>Appelé après chaque modification, pour que la page revalide le scénario.</summary>
+    [Parameter]
+    public EventCallback Changed { get; set; }
+
+    private Task NotifyChanged() => Changed.InvokeAsync();
+
+    private Task Add()
+    {
+        Attacker.Weapons.Add(new WeaponForm());
+        return NotifyChanged();
+    }
+
+    private Task Duplicate(WeaponForm weapon)
+    {
+        var copy = weapon.Clone();
+        copy.Name = L["Attacker_CopyName", weapon.Name];
+        Attacker.Weapons.Insert(Attacker.Weapons.IndexOf(weapon) + 1, copy);
+        return NotifyChanged();
+    }
+
+    private Task Remove(WeaponForm weapon)
+    {
+        Attacker.Weapons.Remove(weapon);
+        return NotifyChanged();
+    }
+}

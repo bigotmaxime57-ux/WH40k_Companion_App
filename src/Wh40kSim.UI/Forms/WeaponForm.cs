@@ -65,4 +65,12 @@ public sealed class WeaponForm
             Abilities = Abilities.ToWeaponAbilities(),
         },
     };
+
+    /// <summary>Copie indépendante, telle que saisie (même si une expression de dés est invalide).</summary>
+    public WeaponForm Clone()
+    {
+        var copy = (WeaponForm)MemberwiseClone();
+        copy.Abilities = Abilities.Clone();
+        return copy;
+    }
 }

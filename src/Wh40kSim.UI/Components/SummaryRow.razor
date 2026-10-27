@@ -1,0 +1,17 @@
+@* Ligne du tableau de synthèse : moyenne, écart-type, médiane et fourchette d'une distribution. *@
+
+<tr>
+    <td><b>@Label</b></td>
+    <td>@Distribution.Mean.ToString("F2")</td>
+    <td>@Distribution.StdDev.ToString("F2")</td>
+    <td>@Distribution.Median</td>
+    <td>@Distribution.CentralRange.Low – @Distribution.CentralRange.High</td>
+</tr>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public DiscreteDistribution Distribution { get; set; } = null!;
+}

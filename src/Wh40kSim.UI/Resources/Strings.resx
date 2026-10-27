@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Textes de l'interface (français, langue neutre). Clé = Zone_Élément ; {0}, {1}… = valeurs insérées. -->
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Ability_Blast" xml:space="preserve">
+    <value>Blast</value>
+  </data>
+  <data name="Ability_CriticalHitOn" xml:space="preserve">
+    <value>Touche critique sur</value>
+  </data>
+  <data name="Ability_CriticalWoundOn" xml:space="preserve">
+    <value>Blessure critique sur</value>
+  </data>
+  <data name="Ability_DevastatingWounds" xml:space="preserve">
+    <value>Devastating Wounds</value>
+  </data>
+  <data name="Ability_Heavy" xml:space="preserve">
+    <value>Heavy</value>
+  </data>
+  <data name="Ability_IgnoresCover" xml:space="preserve">
+    <value>Ignores Cover</value>
+  </data>
+  <data name="Ability_Lance" xml:space="preserve">
+    <value>Lance</value>
+  </data>
+  <data name="Ability_LethalHits" xml:space="preserve">
+    <value>Lethal Hits</value>
+  </data>
+  <data name="Ability_Melta" xml:space="preserve">
+    <value>Melta</value>
+  </data>
+  <data name="Ability_Precision" xml:space="preserve">
+    <value>Precision</value>
+  </data>
+  <data name="Ability_RapidFire" xml:space="preserve">
+    <value>Rapid Fire</value>
+  </data>
+  <data name="Ability_SustainedHits" xml:space="preserve">
+    <value>Sustained Hits</value>
+  </data>
+  <data name="Ability_Torrent" xml:space="preserve">
+    <value>Torrent</value>
+  </data>
+  <data name="Ability_TwinLinked" xml:space="preserve">
+    <value>Twin-linked</value>
+  </data>
+  <data name="Attacker_AddWeapon" xml:space="preserve">
+    <value>Ajouter un profil d'arme</value>
+  </data>
+  <data name="Attacker_CopyName" xml:space="preserve">
+    <value>{0} (copie)</value>
+  </data>
+  <data name="Attacker_Name" xml:space="preserve">
+    <value>Nom de l'attaquant</value>
+  </data>
+  <data name="Attacker_Title" xml:space="preserve">
+    <value>Attaquant</value>
+  </data>
+  <data name="Context_Charged" xml:space="preserve">
+    <value>A chargé ce tour</value>
+  </data>
+  <data name="Context_HalfRange" xml:space="preserve">
+    <value>À demi-portée</value>
+  </data>
+  <data name="Context_HitModifier" xml:space="preserve">
+    <value>Modificateur de touche</value>
+  </data>
+  <data name="Context_HitReroll" xml:space="preserve">
+    <value>Relance des touches</value>
+  </data>
+  <data name="Context_PrecisionFirst" xml:space="preserve">
+    <value>Premier PERSONNAGE en jeu</value>
+  </data>
+  <data name="Context_PrecisionTarget" xml:space="preserve">
+    <value>PERSONNAGE visé par Precision</value>
+  </data>
+  <data name="Context_RemainedStationary" xml:space="preserve">
+    <value>Restée immobile</value>
+  </data>
+  <data name="Context_Title" xml:space="preserve">
+    <value>Situation</value>
+  </data>
+  <data name="Context_WoundModifier" xml:space="preserve">
+    <value>Modificateur de blessure</value>
+  </data>
+  <data name="Context_WoundReroll" xml:space="preserve">
+    <value>Relance des blessures</value>
+  </data>
+  <data name="Defender_AddGroup" xml:space="preserve">
+    <value>Ajouter un groupe</value>
+  </data>
+  <data name="Defender_Groups" xml:space="preserve">
+    <value>Groupes d'allocation</value>
+  </data>
+  <data name="Defender_GroupsHelp" xml:space="preserve">
+    <value>Dans l'ordre où ils encaissent : le premier groupe d'abord, les PERSONNAGES en dernier.</value>
+  </data>
+  <data name="Defender_HitModifier" xml:space="preserve">
+    <value>Modificateur aux touches subies</value>
+  </data>
+  <data name="Defender_InCover" xml:space="preserve">
+    <value>À couvert</value>
+  </data>
+  <data name="Defender_MoveDown" xml:space="preserve">
+    <value>Descendre</value>
+  </data>
+  <data name="Defender_MoveUp" xml:space="preserve">
+    <value>Monter</value>
+  </data>
+  <data name="Defender_Name" xml:space="preserve">
+    <value>Nom du défenseur</value>
+  </data>
+  <data name="Defender_RemoveGroup" xml:space="preserve">
+    <value>Supprimer le groupe</value>
+  </data>
+  <data name="Defender_Title" xml:space="preserve">
+    <value>Défenseur</value>
+  </data>
+  <data name="Defender_WoundModifier" xml:space="preserve">
+    <value>Modificateur aux blessures subies</value>
+  </data>
+  <data name="Dice_Invalid" xml:space="preserve">
+    <value>Expression de dés invalide (ex. 2, D6, 2D3, D6+1)</value>
+  </data>
+  <data name="Errors_Dice" xml:space="preserve">
+    <value>Une expression de dés est invalide : corrigez les champs en rouge.</value>
+  </data>
+  <data name="Errors_Title" xml:space="preserve">
+    <value>Le scénario ne peut pas être simulé :</value>
+  </data>
+  <data name="File_OpenError" xml:space="preserve">
+    <value>Impossible d'ouvrir le scénario : {0}</value>
+  </data>
+  <data name="File_SaveError" xml:space="preserve">
+    <value>Impossible d'enregistrer le scénario : {0}</value>
+  </data>
+  <data name="File_Saved" xml:space="preserve">
+    <value>Scénario enregistré : {0}</value>
+  </data>
+  <data name="Group_Count" xml:space="preserve">
+    <value>Figurines</value>
+  </data>
+  <data name="Group_DamageReduction" xml:space="preserve">
+    <value>Réduction de dégâts</value>
+  </data>
+  <data name="Group_FeelNoPain" xml:space="preserve">
+    <value>Insensible à la douleur</value>
+  </data>
+  <data name="Group_InvulnerableSave" xml:space="preserve">
+    <value>Invulnérable</value>
+  </data>
+  <data name="Group_IsCharacter" xml:space="preserve">
+    <value>PERSONNAGE</value>
+  </data>
+  <data name="Group_Name" xml:space="preserve">
+    <value>Nom du groupe</value>
+  </data>
+  <data name="Group_None" xml:space="preserve">
+    <value>Aucune</value>
+  </data>
+  <data name="Group_Save" xml:space="preserve">
+    <value>Sauvegarde</value>
+  </data>
+  <data name="Group_Toughness" xml:space="preserve">
+    <value>Endurance</value>
+  </data>
+  <data name="Group_Wounds" xml:space="preserve">
+    <value>PV</value>
+  </data>
+  <data name="Reroll_Failed" xml:space="preserve">
+    <value>Les échecs</value>
+  </data>
+  <data name="Reroll_NonCritical" xml:space="preserve">
+    <value>Tout sauf les critiques</value>
+  </data>
+  <data name="Reroll_None" xml:space="preserve">
+    <value>Aucune</value>
+  </data>
+  <data name="Reroll_Ones" xml:space="preserve">
+    <value>Les 1</value>
+  </data>
+  <data name="Results_CentralRange" xml:space="preserve">
+    <value>80 % des cas</value>
+  </data>
+  <data name="Results_Damage" xml:space="preserve">
+    <value>PV retirés</value>
+  </data>
+  <data name="Results_Extended" xml:space="preserve">
+    <value>Prolonger au-delà de l'unité (excédent)</value>
+  </data>
+  <data name="Results_ExtendedHelp" xml:space="preserve">
+    <value>Après la destruction de l'unité, les attaques restantes continuent contre des figurines virtuelles : {0}.</value>
+  </data>
+  <data name="Results_Header" xml:space="preserve">
+    <value>{0} simulations en {1} s (graine {2})</value>
+  </data>
+  <data name="Results_Kills" xml:space="preserve">
+    <value>Figurines tuées</value>
+  </data>
+  <data name="Results_LossesPerGroup" xml:space="preserve">
+    <value>Pertes moyennes par groupe</value>
+  </data>
+  <data name="Results_Mean" xml:space="preserve">
+    <value>Moyenne</value>
+  </data>
+  <data name="Results_Median" xml:space="preserve">
+    <value>Médiane</value>
+  </data>
+  <data name="Results_StdDev" xml:space="preserve">
+    <value>Écart-type</value>
+  </data>
+  <data name="Results_Title" xml:space="preserve">
+    <value>Résultats</value>
+  </data>
+  <data name="Results_Wipe" xml:space="preserve">
+    <value>Unité détruite :</value>
+  </data>
+  <data name="Simulation_Cancel" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+  <data name="Simulation_Cancelled" xml:space="preserve">
+    <value>Simulation annulée.</value>
+  </data>
+  <data name="Simulation_Iterations" xml:space="preserve">
+    <value>Nombre de simulations</value>
+  </data>
+  <data name="Simulation_Run" xml:space="preserve">
+    <value>Lancer</value>
+  </data>
+  <data name="Simulation_Seed" xml:space="preserve">
+    <value>Graine</value>
+  </data>
+  <data name="Simulation_SeedHelp" xml:space="preserve">
+    <value>Vide : tirée au hasard</value>
+  </data>
+  <data name="Simulation_Title" xml:space="preserve">
+    <value>Simulation</value>
+  </data>
+  <data name="Toolbar_New" xml:space="preserve">
+    <value>Nouveau</value>
+  </data>
+  <data name="Toolbar_Open" xml:space="preserve">
+    <value>Ouvrir</value>
+  </data>
+  <data name="Toolbar_Save" xml:space="preserve">
+    <value>Enregistrer</value>
+  </data>
+  <data name="Weapon_Abilities" xml:space="preserve">
+    <value>Mots-clés</value>
+  </data>
+  <data name="Weapon_Ap" xml:space="preserve">
+    <value>PA</value>
+  </data>
+  <data name="Weapon_Attacks" xml:space="preserve">
+    <value>A</value>
+  </data>
+  <data name="Weapon_BallisticSkill" xml:space="preserve">
+    <value>CT</value>
+  </data>
+  <data name="Weapon_Damage" xml:space="preserve">
+    <value>D</value>
+  </data>
+  <data name="Weapon_Duplicate" xml:space="preserve">
+    <value>Dupliquer</value>
+  </data>
+  <data name="Weapon_Melee" xml:space="preserve">
+    <value>Mêlée</value>
+  </data>
+  <data name="Weapon_ModelCount" xml:space="preserve">
+    <value>Figurines</value>
+  </data>
+  <data name="Weapon_Name" xml:space="preserve">
+    <value>Nom de l'arme</value>
+  </data>
+  <data name="Weapon_Ranged" xml:space="preserve">
+    <value>Tir</value>
+  </data>
+  <data name="Weapon_Remove" xml:space="preserve">
+    <value>Supprimer</value>
+  </data>
+  <data name="Weapon_Strength" xml:space="preserve">
+    <value>F</value>
+  </data>
+  <data name="Weapon_Type" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Weapon_WeaponSkill" xml:space="preserve">
+    <value>CC</value>
+  </data>
+</root>

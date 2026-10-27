@@ -236,6 +236,22 @@ public class ScenarioFormTests
         Assert.Throws<FormatException>(() => form.ToScenario());
     }
 
+    [Fact]
+    public void Weapon_clone_is_independent_and_keeps_invalid_text()
+    {
+        var weapon = new ScenarioForm(FullScenario()).Attacker.Weapons[0];
+        weapon.Attacks = "D";
+
+        var copy = weapon.Clone();
+        copy.Name = "Copie";
+        copy.Abilities.HasRapidFire = false;
+
+        Assert.Equal("D", copy.Attacks);
+        Assert.Equal("Fusil", weapon.Name);
+        Assert.True(weapon.Abilities.HasRapidFire);
+        Assert.NotSame(weapon.Abilities, copy.Abilities);
+    }
+
     private static string FindRepositoryRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);

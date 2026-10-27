@@ -92,4 +92,7 @@ public sealed class WeaponAbilitiesForm
         CriticalHitOn = CriticalHitOn,
         CriticalWoundOn = CriticalWoundOn,
     };
+
+    /// <summary>Copie indépendante, telle que saisie (toutes les propriétés sont des valeurs ou des textes).</summary>
+    public WeaponAbilitiesForm Clone() => (WeaponAbilitiesForm)MemberwiseClone();
 }

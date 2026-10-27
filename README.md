@@ -15,11 +15,13 @@ src/Wh40kSim.Simulation      Monte Carlo : simulateur parallèle et déterminist
   Statistics/                Distributions : moyenne, écart-type, centiles, P(= k), P(≥ k), lignes de tableau
 src/Wh40kSim.Console         Appli console de debug (saisie interactive ou fichier JSON) : affichage uniquement
 src/Wh40kSim.UI              Interface Blazor + MudBlazor partagée par les hôtes (aucune règle de jeu, aucun calcul)
+  Components/                Page « Simulateur » : attaquant, défenseur, situation, simulation, résultats
   Forms/                     Modèles de formulaire modifiables, convertis vers / depuis les records du Core
+  Resources/                 Textes de l'interface (Strings.resx, français)
   Services/                  Simulation hors du thread de l'interface, ouverture / enregistrement des scénarios
 tests/Wh40kSim.Core.Tests    Tests xUnit du Core (règles)
 tests/Wh40kSim.Simulation.Tests  Tests xUnit de la simulation (moyennes analytiques, statistiques, non-régression)
-tests/Wh40kSim.UI.Tests      Tests xUnit de l'interface (formulaires, services)
+tests/Wh40kSim.UI.Tests      Tests xUnit de l'interface (formulaires, services, composants avec bUnit)
 scenarios/                   Scénarios d'exemple et scénarios enregistrés depuis la saisie interactive
 ```
 

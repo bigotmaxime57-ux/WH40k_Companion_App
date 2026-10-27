@@ -173,7 +173,7 @@ public sealed class AttackResolver
         skill = Math.Clamp(skill, 2, 6);
 
         int modifier = context.HitModifier + defender.HitModifier;
-        if (ranged && abilities.Heavy && context.RemainedStationary)
+        if (weapon.UsesRemainedStationary && context.RemainedStationary)
         {
             modifier += 1;
         }
@@ -223,7 +223,7 @@ public sealed class AttackResolver
         int target = WoundTable.RequiredRoll(weapon.Strength, _target.EffectiveToughness());
 
         int modifier = context.WoundModifier + _scenario.Defender.WoundModifier;
-        if (abilities.Lance && context.Charged)
+        if (weapon.UsesCharged && context.Charged)
         {
             modifier += 1;
         }

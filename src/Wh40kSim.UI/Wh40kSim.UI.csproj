@@ -6,6 +6,8 @@
   -->
   <PropertyGroup>
     <RootNamespace>Wh40kSim.UI</RootNamespace>
+    <!-- Les textes de Resources/Strings.resx sont en français : pas de ressources satellites à chercher pour fr / fr-FR -->
+    <NeutralLanguage>fr</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.14" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="10.0.14" />
     <PackageReference Include="MudBlazor" Version="9.11.0" />
   </ItemGroup>
 

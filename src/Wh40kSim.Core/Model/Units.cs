@@ -8,6 +8,18 @@ public sealed record AttackerUnit
     public string Name { get; init; } = "Attaquant";
 
     public IReadOnlyList<WeaponGroup> Weapons { get; init; } = [];
+
+    /// <summary>Au moins une arme est concernée par la demi-portée (voir <see cref="WeaponProfile.UsesHalfRange"/>).</summary>
+    [JsonIgnore]
+    public bool UsesHalfRange => Weapons.Any(w => w.Weapon.UsesHalfRange);
+
+    /// <summary>Au moins une arme est concernée par l'immobilité (voir <see cref="WeaponProfile.UsesRemainedStationary"/>).</summary>
+    [JsonIgnore]
+    public bool UsesRemainedStationary => Weapons.Any(w => w.Weapon.UsesRemainedStationary);
+
+    /// <summary>Au moins une arme est concernée par la charge (voir <see cref="WeaponProfile.UsesCharged"/>).</summary>
+    [JsonIgnore]
+    public bool UsesCharged => Weapons.Any(w => w.Weapon.UsesCharged);
 }
 
 /// <summary>

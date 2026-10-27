@@ -1,0 +1,27 @@
+@* Ce qui empêche de lancer la simulation : saisies de dés invalides, puis incohérences relevées par le Core. *@
+
+@if (HasDiceErrors)
+{
+    <MudAlert Severity="Severity.Error" data-test="dice-errors">@L["Errors_Dice"]</MudAlert>
+}
+else if (Errors.Count > 0)
+{
+    <MudAlert Severity="Severity.Warning" data-test="scenario-errors">
+        <MudText Typo="Typo.subtitle2">@L["Errors_Title"]</MudText>
+        <ul class="mb-0">
+            @foreach (string error in Errors)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </MudAlert>
+}
+
+@code {
+    /// <summary>Messages de <c>Scenario.Validate()</c> (en français, traduits avec les messages du Core en phase 3).</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<string> Errors { get; set; } = [];
+
+    [Parameter]
+    public bool HasDiceErrors { get; set; }
+}

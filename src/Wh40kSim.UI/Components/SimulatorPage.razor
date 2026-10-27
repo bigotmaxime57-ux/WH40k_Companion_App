@@ -1,0 +1,46 @@
+@* Page « Simulateur » : saisie du scénario, simulation et résultats. L'hôte la place dans sa mise en page. *@
+
+<MudStack Spacing="3" Class="pa-4">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.NoteAdd" Disabled="_running" OnClick="NewScenario"
+                   data-test="new">@L["Toolbar_New"]</MudButton>
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.FolderOpen" Disabled="_running" OnClick="OpenAsync"
+                   data-test="open">@L["Toolbar_Open"]</MudButton>
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Save" Disabled="@(!CanSave)" OnClick="SaveAsync"
+                   data-test="save">@L["Toolbar_Save"]</MudButton>
+        @if (_fileName is not null)
+        {
+            <MudText Typo="Typo.body2" data-test="file-name">@_fileName</MudText>
+        }
+    </MudStack>
+
+    @if (_message is not null)
+    {
+        <MudAlert Severity="_messageSeverity" ShowCloseIcon="true" CloseIconClicked="() => _message = null" data-test="message">@_message</MudAlert>
+    }
+
+    <MudGrid Spacing="3">
+        <MudItem xs="12" lg="6">
+            <AttackerPanel Attacker="Form.Attacker" Changed="Refresh" />
+        </MudItem>
+        <MudItem xs="12" lg="6">
+            <DefenderPanel Defender="Form.Defender" Changed="Refresh" />
+        </MudItem>
+        <MudItem xs="12" lg="6">
+            <ContextPanel Context="Form.Context" Reference="_reference" Changed="Refresh" />
+        </MudItem>
+        <MudItem xs="12" lg="6">
+            <MudStack Spacing="3">
+                <ScenarioErrors Errors="_errors" HasDiceErrors="_hasDiceErrors" />
+                <SimulationPanel @bind-Iterations="_iterations" @bind-Seed="_seed" CanRun="CanRun" Running="_running" Progress="_progress"
+                                 OnRun="RunAsync" OnCancel="Cancel" />
+            </MudStack>
+        </MudItem>
+        @if (_result is not null)
+        {
+            <MudItem xs="12">
+                <ResultsView Result="_result" />
+            </MudItem>
+        }
+    </MudGrid>
+</MudStack>

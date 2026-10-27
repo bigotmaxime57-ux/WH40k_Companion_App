@@ -1,0 +1,75 @@
+@*
+    Résultats d'une simulation, en texte et tableaux. Mise en forme uniquement : tous les chiffres viennent de
+    SimulationResult (Wh40kSim.Simulation).
+*@
+
+<MudPaper Outlined="true" Class="pa-3" data-test="results">
+    <MudText Typo="Typo.h6">@L["Results_Title"]</MudText>
+    <MudText Typo="Typo.body2" GutterBottom="true">
+        @L["Results_Header", Result.Iterations.ToString("N0"), Result.Elapsed.TotalSeconds.ToString("F2"), Result.Seed]
+    </MudText>
+
+    @if (Result.ProbabilityWipe > 0)
+    {
+        <MudSwitch T="bool" Color="Color.Primary" Label="@L["Results_Extended"]" @bind-Value="_extended" data-test="extended" />
+        @if (_extended)
+        {
+            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2" data-test="excess-explanation">
+                @L["Results_ExtendedHelp", (Result.ExcessProfile with { Count = 1 }).Describe()]
+            </MudAlert>
+        }
+    }
+
+    <MudSimpleTable Dense="true" Class="mb-3">
+        <thead>
+            <tr>
+                <th></th>
+                <th>@L["Results_Mean"]</th>
+                <th>@L["Results_StdDev"]</th>
+                <th>@L["Results_Median"]</th>
+                <th>@L["Results_CentralRange"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            <SummaryRow Label="@L["Results_Kills"]" Distribution="Kills" />
+            <SummaryRow Label="@L["Results_Damage"]" Distribution="Damage" />
+        </tbody>
+    </MudSimpleTable>
+
+    <MudText Typo="Typo.body1" data-test="wipe"><b>@L["Results_Wipe"]</b> @Result.ProbabilityWipe.ToString("P1")</MudText>
+
+    <MudText Typo="Typo.subtitle2" Class="mt-3">@L["Results_LossesPerGroup"]</MudText>
+    <MudSimpleTable Dense="true" Class="mb-3">
+        <tbody>
+            @for (int g = 0; g < Result.Scenario.Defender.Groups.Count; g++)
+            {
+                var group = Result.Scenario.Defender.Groups[g];
+                <tr>
+                    <td>@group.Name</td>
+                    <td>@Result.MeanKilledInGroup(g).ToString("F2") / @group.Count</td>
+                </tr>
+            }
+        </tbody>
+    </MudSimpleTable>
+
+    <MudGrid Spacing="3">
+        <MudItem xs="12" md="6">
+            <DistributionTable Title="@L["Results_Kills"]" Distribution="Kills" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <DistributionTable Title="@L["Results_Damage"]" Distribution="Damage" />
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@code {
+    private bool _extended;
+
+    [Parameter, EditorRequired]
+    public SimulationResult Result { get; set; } = null!;
+
+    /// <summary>Distributions réelles, ou prolongées au-delà de la destruction de l'unité (excédent).</summary>
+    private DiscreteDistribution Kills => _extended ? Result.ExtendedKills : Result.Kills;
+
+    private DiscreteDistribution Damage => _extended ? Result.ExtendedDamage : Result.Damage;
+}

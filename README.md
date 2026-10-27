@@ -6,16 +6,19 @@ une séquence d'attaque (profils d'armes contre une unité cible) et en sort des
 ## Structure
 
 ```
-src/Wh40kSim.Core            Bibliothèque pure : modèles + moteur (réutilisée plus tard par l'API et l'UI)
+src/Wh40kSim.Core            Règles du jeu, bibliothèque pure : modèles + résolution d'une séquence d'attaque
   Dice/                      Dés et expressions "D6+1"
   Model/                     Arme, unités, situation, scénario
-  Engine/                    Séquence d'attaque, simulateur parallèle, statistiques
+  Engine/                    Séquence d'attaque (pools, touche, blessure, allocation, dégâts)
   Serialization/             Lecture / écriture des scénarios en JSON
-src/Wh40kSim.Console         Appli console de debug (saisie interactive ou fichier JSON)
-src/Wh40kSim.UI              Interface Blazor + MudBlazor partagée par les hôtes (aucune règle de jeu)
+src/Wh40kSim.Simulation      Monte Carlo : simulateur parallèle et déterministe, résultats agrégés en histogrammes
+  Statistics/                Distributions : moyenne, écart-type, centiles, P(= k), P(≥ k), lignes de tableau
+src/Wh40kSim.Console         Appli console de debug (saisie interactive ou fichier JSON) : affichage uniquement
+src/Wh40kSim.UI              Interface Blazor + MudBlazor partagée par les hôtes (aucune règle de jeu, aucun calcul)
   Forms/                     Modèles de formulaire modifiables, convertis vers / depuis les records du Core
   Services/                  Simulation hors du thread de l'interface, ouverture / enregistrement des scénarios
-tests/Wh40kSim.Core.Tests    Tests xUnit du Core
+tests/Wh40kSim.Core.Tests    Tests xUnit du Core (règles)
+tests/Wh40kSim.Simulation.Tests  Tests xUnit de la simulation (moyennes analytiques, statistiques, non-régression)
 tests/Wh40kSim.UI.Tests      Tests xUnit de l'interface (formulaires, services)
 scenarios/                   Scénarios d'exemple et scénarios enregistrés depuis la saisie interactive
 ```

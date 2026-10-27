@@ -13,6 +13,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wh40kSim.UI", "src\Wh40kSim
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wh40kSim.UI.Tests", "tests\Wh40kSim.UI.Tests\Wh40kSim.UI.Tests.csproj", "{E6AD6545-78F4-4561-A666-3930298D32AE}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wh40kSim.Simulation", "src\Wh40kSim.Simulation\Wh40kSim.Simulation.csproj", "{7B2DD6FB-456E-4F12-AEF5-B646E869DDC0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wh40kSim.Simulation.Tests", "tests\Wh40kSim.Simulation.Tests\Wh40kSim.Simulation.Tests.csproj", "{597401F7-B61C-4553-B754-97061FF7EBA6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,5 +43,13 @@ Global
 		{E6AD6545-78F4-4561-A666-3930298D32AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6AD6545-78F4-4561-A666-3930298D32AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6AD6545-78F4-4561-A666-3930298D32AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B2DD6FB-456E-4F12-AEF5-B646E869DDC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B2DD6FB-456E-4F12-AEF5-B646E869DDC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B2DD6FB-456E-4F12-AEF5-B646E869DDC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B2DD6FB-456E-4F12-AEF5-B646E869DDC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{597401F7-B61C-4553-B754-97061FF7EBA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{597401F7-B61C-4553-B754-97061FF7EBA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{597401F7-B61C-4553-B754-97061FF7EBA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{597401F7-B61C-4553-B754-97061FF7EBA6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

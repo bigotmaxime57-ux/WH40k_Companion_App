@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Monte Carlo et statistiques : répète la séquence d'attaque du Core, agrège les résultats et calcule tout ce qui
+    s'affiche (moyennes, centiles, probabilités). Aucune règle de jeu ici, aucune dépendance UI.
+  -->
+  <PropertyGroup>
+    <RootNamespace>Wh40kSim.Simulation</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Wh40kSim.Core\Wh40kSim.Core.csproj" />
+  </ItemGroup>
+
+</Project>

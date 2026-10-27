@@ -1,20 +1,23 @@
-using Wh40kSim.Core.Engine;
+using Wh40kSim.Simulation;
+using Wh40kSim.Simulation.Statistics;
 using static Wh40kSim.ConsoleApp.ConsoleInput;
 
 namespace Wh40kSim.ConsoleApp;
 
-/// <summary>Affichage texte des résultats (en attendant les vrais graphiques de la phase 5).</summary>
+/// <summary>
+/// Affichage texte des résultats (en attendant les graphiques de la phase 4). Mise en forme uniquement :
+/// tous les chiffres viennent de <see cref="SimulationResult"/>.
+/// </summary>
 internal static class ReportPrinter
 {
     private const int BarWidth = 40;
-    private const double MinRowProbability = 0.0005; // on masque les queues de distribution sous 0,05 %
 
-    public static void Print(SimulationSummary s)
+    public static void Print(SimulationResult result)
     {
-        var scenario = s.Scenario;
+        var scenario = result.Scenario;
         var defender = scenario.Defender;
 
-        WriteTitle($"Résultats : {s.Iterations:N0} simulations en {s.Elapsed.TotalSeconds:F2} s (seed {s.Seed})");
+        WriteTitle($"Résultats : {result.Iterations:N0} simulations en {result.Elapsed.TotalSeconds:F2} s (seed {result.Seed})");
 
         Console.WriteLine($"Attaquant : {scenario.Attacker.Name}");
         foreach (var group in scenario.Attacker.Weapons)
@@ -29,52 +32,40 @@ internal static class ReportPrinter
         }
 
         Console.WriteLine();
-        Console.WriteLine($"Figurines tuées  : moyenne {s.MeanKills:F2} (écart-type {s.StdDevKills:F2}), " +
-                          $"médiane {s.PercentileKills(0.5)}, 80 % des cas entre {s.PercentileKills(0.1)} et {s.PercentileKills(0.9)}");
-        Console.WriteLine($"PV retirés       : moyenne {s.MeanDamage:F2} (écart-type {s.StdDevDamage:F2}), " +
-                          $"médiane {s.PercentileDamage(0.5)}, 80 % des cas entre {s.PercentileDamage(0.1)} et {s.PercentileDamage(0.9)}");
-        Console.WriteLine($"Unité détruite   : {s.ProbabilityWipe:P1}");
+        Console.WriteLine($"Figurines tuées  : {Summarize(result.Kills)}");
+        Console.WriteLine($"PV retirés       : {Summarize(result.Damage)}");
+        Console.WriteLine($"Unité détruite   : {result.ProbabilityWipe:P1}");
 
         Console.WriteLine("Pertes moyennes par groupe :");
         for (int g = 0; g < defender.Groups.Count; g++)
         {
             var group = defender.Groups[g];
-            Console.WriteLine($"  {group.Name} : {s.MeanKilledInGroup(g):F2} / {group.Count}");
+            Console.WriteLine($"  {group.Name} : {result.MeanKilledInGroup(g):F2} / {group.Count}");
         }
 
-        PrintDistribution("Figurines tuées", s.KillsHistogram, s.Iterations);
-        PrintDistribution("PV retirés", s.DamageHistogram, s.Iterations);
+        PrintDistribution("Figurines tuées", result.Kills);
+        PrintDistribution("PV retirés", result.Damage);
     }
 
-    private static void PrintDistribution(string title, IReadOnlyList<long> histogram, long iterations)
+    private static string Summarize(DiscreteDistribution distribution)
     {
-        if (iterations == 0)
-        {
-            return;
-        }
+        var range = distribution.CentralRange;
+        return $"moyenne {distribution.Mean:F2} (écart-type {distribution.StdDev:F2}), médiane {distribution.Median}, " +
+               $"80 % des cas entre {range.Low} et {range.High}";
+    }
 
-        // P(≥ k) par sommes cumulées depuis la fin
-        var atLeast = new double[histogram.Count + 1];
-        for (int k = histogram.Count - 1; k >= 0; k--)
-        {
-            atLeast[k] = atLeast[k + 1] + (double)histogram[k] / iterations;
-        }
-
-        int first = 0;
-        while (first < histogram.Count - 1 && (double)histogram[first] / iterations < MinRowProbability) first++;
-        int last = histogram.Count - 1;
-        while (last > first && (double)histogram[last] / iterations < MinRowProbability) last--;
-
-        double max = histogram.Max() / (double)iterations;
+    private static void PrintDistribution(string title, DiscreteDistribution distribution)
+    {
+        var rows = distribution.Rows();
+        double max = rows.Max(r => r.Exactly);
 
         Console.WriteLine();
         Console.WriteLine($"{title} :");
         Console.WriteLine($"{"k",5}  {"P(= k)",8}  {"P(≥ k)",8}");
-        for (int k = first; k <= last; k++)
+        foreach (var row in rows)
         {
-            double p = (double)histogram[k] / iterations;
-            int bar = max > 0 ? (int)Math.Round(p / max * BarWidth) : 0;
-            Console.WriteLine($"{k,5}  {p,8:P1}  {atLeast[k],8:P1}  {new string('█', bar)}");
+            int bar = max > 0 ? (int)Math.Round(row.Exactly / max * BarWidth) : 0;
+            Console.WriteLine($"{row.Value,5}  {row.Exactly,8:P1}  {row.AtLeast,8:P1}  {new string('█', bar)}");
         }
     }
 }

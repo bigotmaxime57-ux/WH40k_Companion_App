@@ -10,6 +10,9 @@ public enum DarkStyle
 
     /// <summary>Acier sombre et laiton, plus doux.</summary>
     Steel,
+
+    /// <summary>Néon : nuit indigo, violet pour l'attaquant, bleu pour le défenseur, halos et dégradés (classe wh-neon).</summary>
+    Neon,
 }
 
 /// <summary>
@@ -26,7 +29,14 @@ public static class Wh40kTheme
 
     public static MudTheme Steel { get; } = Create(SteelPalette(), borderRadius: "6px");
 
-    public static MudTheme For(DarkStyle style) => style == DarkStyle.Steel ? Steel : Grimdark;
+    public static MudTheme Neon { get; } = Create(NeonPalette(), borderRadius: "10px");
+
+    public static MudTheme For(DarkStyle style) => style switch
+    {
+        DarkStyle.Steel => Steel,
+        DarkStyle.Neon => Neon,
+        _ => Grimdark,
+    };
 
     private static MudTheme Create(PaletteDark dark, string borderRadius) => new()
     {
@@ -97,6 +107,34 @@ public static class Wh40kTheme
         TableLines = "#2c3036",
         TableStriped = "rgba(201, 160, 60, 0.04)",
         TableHover = "rgba(201, 160, 60, 0.08)",
+    };
+
+    private static PaletteDark NeonPalette() => new()
+    {
+        Primary = "#8f7bff",               // lavande, entre le violet et le bleu des camps
+        PrimaryContrastText = "#ffffff",
+        Secondary = "#ff4fd8",             // rose néon
+        SecondaryContrastText = "#ffffff",
+        Tertiary = "#29e0ff",              // cyan
+        Info = "#29b6ff",
+        Success = "#2ee6a6",               // vert néon
+        Warning = "#ffb02e",
+        Error = "#ff4d6d",
+        Background = "#06051a",            // nuit indigo
+        BackgroundGray = "#0e0b26",
+        Surface = "#120d2c",
+        AppbarBackground = "#0a0820",
+        AppbarText = "#e6dcff",
+        DrawerBackground = "#0e0b26",
+        TextPrimary = "#ece8ff",
+        TextSecondary = "#9d97c7",
+        ActionDefault = "#9d97c7",
+        LinesDefault = "#2a2452",
+        LinesInputs = "#3a3370",
+        Divider = "#221d45",
+        TableLines = "#221d45",
+        TableStriped = "rgba(143, 123, 255, 0.05)",
+        TableHover = "rgba(143, 123, 255, 0.10)",
     };
 
     private static PaletteLight ParchmentPalette() => new()

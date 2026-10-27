@@ -389,3 +389,147 @@
     color: var(--wh-accent);
     text-shadow: 0 1px 2px rgba(0, 0, 0, .8);
 }
+
+/* --- Thème sombre, style Néon ------------------------------------------------------------------------ */
+
+/*
+   Violet pour l'attaquant, bleu pour le défenseur, lavande ailleurs. --wh-gradient : dégradé de chaque zone (boutons,
+   valeurs, barres, filets) ; --wh-accent-rgb sert aux halos (box-shadow), aussi dans les sections neutres.
+*/
+.wh-shell.wh-neon {
+    --wh-accent-rgb: 143, 123, 255;
+    --wh-gradient: linear-gradient(90deg, #c04dff 0%, #29b6ff 100%);
+}
+
+.wh-shell.wh-dark.wh-neon .wh-attacker {
+    --wh-accent: #c04dff;
+    --wh-accent-rgb: 192, 77, 255;
+    --wh-gradient: linear-gradient(90deg, #8a3dff 0%, #ff5ce1 100%);
+}
+
+.wh-shell.wh-dark.wh-neon .wh-defender {
+    --wh-accent: #29b6ff;
+    --wh-accent-rgb: 41, 182, 255;
+    --wh-gradient: linear-gradient(90deg, #2f6bff 0%, #29e0ff 100%);
+}
+
+/* Fond : nuit indigo éclairée d'un halo violet en haut à gauche et d'un halo bleu en bas à droite */
+.wh-shell.wh-neon .mud-main-content {
+    background:
+        radial-gradient(circle at 10% 0%, rgba(192, 77, 255, .20) 0%, transparent 40%),
+        radial-gradient(circle at 90% 100%, rgba(41, 182, 255, .18) 0%, transparent 45%),
+        radial-gradient(ellipse at center, #0d0a26 0%, var(--mud-palette-background) 80%);
+    background-attachment: fixed;
+}
+
+/* Barre de titre : filet dégradé violet → bleu qui rayonne, titre en dégradé */
+.wh-shell.wh-neon .mud-appbar {
+    background: linear-gradient(90deg, #170a33 0%, #0a0820 50%, #071433 100%);
+    border-bottom: 2px solid transparent;
+    border-image: var(--wh-gradient) 1;
+    box-shadow: 0 2px 18px rgba(143, 123, 255, .45);
+}
+
+.wh-shell.wh-neon .wh-brand {
+    background: linear-gradient(90deg, #e07bff 0%, #4fc8ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 6px rgba(160, 100, 255, .6));
+}
+
+/* Cartes : verre sombre, contour lumineux de la couleur du camp, halo extérieur et reflet intérieur */
+.wh-shell.wh-neon .wh-section {
+    background: linear-gradient(160deg, rgba(var(--wh-accent-rgb), .14) 0%, rgba(18, 13, 44, .92) 30%, rgba(10, 8, 30, .95) 100%);
+    border: 1px solid rgba(var(--wh-accent-rgb), .65);
+    border-radius: 14px;
+    box-shadow:
+        0 0 0 1px rgba(var(--wh-accent-rgb), .12),
+        0 0 24px rgba(var(--wh-accent-rgb), .30),
+        inset 0 0 22px rgba(var(--wh-accent-rgb), .08);
+}
+
+.wh-shell.wh-neon .wh-section-header .mud-typography-h6 {
+    color: var(--wh-accent);
+    text-shadow: 0 0 8px rgba(var(--wh-accent-rgb), .8);
+}
+
+.wh-shell.wh-neon .wh-section-header > .mud-icon-root {
+    filter: drop-shadow(0 0 6px rgba(var(--wh-accent-rgb), .9));
+}
+
+.wh-shell.wh-neon .wh-section-header::after {
+    background: var(--wh-gradient);
+    box-shadow: 0 0 8px rgba(var(--wh-accent-rgb), .7);
+    opacity: .8;
+}
+
+/* Sous-cartes (armes, groupes) : filet lumineux à gauche */
+.wh-shell.wh-neon .wh-subcard {
+    background: rgba(255, 255, 255, .02);
+    border-color: rgba(var(--wh-accent-rgb), .25) !important;
+    box-shadow: -4px 0 14px -6px rgba(var(--wh-accent-rgb), .9);
+}
+
+.wh-shell.wh-neon .wh-subcard-character {
+    border-left-color: var(--wh-accent) !important;
+    box-shadow: -6px 0 18px -6px rgba(var(--wh-accent-rgb), 1);
+}
+
+.wh-shell.wh-neon .wh-group-number {
+    text-shadow: 0 0 8px rgba(var(--wh-accent-rgb), .9);
+}
+
+/* Boutons pleins : dégradé de la zone et halo */
+.wh-shell.wh-neon .mud-button-filled-primary:not(:disabled),
+.wh-shell.wh-neon .wh-preset-active:not(:disabled) {
+    background: var(--wh-gradient) !important;
+    box-shadow: 0 0 14px rgba(var(--wh-accent-rgb), .55);
+    color: #ffffff !important;
+}
+
+.wh-shell.wh-neon .mud-button-filled-primary:not(:disabled):hover,
+.wh-shell.wh-neon .wh-preset-active:not(:disabled):hover {
+    box-shadow: 0 0 22px rgba(var(--wh-accent-rgb), .85);
+}
+
+/* Barre de progression : dégradé */
+.wh-shell.wh-neon .mud-progress-linear-bar {
+    background: var(--wh-gradient) !important;
+}
+
+/* Tuiles : verre, valeur neutre en dégradé lumineux, halo vert ou rouge pour la destruction de l'unité */
+.wh-shell.wh-neon .wh-tile {
+    background: linear-gradient(160deg, rgba(var(--wh-accent-rgb), .12) 0%, rgba(10, 8, 30, .6) 100%);
+    border-color: rgba(var(--wh-accent-rgb), .45);
+    border-radius: 12px;
+}
+
+.wh-shell.wh-neon .wh-tile-neutral .wh-tile-value,
+.wh-shell.wh-neon .wh-tile-margin-value {
+    background: var(--wh-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 6px rgba(var(--wh-accent-rgb), .6));
+}
+
+.wh-shell.wh-neon .wh-tile-good {
+    box-shadow: 0 0 16px rgba(46, 230, 166, .35);
+}
+
+.wh-shell.wh-neon .wh-tile-bad {
+    box-shadow: 0 0 16px rgba(255, 77, 109, .35);
+}
+
+.wh-shell.wh-neon .wh-tile-good .wh-tile-value,
+.wh-shell.wh-neon .wh-tile-bad .wh-tile-value {
+    text-shadow: 0 0 10px currentColor;
+}
+
+/* Barres des tableaux de distribution : dégradé lumineux */
+.wh-shell.wh-neon .wh-bar {
+    background: var(--wh-gradient);
+    border-radius: 2px;
+    box-shadow: 0 0 6px rgba(var(--wh-accent-rgb), .7);
+}

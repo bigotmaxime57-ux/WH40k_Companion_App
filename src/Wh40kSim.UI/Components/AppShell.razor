@@ -30,7 +30,7 @@
 
     /// <summary>Style du thème sombre (le choix par l'utilisateur viendra avec un sélecteur de thème : voir les tickets).</summary>
     [Parameter]
-    public DarkStyle DarkStyle { get; set; } = DarkStyle.Grimdark;
+    public DarkStyle DarkStyle { get; set; } = DarkStyle.Neon;
 
     /// <summary>
     /// Mode sombre du système, fourni par l'hôte s'il le connaît : le premier rendu a alors déjà le bon thème. Sinon,
@@ -42,8 +42,12 @@
     /// <summary>Thème sombre actif (bascule par le bouton de la barre de titre).</summary>
     public bool IsDarkMode => _isDarkMode;
 
-    private string ShellClass => !_isDarkMode ? "wh-shell"
-        : DarkStyle == DarkStyle.Grimdark ? "wh-shell wh-dark wh-grimdark" : "wh-shell wh-dark";
+    private string ShellClass => !_isDarkMode ? "wh-shell" : DarkStyle switch
+    {
+        DarkStyle.Grimdark => "wh-shell wh-dark wh-grimdark",
+        DarkStyle.Neon => "wh-shell wh-dark wh-neon",
+        _ => "wh-shell wh-dark",
+    };
 
     protected override void OnInitialized() => _isDarkMode = SystemDarkMode ?? false;
 

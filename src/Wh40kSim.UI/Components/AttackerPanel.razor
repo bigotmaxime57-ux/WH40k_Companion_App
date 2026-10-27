@@ -6,6 +6,11 @@
 
     <AttackerBoostsEditor Boosts="Attacker.Boosts" Changed="NotifyChanged" />
 
+    <div class="wh-subsection-title mt-4" data-test="weapons-title">
+        <MudText Typo="Typo.subtitle1">@L["Attacker_Weapons"]</MudText>
+        <HelpBubble Lines="@([L["Attacker_WeaponsHelp"]])" />
+    </div>
+
     @foreach (var weapon in Attacker.Weapons)
     {
         <WeaponEditor @key="weapon" Weapon="weapon" Changed="NotifyChanged"

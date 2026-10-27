@@ -251,6 +251,8 @@ public class BoostTests : ComponentTestContext
 
         Assert.NotNull(page.Find("[data-test=attacker-boosts]"));
         Assert.NotNull(page.Find("[data-test=defender-boosts]"));
+        // Titre « Armement » entre les boosts et les armes, comme « Groupes d'allocation » côté défenseur
+        Assert.Contains("Armement", page.Find("[data-test=weapons-title]").TextContent);
     }
 }
 

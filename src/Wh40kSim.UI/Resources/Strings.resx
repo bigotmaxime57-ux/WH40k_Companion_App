@@ -31,6 +31,12 @@
   <data name="Attacker_Title" xml:space="preserve">
     <value>Attaquant</value>
   </data>
+  <data name="Attacker_Weapons" xml:space="preserve">
+    <value>Armement</value>
+  </data>
+  <data name="Attacker_WeaponsHelp" xml:space="preserve">
+    <value>Les profils d'armes de l'unité, résolus dans l'ordre de la liste. Les boosts saisis au-dessus s'appliquent à toutes les armes.</value>
+  </data>
   <data name="Boosts_Active" xml:space="preserve">
     <value>{0} actif(s)</value>
   </data>

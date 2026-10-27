@@ -133,6 +133,19 @@
     border-left: 3px solid var(--mud-palette-primary) !important;
 }
 
+/* Bloc « Boosts » : fond et contour teintés de la couleur principale, pour le distinguer des armes et des groupes */
+.wh-boosts {
+    background-color: color-mix(in srgb, var(--mud-palette-primary) 7%, var(--mud-palette-surface)) !important;
+    border-color: color-mix(in srgb, var(--mud-palette-primary) 45%, transparent) !important;
+    border-left-width: 5px !important;
+}
+
+.wh-boosts .wh-subsection-title .mud-typography {
+    color: var(--mud-palette-primary);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
 /* Groupe PERSONNAGE : filet rouge, pour le distinguer des gardes du corps */
 .wh-subcard-character {
     border-left-color: var(--mud-palette-secondary) !important;

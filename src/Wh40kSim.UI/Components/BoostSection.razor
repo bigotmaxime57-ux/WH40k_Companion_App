@@ -3,7 +3,7 @@
     Replié au départ tant qu'aucun boost n'est saisi, pour ne pas encombrer la carte.
 *@
 
-<MudPaper Outlined="true" Class="pa-3 my-3 wh-subcard" @attributes="Attributes">
+<MudPaper Outlined="true" Class="pa-3 my-3 wh-subcard wh-boosts" @attributes="Attributes">
     <div class="wh-subsection-title">
         <MudIconButton Icon="@(_expanded ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)" Size="Size.Small"
                        OnClick="() => _expanded = !_expanded" data-test="toggle-boosts" />

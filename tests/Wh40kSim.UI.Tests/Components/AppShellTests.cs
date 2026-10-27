@@ -15,53 +15,79 @@ public class AppShellTests() : ComponentTestContext(renderPopoverProvider: false
         Assert.NotNull(shell.FindComponent<SimulatorPage>());
     }
 
-    [Fact]
-    public void Theme_follows_the_system_then_can_be_toggled()
+    [Theory]
+    [InlineData(true, ThemeChoice.Grimdark)]
+    [InlineData(false, ThemeChoice.Parchment)]
+    public void Without_a_saved_choice_the_theme_follows_the_system(bool systemDark, ThemeChoice expected)
     {
-        // Préférence du système lue par MudBlazor via JavaScript : ici, sombre
-        JSInterop.Setup<bool>("mudThemeProvider.isDarkMode").SetResult(true);
+        // Préférence du système lue par MudBlazor via JavaScript
+        JSInterop.Setup<bool>("mudThemeProvider.isDarkMode").SetResult(systemDark);
         var shell = Render<AppShell>();
-        shell.WaitForAssertion(() => Assert.True(shell.Instance.IsDarkMode));
 
-        shell.ClickUntil("[data-test=toggle-theme]", () => !shell.Instance.IsDarkMode);
+        shell.WaitForAssertion(() => Assert.Equal(expected, shell.Instance.Theme));
+        Assert.Null(Preferences.Theme); // rien n'est mémorisé tant que l'utilisateur n'a pas choisi
+    }
 
-        Assert.False(shell.Instance.IsDarkMode);
+    [Fact]
+    public void The_saved_choice_wins_over_the_system()
+    {
+        JSInterop.Setup<bool>("mudThemeProvider.isDarkMode").SetResult(false);
+        Preferences.Theme = ThemeChoice.Neon;
+        var shell = Render<AppShell>();
+
+        shell.WaitForAssertion(() => Assert.Equal(ThemeChoice.Neon, shell.Instance.Theme));
+        Assert.NotEmpty(shell.FindAll(".wh-neon"));
     }
 
     [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void Theme_given_by_the_host_applies_from_the_first_render_without_asking_the_browser(bool dark)
+    [InlineData(ThemeChoice.Parchment)]
+    [InlineData(ThemeChoice.Neon)]
+    public void Theme_given_by_the_host_applies_from_the_first_render_without_asking_anyone(ThemeChoice theme)
     {
-        // Le navigateur dirait l'inverse : il ne doit pas être consulté
-        JSInterop.Setup<bool>("mudThemeProvider.isDarkMode").SetResult(!dark);
-        var shell = Render<AppShell>(p => p.Add(c => c.SystemDarkMode, dark));
+        // Le navigateur et les préférences diraient autre chose : ils ne doivent pas être consultés
+        JSInterop.Setup<bool>("mudThemeProvider.isDarkMode").SetResult(true);
+        Preferences.Theme = ThemeChoice.Steel;
+        var shell = Render<AppShell>(p => p.Add(c => c.InitialTheme, theme));
 
-        Assert.Equal(dark, shell.FindAll(".wh-dark").Count > 0);
-        Assert.Equal(dark, shell.Instance.IsDarkMode);
+        Assert.Equal(theme, shell.Instance.Theme);
+        Assert.Equal(Wh40kTheme.IsDark(theme), shell.FindAll(".wh-dark").Count > 0);
         Assert.Empty(JSInterop.Invocations["mudThemeProvider.isDarkMode"]);
     }
 
-    [Theory]
-    [InlineData(DarkStyle.Grimdark, true)]
-    [InlineData(DarkStyle.Steel, false)]
-    public void Grimdark_effects_apply_only_to_the_grimdark_dark_theme(DarkStyle style, bool grimdark)
+    [Fact]
+    public void Choosing_a_theme_in_the_menu_applies_and_saves_it()
     {
-        JSInterop.Setup<bool>("mudThemeProvider.isDarkMode").SetResult(true);
-        var shell = Render<AppShell>(p => p.Add(c => c.DarkStyle, style));
-        shell.WaitForAssertion(() => Assert.True(shell.Instance.IsDarkMode));
+        var shell = Render<AppShell>(p => p.Add(c => c.InitialTheme, ThemeChoice.Grimdark));
 
-        Assert.Equal(grimdark, shell.FindAll(".wh-grimdark").Count > 0);
-        shell.ClickUntil("[data-test=toggle-theme]", () => !shell.Instance.IsDarkMode);
-        Assert.Empty(shell.FindAll(".wh-grimdark")); // thème clair : jamais
+        shell.ClickUntil("[data-test=theme-menu] button", () => shell.FindAll("[data-test=theme-Steel]").Count > 0);
+        shell.ClickUntil("[data-test=theme-Steel]", () => shell.Instance.Theme == ThemeChoice.Steel);
+
+        Assert.Equal(ThemeChoice.Steel, Preferences.Theme);
+        Assert.NotEmpty(shell.FindAll(".wh-dark"));
+        Assert.Empty(shell.FindAll(".wh-grimdark"));
+    }
+
+    [Theory]
+    [InlineData(ThemeChoice.Parchment, "wh-shell")]
+    [InlineData(ThemeChoice.Grimdark, "wh-shell wh-dark wh-grimdark")]
+    [InlineData(ThemeChoice.Steel, "wh-shell wh-dark")]
+    [InlineData(ThemeChoice.Neon, "wh-shell wh-dark wh-neon")]
+    public void Each_theme_sets_its_own_style_classes(ThemeChoice theme, string classes)
+    {
+        var shell = Render<AppShell>(p => p.Add(c => c.InitialTheme, theme));
+
+        var layout = shell.Find(".wh-shell");
+        Assert.Equal(classes.Split(' ').Order(), layout.ClassList.Where(c => c.StartsWith("wh-")).Order());
     }
 
     [Fact]
     public void Each_dark_style_has_its_own_theme_and_the_light_palette_is_shared()
     {
-        Assert.NotSame(Wh40kTheme.Grimdark, Wh40kTheme.Steel);
-        Assert.Same(Wh40kTheme.Steel, Wh40kTheme.For(DarkStyle.Steel));
-        Assert.Equal(Wh40kTheme.Grimdark.PaletteLight.Background, Wh40kTheme.Steel.PaletteLight.Background);
-        Assert.NotEqual(Wh40kTheme.Grimdark.PaletteDark.Background, Wh40kTheme.Steel.PaletteDark.Background);
+        MudBlazor.MudTheme[] dark = [.. new[] { ThemeChoice.Grimdark, ThemeChoice.Steel, ThemeChoice.Neon }.Select(Wh40kTheme.For)];
+
+        Assert.Equal(3, dark.Distinct().Count());
+        Assert.Equal(3, dark.Select(t => t.PaletteDark.Background).Distinct().Count());
+        Assert.Single(dark.Select(t => t.PaletteLight.Background).Distinct());
+        Assert.False(Wh40kTheme.IsDark(ThemeChoice.Parchment));
     }
 }

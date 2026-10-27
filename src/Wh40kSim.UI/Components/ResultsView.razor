@@ -86,7 +86,7 @@
     /// </summary>
     private RenderFragment MarginLine(double value, string help, string test) =>
         @<div class="wh-tile-margin">
-            <span data-test="@test">@L["Results_MarginValue", Result.ProbabilityWipe > 0 ? "+" + value.ToString("F2") : "—"]</span>
+            <span class="wh-tile-margin-value" data-test="@test">@L["Results_MarginValue", Result.ProbabilityWipe > 0 ? "+" + value.ToString("F2") : "—"]</span>
             <HelpBubble Lines="@([help])" />
         </div>;
 

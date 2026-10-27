@@ -1,10 +1,12 @@
 @*
-    Coquille de l'application, commune aux hôtes : fournisseurs MudBlazor, barre de titre avec bascule clair / sombre,
-    et la page « Simulateur ». Thèmes Wh40kTheme ; le mode sombre suit celui du système au démarrage (fourni par l'hôte,
-    ou à défaut lu par le navigateur). Styles complémentaires : wwwroot/wh40ksim.css, chargé par l'hôte.
+    Coquille de l'application, commune aux hôtes : fournisseurs MudBlazor, barre de titre avec le menu des thèmes, et la
+    page « Simulateur ». Thème au démarrage : celui fourni par l'hôte (InitialTheme), sinon le choix mémorisé
+    (IPreferenceService), sinon celui qui correspond au mode clair / sombre du navigateur. Un thème choisi dans le menu
+    est mémorisé. Styles complémentaires : wwwroot/wh40ksim.css, chargé par l'hôte.
 *@
+@inject IPreferenceService Preferences
 
-<MudThemeProvider @ref="_themeProvider" Theme="Wh40kTheme.For(DarkStyle)" @bind-IsDarkMode="_isDarkMode" />
+<MudThemeProvider @ref="_themeProvider" Theme="Wh40kTheme.For(_theme)" IsDarkMode="Wh40kTheme.IsDark(_theme)" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -14,10 +16,16 @@
         <MudIcon Icon="@Icons.Material.Filled.MilitaryTech" Class="mr-2" />
         <MudText Typo="Typo.h6" Class="wh-brand">@L["App_Title"]</MudText>
         <MudSpacer />
-        <MudTooltip Text="@L["App_ToggleTheme"]">
-            <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)" Color="Color.Inherit"
-                           OnClick="ToggleTheme" data-test="toggle-theme" />
-        </MudTooltip>
+        <MudMenu Icon="@Icons.Material.Filled.Palette" Color="Color.Inherit" AriaLabel="@L["App_Theme"]"
+                 AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" data-test="theme-menu">
+            @foreach (var choice in Enum.GetValues<ThemeChoice>())
+            {
+                <MudMenuItem Icon="@(choice == _theme ? Icons.Material.Filled.RadioButtonChecked : Icons.Material.Filled.RadioButtonUnchecked)"
+                             OnClick="@(() => ChooseAsync(choice))" data-test="@($"theme-{choice}")">
+                    @L[Wh40kTheme.NameKey(choice)]
+                </MudMenuItem>
+            }
+        </MudMenu>
     </MudAppBar>
     <MudMainContent>
         <SimulatorPage />
@@ -26,35 +34,40 @@
 
 @code {
     private MudThemeProvider _themeProvider = null!;
-    private bool _isDarkMode;
-
-    /// <summary>Style du thème sombre (le choix par l'utilisateur viendra avec un sélecteur de thème : voir les tickets).</summary>
-    [Parameter]
-    public DarkStyle DarkStyle { get; set; } = DarkStyle.Grimdark;
+    private ThemeChoice _theme;
 
     /// <summary>
-    /// Mode sombre du système, fourni par l'hôte s'il le connaît : le premier rendu a alors déjà le bon thème. Sinon,
-    /// il est demandé au navigateur après le premier rendu (le thème clair s'affiche un instant).
+    /// Thème au démarrage, fourni par l'hôte s'il le connaît (choix mémorisé, à défaut mode du système) : le premier
+    /// rendu a alors déjà le bon thème. Sinon, il est cherché après le premier rendu (le thème clair s'affiche un instant).
     /// </summary>
     [Parameter]
-    public bool? SystemDarkMode { get; set; }
+    public ThemeChoice? InitialTheme { get; set; }
 
-    /// <summary>Thème sombre actif (bascule par le bouton de la barre de titre).</summary>
-    public bool IsDarkMode => _isDarkMode;
+    /// <summary>Thème affiché.</summary>
+    public ThemeChoice Theme => _theme;
 
-    private string ShellClass => !_isDarkMode ? "wh-shell"
-        : DarkStyle == DarkStyle.Grimdark ? "wh-shell wh-dark wh-grimdark" : "wh-shell wh-dark";
+    private string ShellClass => _theme switch
+    {
+        ThemeChoice.Grimdark => "wh-shell wh-dark wh-grimdark",
+        ThemeChoice.Steel => "wh-shell wh-dark",
+        ThemeChoice.Neon => "wh-shell wh-dark wh-neon",
+        _ => "wh-shell",
+    };
 
-    protected override void OnInitialized() => _isDarkMode = SystemDarkMode ?? false;
+    protected override void OnInitialized() => _theme = InitialTheme ?? ThemeChoice.Parchment;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && SystemDarkMode is null)
+        if (firstRender && InitialTheme is null)
         {
-            _isDarkMode = await _themeProvider.GetSystemDarkModeAsync();
+            _theme = await Preferences.GetThemeAsync() ?? Wh40kTheme.Default(await _themeProvider.GetSystemDarkModeAsync());
             StateHasChanged();
         }
     }
 
-    private void ToggleTheme() => _isDarkMode = !_isDarkMode;
+    private async Task ChooseAsync(ThemeChoice choice)
+    {
+        _theme = choice;
+        await Preferences.SetThemeAsync(choice);
+    }
 }

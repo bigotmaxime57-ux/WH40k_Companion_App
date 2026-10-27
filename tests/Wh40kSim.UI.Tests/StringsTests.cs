@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Wh40kSim.UI.Keywords;
+using Wh40kSim.UI.Theme;
 
 namespace Wh40kSim.UI.Tests;
 
@@ -13,7 +14,7 @@ public class StringsTests
 {
     private static readonly string UiProject = Path.Combine(RepositoryRoot(), "src", "Wh40kSim.UI");
 
-    /// <summary>Clés écrites telles quelles dans le code (L["…"]), plus celles construites à partir du catalogue de mots-clés.</summary>
+    /// <summary>Clés écrites telles quelles dans le code (L["…"]), plus celles construites à partir du catalogue de mots-clés et des thèmes.</summary>
     private static HashSet<string> UsedKeys()
     {
         var keys = Directory.EnumerateFiles(UiProject, "*.*", SearchOption.AllDirectories)
@@ -24,6 +25,7 @@ public class StringsTests
         {
             keys.UnionWith([keyword.NameKey, keyword.HelpKey, keyword.CategoryKey]);
         }
+        keys.UnionWith(Enum.GetValues<ThemeChoice>().Select(Wh40kTheme.NameKey));
         return keys;
     }
 

@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
     La fenêtre ne contient que le BlazorWebView : toute l'interface est le composant AppShell de Wh40kSim.UI.
-    Fond de la page aux couleurs du thème (parchemin / Grimdark), visible tant que la WebView n'a rien affiché.
+    Fond de la page aux couleurs du thème (MainPage.xaml.cs), visible tant que la WebView n'a rien affiché.
 -->
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:ui="clr-namespace:Wh40kSim.UI.Components;assembly=Wh40kSim.UI"
-             x:Class="Wh40kSim.Desktop.MainPage"
-             BackgroundColor="{AppThemeBinding Light=#f2ece0, Dark=#0a0a0b}">
+             x:Class="Wh40kSim.Desktop.MainPage">
 
     <BlazorWebView x:Name="WebView" HostPage="wwwroot/index.html" BlazorWebViewInitialized="OnWebViewInitialized">
         <BlazorWebView.RootComponents>

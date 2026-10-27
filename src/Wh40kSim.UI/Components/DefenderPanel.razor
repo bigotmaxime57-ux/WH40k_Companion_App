@@ -2,28 +2,33 @@
 
 <MudPaper Elevation="3" Class="pa-4 wh-section">
     <SectionHeader Icon="@Icons.Material.Filled.Shield" Title="@L["Defender_Title"]" />
-    <MudGrid Spacing="2">
-        <MudItem xs="12" sm="6">
-            <MudTextField T="string" Label="@L["Defender_Name"]" @bind-Value="Defender.Name" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="12" sm="6">
-            <MudCheckBox T="bool" Label="@L["Defender_InCover"]" @bind-Value="Defender.InCover" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Defender_HitModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3" @bind-Value="Defender.HitModifier" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Defender_WoundModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3" @bind-Value="Defender.WoundModifier" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Modifier_DefenderSkill"]" HelperText="@L["Modifier_DefenderSkillHelp"]" Min="-6" Max="6"
-                             @bind-Value="Defender.SkillModifier" @bind-Value:after="NotifyChanged" data-test="defender-skill-modifier" />
-        </MudItem>
-        <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Modifier_DefenderAp"]" HelperText="@L["Modifier_DefenderApHelp"]" Min="-6" Max="6"
-                             @bind-Value="Defender.ApModifier" @bind-Value:after="NotifyChanged" data-test="defender-ap-modifier" />
-        </MudItem>
-    </MudGrid>
+    <MudTextField T="string" Label="@L["Defender_Name"]" @bind-Value="Defender.Name" @bind-Value:after="NotifyChanged" />
+
+    @* Ce qui joue contre les attaques qui visent cette unité, du point de vue de l'attaquant (comme la Situation) *@
+    <SubSection Title="@L["Defender_AgainstUnit"]" data-test="defender-modifiers">
+        <MudGrid Spacing="3">
+            <MudItem xs="12" sm="4">
+                <MudCheckBox T="bool" Label="@L["Defender_InCover"]" @bind-Value="Defender.InCover" @bind-Value:after="NotifyChanged" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudNumericField T="int" Label="@L["Modifier_DefenderSkill"]" HelperText="@L["Modifier_DefenderSkillHelp"]" Min="-6" Max="6"
+                                 @bind-Value="Defender.SkillModifier" @bind-Value:after="NotifyChanged" data-test="defender-skill-modifier" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudNumericField T="int" Label="@L["Defender_HitModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3"
+                                 @bind-Value="Defender.HitModifier" @bind-Value:after="NotifyChanged" />
+            </MudItem>
+            <MudItem xs="12" sm="4" Class="d-none d-sm-flex" />
+            <MudItem xs="12" sm="4">
+                <MudNumericField T="int" Label="@L["Modifier_DefenderAp"]" HelperText="@L["Modifier_DefenderApHelp"]" Min="-6" Max="6"
+                                 @bind-Value="Defender.ApModifier" @bind-Value:after="NotifyChanged" data-test="defender-ap-modifier" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudNumericField T="int" Label="@L["Defender_WoundModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3"
+                                 @bind-Value="Defender.WoundModifier" @bind-Value:after="NotifyChanged" />
+            </MudItem>
+        </MudGrid>
+    </SubSection>
 
     <MudText Typo="Typo.subtitle1" Class="mt-4">@L["Defender_Groups"]</MudText>
     <MudText Typo="Typo.caption">@L["Defender_GroupsHelp"]</MudText>

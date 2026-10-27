@@ -1,45 +1,32 @@
 @*
-    Situation de l'attaque. Les options qui ne concernent aucune arme sont masquées : ce choix vient du Core
-    (UsesHalfRange, UsesRemainedStationary, UsesCharged, PrecisionTargetMatters), aucune règle n'est écrite ici.
+    Situation de l'attaque, en blocs suivant la séquence d'attaque : conditions, touche, blessure, attaques / PA /
+    dégâts. Chaque champ précise s'il s'agit d'une modification de caractéristique (sans plafond, dans ses bornes) ou
+    d'un modificateur au jet (±1 au total). Les conditions qui ne concernent aucune arme sont masquées : ce choix vient
+    du Core (UsesHalfRange, UsesRemainedStationary, UsesCharged, PrecisionTargetMatters), aucune règle n'est écrite ici.
 *@
 
 <MudPaper Elevation="3" Class="pa-4 wh-section" data-test="context">
     <SectionHeader Icon="@Icons.Material.Filled.Terrain" Title="@L["Context_Title"]" />
+    <MudText Typo="Typo.caption">@L["Modifier_AttackerHelp"]</MudText>
 
-    @if (Reference.Attacker.UsesHalfRange)
+    @if (HasConditions)
     {
-        <MudCheckBox T="bool" Label="@L["Context_HalfRange"]" @bind-Value="Context.HalfRange" @bind-Value:after="NotifyChanged" data-test="half-range" />
-    }
-    @if (Reference.Attacker.UsesRemainedStationary)
-    {
-        <MudCheckBox T="bool" Label="@L["Context_RemainedStationary"]" @bind-Value="Context.RemainedStationary" @bind-Value:after="NotifyChanged"
-                     data-test="remained-stationary" />
-    }
-    @if (Reference.Attacker.UsesCharged)
-    {
-        <MudCheckBox T="bool" Label="@L["Context_Charged"]" @bind-Value="Context.Charged" @bind-Value:after="NotifyChanged" data-test="charged" />
-    }
-
-    <MudGrid Spacing="2">
-        <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Context_HitModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3" @bind-Value="Context.HitModifier" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Context_WoundModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3" @bind-Value="Context.WoundModifier" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="6">
-            <MudSelect T="RerollPolicy" Label="@L["Context_HitReroll"]" @bind-Value="Context.HitReroll" @bind-Value:after="NotifyChanged">
-                <RerollItems />
-            </MudSelect>
-        </MudItem>
-        <MudItem xs="6">
-            <MudSelect T="RerollPolicy" Label="@L["Context_WoundReroll"]" @bind-Value="Context.WoundReroll" @bind-Value:after="NotifyChanged">
-                <RerollItems />
-            </MudSelect>
-        </MudItem>
-        @if (ShowPrecisionTarget)
-        {
-            <MudItem xs="12">
+        <SubSection Title="@L["Context_Conditions"]" data-test="context-conditions">
+            @if (Reference.Attacker.UsesHalfRange)
+            {
+                <MudCheckBox T="bool" Label="@L["Context_HalfRange"]" @bind-Value="Context.HalfRange" @bind-Value:after="NotifyChanged" data-test="half-range" />
+            }
+            @if (Reference.Attacker.UsesRemainedStationary)
+            {
+                <MudCheckBox T="bool" Label="@L["Context_RemainedStationary"]" @bind-Value="Context.RemainedStationary" @bind-Value:after="NotifyChanged"
+                             data-test="remained-stationary" />
+            }
+            @if (Reference.Attacker.UsesCharged)
+            {
+                <MudCheckBox T="bool" Label="@L["Context_Charged"]" @bind-Value="Context.Charged" @bind-Value:after="NotifyChanged" data-test="charged" />
+            }
+            @if (ShowPrecisionTarget)
+            {
                 <MudSelect T="string" Label="@L["Context_PrecisionTarget"]" @bind-Value="PrecisionChoice" @bind-Value:after="NotifyChanged"
                            data-test="precision-target">
                     <MudSelectItem T="string" Value="FirstCharacter">@L["Context_PrecisionFirst"]</MudSelectItem>
@@ -48,31 +35,62 @@
                         <MudSelectItem T="string" Value="name">@name</MudSelectItem>
                     }
                 </MudSelect>
-            </MudItem>
-        }
-    </MudGrid>
+            }
+        </SubSection>
+    }
 
-    @* Modifications de caractéristiques : changent le profil de toutes les armes, sans plafond (≠ modificateurs au jet) *@
-    <MudText Typo="Typo.subtitle2" Class="mt-4">@L["Modifier_CharacteristicsTitle"]</MudText>
-    <MudText Typo="Typo.caption">@L["Modifier_AttackerHelp"]</MudText>
-    <MudGrid Spacing="2">
-        <MudItem xs="4">
-            <MudNumericField T="int" Label="@L["Modifier_Skill"]" Min="-6" Max="6" @bind-Value="Context.SkillModifier" @bind-Value:after="NotifyChanged"
-                             data-test="skill-modifier" />
-        </MudItem>
-        <MudItem xs="4">
-            <MudNumericField T="int" Label="@L["Modifier_Attacks"]" Min="-6" Max="6" @bind-Value="Context.AttacksModifier" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="4">
-            <MudNumericField T="int" Label="@L["Modifier_Strength"]" Min="-10" Max="10" @bind-Value="Context.StrengthModifier" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="4">
-            <MudNumericField T="int" Label="@L["Modifier_Ap"]" Min="-6" Max="6" @bind-Value="Context.ApModifier" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-        <MudItem xs="4">
-            <MudNumericField T="int" Label="@L["Modifier_Damage"]" Min="-6" Max="6" @bind-Value="Context.DamageModifier" @bind-Value:after="NotifyChanged" />
-        </MudItem>
-    </MudGrid>
+    <SubSection Title="@L["Context_HitSection"]">
+        <MudGrid Spacing="3">
+            <MudItem xs="12" sm="4">
+                <MudNumericField T="int" Label="@L["Modifier_Skill"]" HelperText="@L["Modifier_SkillHelp"]" Min="-6" Max="6"
+                                 @bind-Value="Context.SkillModifier" @bind-Value:after="NotifyChanged" data-test="skill-modifier" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudNumericField T="int" Label="@L["Context_HitModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3"
+                                 @bind-Value="Context.HitModifier" @bind-Value:after="NotifyChanged" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudSelect T="RerollPolicy" Label="@L["Context_HitReroll"]" @bind-Value="Context.HitReroll" @bind-Value:after="NotifyChanged">
+                    <RerollItems />
+                </MudSelect>
+            </MudItem>
+        </MudGrid>
+    </SubSection>
+
+    <SubSection Title="@L["Context_WoundSection"]">
+        <MudGrid Spacing="3">
+            <MudItem xs="12" sm="4">
+                <MudNumericField T="int" Label="@L["Modifier_Strength"]" HelperText="@L["Modifier_MinimumOneHelp"]" Min="-10" Max="10"
+                                 @bind-Value="Context.StrengthModifier" @bind-Value:after="NotifyChanged" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudNumericField T="int" Label="@L["Context_WoundModifier"]" HelperText="@L["Modifier_RollHelp"]" Min="-3" Max="3"
+                                 @bind-Value="Context.WoundModifier" @bind-Value:after="NotifyChanged" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudSelect T="RerollPolicy" Label="@L["Context_WoundReroll"]" @bind-Value="Context.WoundReroll" @bind-Value:after="NotifyChanged">
+                    <RerollItems />
+                </MudSelect>
+            </MudItem>
+        </MudGrid>
+    </SubSection>
+
+    <SubSection Title="@L["Context_ProfileSection"]">
+        <MudGrid Spacing="3">
+            <MudItem xs="12" sm="4">
+                <MudNumericField T="int" Label="@L["Modifier_Attacks"]" HelperText="@L["Modifier_MinimumOneHelp"]" Min="-6" Max="6"
+                                 @bind-Value="Context.AttacksModifier" @bind-Value:after="NotifyChanged" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudNumericField T="int" Label="@L["Modifier_Ap"]" HelperText="@L["Modifier_ApHelp"]" Min="-6" Max="6"
+                                 @bind-Value="Context.ApModifier" @bind-Value:after="NotifyChanged" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudNumericField T="int" Label="@L["Modifier_Damage"]" HelperText="@L["Modifier_MinimumOneHelp"]" Min="-6" Max="6"
+                                 @bind-Value="Context.DamageModifier" @bind-Value:after="NotifyChanged" />
+            </MudItem>
+        </MudGrid>
+    </SubSection>
 </MudPaper>
 
 @code {
@@ -88,6 +106,9 @@
 
     [Parameter]
     public EventCallback Changed { get; set; }
+
+    private bool HasConditions =>
+        Reference.Attacker.UsesHalfRange || Reference.Attacker.UsesRemainedStationary || Reference.Attacker.UsesCharged || ShowPrecisionTarget;
 
     /// <summary>Affichée aussi si une cible est encore choisie, pour pouvoir la retirer si elle n'a plus lieu d'être.</summary>
     private bool ShowPrecisionTarget => Reference.PrecisionTargetMatters || Context.PrecisionTarget is not null;

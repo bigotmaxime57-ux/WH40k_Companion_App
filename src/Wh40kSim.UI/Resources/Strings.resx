@@ -46,6 +46,9 @@
   <data name="Context_Charged" xml:space="preserve">
     <value>A chargé ce tour</value>
   </data>
+  <data name="Context_Conditions" xml:space="preserve">
+    <value>Conditions</value>
+  </data>
   <data name="Context_HalfRange" xml:space="preserve">
     <value>À demi-portée</value>
   </data>
@@ -55,11 +58,17 @@
   <data name="Context_HitReroll" xml:space="preserve">
     <value>Relance des touches</value>
   </data>
+  <data name="Context_HitSection" xml:space="preserve">
+    <value>Touche</value>
+  </data>
   <data name="Context_PrecisionFirst" xml:space="preserve">
     <value>Premier PERSONNAGE en jeu</value>
   </data>
   <data name="Context_PrecisionTarget" xml:space="preserve">
     <value>PERSONNAGE visé par Precision</value>
+  </data>
+  <data name="Context_ProfileSection" xml:space="preserve">
+    <value>Attaques, PA et dégâts</value>
   </data>
   <data name="Context_RemainedStationary" xml:space="preserve">
     <value>Restée immobile</value>
@@ -73,8 +82,14 @@
   <data name="Context_WoundReroll" xml:space="preserve">
     <value>Relance des blessures</value>
   </data>
+  <data name="Context_WoundSection" xml:space="preserve">
+    <value>Blessure</value>
+  </data>
   <data name="Defender_AddGroup" xml:space="preserve">
     <value>Ajouter un groupe</value>
+  </data>
+  <data name="Defender_AgainstUnit" xml:space="preserve">
+    <value>Contre les attaques qui visent cette unité</value>
   </data>
   <data name="Defender_Groups" xml:space="preserve">
     <value>Groupes d'allocation</value>
@@ -271,14 +286,14 @@
   <data name="Modifier_Ap" xml:space="preserve">
     <value>PA</value>
   </data>
+  <data name="Modifier_ApHelp" xml:space="preserve">
+    <value>Caractéristique, sans plafond ; jamais au-dessus de 0</value>
+  </data>
   <data name="Modifier_AttackerHelp" xml:space="preserve">
-    <value>Changent le profil de toutes les armes avant les jets, sans plafond : +1 = mieux pour l'attaquant (CT 3+ → 2+, PA-1 → PA-2). CT / CC bornée entre 2+ et 6+, Force, A et D au moins 1, PA jamais au-dessus de 0.</value>
+    <value>Valeurs du point de vue de l'attaquant : +1 = mieux pour lui (CT 3+ → 2+, PA-1 → PA-2).</value>
   </data>
   <data name="Modifier_Attacks" xml:space="preserve">
     <value>Attaques (A)</value>
-  </data>
-  <data name="Modifier_CharacteristicsTitle" xml:space="preserve">
-    <value>Modifications de caractéristiques</value>
   </data>
   <data name="Modifier_Damage" xml:space="preserve">
     <value>Dégâts (D)</value>
@@ -287,19 +302,25 @@
     <value>PA des attaques reçues</value>
   </data>
   <data name="Modifier_DefenderApHelp" xml:space="preserve">
-    <value>-1 = PA-2 devient PA-1 (jamais au-dessus de 0)</value>
+    <value>Caractéristique : -1 = PA-2 devient PA-1 (jamais au-dessus de 0)</value>
   </data>
   <data name="Modifier_DefenderSkill" xml:space="preserve">
     <value>CT / CC des attaquants</value>
   </data>
   <data name="Modifier_DefenderSkillHelp" xml:space="preserve">
-    <value>Modification sans plafond, cumulée avec le couvert : -1 = 3+ devient 4+</value>
+    <value>Caractéristique, cumulée avec le couvert : -1 = 3+ devient 4+</value>
+  </data>
+  <data name="Modifier_MinimumOneHelp" xml:space="preserve">
+    <value>Caractéristique, sans plafond ; au moins 1</value>
   </data>
   <data name="Modifier_RollHelp" xml:space="preserve">
-    <value>Cumulé avec les autres, plafonné à ±1 (après relances)</value>
+    <value>Au jet : ±1 max au total, après relances</value>
   </data>
   <data name="Modifier_Skill" xml:space="preserve">
     <value>CT / CC</value>
+  </data>
+  <data name="Modifier_SkillHelp" xml:space="preserve">
+    <value>Caractéristique, sans plafond ; bornée entre 2+ et 6+</value>
   </data>
   <data name="Modifier_Strength" xml:space="preserve">
     <value>Force (F)</value>

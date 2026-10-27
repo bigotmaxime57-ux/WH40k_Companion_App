@@ -1,0 +1,18 @@
+@* Bloc encadré à l'intérieur d'une section (même style que les cartes d'arme et de groupe), avec un petit titre. *@
+
+<MudPaper Outlined="true" Class="pa-3 my-3 wh-subcard" @attributes="Attributes">
+    <MudText Typo="Typo.subtitle2" Class="mb-1">@Title</MudText>
+    @ChildContent
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>Attributs supplémentaires (data-test…) posés sur le bloc.</summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? Attributes { get; set; }
+}

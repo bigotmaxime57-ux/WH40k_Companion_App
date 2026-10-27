@@ -159,7 +159,7 @@ public class ContextPanelTests : ComponentTestContext
 
         Assert.Equal(2, context.SkillModifier);
         Assert.Equal(0, context.HitModifier);
-        Assert.Contains("Modifications de caractéristiques", panel.Markup);
+        Assert.Contains("Caractéristique, sans plafond", panel.Markup);
     }
 
     [Fact]

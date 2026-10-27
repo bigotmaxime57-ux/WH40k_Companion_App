@@ -45,6 +45,25 @@ internal static class ReportPrinter
 
         PrintDistribution("Figurines tuées", result.Kills);
         PrintDistribution("PV retirés", result.Damage);
+
+        if (result.ProbabilityWipe > 0)
+        {
+            PrintExcess(result);
+        }
+    }
+
+    /// <summary>Distributions prolongées au-delà de la destruction de l'unité : la marge de l'attaquant.</summary>
+    private static void PrintExcess(SimulationResult result)
+    {
+        WriteTitle("Au-delà de l'unité (excédent)");
+        Console.WriteLine("Après la destruction de l'unité, les attaques restantes continuent contre des figurines virtuelles :");
+        Console.WriteLine($"  {(result.ExcessProfile with { Count = 1 }).Describe()}");
+        Console.WriteLine();
+        Console.WriteLine($"Figurines tuées  : {Summarize(result.ExtendedKills)}");
+        Console.WriteLine($"PV retirés       : {Summarize(result.ExtendedDamage)}");
+
+        PrintDistribution("Figurines tuées (prolongé)", result.ExtendedKills);
+        PrintDistribution("PV retirés (prolongé)", result.ExtendedDamage);
     }
 
     private static string Summarize(DiscreteDistribution distribution)

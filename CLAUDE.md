@@ -288,7 +288,10 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 - Backlog passé en GitHub Issues le 2026-10-27 : labels `idée`, `outillage`, `dette technique` (+ `bug` par défaut),
   tickets #1 à #8 repris de l'ancienne section Backlog. `gh` installé et authentifié sur la deuxième machine
   seulement : **à faire sur l'autre machine** (voir « Environnement de développement »).
-- **Prochaine : étape 4 (excédent de dégâts)**, en attente du feu vert.
+- Phase 2a, étape 4 (excédent de dégâts) : fusionnée dans `main`.
+  169 tests verts (103 Core, 33 Simulation, 33 UI) ; `NonRegressionTests` inchangés (résultats réels
+  identiques au bit près) ; pas de surcoût mesurable (5 M simulations, unité détruite à 89 %), donc pas d'option.
+- **Prochaine : étape 5 (composants)**, en attente du feu vert.
 
 Points notés pour les étapes suivantes :
 - **Ancienne numérotation** dans le code : `WeaponAbilities.cs` (« phase 3 » pour les mots-clés, et un commentaire

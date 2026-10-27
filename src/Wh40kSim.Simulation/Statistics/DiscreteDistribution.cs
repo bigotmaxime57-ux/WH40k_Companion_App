@@ -59,7 +59,10 @@ public sealed class DiscreteDistribution
     /// <summary>Nombre total de simulations.</summary>
     public long Total { get; }
 
-    /// <summary>Plus grande valeur possible (taille de l'histogramme - 1), qu'elle ait été atteinte ou non.</summary>
+    /// <summary>
+    /// Plus grande valeur de l'histogramme (sa taille - 1), atteinte ou non : pour les figurines tuées, l'effectif de
+    /// l'unité ; pour une distribution prolongée, la plus grande valeur observée.
+    /// </summary>
     public int MaxValue => _counts.Length - 1;
 
     public double Mean { get; }

@@ -78,4 +78,12 @@ public sealed record DefenderUnit
 
     [JsonIgnore]
     public int TotalWounds => Groups.Sum(g => g.Count * g.Wounds);
+
+    /// <summary>
+    /// Profil des figurines virtuelles qui encaissent l'excédent une fois l'unité détruite : le premier groupe
+    /// non-PERSONNAGE dans l'ordre d'allocation (un garde du corps : le leader, tué en dernier, est unique et souvent
+    /// plus résistant), à défaut le premier groupe. Null si l'unité n'a aucun groupe.
+    /// </summary>
+    [JsonIgnore]
+    public ModelGroup? ExcessProfile => Groups.FirstOrDefault(g => !g.IsCharacter) ?? Groups.FirstOrDefault();
 }

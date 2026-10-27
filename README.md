@@ -58,6 +58,16 @@ dotnet run --project src/Wh40kSim.Console -- scenarios/exemple-escouade-vs-leade
 
 Relances disponibles (touche et blessure) : aucune, les 1, les échecs, tout sauf critique (« pêche aux 6 »).
 
+## Excédent (au-delà de la destruction de l'unité)
+
+Les figurines tuées et les PV retirés suivent les règles : ils s'arrêtent à l'effectif et aux PV de l'unité, et la
+dernière valeur du tableau vaut la probabilité de la détruire. Pour mesurer la marge, le simulateur calcule aussi des
+distributions **prolongées** : une fois l'unité détruite, les attaques restantes continuent contre des figurines
+virtuelles identiques au premier groupe non-PERSONNAGE (à défaut, le premier groupe), en nombre illimité. Ce n'est pas
+le dernier tué, souvent le leader, unique et plus résistant. L'excédent de dégâts sur une figurine reste perdu.
+Ces dés sont tirés à part : les résultats réels sont les mêmes que sans ce calcul. La console affiche la section
+« Au-delà de l'unité » dès que l'unité peut être détruite.
+
 ## Hypothèses restantes
 
 - **Réduction de dégâts** : non appliquée aux blessures mortelles (elles ne sont pas une attaque allouée).

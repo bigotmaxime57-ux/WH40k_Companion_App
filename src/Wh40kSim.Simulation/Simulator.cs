@@ -12,6 +12,8 @@ namespace Wh40kSim.Simulation;
 /// dérivée de la graine principale : à graine égale, le résultat est identique quel que soit le nombre de cœurs.</para>
 /// <para>Les résultats sont agrégés en histogrammes au fil de l'eau (un par thread, fusionnés à la fin) :
 /// aucun résultat individuel n'est conservé.</para>
+/// <para>L'excédent (attaques après la destruction de l'unité) est tiré sur un second flux de dés par paquet :
+/// les résultats réels sont les mêmes que sans excédent.</para>
 /// </summary>
 public static class Simulator
 {
@@ -48,10 +50,11 @@ public static class Simulator
             (chunk, _, worker) =>
             {
                 int count = Math.Min(ChunkSize, iterations - chunk * ChunkSize);
-                var dice = new RandomDiceRoller(DeriveSeed(baseSeed, chunk));
+                var dice = new RandomDiceRoller(DeriveSeed(baseSeed, chunk, MainStream));
+                var excessDice = new RandomDiceRoller(DeriveSeed(baseSeed, chunk, ExcessStream));
                 for (int i = 0; i < count; i++)
                 {
-                    worker.Resolver.Run(dice);
+                    worker.Resolver.Run(dice, excessDice);
                     worker.Accumulator.Record(worker.Resolver.Target);
                 }
 
@@ -78,12 +81,19 @@ public static class Simulator
         return total.ToResult(scenario, baseSeed, stopwatch.Elapsed);
     }
 
-    /// <summary>Graine indépendante par paquet (mélange SplitMix64).</summary>
-    private static int DeriveSeed(int baseSeed, int chunk)
+    private const int MainStream = 0;
+    private const int ExcessStream = 1;
+
+    /// <summary>
+    /// Graine indépendante par paquet et par flux de dés (mélange SplitMix64). Le flux principal (0) donne les mêmes
+    /// graines qu'avant l'ajout des flux : les résultats à graine égale n'ont pas changé.
+    /// </summary>
+    private static int DeriveSeed(int baseSeed, int chunk, int stream)
     {
         unchecked
         {
-            ulong z = (ulong)(uint)baseSeed * 0x9E3779B97F4A7C15UL + (ulong)chunk * 0xBF58476D1CE4E5B9UL + 0x94D049BB133111EBUL;
+            ulong z = (ulong)(uint)baseSeed * 0x9E3779B97F4A7C15UL + (ulong)chunk * 0xBF58476D1CE4E5B9UL
+                      + (ulong)stream * 0xD6E8FEB86659FD93UL + 0x94D049BB133111EBUL;
             z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9UL;
             z = (z ^ (z >> 27)) * 0x94D049BB133111EBUL;
             z ^= z >> 31;
@@ -106,6 +116,10 @@ public static class Simulator
         private readonly long[] _damage = new long[defender.TotalWounds + 1];       // _damage[d] = simulations avec exactement d PV retirés
         private readonly long[] _killedPerGroup = new long[defender.Groups.Count];  // figurines tuées par groupe, cumulées
 
+        // Distributions prolongées (réel + excédent) : pas de maximum connu à l'avance, les tableaux s'agrandissent
+        private long[] _extendedKills = new long[defender.TotalModels + 1];
+        private long[] _extendedDamage = new long[defender.TotalWounds + 1];
+
         public void Record(DefenderState state)
         {
             _kills[state.ModelsKilled]++;
@@ -114,6 +128,9 @@ public static class Simulator
             {
                 _killedPerGroup[g] += state.KilledInGroup(g);
             }
+
+            Increment(ref _extendedKills, state.ModelsKilled + state.ExcessModelsKilled);
+            Increment(ref _extendedDamage, state.DamageDealt + state.ExcessDamage);
         }
 
         public void Merge(Accumulator other)
@@ -121,9 +138,40 @@ public static class Simulator
             for (int i = 0; i < _kills.Length; i++) _kills[i] += other._kills[i];
             for (int i = 0; i < _damage.Length; i++) _damage[i] += other._damage[i];
             for (int i = 0; i < _killedPerGroup.Length; i++) _killedPerGroup[i] += other._killedPerGroup[i];
+            Add(ref _extendedKills, other._extendedKills);
+            Add(ref _extendedDamage, other._extendedDamage);
         }
 
         public SimulationResult ToResult(Scenario scenario, int seed, TimeSpan elapsed) =>
-            new(scenario, seed, elapsed, new DiscreteDistribution(_kills), new DiscreteDistribution(_damage), _killedPerGroup);
+            new(scenario, seed, elapsed,
+                new DiscreteDistribution(_kills), new DiscreteDistribution(_damage), _killedPerGroup,
+                new DiscreteDistribution(TrimTrailingZeros(_extendedKills, _kills.Length)),
+                new DiscreteDistribution(TrimTrailingZeros(_extendedDamage, _damage.Length)));
+
+        private static void Increment(ref long[] histogram, int value)
+        {
+            if (value >= histogram.Length)
+            {
+                Array.Resize(ref histogram, Math.Max(value + 1, histogram.Length * 2));
+            }
+            histogram[value]++;
+        }
+
+        private static void Add(ref long[] histogram, long[] other)
+        {
+            if (other.Length > histogram.Length)
+            {
+                Array.Resize(ref histogram, other.Length);
+            }
+            for (int i = 0; i < other.Length; i++) histogram[i] += other[i];
+        }
+
+        /// <summary>Retire les zéros de fin ajoutés par l'agrandissement, sans descendre sous la taille réelle.</summary>
+        private static long[] TrimTrailingZeros(long[] histogram, int minLength)
+        {
+            int length = histogram.Length;
+            while (length > minLength && histogram[length - 1] == 0) length--;
+            return histogram[..length];
+        }
     }
 }

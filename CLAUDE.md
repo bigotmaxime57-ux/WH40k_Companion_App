@@ -45,7 +45,7 @@ Voir aussi `README.md` (structure de la solution, règles de jeu implémentées,
 Chaque phase garde une ligne **Objectif** : sa formulation d'origine, qui ne se modifie qu'avec l'accord de
 l'utilisateur. Le découpage en étapes peut évoluer ; celui des phases futures est indicatif et sera précisé au début
 de chaque phase. Numérotation fixée le 2026-10-27 : le README et des commentaires du code suivent encore l'ancienne
-(mots-clés en « phase 3 », graphiques en « phase 5 »), à corriger à l'étape 5 de la phase 2a.
+(mots-clés en « phase 3 »), à corriger à l'étape 6 de la phase 2a.
 
 ### État de l'existant (2026-10-27)
 
@@ -143,6 +143,11 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 - Efficacité rapportée au coût en points (le modèle n'a pas de points ; plutôt après la phase 6).
 - Ordre des pools choisi pour maximiser les dégâts (au lieu de l'ordre de saisie).
 - Import de listes d'armée depuis des outils tiers.
+- Excédent de dégâts : laisser l'utilisateur choisir le profil qui encaisse l'excédent (par défaut le premier groupe
+  non-PERSONNAGE, voir étape 4 de la phase 2a).
+- « Dégâts bruts » : dégâts de chaque attaque non sauvegardée comptés en entier, sans plafond par figurine ; l'écart
+  avec les PV retirés mesure le gaspillage (arme à gros dégâts contre des figurines à 1 PV). Plutôt avec la
+  comparaison de profils (phase 4).
 - Outillage : intégration continue (GitHub Actions, build + tests à chaque push) ; `.gitattributes` pour fixer les fins
   de ligne dans le dépôt plutôt que par machine.
 
@@ -167,7 +172,21 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
    - `Wh40kSim.Simulation.Tests` : `SimulatorTests` déplacés, tests de `DiscreteDistribution`, non-régression à graine
      égale (résultats identiques au bit près). Projets ajoutés au `.sln` à la main.
    - Pas d'anticipation de la phase 4 (pas de comparaison, pas de distribution par groupe).
-4. **Composants : page « Simulateur ».**
+4. **Excédent de dégâts (overflow).** Aujourd'hui la distribution des PV retirés est plafonnée aux PV de l'unité :
+   tout ce qui dépasse est compté au maximum (le pic final vaut P(unité détruite)), sans rien dire de la marge.
+   - Définition : la séquence est inchangée jusqu'à la destruction de l'unité ; ensuite, les attaques restantes
+     continuent contre des figurines virtuelles identiques au **premier groupe non-PERSONNAGE dans l'ordre
+     d'allocation** (à défaut, le premier groupe). Chacune arrive avec tous ses PV, l'excédent par figurine reste
+     perdu, l'Endurance est celle de ce profil, Precision n'a plus de cible.
+   - Core : `AttackResolver` peut continuer après la destruction ; `DefenderState` compte figurines et PV au-delà de
+     l'unité. Les dés de l'excédent sont tirés sur un **flux séparé** : les résultats réels restent identiques au bit
+     près (`NonRegressionTests` inchangés).
+   - Simulation : deux distributions prolongées (figurines tuées, PV retirés) calculées dans la même simulation.
+     Si le coût en temps se voit, en faire une option.
+   - Console : affiche la marge (tableaux prolongés), pour tester l'étape sans interface.
+   - Tests : séquences scriptées (continuation sur le profil garde du corps, sans garde du corps, Precision), et
+     cohérence avec la distribution réelle (identique sous le maximum, P(prolongé ≥ max) = P(détruite)).
+5. **Composants : page « Simulateur ».**
    - Attaquant : liste de profils d'armes (ajout / suppression / duplication) ; nom, tir/mêlée, nombre de figurines,
      A, CT/CC, F, PA, D (A et D acceptent "D6+1") ; mots-clés en cases à cocher / champs numériques (Torrent,
      Lethal Hits, Sustained Hits X, Devastating Wounds, Twin-linked, Blast, Rapid Fire X, Melta X, Heavy, Lance,
@@ -188,11 +207,12 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
    - Résultats en texte et tableaux (pas de graphique, c'est la phase 4), lus dans `SimulationResult` sans aucun
      calcul : les mêmes informations que la console (moyennes, écarts-types, médianes, fourchette 10-90 %, unité
      détruite, pertes par groupe, tableaux P(= k) et P(≥ k) pour les figurines tuées et les PV retirés, lignes
-     négligeables masquées aux extrémités).
+     négligeables masquées aux extrémités). Choix d'affichage réel / prolongé (excédent de l'étape 4), avec le
+     profil utilisé pour l'excédent indiqué clairement.
    - Boutons Ouvrir / Enregistrer (JSON compatible avec `scenarios/`) et Nouveau.
    - Textes de l'interface via `IStringLocalizer` + `.resx` (voir Traduction).
    - Tests de composants avec bUnit : Lancer désactivé si invalide, situation conditionnelle, monter / descendre.
-5. **Wh40kSim.Desktop (MAUI Blazor Hybrid).**
+6. **Wh40kSim.Desktop (MAUI Blazor Hybrid).**
    - Vérifier `dotnet workload list` (sinon indiquer `dotnet workload install maui-windows`).
    - Projet MAUI Blazor Hybrid qui affiche les composants de Wh40kSim.UI dans un `BlazorWebView`.
    - Cible Windows uniquement : `net10.0-windows10.0.19041.0`, `WindowsPackageType=None` (non empaqueté).
@@ -216,6 +236,9 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
   ne connaît ni le nombre d'itérations, ni les threads, ni les statistiques. `Wh40kSim.Simulation` répète, agrège en
   histogrammes (dans la boucle parallèle, pas de stockage des résultats bruts) et calcule toutes les statistiques.
   La console et les composants ne font que mettre en forme : aucun calcul dupliqué entre eux.
+- **Excédent de dégâts** (2026-10-27) : « PV retirés » reste la mesure réelle (règles du jeu, plafonnée) ;
+  l'excédent est une distribution prolongée à part, contre des copies du premier garde du corps (pas du dernier tué,
+  souvent le leader, unique et plus résistant). Flux de dés séparé pour ne pas modifier les résultats réels.
 - **Web (phase 2b)** : Blazor Web App, serveur `Wh40kSim.Web` (API + client) et client WebAssembly
   `Wh40kSim.Web.Client` ; le calcul se fait sur le serveur.
 - **Versions** (vérifiées le 2026-10-26) : MudBlazor 9.11.0, Microsoft.AspNetCore.Components.Web 10.0.14,
@@ -253,13 +276,14 @@ Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que
 - Phase 2a, étape 2 (Wh40kSim.UI, services, formulaires) : fusionnée dans `main`.
 - Roadmap refaite et renumérotée le 2026-10-27 (web local abandonné, traduction en phase 3, étape « Séparation
   Core / Simulation » insérée en 2a).
-- Phase 2a, étape 3 (séparation Core / Simulation) : terminée sur `phase2a/etape3-simulation`, en attente de
-  validation avant fusion. 156 tests verts (95 Core, 28 Simulation, 33 UI) ; non-régression au bit près sur deux
-  scénarios (`NonRegressionTests`) ; sortie de la console identique à celle d'avant le refactor.
-- **Prochaine : étape 4 (composants)**, en attente du feu vert.
+- Phase 2a, étape 3 (séparation Core / Simulation) : fusionnée dans `main`. 156 tests verts (95 Core,
+  28 Simulation, 33 UI) ; non-régression au bit près sur deux scénarios (`NonRegressionTests`) ; sortie de la console
+  identique à celle d'avant le refactor.
+- Étape « Excédent de dégâts » insérée en 4 le 2026-10-27 (composants en 5, desktop en 6).
+- **Prochaine : étape 4 (excédent de dégâts)**, en attente du feu vert.
 
 Points notés pour les étapes suivantes :
 - **Ancienne numérotation** dans le code : `WeaponAbilities.cs` (« phase 3 » pour les mots-clés, et un commentaire
   qui cite Precision comme non géré alors qu'il l'est) : à corriger quand ce fichier est touché, au plus tard à
-  l'étape 5.
-- `UsesHalfRange` / `UsesRemainedStationary` / `UsesCharged` n'existent pas encore (prévu à l'étape 4).
+  l'étape 6.
+- `UsesHalfRange` / `UsesRemainedStationary` / `UsesCharged` n'existent pas encore (prévu à l'étape 5).

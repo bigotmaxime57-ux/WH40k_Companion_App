@@ -1,16 +1,31 @@
 @*
-    Tuile de synthèse : libellé, grande valeur, contenu optionnel sous la valeur (la marge), détail optionnel, et une
+    Tuile de synthèse : libellé, grande valeur, contenu optionnel sous la valeur (la marge), indicateurs optionnels en
+    colonne à droite de la valeur (symbole, nom, valeur, bulle « ? » ; passent dessous si la tuile est étroite), et une
     tonalité (neutre, bonne, mauvaise).
 *@
 
 <div class="@($"wh-tile wh-tile-{Tone.ToString().ToLowerInvariant()}")" @attributes="Attributes">
     <div class="wh-tile-label">@Label</div>
-    <div class="wh-tile-value">@Value</div>
-    @ChildContent
-    @if (Detail is not null)
-    {
-        <div class="wh-tile-detail">@Detail</div>
-    }
+    <div class="wh-tile-body">
+        <div class="wh-tile-main">
+            <div class="wh-tile-value">@Value</div>
+            @ChildContent
+        </div>
+        @if (Stats is { Count: > 0 })
+        {
+            <div class="wh-tile-stats" data-test="tile-stats">
+                @foreach (var stat in Stats)
+                {
+                    <div class="wh-tile-stat">
+                        <span class="wh-tile-stat-symbol">@stat.Symbol</span>
+                        <span class="wh-tile-stat-label">@stat.Label</span>
+                        <span class="wh-tile-stat-value">@stat.Value</span>
+                        <HelpBubble Lines="@([stat.Help])" />
+                    </div>
+                }
+            </div>
+        }
+    </div>
 </div>
 
 @code {
@@ -22,14 +37,18 @@
         Bad,
     }
 
+    /// <summary>Indicateur secondaire : symbole, nom, valeur et explication pour qui ne connaît pas la notion.</summary>
+    public sealed record Stat(string Symbol, string Label, string Value, string Help);
+
     [Parameter, EditorRequired]
     public string Label { get; set; } = "";
 
     [Parameter, EditorRequired]
     public string Value { get; set; } = "";
 
+    /// <summary>Indicateurs affichés en colonne à droite de la valeur.</summary>
     [Parameter]
-    public string? Detail { get; set; }
+    public IReadOnlyList<Stat>? Stats { get; set; }
 
     [Parameter]
     public TileTone Tone { get; set; }

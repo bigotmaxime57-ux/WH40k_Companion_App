@@ -5,13 +5,13 @@
 *@
 
 <div class="wh-tiles my-3">
-    <StatTile Label="@L["Results_Kills"]" Value="@Result.Kills.Mean.ToString("F2")" Detail="@Detail(Result.Kills)" data-test="tile-kills">
+    <StatTile Label="@L["Results_Kills"]" Value="@Result.Kills.Mean.ToString("F2")" Stats="@Stats(Result.Kills)" data-test="tile-kills">
         @if (Extended)
         {
             @MarginLine(Result.KillMarginWhenWiped, L["Results_MarginKillsHelp", ExcessModel], "margin-kills")
         }
     </StatTile>
-    <StatTile Label="@L["Results_Damage"]" Value="@Result.Damage.Mean.ToString("F2")" Detail="@Detail(Result.Damage)" data-test="tile-damage">
+    <StatTile Label="@L["Results_Damage"]" Value="@Result.Damage.Mean.ToString("F2")" Stats="@Stats(Result.Damage)" data-test="tile-damage">
         @if (Extended)
         {
             @MarginLine(Result.DamageMarginWhenWiped, L["Results_MarginDamageHelp", ExcessModel], "margin-damage")
@@ -53,6 +53,11 @@
             <HelpBubble Lines="@([help])" />
         </div>;
 
-    private string Detail(DiscreteDistribution distribution) => L["Results_TileDetail",
-        distribution.Median, distribution.StdDev.ToString("F2"), distribution.CentralRange.Low, distribution.CentralRange.High];
+    /// <summary>Médiane, écart-type et fourchette des 80 % centraux, avec une explication pour chacun.</summary>
+    private List<StatTile.Stat> Stats(DiscreteDistribution distribution) =>
+    [
+        new("½", L["Tile_Median"], distribution.Median.ToString(), L["Help_Median"]),
+        new("±", L["Tile_StdDev"], distribution.StdDev.ToString("F2"), L["Help_StdDev"]),
+        new("↔", L["Tile_CentralRange"], L["Tile_RangeValue", distribution.CentralRange.Low, distribution.CentralRange.High], L["Help_CentralRange"]),
+    ];
 }

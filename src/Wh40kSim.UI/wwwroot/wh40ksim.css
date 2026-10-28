@@ -423,9 +423,42 @@
     font-weight: 600;
 }
 
-.wh-tile-detail {
+/* Corps de la tuile : valeur à gauche, indicateurs en colonne à droite (dessous si la tuile est trop étroite) */
+.wh-tile-body {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem 1.25rem;
+}
+
+.wh-tile-stats {
+    border-left: 1px solid var(--mud-palette-lines-default);
+    display: flex;
+    flex-direction: column;
+    gap: .1rem;
+    padding-left: .75rem;
+}
+
+.wh-tile-stat {
+    align-items: center;
     color: var(--mud-palette-text-secondary);
+    display: flex;
     font-size: .8rem;
+    gap: .35rem;
+    white-space: nowrap;
+}
+
+.wh-tile-stat-symbol {
+    color: var(--mud-palette-primary);
+    font-weight: 700;
+    text-align: center;
+    width: 1em;
+}
+
+.wh-tile-stat-value {
+    color: var(--mud-palette-text-primary);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
 }
 
 /* Histogramme SVG (HistogramChart) : barres « exactement » à la couleur du camp, courbe « au moins » en couleur du

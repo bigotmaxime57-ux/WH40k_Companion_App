@@ -108,7 +108,7 @@ public class PartialFileTests : ComponentTestContext
     public void Replacing_a_part_asks_for_confirmation_when_the_entry_is_modified()
     {
         var page = Render<SimulatorPage>();
-        page.Find("input[data-test=attacks]").Input("3");
+        page.Find("input[data-test=attacks]").Change("3");
         Files.ToOpen = FakeScenarioFileService.File("fusiliers.json", Attacker());
 
         page.Find("[data-test=open-attacker]").Click();
@@ -154,7 +154,7 @@ public class PartialFileTests : ComponentTestContext
     {
         var page = Render<SimulatorPage>();
 
-        page.Find("input[data-test=attacks]").Input("D");
+        page.Find("input[data-test=attacks]").Change("D");
 
         Assert.True(IsDisabled(page, "save-attacker"));
         Assert.False(IsDisabled(page, "save-defender"));

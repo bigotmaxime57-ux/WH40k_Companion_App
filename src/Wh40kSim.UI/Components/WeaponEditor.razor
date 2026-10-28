@@ -53,7 +53,7 @@
             <div class="wh-card-row">
                 <MudText Typo="Typo.subtitle2" Class="wh-card-row-label">@L["Weapon_Profile"]</MudText>
                 <div class="wh-stat-line" style="--wh-cols: 5" data-test="weapon-profile">
-                    <MudTextField T="string" Label="@L["Weapon_Attacks"]" Immediate="true" @bind-Value="Weapon.Attacks" @bind-Value:after="NotifyChanged"
+                    <MudTextField T="string" Label="@L["Weapon_Attacks"]" @bind-Value="Weapon.Attacks" @bind-Value:after="NotifyChanged"
                                   Error="@(!IsDice(Weapon.Attacks))" ErrorText="@L["Dice_Invalid"]" data-test="attacks" />
                     <MudSelect T="int" Label="@(Weapon.Type == WeaponType.Ranged ? L["Weapon_BallisticSkill"] : L["Weapon_WeaponSkill"])"
                                Disabled="Weapon.Abilities.Torrent" @bind-Value="Weapon.Skill" @bind-Value:after="NotifyChanged">
@@ -64,7 +64,7 @@
                     </MudSelect>
                     <MudNumericField T="int" Label="@L["Weapon_Strength"]" Min="1" @bind-Value="Weapon.Strength" @bind-Value:after="NotifyChanged" />
                     <MudNumericField T="int" Label="@L["Weapon_Ap"]" Min="-6" Max="0" @bind-Value="Weapon.Ap" @bind-Value:after="NotifyChanged" />
-                    <MudTextField T="string" Label="@L["Weapon_Damage"]" Immediate="true" @bind-Value="Weapon.Damage" @bind-Value:after="NotifyChanged"
+                    <MudTextField T="string" Label="@L["Weapon_Damage"]" @bind-Value="Weapon.Damage" @bind-Value:after="NotifyChanged"
                                   Error="@(!IsDice(Weapon.Damage))" ErrorText="@L["Dice_Invalid"]" data-test="damage" />
                 </div>
             </div>

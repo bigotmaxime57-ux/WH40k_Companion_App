@@ -32,11 +32,27 @@ public class SimulatorPageTests : ComponentTestContext
     {
         var page = Render<SimulatorPage>();
 
-        page.Find("input[data-test=attacks]").Input("D");
+        page.Find("input[data-test=attacks]").Change("D");
 
         Assert.True(IsDisabled(page, "run"));
         Assert.NotNull(page.Find("[data-test=dice-errors]"));
         Assert.Contains("Expression de dés invalide", page.Find("input[data-test=attacks]").Closest(".mud-input-control")!.TextContent);
+    }
+
+    [Fact]
+    public void Dice_are_only_checked_when_leaving_the_field()
+    {
+        var page = Render<SimulatorPage>();
+
+        // Saisie en cours : le champ n'écoute pas la frappe (pas d'événement « input »), donc pas d'erreur
+        Assert.Throws<MissingEventHandlerException>(() => page.Find("input[data-test=attacks]").Input(""));
+        Assert.Empty(page.FindAll("[data-test=dice-errors]"));
+        Assert.False(IsDisabled(page, "run"));
+
+        // Sortie du champ : la valeur est lue, l'erreur s'affiche
+        page.Find("input[data-test=attacks]").Change("");
+        Assert.NotNull(page.Find("[data-test=dice-errors]"));
+        Assert.True(IsDisabled(page, "run"));
     }
 
     [Fact]
@@ -45,8 +61,8 @@ public class SimulatorPageTests : ComponentTestContext
         var page = Render<SimulatorPage>();
         var attacks = page.Find("input[data-test=attacks]");
 
-        attacks.Input("D");
-        page.Find("input[data-test=attacks]").Input("D6+1");
+        attacks.Change("D");
+        page.Find("input[data-test=attacks]").Change("D6+1");
 
         Assert.False(IsDisabled(page, "run"));
         Assert.Empty(page.FindAll("[data-test=dice-errors]"));
@@ -177,7 +193,7 @@ public class SimulatorPageTests : ComponentTestContext
     {
         var page = Render<SimulatorPage>();
 
-        page.Find("input[data-test=damage]").Input("abc");
+        page.Find("input[data-test=damage]").Change("abc");
 
         Assert.True(IsDisabled(page, "save"));
     }
@@ -204,7 +220,7 @@ public class SimulatorPageTests : ComponentTestContext
         var page = Render<SimulatorPage>();
         Assert.False(page.Instance.IsDirty);
 
-        page.Find("input[data-test=attacks]").Input("2");
+        page.Find("input[data-test=attacks]").Change("2");
 
         Assert.True(page.Instance.IsDirty);
         Assert.Equal("Nouveau scénario *", page.Find("[data-test=file-name]").TextContent);
@@ -216,7 +232,7 @@ public class SimulatorPageTests : ComponentTestContext
     public void Losing_modifications_asks_for_confirmation()
     {
         var page = Render<SimulatorPage>();
-        page.Find("input[data-test=attacks]").Input("2");
+        page.Find("input[data-test=attacks]").Change("2");
 
         // « Nouveau » puis « Annuler » : la saisie est gardée
         page.Find("[data-test=new]").Click();

@@ -1,29 +1,31 @@
-Wh40kSim - Simulateur de dégâts (Warhammer 40 000, 11e édition)
+﻿Wh40kSim - Simulateur de dégâts (Warhammer 40 000, 11e édition)
 ==================================================================
 
 Version d'aperçu, pour tests. Merci de l'essayer !
 
 
-Lancer l'application
---------------------
+Installer et lancer l'application
+---------------------------------
 
-1. Décompressez le zip dans un dossier de votre choix (par exemple Documents\Wh40kSim).
-   Ne la lancez pas depuis le zip sans l'avoir décompressé.
-2. Double-cliquez sur Wh40kSim.Desktop.exe.
+1. Double-cliquez sur Wh40kSim-<version>-setup.exe et suivez les étapes (aucun droit administrateur demandé).
+2. Lancez Wh40kSim depuis le menu Démarrer ou le raccourci du bureau.
 
-Rien à installer : tout est inclus. Il faut Windows 10 (version 1809 ou plus récente) ou Windows 11, en 64 bits,
+Tout est inclus, rien d'autre à installer. Il faut Windows 10 (version 1809 ou plus récente) ou Windows 11, en 64 bits,
 avec WebView2, déjà présent sur Windows 11 et sur un Windows 10 à jour (il est fourni avec le navigateur Edge).
 
-Au premier lancement, Windows peut afficher « Windows a protégé votre ordinateur » : l'application n'est pas signée
-par un éditeur reconnu. Cliquez sur « Informations complémentaires », puis sur « Exécuter quand même ».
+Au premier lancement de l'installateur, Windows peut afficher « Windows a protégé votre ordinateur » : l'application
+n'est pas signée par un éditeur reconnu. Cliquez sur « Informations complémentaires », puis sur « Exécuter quand même ».
+
+Nouvelle version : lancez simplement le nouvel installateur, il remplace l'ancienne.
+Désinstaller : Paramètres de Windows > Applications > Wh40kSim. Vos scénarios sont conservés.
 
 
 Pour commencer
 --------------
 
 - Écran d'accueil : « Quick sim » (tout sur une page) ou « Full sim » (saisie, puis résultats détaillés en onglets).
-- Des scénarios d'exemple sont dans le dossier « scenarios » : bouton « Ouvrir » (scénario complet), ou les boutons
-  dossier des cartes Attaquant et Défenseur (une seule partie).
+- Des scénarios d'exemple sont dans Documents\Wh40kSim\scenarios (raccourci « Scénarios » dans le menu Démarrer) :
+  bouton « Ouvrir » (scénario complet), ou les boutons dossier des cartes Attaquant et Défenseur (une seule partie).
 - Les bulles « ? » expliquent chaque notion au survol (après une seconde).
 
 

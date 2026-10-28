@@ -70,17 +70,23 @@ L'application n'est pas empaquetée (pas de Microsoft Store) : le `.exe` est dan
 
 ## Distribution (versions de test)
 
-Un zip autonome, sans installation : .NET et Windows App SDK sont inclus, seul WebView2 est requis chez l'utilisateur.
+Un installateur (`Setup.exe`, Inno Setup) : l'application est autonome (.NET et Windows App SDK inclus), seul
+WebView2 est requis chez l'utilisateur. Installation pour l'utilisateur seul, sans droits administrateur
+(`%LOCALAPPDATA%\Programs\Wh40kSim`), raccourcis dans le menu Démarrer (et sur le bureau si coché), scénarios d'exemple
+copiés dans `Documents\Wh40kSim\scenarios` (jamais écrasés ni supprimés), désinstallation depuis les paramètres de
+Windows. Une nouvelle version remplace la précédente.
 
 ```powershell
+winget install --id JRSoftware.InnoSetup -e --scope user                       # une fois par machine
 powershell -ExecutionPolicy Bypass -File tools\publier.ps1                   # scénarios versionnés seulement
 powershell -ExecutionPolicy Bypass -File tools\publier.ps1 -LocalScenarios   # tout le dossier scenarios local
 ```
 
-Le script publie avec le profil `win-x64` (`src/Wh40kSim.Desktop/Properties/PublishProfiles/`), ajoute
-`tools/LISEZMOI.txt` et les scénarios, puis écrit `dist/Wh40kSim-<version>-win-x64.zip` (environ 300 Mo décompressé).
+Le script publie avec le profil `win-x64` (`src/Wh40kSim.Desktop/Properties/PublishProfiles/`), ne garde que les
+traductions française et anglaise des bibliothèques, puis compile `tools/installateur.iss` (avec `tools/LISEZMOI.txt`
+et les scénarios) en `dist/Wh40kSim-<version>-setup.exe` (environ 75 Mo).
 La version vient de `<InformationalVersion>` dans `Wh40kSim.Desktop.csproj` et s'affiche en bas de l'accueil.
-L'application n'est pas signée : au premier lancement, Windows SmartScreen demande « Exécuter quand même ».
+L'installateur n'est pas signé : au premier lancement, Windows SmartScreen demande « Exécuter quand même ».
 Les versions de test sont publiées en préversion dans les Releases GitHub du dépôt.
 
 ## Séquence d'attaque implémentée (règles 05 et 02.02.01, 11e édition)

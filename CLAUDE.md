@@ -621,6 +621,12 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
   (`tools/publier.ps1`, profil `win-x64`), version affichée sur l'accueil ; préversion **`v0.3-apercu.1`** publiée
   dans les Releases GitHub (avec les scénarios locaux de l'utilisateur, accord du 2026-10-28). 379 tests verts
   (178 Core, 52 Simulation, 149 UI). Retours du testeur attendus (tickets ou messages).
+- Installateur (branche `outillage/installateur`, en attente de validation) : retour du testeur, racine du zip trop
+  chargée (122 dossiers de langues, 432 fichiers). `tools/publier.ps1` produit maintenant
+  `dist/Wh40kSim-<version>-setup.exe` (Inno Setup, `tools/installateur.iss`) : installation sans droits
+  administrateur, menu Démarrer, scénarios dans `Documents\Wh40kSim\scenarios` (dossier de départ de l'enregistrement
+  hors du dépôt) ; traductions limitées au français et à l'anglais (75 Mo au lieu de 109). Version `0.3-apercu.2`.
+  Installation, lancement et désinstallation vérifiés sur cette machine.
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

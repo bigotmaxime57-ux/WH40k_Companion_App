@@ -26,6 +26,7 @@ public class HistogramChartTests : ComponentTestContext
         Assert.Equal(4, chart.FindAll("[data-test=chart-column]").Count);
         Assert.NotNull(chart.Find("[data-test=chart-mean]"));
         Assert.Contains("Moyenne : 1,60", chart.Markup);
+        Assert.Empty(chart.FindAll("[data-test=legend-limit]"));
         Assert.Empty(chart.FindAll("[data-test=chart-tooltip]"));
         // Sans effectif d'unité, rien n'est hachuré ni annoncé dans la légende
         Assert.Empty(chart.FindAll("[data-test=chart-hatch]"));
@@ -91,6 +92,8 @@ public class HistogramChartTests : ComponentTestContext
         Assert.Single(chart.FindAll("line.wh-chart-limit"));
         // Unité entière (2) et au-delà (3) : toutes deux hachurées
         Assert.Equal(2, chart.FindAll("[data-test=chart-hatch]").Count);
+        Assert.Contains("Limite de l'unité", chart.Find("[data-test=legend-limit]").TextContent);
+        Assert.Contains("Moyenne marge comprise : 1,60", chart.Find("[data-test=legend-mean]").TextContent);
         var axisLabels = chart.FindAll("text.wh-chart-axis").Select(t => t.TextContent).ToList();
         Assert.Contains("3", axisLabels);
         Assert.DoesNotContain(axisLabels, label => label.Contains('+'));

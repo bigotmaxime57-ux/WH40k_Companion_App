@@ -93,7 +93,17 @@
             <span data-test="legend-wiped"><i class="wh-chart-swatch-hatch"></i>@L["Chart_WipedTooltip"]</span>
         }
         <span><i class="wh-chart-swatch-curve"></i>@L["Chart_AtLeastAxis"]</span>
-        <span><i class="wh-chart-swatch-mean"></i>@L["Chart_Mean", Distribution.Mean.ToString("F2")]</span>
+        <span data-test="legend-mean">
+            <i class="wh-chart-swatch-mean"></i>@(Extended ? L["Chart_MeanExtended", Distribution.Mean.ToString("F2")] : L["Chart_Mean", Distribution.Mean.ToString("F2")])
+            @if (Extended && MeanHelp is not null)
+            {
+                <HelpBubble Lines="@([MeanHelp])" />
+            }
+        </span>
+        @if (_firstBeyond >= 0)
+        {
+            <span data-test="legend-limit"><i class="wh-chart-swatch-limit"></i>@L["Chart_UnitLimit"]</span>
+        }
     </div>
 </div>
 
@@ -129,6 +139,13 @@
     /// <summary>Distribution prolongée au-delà de l'unité (marge) : colonnes suivantes atténuées et notées « 5 + 2 ».</summary>
     [Parameter]
     public bool Extended { get; set; }
+
+    /// <summary>
+    /// Explication de la moyenne d'une distribution prolongée (bulle « ? » de la légende) : elle porte sur toutes les
+    /// simulations, alors que la marge des tuiles ne compte que celles où l'unité est détruite.
+    /// </summary>
+    [Parameter]
+    public string? MeanHelp { get; set; }
 
     protected override void OnParametersSet()
     {

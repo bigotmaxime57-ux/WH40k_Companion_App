@@ -671,10 +671,21 @@
     vertical-align: 3px !important;
 }
 
-.wh-chart-swatch-mean {
-    border-top: 2px solid var(--mud-palette-text-secondary);
-    height: 0 !important;
-    vertical-align: 3px !important;
+/* Repères verticaux, comme sur le graphique : moyenne en trait plein, limite de l'unité en pointillé */
+.wh-chart-swatch-mean,
+.wh-chart-swatch-limit {
+    border-left: 2px solid var(--mud-palette-text-secondary);
+    border-radius: 0 !important;
+    width: 0 !important;
+}
+
+.wh-chart-swatch-limit {
+    border-left-style: dashed;
+}
+
+.wh-chart-legend span {
+    align-items: center;
+    display: inline-flex;
 }
 
 /* Bandeau du Full sim : champs du nombre de simulations et de la graine à largeur fixe, progression en bout de ligne */

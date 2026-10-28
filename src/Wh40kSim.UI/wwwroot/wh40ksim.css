@@ -550,7 +550,8 @@
     position: relative;
 }
 
-.wh-chart svg {
+/* Le SVG du graphique seulement : les icônes (bulle « ? ») sont aussi des SVG */
+.wh-chart > svg {
     display: block;
     height: auto;
     overflow: visible;

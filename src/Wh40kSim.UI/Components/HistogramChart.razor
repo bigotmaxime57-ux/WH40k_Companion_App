@@ -1,9 +1,10 @@
 @*
     Histogramme d'une distribution, en SVG : barres « exactement k » (axe de gauche), courbe « au moins k » (axe de
-    droite, 0 à 100 %) et trait de la moyenne, sur le même graphique ; infobulle au survol d'une colonne. Sans les
-    valeurs négligeables aux extrémités (comme les tableaux). Couleurs tirées du CSS (--wh-accent) : elles suivent le
-    thème et le camp de la section qui l'entoure. Pour une distribution prolongée (UnitSize), les colonnes au-delà de
-    l'unité (la marge) sont atténuées, séparées par un pointillé et notées « 5 + 2 ».
+    droite, 0 à 100 %) et trait plein de la moyenne (« moy. »), sur le même graphique ; infobulle au survol d'une
+    colonne. Sans les valeurs négligeables aux extrémités (comme les tableaux). Couleurs tirées du CSS (--wh-accent) :
+    elles suivent le thème et le camp de la section qui l'entoure. La colonne de l'unité entière est notée « détruite » ;
+    pour une distribution prolongée (Extended), les colonnes au-delà (la marge) sont atténuées, séparées par un
+    pointillé et notées « 5 + 2 ».
 *@
 @using System.Globalization
 
@@ -39,8 +40,16 @@
         {
             <line class="wh-chart-limit" x1="@F(ColumnX(_firstBeyond))" y1="@F(Top)" x2="@F(ColumnX(_firstBeyond))" y2="@F(Bottom)" />
         }
+        else if (_wipedColumn >= 0)
+        {
+            @* Distribution réelle : la dernière colonne possible est l'unité entière, notée au-dessus de sa barre *@
+            double barTop = Y(_rows[_wipedColumn].Exactly / _maxExactly);
+            <g><text class="wh-chart-wiped" x="@F(ColumnX(_wipedColumn) + ColumnWidth / 2)" y="@F(barTop - 6)" text-anchor="middle"
+                     data-test="chart-wiped">@L["Chart_Wiped"]</text></g>
+        }
 
-        <line class="wh-chart-mean" x1="@F(MeanX)" y1="@F(Top)" x2="@F(MeanX)" y2="@F(Bottom)" data-test="chart-mean" />
+        <line class="wh-chart-mean" x1="@F(MeanX)" y1="@F(Top + 14)" x2="@F(MeanX)" y2="@F(Bottom)" data-test="chart-mean" />
+        <g><text class="wh-chart-mean-label" x="@F(MeanX)" y="@F(Top + 9)" text-anchor="middle">@L["Chart_MeanShort"]</text></g>
 
         <polyline class="wh-chart-curve" points="@CurvePoints" />
         @for (int i = 0; i < _rows.Count; i++)
@@ -64,6 +73,10 @@
             <strong>@string.Format(ValueTitle, Label(row.Value))</strong><br />
             @L["Chart_Exactly"] : @row.Exactly.ToString("P1")<br />
             @L["Chart_AtLeast"] : @row.AtLeast.ToString("P1")@OneIn(row.AtLeast)
+            @if (UnitSize is int size && row.Value >= size)
+            {
+                <span><br /><em>@L["Chart_WipedTooltip"]</em></span>
+            }
         </div>
     }
 
@@ -82,7 +95,8 @@
     private IReadOnlyList<DistributionRow> _rows = [];
     private double _maxExactly = 1;
     private double[] _leftTicks = [];
-    private int _firstBeyond = -1;
+    private int _firstBeyond = -1;   // première colonne de la marge (distribution prolongée), -1 sinon
+    private int _wipedColumn = -1;   // colonne de l'unité entière (distribution réelle), -1 si absente des lignes
     private int? _hover;
 
     [Parameter, EditorRequired]
@@ -96,9 +110,13 @@
     [Parameter, EditorRequired]
     public string ValueTitle { get; set; } = "{0}";
 
-    /// <summary>Effectif de l'unité pour une distribution prolongée (marge) ; null pour une distribution réelle.</summary>
+    /// <summary>Effectif de l'unité (figurines ou PV) : sa colonne est celle de l'unité détruite.</summary>
     [Parameter]
     public int? UnitSize { get; set; }
+
+    /// <summary>Distribution prolongée au-delà de l'unité (marge) : colonnes suivantes atténuées et notées « 5 + 2 ».</summary>
+    [Parameter]
+    public bool Extended { get; set; }
 
     protected override void OnParametersSet()
     {
@@ -107,7 +125,9 @@
         double step = NiceStep(max / 4);
         _maxExactly = Math.Max(step, Math.Ceiling(max / step - 1e-9) * step);
         _leftTicks = Enumerable.Range(0, (int)Math.Round(_maxExactly / step) + 1).Select(i => i * step).ToArray();
-        _firstBeyond = UnitSize is int size ? _rows.Select(r => r.Value).ToList().FindIndex(v => v > size) : -1;
+        var values = _rows.Select(r => r.Value).ToList();
+        _firstBeyond = Extended && UnitSize is int size ? values.FindIndex(v => v > size) : -1;
+        _wipedColumn = !Extended && UnitSize is int total ? values.IndexOf(total) : -1;
         _hover = null;
     }
 
@@ -129,7 +149,7 @@
     private bool ShowLabel(int i) => i % (int)Math.Ceiling(_rows.Count / 20.0) == 0;
 
     private string Label(int value) =>
-        UnitSize is int size && value > size ? L["Results_Beyond", size, value - size].Value : value.ToString();
+        Extended && UnitSize is int size && value > size ? L["Results_Beyond", size, value - size].Value : value.ToString();
 
     /// <summary>« (1 chance sur 2,4) » pour une probabilité strictement entre 0 et 1.</summary>
     private string OneIn(double probability)

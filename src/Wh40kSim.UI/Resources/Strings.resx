@@ -598,6 +598,15 @@
   <data name="Chart_Mean" xml:space="preserve">
     <value>Moyenne : {0}</value>
   </data>
+  <data name="Chart_MeanShort" xml:space="preserve">
+    <value>moy.</value>
+  </data>
+  <data name="Chart_Wiped" xml:space="preserve">
+    <value>détruite</value>
+  </data>
+  <data name="Chart_WipedTooltip" xml:space="preserve">
+    <value>Unité détruite</value>
+  </data>
   <data name="Chart_OneIn" xml:space="preserve">
     <value>(1 chance sur {0})</value>
   </data>

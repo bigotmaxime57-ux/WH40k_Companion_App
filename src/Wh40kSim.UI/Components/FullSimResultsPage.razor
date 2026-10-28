@@ -27,26 +27,33 @@
     {
         <MudTabs Elevation="3" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="pa-4" Class="wh-results-tabs">
             <MudTabPanel Text="@L["FullSim_TabDistributions"]" Icon="@Icons.Material.Filled.BarChart" data-test="tab-distributions">
+                <SummaryTiles Result="Result" Extended="_extended" />
                 @if (Result.ProbabilityWipe > 0)
                 {
-                    <div class="wh-subsection-title mb-2">
+                    <div class="wh-subsection-title">
                         <MudSwitch T="bool" Color="Color.Primary" Label="@L["Results_Extended"]" @bind-Value="_extended" data-test="extended" />
                         <HelpBubble Lines="@([L["Help_Margin"], L["Help_MarginChart"]])" />
                     </div>
+                    @if (_extended)
+                    {
+                        <MudText Typo="Typo.caption" Class="wh-muted d-block mt-1" data-test="excess-explanation">
+                            @L["Results_ExtendedHelp", (Result.ExcessProfile with { Count = 1 }).Describe()]
+                        </MudText>
+                    }
                 }
-                <MudGrid Spacing="3">
+                <MudGrid Spacing="3" Class="mt-1">
                     <MudItem xs="12" lg="6">
                         <MudPaper Elevation="2" Class="pa-4 wh-section wh-attacker">
                             <SectionHeader Icon="@Icons.Material.Filled.PersonOff" Title="@L["Results_Kills"]" />
                             <HistogramChart Distribution="@(_extended ? Result.ExtendedKills : Result.Kills)" Title="@L["Results_Kills"]"
-                                            ValueTitle="@L["Chart_KillsValue"]" UnitSize="@(_extended ? Result.TotalModels : null)" />
+                                            ValueTitle="@L["Chart_KillsValue"]" UnitSize="Result.TotalModels" Extended="_extended" />
                         </MudPaper>
                     </MudItem>
                     <MudItem xs="12" lg="6">
                         <MudPaper Elevation="2" Class="pa-4 wh-section wh-defender">
                             <SectionHeader Icon="@Icons.Material.Filled.HeartBroken" Title="@L["Results_Damage"]" />
                             <HistogramChart Distribution="@(_extended ? Result.ExtendedDamage : Result.Damage)" Title="@L["Results_Damage"]"
-                                            ValueTitle="@L["Chart_DamageValue"]" UnitSize="@(_extended ? Result.TotalWounds : null)" />
+                                            ValueTitle="@L["Chart_DamageValue"]" UnitSize="Result.TotalWounds" Extended="_extended" />
                         </MudPaper>
                     </MudItem>
                 </MudGrid>

@@ -67,6 +67,9 @@ public class FullSimTests() : ComponentTestContext(renderPopoverProvider: false)
         shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimResultsPage>()));
         Assert.EndsWith("/" + AppRoutes.FullSimResults, Navigation.Uri);
         Assert.Equal(2, shell.FindAll("[data-test=histogram]").Count);
+        Assert.NotNull(shell.Find("[data-test=tile-kills]"));
+        Assert.NotNull(shell.Find("[data-test=tile-damage]"));
+        Assert.NotNull(shell.Find("[data-test=wipe]"));
         Assert.Contains("Attaquant contre Défenseur", shell.Find("[data-test=results-header]").TextContent);
     }
 
@@ -99,9 +102,8 @@ public class FullSimTests() : ComponentTestContext(renderPopoverProvider: false)
         shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimPage>()));
 
         shell.Find("[data-test=run]").Click();
-        shell.WaitForElement("[data-test=cancel]").Click();
-
-        shell.WaitForElement("[data-test=message]");
+        shell.WaitForElement("[data-test=cancel]");
+        shell.ClickUntil("[data-test=cancel]", () => shell.FindAll("[data-test=message]").Count > 0);
         Assert.NotNull(shell.FindComponent<FullSimPage>());
         Assert.Null(Session.FullSim.Result);
     }

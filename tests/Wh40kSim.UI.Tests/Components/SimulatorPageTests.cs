@@ -100,7 +100,7 @@ public class SimulatorPageTests : ComponentTestContext
 
         page.Find("[data-test=run]").Click();
         Assert.True(IsDisabled(page, "run"));
-        page.Find("[data-test=cancel]").Click();
+        page.ClickUntil("[data-test=cancel]", () => page.FindAll("[data-test=message]").Count > 0);
 
         page.WaitForAssertion(() => Assert.Contains("Simulation annulée", page.Find("[data-test=message]").TextContent));
         Assert.False(IsDisabled(page, "run"));

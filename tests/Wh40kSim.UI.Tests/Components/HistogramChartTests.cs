@@ -10,11 +10,12 @@ public class HistogramChartTests : ComponentTestContext
     // 0 : 10 %, 1 : 40 %, 2 : 30 %, 3 : 20 %
     private static readonly DiscreteDistribution Sample = new(new long[] { 100, 400, 300, 200 });
 
-    private IRenderedComponent<HistogramChart> RenderChart(int? unitSize = null) =>
+    private IRenderedComponent<HistogramChart> RenderChart(int? unitSize = null, bool extended = false) =>
         Render<HistogramChart>(p => p
             .Add(c => c.Distribution, Sample)
             .Add(c => c.ValueTitle, "Figurines tuées : {0}")
-            .Add(c => c.UnitSize, unitSize));
+            .Add(c => c.UnitSize, unitSize)
+            .Add(c => c.Extended, extended));
 
     [Fact]
     public void One_bar_and_one_hover_zone_per_value()
@@ -57,11 +58,28 @@ public class HistogramChartTests : ComponentTestContext
     }
 
     [Fact]
+    public void The_whole_unit_column_is_marked_as_destroyed_without_any_margin_line()
+    {
+        var chart = RenderChart(unitSize: 3);
+
+        Assert.Equal("détruite", chart.Find("[data-test=chart-wiped]").TextContent);
+        Assert.Empty(chart.FindAll("line.wh-chart-limit"));
+        Assert.Empty(chart.FindAll("rect.wh-chart-bar-beyond"));
+
+        chart.FindAll("[data-test=chart-column]")[3].MouseOver();
+        Assert.Contains("Unité détruite", chart.Find("[data-test=chart-tooltip]").TextContent);
+        chart.FindAll("[data-test=chart-column]")[2].MouseOver();
+        Assert.DoesNotContain("Unité détruite", chart.Find("[data-test=chart-tooltip]").TextContent);
+    }
+
+    [Fact]
     public void Beyond_the_unit_columns_are_dimmed_and_labelled_with_the_margin()
     {
-        var chart = RenderChart(unitSize: 2);
+        var chart = RenderChart(unitSize: 2, extended: true);
 
         Assert.Single(chart.FindAll("rect.wh-chart-bar-beyond"));
+        Assert.Single(chart.FindAll("line.wh-chart-limit"));
+        Assert.Empty(chart.FindAll("[data-test=chart-wiped]"));
         chart.FindAll("[data-test=chart-column]")[3].MouseOver();
         Assert.Contains("Figurines tuées : 2 + 1", chart.Find("[data-test=chart-tooltip]").TextContent);
     }

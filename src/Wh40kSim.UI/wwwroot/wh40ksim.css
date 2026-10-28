@@ -112,6 +112,11 @@
 }
 
 /* Tuiles de l'accueil : la carte entière est un lien, qui se soulève au survol ou au focus clavier */
+/* Tuiles de l'accueil les unes sous les autres, sur une largeur de lecture confortable */
+.wh-home-tiles {
+    max-width: 46rem;
+}
+
 .wh-home-tile {
     border-radius: var(--mud-default-borderradius);
     color: inherit;
@@ -479,10 +484,22 @@
     stroke-dasharray: 4 3;
 }
 
+/* Moyenne : trait plein et fin, à ne pas confondre avec le pointillé de la limite de l'unité (marge) */
 .wh-chart-mean {
-    stroke: var(--wh-accent);
-    stroke-dasharray: 6 4;
+    stroke: var(--mud-palette-text-secondary);
     stroke-width: 1.5;
+}
+
+.wh-chart-mean-label {
+    fill: var(--mud-palette-text-secondary);
+    font-size: 11px;
+    font-style: italic;
+}
+
+.wh-chart-wiped {
+    fill: var(--wh-accent);
+    font-size: 11px;
+    font-weight: 600;
 }
 
 .wh-chart-hit {
@@ -533,7 +550,7 @@
 }
 
 .wh-chart-swatch-mean {
-    border-top: 2px dashed var(--wh-accent);
+    border-top: 2px solid var(--mud-palette-text-secondary);
     height: 0 !important;
     vertical-align: 3px !important;
 }

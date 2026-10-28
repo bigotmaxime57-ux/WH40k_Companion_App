@@ -425,13 +425,33 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
      de groupe découpées en lignes (en-tête, « Profil », « Mots-clés » / « Protections », filets, grilles CSS),
      bandeau du type d'arme (viseur / épées, Lucide) ; duplication d'un groupe ; champs de dés vérifiés à la sortie
      du champ ; confirmation par partie (attaquant / défenseur) ; fenêtre desktop rouverte agrandie.
-7. **Rapport par groupe** (avec Precision).
-   - **Pertes par groupe** : distribution des figurines tuées de chaque groupe d'allocation ; % de kill par groupe
-     (P(groupe entièrement tué)), P(tuer le PERSONNAGE) pour chaque groupe PERSONNAGE, moyenne.
-   - **Precision** (décision de l'utilisateur, 2026-10-28) : part des pertes de PERSONNAGE (figurines et PV) **grâce
-     à Precision** : attaque allouée au PERSONNAGE visé alors qu'un garde du corps vivait encore (sans Precision, elle
-     serait allée sur un garde).
-   - Tests : dés imposés (Precision avec et sans garde du corps), % de kill par groupe cohérent avec P(unité détruite).
+7. **Rapport par groupe** (avec Precision). Précisée avec l'utilisateur le 2026-10-28, en partant de l'onglet voulu :
+   nouvel onglet **« Groupes »** des résultats du Full sim, en trois sections ; pertes réelles seulement (pas de marge).
+   - **1. Pertes par groupe** (« groupes de tanking ») : une carte par groupe d'allocation, dans l'ordre (numéro, filet
+     et étiquette PERSONNAGE comme à la saisie) : figurines tuées en moyenne sur l'effectif, P(groupe entièrement tué)
+     (= P(tuer le PERSONNAGE) pour un groupe PERSONNAGE), PV retirés en moyenne, petit histogramme (`HistogramChart`).
+     Histogramme des **figurines tuées** pour un groupe de plusieurs figurines, des **PV retirés** pour une figurine
+     seule (leader, véhicule : 0 ou 1 figurine n'apprendrait rien ; décision de l'utilisateur, à ajuster au besoin).
+   - **2. Gardes du corps** : tous les groupes non-PERSONNAGES ensemble : P(tous les gardes du corps détruits, donc
+     PERSONNAGES exposés), distribution et moyenne des figurines de garde tuées. Affichée seulement s'il y a au moins
+     un PERSONNAGE (sinon elle répéterait l'onglet Distributions).
+   - **3. Frappe Precision** : affichée si l'attaquant a une arme Precision et le défenseur un PERSONNAGE. Pour le
+     PERSONNAGE visé : P(tué), PV retirés en moyenne sur ses PV, part de ses pertes (figurines et PV) **grâce à
+     Precision**. Définition (décision de l'utilisateur, 2026-10-28) : attaque allouée au groupe visé par Precision
+     alors que, sans Precision, elle serait allée sur un autre groupe (garde du corps encore en vie, ou autre PERSONNAGE
+     placé devant) ; figurine attribuée à l'attaque qui l'achève.
+   - **Cible de Precision** (déjà en place : liste de la Situation et `context.precisionTarget` quand il y a plusieurs
+     PERSONNAGES et une arme Precision, pour les unités avec un leader et un support). Fonctionnement confirmé par
+     l'utilisateur : le pool Precision envoie ses sauvegardes ratées d'abord sur la cible choisie, puis, la cible
+     morte, dans l'ordre d'allocation normal du défenseur ; une cible choisie est la **seule** visée (les pools
+     Precision suivants ne visent pas l'autre PERSONNAGE) ; sans choix, chaque pool vise le premier PERSONNAGE en vie.
+   - Core : `DefenderState` compte par groupe les figurines tuées et PV retirés par les attaques « grâce à
+     Precision » (signalées par `AttackResolver`). Simulation : distributions des figurines tuées et des PV retirés
+     par groupe, des figurines de garde tuées, P(entièrement tué), parts Precision, en records simples. Aucun dé en
+     plus (non-régression au bit près) ; temps mesuré. Quick sim et console inchangés.
+   - Tests : dés imposés (Precision avec et sans garde du corps, deux PERSONNAGES et cible choisie, figurine achevée
+     par une attaque Precision) ; cohérence (P(dernier groupe entièrement tué) = P(unité détruite), somme des moyennes
+     par groupe = moyenne totale) ; bUnit (sections affichées ou masquées selon le scénario).
 8. **Rapport par arme** (avec les dégâts bruts).
    - Dégâts bruts et gaspillage de l'étape 5 (distribution des bruts comparée aux PV retirés).
    - PV retirés, figurines tuées, dégâts bruts (donc gaspillage) en moyenne et en part du total, **par pool** (armes
@@ -628,7 +648,11 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
   administrateur, menu Démarrer, scénarios dans `Documents\Wh40kSim\scenarios` (dossier de départ de l'enregistrement
   hors du dépôt) ; traductions limitées au français et à l'anglais (75 Mo au lieu de 109). Version `0.3-apercu.2`.
   Installation, lancement et désinstallation vérifiés sur cette machine. 379 tests verts. Inno Setup à installer sur
-  l'autre machine (`winget`, voir README). Prochaine étape : 7 (rapport par groupe, avec Precision), à préciser.
+  l'autre machine (`winget`, voir README).
+- Dépôt déplacé sur cette machine vers `E:\Dev\WH40k_Companion_App` (disque C plein) le 2026-10-28 : sans effet sur
+  le dépôt ni sur l'autre machine.
+- Phase 3, étape 7 (rapport par groupe) : précisée avec l'utilisateur le 2026-10-28 (onglet « Groupes » en trois
+  sections, voir « Phase 3 : étapes »), à coder sur la branche `phase3/etape7-rapport-groupes` après feu vert.
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

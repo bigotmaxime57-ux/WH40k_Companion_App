@@ -540,8 +540,8 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
   Quick sim à la demande de l'utilisateur (saisie au Full sim).
 - Skill `/debut-journee` (synchronisation, build et tests complets, point du jour) : fusionné dans `main`.
   340 tests verts (172 Core, 48 Simulation, 120 UI).
-- Phase 3, étape 5 (dégâts bruts, #6) : branche `phase3/etape5-degats-bruts`, **en attente de validation**.
-  349 tests verts (178 Core, 51 Simulation, 120 UI) ; `NonRegressionTests` inchangés (aucun dé supplémentaire).
+- Phase 3, étape 5 (dégâts bruts, #6) : fusionnée dans `main` (ticket #6 fermé). Prochaine étape : 6 (statistiques
+  détaillées, côté Simulation), à préciser avec l'utilisateur (définitions des analyses en points). 349 tests verts (178 Core, 51 Simulation, 120 UI) ; `NonRegressionTests` inchangés (aucun dé supplémentaire).
   Gaspillage déduit des moyennes (bruts - PV retirés et excédent), sans distribution propre.
 
 Points notés pour la suite :

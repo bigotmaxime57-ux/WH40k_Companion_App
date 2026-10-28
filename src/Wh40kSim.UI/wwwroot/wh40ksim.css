@@ -373,18 +373,34 @@
     border-top: 2px dashed var(--mud-palette-primary) !important;
 }
 
+/* Tuile : titre en bandeau sur toute la largeur, puis un corps qui remplit la hauteur restante (contenu centré dedans) */
 .wh-tile {
     background: var(--mud-palette-background-gray);
     border: 1px solid var(--mud-palette-lines-default);
     border-radius: var(--mud-default-borderradius);
-    padding: .6rem .8rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .wh-tile-label {
+    background: color-mix(in srgb, var(--mud-palette-primary) 14%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--mud-palette-primary) 30%, transparent);
     color: var(--mud-palette-text-secondary);
     font-size: .8rem;
     letter-spacing: .06em;
+    padding: .3rem .8rem;
     text-transform: uppercase;
+}
+
+.wh-tile-bad .wh-tile-label {
+    background: color-mix(in srgb, var(--mud-palette-error) 16%, transparent);
+    border-bottom-color: color-mix(in srgb, var(--mud-palette-error) 35%, transparent);
+}
+
+.wh-tile-good .wh-tile-label {
+    background: color-mix(in srgb, var(--mud-palette-success) 16%, transparent);
+    border-bottom-color: color-mix(in srgb, var(--mud-palette-success) 35%, transparent);
 }
 
 .wh-tile-value {
@@ -428,9 +444,11 @@
 .wh-tile-body {
     align-items: center;
     display: flex;
+    flex: 1;
     flex-wrap: wrap;
     gap: .25rem 1.25rem;
     justify-content: space-between;
+    padding: .5rem .8rem;
 }
 
 .wh-tile-stats {

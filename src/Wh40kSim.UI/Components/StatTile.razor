@@ -1,16 +1,12 @@
 @*
-    Tuile de synthèse : libellé, grande valeur, contenu optionnel sous la valeur (la marge), indicateurs optionnels en
-    colonne à droite de la valeur (symbole, nom, valeur, bulle « ? » ; passent dessous si la tuile est étroite), et une
-    tonalité (neutre, bonne, mauvaise).
+    Tuile de synthèse : libellé, indicateurs optionnels en colonne contre le bord gauche (symbole, nom, valeur, bulle
+    « ? »), grande valeur à leur droite (dessous si la tuile est étroite) avec un contenu optionnel sous elle (la
+    marge), et une tonalité (neutre, bonne, mauvaise).
 *@
 
 <div class="@($"wh-tile wh-tile-{Tone.ToString().ToLowerInvariant()}")" @attributes="Attributes">
     <div class="wh-tile-label">@Label</div>
     <div class="wh-tile-body">
-        <div class="wh-tile-main">
-            <div class="wh-tile-value">@Value</div>
-            @ChildContent
-        </div>
         @if (Stats is { Count: > 0 })
         {
             <div class="wh-tile-stats" data-test="tile-stats">
@@ -25,6 +21,10 @@
                 }
             </div>
         }
+        <div class="wh-tile-main">
+            <div class="wh-tile-value">@Value</div>
+            @ChildContent
+        </div>
     </div>
 </div>
 

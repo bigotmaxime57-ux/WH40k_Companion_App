@@ -423,7 +423,7 @@
     font-weight: 600;
 }
 
-/* Corps de la tuile : valeur à gauche, indicateurs en colonne à droite (dessous si la tuile est trop étroite) */
+/* Corps de la tuile : indicateurs en colonne contre le bord gauche, valeur à droite (dessous si la tuile est étroite) */
 .wh-tile-body {
     align-items: center;
     display: flex;
@@ -432,11 +432,11 @@
 }
 
 .wh-tile-stats {
-    border-left: 1px solid var(--mud-palette-lines-default);
+    border-right: 1px solid var(--mud-palette-lines-default);
     display: flex;
     flex-direction: column;
     gap: .1rem;
-    padding-left: .75rem;
+    padding-right: .75rem;
 }
 
 .wh-tile-stat {

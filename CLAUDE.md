@@ -8,8 +8,9 @@ décisions du projet, pour reprendre le travail sur n'importe quelle machine. **
 **Deux machines.** L'utilisateur travaille en alternance sur deux PC Windows. Ce fichier (versionné) contient
 uniquement ce qui vaut pour les deux : règles, décisions, avancement. Ce qui est propre à une machine (chemin du SDK,
 charges de travail installées, identité git, réglages Windows…) va dans la mémoire utilisateur de Claude Code de
-cette machine (`~/.claude/projects/<projet>/memory/`), jamais dans le dépôt. En début de session : `git fetch` et
-vérifier que `main` est à jour avant toute chose ; en fin de session : tout pousser, et mettre à jour
+cette machine (`~/.claude/projects/<projet>/memory/`), jamais dans le dépôt. En début de session : skill `/debut-journee`
+(`.claude/skills/debut-journee/SKILL.md`) avant toute chose (synchronisation, build et tests complets pour remettre
+l'environnement d'aplomb, point sur l'avancement et les questions en attente) ; en fin de session : tout pousser, et mettre à jour
 « Avancement » si l'état a changé (étape en cours, branche non fusionnée, point en suspens).
 
 Voir aussi `README.md` (structure de la solution, règles de jeu implémentées, format JSON).
@@ -527,6 +528,7 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
 - Phase 3, étape 4 (points, #2 version légère) : fusionnée dans `main` (ticket #2 commenté, laissé ouvert).
   Prochaine étape : 5 (dégâts bruts, #6). 340 tests verts (172 Core, 48 Simulation, 120 UI) ; `NonRegressionTests` inchangés. Champs de points retirés du
   Quick sim à la demande de l'utilisateur (saisie au Full sim).
+- Skill `/debut-journee` ajouté (branche `outillage/skill-debut-journee`, en attente de validation).
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

@@ -21,7 +21,8 @@ public sealed class SimulationResult
         long[] killedPerGroup,
         long[] damagePerGroup,
         DiscreteDistribution extendedKills,
-        DiscreteDistribution extendedDamage)
+        DiscreteDistribution extendedDamage,
+        DiscreteDistribution rawDamage)
     {
         Scenario = scenario;
         Seed = seed;
@@ -32,6 +33,7 @@ public sealed class SimulationResult
         _damagePerGroup = damagePerGroup;
         ExtendedKills = extendedKills;
         ExtendedDamage = extendedDamage;
+        RawDamage = rawDamage;
     }
 
     public Scenario Scenario { get; }
@@ -108,6 +110,22 @@ public sealed class SimulationResult
 
     /// <summary>Marge moyenne quand l'unité est détruite : PV retirés en plus aux figurines virtuelles (0 si jamais détruite).</summary>
     public double DamageMarginWhenWiped => ExtendedDamage.MeanExcessAbove(TotalWounds);
+
+    /// <summary>
+    /// Dégâts bruts : dégâts de chaque attaque non sauvegardée comptés en entier (après réduction de dégâts et Feel No
+    /// Pain), sans plafond par figurine ni arrêt à la destruction de l'unité. Toujours au moins égaux aux PV retirés
+    /// de <see cref="ExtendedDamage"/>.
+    /// </summary>
+    public DiscreteDistribution RawDamage { get; }
+
+    /// <summary>
+    /// Gaspillage moyen : dégâts bruts perdus parce qu'une attaque dépasse les PV restants de sa figurine. Ce qui dépasse
+    /// la destruction de l'unité n'en fait pas partie : c'est la marge (<see cref="DamageMarginWhenWiped"/>).
+    /// </summary>
+    public double MeanWastedDamage => RawDamage.Mean - ExtendedDamage.Mean;
+
+    /// <summary>Part des dégâts bruts gaspillée (entre 0 et 1 ; 0 si aucun dégât brut).</summary>
+    public double WastedShare => RawDamage.Mean > 0 ? MeanWastedDamage / RawDamage.Mean : 0;
 
     /// <summary>Profil des figurines virtuelles qui encaissent l'excédent (voir <see cref="DefenderUnit.ExcessProfile"/>).</summary>
     public ModelGroup ExcessProfile => Scenario.Defender.ExcessProfile!;

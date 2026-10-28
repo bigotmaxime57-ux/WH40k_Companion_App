@@ -619,6 +619,63 @@
   <data name="FullSim_TabDistributions" xml:space="preserve">
     <value>Distributions</value>
   </data>
+  <data name="FullSim_TabGroups" xml:space="preserve">
+    <value>Groupes</value>
+  </data>
+  <data name="Groups_LossesTitle" xml:space="preserve">
+    <value>Pertes par groupe</value>
+  </data>
+  <data name="Help_GroupLosses" xml:space="preserve">
+    <value>Pertes de chaque groupe d'allocation, dans l'ordre où il encaisse les sauvegardes ratées. Pertes réelles seulement, sans la marge. L'histogramme compte les figurines tuées, ou les PV retirés pour un groupe d'une seule figurine.</value>
+  </data>
+  <data name="Groups_Killed" xml:space="preserve">
+    <value>Figurines tuées</value>
+  </data>
+  <data name="Groups_OutOf" xml:space="preserve">
+    <value>{0} / {1}</value>
+  </data>
+  <data name="Groups_Wiped" xml:space="preserve">
+    <value>Groupe détruit</value>
+  </data>
+  <data name="Groups_CharacterKilled" xml:space="preserve">
+    <value>PERSONNAGE tué</value>
+  </data>
+  <data name="Groups_Damage" xml:space="preserve">
+    <value>PV retirés</value>
+  </data>
+  <data name="Groups_BodyguardsTitle" xml:space="preserve">
+    <value>Gardes du corps</value>
+  </data>
+  <data name="Help_Bodyguards" xml:space="preserve">
+    <value>Tous les groupes qui ne sont pas des PERSONNAGES, pris ensemble. Tant qu'il reste un garde du corps, les PERSONNAGES ne prennent les sauvegardes ratées que grâce à Precision ; une fois tous les gardes tués, ils sont exposés.</value>
+  </data>
+  <data name="Groups_BodyguardsWiped" xml:space="preserve">
+    <value>Tous les gardes tués</value>
+  </data>
+  <data name="Groups_BodyguardsKilled" xml:space="preserve">
+    <value>Gardes tués</value>
+  </data>
+  <data name="Groups_PrecisionTitle" xml:space="preserve">
+    <value>Frappe Precision</value>
+  </data>
+  <data name="Help_PrecisionStrike" xml:space="preserve">
+    <value>Le PERSONNAGE que visent les armes Precision : la cible choisie dans la Situation, seule visée ; sans choix, chaque PERSONNAGE (chaque pool vise le premier encore en jeu). Une fois la cible morte, le reste du pool suit l'ordre d'allocation normal.</value>
+  </data>
+  <data name="Groups_PrecisionShare" xml:space="preserve">
+    <value>Grâce à Precision</value>
+  </data>
+  <data name="Groups_PrecisionKills" xml:space="preserve">
+    <value>Figurines</value>
+  </data>
+  <data name="Groups_PrecisionDamage" xml:space="preserve">
+    <value>PV</value>
+  </data>
+  <data name="Help_PrecisionShare" xml:space="preserve">
+    <value>Part des PV retirés à ce PERSONNAGE par des attaques qui, sans Precision, seraient allées sur un garde du corps ou sur un autre PERSONNAGE placé devant.</value>
+  </data>
+  <data name="Help_PrecisionKills" xml:space="preserve">
+    <value>Part des fois où ce PERSONNAGE a été achevé par une attaque grâce à Precision (une figurine compte pour l'attaque qui l'achève).</value>
+  </data>
   <data name="Help_MarginChart" xml:space="preserve">
     <value>Sur les graphiques, au-delà du pointillé, les barres atténuées sont la marge : « 5 + 2 » signifie l'unité entière (5), plus 2 au-delà.</value>
   </data>

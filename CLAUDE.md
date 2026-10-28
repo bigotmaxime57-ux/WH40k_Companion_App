@@ -651,8 +651,12 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
   l'autre machine (`winget`, voir README).
 - Dépôt déplacé sur cette machine vers `E:\Dev\WH40k_Companion_App` (disque C plein) le 2026-10-28 : sans effet sur
   le dépôt ni sur l'autre machine.
-- Phase 3, étape 7 (rapport par groupe) : précisée avec l'utilisateur le 2026-10-28 (onglet « Groupes » en trois
-  sections, voir « Phase 3 : étapes »), à coder sur la branche `phase3/etape7-rapport-groupes` après feu vert.
+- Phase 3, étape 7 (rapport par groupe) : branche `phase3/etape7-rapport-groupes`, **en attente de validation**.
+  Onglet « Groupes » (`GroupsReport`) ; `GroupLosses` et `BodyguardKills` dans `SimulationResult`,
+  `DefenderState.PrecisionKilledInGroup` / `PrecisionDamageInGroup`, `Scenario.UsesPrecision` / `PrecisionTargets`.
+  401 tests verts (187 Core, 58 Simulation, 156 UI) ; `NonRegressionTests` inchangés, sortie de la console identique ;
+  temps mesuré (10 M simulations, scénario d'exemple) : 1,77 s sur `main`, 1,87 s sur la branche, dans le bruit de
+  mesure, donc pas d'option. Pas encore vue à l'écran.
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

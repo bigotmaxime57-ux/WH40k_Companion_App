@@ -22,8 +22,14 @@ public sealed class SimulationResult
         long[] damagePerGroup,
         DiscreteDistribution extendedKills,
         DiscreteDistribution extendedDamage,
-        DiscreteDistribution rawDamage)
+        DiscreteDistribution rawDamage,
+        IReadOnlyList<GroupLosses> groups,
+        DiscreteDistribution bodyguardKills)
     {
+        Groups = groups;
+        // Gardes du corps : seulement s'il y en a et qu'ils protègent au moins un PERSONNAGE
+        var defenderGroups = scenario.Defender.Groups;
+        BodyguardKills = defenderGroups.Any(g => g.IsCharacter) && defenderGroups.Any(g => !g.IsCharacter) ? bodyguardKills : null;
         Scenario = scenario;
         Seed = seed;
         Elapsed = elapsed;
@@ -129,4 +135,22 @@ public sealed class SimulationResult
 
     /// <summary>Profil des figurines virtuelles qui encaissent l'excédent (voir <see cref="DefenderUnit.ExcessProfile"/>).</summary>
     public ModelGroup ExcessProfile => Scenario.Defender.ExcessProfile!;
+
+    /// <summary>Pertes de chaque groupe d'allocation, dans l'ordre d'allocation du défenseur (pertes réelles).</summary>
+    public IReadOnlyList<GroupLosses> Groups { get; }
+
+    /// <summary>
+    /// Figurines de garde du corps tuées (tous les groupes non-PERSONNAGES ensemble, de 0 à leur effectif total). Null
+    /// s'il n'y a pas à la fois des gardes du corps et au moins un PERSONNAGE : il n'y a alors personne à protéger.
+    /// </summary>
+    public DiscreteDistribution? BodyguardKills { get; }
+
+    /// <summary>Probabilité que tous les gardes du corps soient tués : les PERSONNAGES sont alors exposés.</summary>
+    public double? ProbabilityBodyguardsWiped => BodyguardKills?.ProbabilityAtLeast(BodyguardKills.MaxValue);
+
+    /// <summary>
+    /// Groupes PERSONNAGES que Precision peut viser (voir <see cref="Scenario.PrecisionTargets"/>) : vide sans arme
+    /// Precision ou sans PERSONNAGE.
+    /// </summary>
+    public IReadOnlyList<GroupLosses> PrecisionTargets => Scenario.PrecisionTargets.Select(g => Groups[g]).ToList();
 }

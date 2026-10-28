@@ -116,6 +116,15 @@ public static class Simulator
         private readonly long[] _killedPerGroup = new long[defender.Groups.Count];  // figurines tuées par groupe, cumulées
         private readonly long[] _damagePerGroup = new long[defender.Groups.Count];  // PV retirés par groupe, cumulés
 
+        // Distributions par groupe (_groupKills[g][k] = simulations avec exactement k figurines tuées dans le groupe g),
+        // figurines de garde du corps tuées (groupes non-PERSONNAGES ensemble) et pertes « grâce à Precision », cumulées
+        private readonly long[][] _groupKills = defender.Groups.Select(g => new long[g.Count + 1]).ToArray();
+        private readonly long[][] _groupDamage = defender.Groups.Select(g => new long[g.Count * g.Wounds + 1]).ToArray();
+        private readonly bool[] _isBodyguard = defender.Groups.Select(g => !g.IsCharacter).ToArray();
+        private readonly long[] _bodyguardKills = new long[defender.Groups.Where(g => !g.IsCharacter).Sum(g => g.Count) + 1];
+        private readonly long[] _precisionKilled = new long[defender.Groups.Count];
+        private readonly long[] _precisionDamage = new long[defender.Groups.Count];
+
         // Distributions prolongées (réel + excédent) : pas de maximum connu à l'avance, les tableaux s'agrandissent
         private long[] _extendedKills = new long[defender.TotalModels + 1];
         private long[] _extendedDamage = new long[defender.TotalWounds + 1];
@@ -125,11 +134,23 @@ public static class Simulator
         {
             _kills[state.ModelsKilled]++;
             _damage[state.DamageDealt]++;
+            int bodyguardsKilled = 0;
             for (int g = 0; g < _killedPerGroup.Length; g++)
             {
-                _killedPerGroup[g] += state.KilledInGroup(g);
-                _damagePerGroup[g] += state.DamageInGroup(g);
+                int killed = state.KilledInGroup(g);
+                int damage = state.DamageInGroup(g);
+                _killedPerGroup[g] += killed;
+                _damagePerGroup[g] += damage;
+                _groupKills[g][killed]++;
+                _groupDamage[g][damage]++;
+                _precisionKilled[g] += state.PrecisionKilledInGroup(g);
+                _precisionDamage[g] += state.PrecisionDamageInGroup(g);
+                if (_isBodyguard[g])
+                {
+                    bodyguardsKilled += killed;
+                }
             }
+            _bodyguardKills[bodyguardsKilled]++;
 
             Increment(ref _extendedKills, state.ModelsKilled + state.ExcessModelsKilled);
             Increment(ref _extendedDamage, state.DamageDealt + state.ExcessDamage);
@@ -142,17 +163,34 @@ public static class Simulator
             for (int i = 0; i < _damage.Length; i++) _damage[i] += other._damage[i];
             for (int i = 0; i < _killedPerGroup.Length; i++) _killedPerGroup[i] += other._killedPerGroup[i];
             for (int i = 0; i < _damagePerGroup.Length; i++) _damagePerGroup[i] += other._damagePerGroup[i];
+            for (int g = 0; g < _groupKills.Length; g++)
+            {
+                for (int i = 0; i < _groupKills[g].Length; i++) _groupKills[g][i] += other._groupKills[g][i];
+                for (int i = 0; i < _groupDamage[g].Length; i++) _groupDamage[g][i] += other._groupDamage[g][i];
+            }
+            for (int i = 0; i < _bodyguardKills.Length; i++) _bodyguardKills[i] += other._bodyguardKills[i];
+            for (int i = 0; i < _precisionKilled.Length; i++) _precisionKilled[i] += other._precisionKilled[i];
+            for (int i = 0; i < _precisionDamage.Length; i++) _precisionDamage[i] += other._precisionDamage[i];
             Add(ref _extendedKills, other._extendedKills);
             Add(ref _extendedDamage, other._extendedDamage);
             Add(ref _rawDamage, other._rawDamage);
         }
 
-        public SimulationResult ToResult(Scenario scenario, int seed, TimeSpan elapsed) =>
-            new(scenario, seed, elapsed,
+        public SimulationResult ToResult(Scenario scenario, int seed, TimeSpan elapsed)
+        {
+            long iterations = _kills.Sum();
+            var groups = scenario.Defender.Groups
+                .Select((group, g) => new GroupLosses(
+                    g, group, new DiscreteDistribution(_groupKills[g]), new DiscreteDistribution(_groupDamage[g]),
+                    (double)_precisionKilled[g] / iterations, (double)_precisionDamage[g] / iterations))
+                .ToList();
+            return new(scenario, seed, elapsed,
                 new DiscreteDistribution(_kills), new DiscreteDistribution(_damage), _killedPerGroup, _damagePerGroup,
                 new DiscreteDistribution(TrimTrailingZeros(_extendedKills, _kills.Length)),
                 new DiscreteDistribution(TrimTrailingZeros(_extendedDamage, _damage.Length)),
-                new DiscreteDistribution(TrimTrailingZeros(_rawDamage, _damage.Length)));
+                new DiscreteDistribution(TrimTrailingZeros(_rawDamage, _damage.Length)),
+                groups, new DiscreteDistribution(_bodyguardKills));
+        }
 
         private static void Increment(ref long[] histogram, int value)
         {

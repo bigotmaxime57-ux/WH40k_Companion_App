@@ -124,6 +124,13 @@ public sealed class AttackResolver
         return g < 0 && TracksExcess ? _target.ExcessGroup : g;
     }
 
+    /// <summary>
+    /// L'attaque allouée à <paramref name="group"/> y va « grâce à Precision » : c'est le groupe visé, alors que sans
+    /// Precision elle irait sur le premier groupe en jeu (garde du corps, ou PERSONNAGE placé devant).
+    /// </summary>
+    private bool IsViaPrecision(int group, int precisionGroup) =>
+        group == precisionGroup && _target.FirstAliveGroup() != group;
+
     // --- 1. Nombre d'attaques -------------------------------------------------------------
 
     private int CountAttacks(AttackPool pool, int initialModels)
@@ -289,7 +296,7 @@ public sealed class AttackResolver
                              && ((group.InvulnerableSave is int invuln && face >= invuln) || face + ap >= group.Save);
                 if (!saved)
                 {
-                    _target.ApplyDamage(g, RollDamage(weapon), mortalWounds: false, Dice);
+                    _target.ApplyDamage(g, RollDamage(weapon), mortalWounds: false, Dice, IsViaPrecision(g, precisionGroup));
                 }
             }
         }
@@ -311,7 +318,7 @@ public sealed class AttackResolver
             {
                 return;
             }
-            _target.ApplyDamage(g, RollDamage(weapon), mortalWounds: true, Dice);
+            _target.ApplyDamage(g, RollDamage(weapon), mortalWounds: true, Dice, IsViaPrecision(g, precisionGroup));
         }
     }
 

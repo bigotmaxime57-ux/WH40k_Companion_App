@@ -1,0 +1,107 @@
+@*
+    Onglet « Groupes » du Full sim, en trois sections, lues dans le résultat sans aucun calcul (pertes réelles, sans la
+    marge) :
+    1. une carte par groupe d'allocation, dans l'ordre (numéro, filet et étiquette PERSONNAGE comme à la saisie) :
+       tuiles et histogramme, des figurines tuées pour un groupe de plusieurs figurines, des PV retirés pour une seule ;
+    2. les gardes du corps pris ensemble, s'ils protègent au moins un PERSONNAGE ;
+    3. la frappe Precision, pour chaque PERSONNAGE que Precision peut viser.
+*@
+
+<div data-test="groups-report">
+    <SectionHeader Icon="@Icons.Material.Filled.Shield" Title="@L["Groups_LossesTitle"]" Help="@([L["Help_GroupLosses"]])" />
+    <MudGrid Spacing="3" Class="mb-4">
+        @foreach (var losses in Result.Groups)
+        {
+            <MudItem xs="12" lg="6">
+                <MudPaper Outlined="true" Class="@($"pa-4 wh-defender wh-subcard {(losses.Group.IsCharacter ? "wh-subcard-character" : "")}")"
+                          data-test="@($"group-losses-{losses.Index}")">
+                    @GroupHeader(losses)
+                    <div class="wh-tiles my-3">
+                        @if (losses.Group.Count > 1)
+                        {
+                            <StatTile Label="@L["Groups_Killed"]" Value="@L["Groups_OutOf", losses.Kills.Mean.ToString("F2"), losses.Group.Count]"
+                                      data-test="group-killed" />
+                        }
+                        <StatTile Label="@(losses.Group.IsCharacter ? L["Groups_CharacterKilled"] : L["Groups_Wiped"])"
+                                  Value="@losses.ProbabilityWiped.ToString("P1")" data-test="group-wiped" />
+                        <StatTile Label="@L["Groups_Damage"]" Value="@L["Groups_OutOf", losses.Damage.Mean.ToString("F2"), losses.Group.Count * losses.Group.Wounds]"
+                                  data-test="group-damage" />
+                    </div>
+                    @if (losses.Group.Count > 1)
+                    {
+                        <HistogramChart Distribution="losses.Kills" Title="@losses.Group.Name" ValueTitle="@L["Chart_KillsValue"]"
+                                        UnitSize="losses.Group.Count" />
+                    }
+                    else
+                    {
+                        <HistogramChart Distribution="losses.Damage" Title="@losses.Group.Name" ValueTitle="@L["Chart_DamageValue"]"
+                                        UnitSize="losses.Group.Wounds" />
+                    }
+                </MudPaper>
+            </MudItem>
+        }
+    </MudGrid>
+
+    @if (Result.BodyguardKills is { } bodyguards)
+    {
+        <div class="mb-4" data-test="bodyguards">
+            <SectionHeader Icon="@Icons.Material.Filled.Groups" Title="@L["Groups_BodyguardsTitle"]" Help="@([L["Help_Bodyguards"]])" />
+            <MudPaper Outlined="true" Class="pa-4 wh-defender wh-subcard">
+                <div class="wh-tiles mb-3">
+                    <StatTile Label="@L["Groups_BodyguardsWiped"]" Value="@Result.ProbabilityBodyguardsWiped!.Value.ToString("P1")"
+                              data-test="bodyguards-wiped" />
+                    <StatTile Label="@L["Groups_BodyguardsKilled"]" Value="@L["Groups_OutOf", bodyguards.Mean.ToString("F2"), bodyguards.MaxValue]"
+                              data-test="bodyguards-killed" />
+                </div>
+                <HistogramChart Distribution="bodyguards" Title="@L["Groups_BodyguardsTitle"]" ValueTitle="@L["Chart_KillsValue"]"
+                                UnitSize="bodyguards.MaxValue" />
+            </MudPaper>
+        </div>
+    }
+
+    @if (Result.PrecisionTargets.Count > 0)
+    {
+        <div data-test="precision">
+            <SectionHeader Icon="@Icons.Material.Filled.GpsFixed" Title="@L["Groups_PrecisionTitle"]" Help="@([L["Help_PrecisionStrike"]])" />
+            <MudGrid Spacing="3">
+                @foreach (var target in Result.PrecisionTargets)
+                {
+                    <MudItem xs="12" lg="6">
+                        <MudPaper Outlined="true" Class="pa-4 wh-attacker wh-subcard" data-test="@($"precision-target-{target.Index}")">
+                            @GroupHeader(target)
+                            <div class="wh-tiles mt-3">
+                                <StatTile Label="@L["Groups_CharacterKilled"]" Value="@target.ProbabilityWiped.ToString("P1")" />
+                                <StatTile Label="@L["Groups_Damage"]" Value="@L["Groups_OutOf", target.Damage.Mean.ToString("F2"), target.Group.Wounds]" />
+                                <StatTile Label="@L["Groups_PrecisionShare"]" Value="@target.PrecisionDamageShare.ToString("P0")"
+                                          Stats="@PrecisionStats(target)" data-test="precision-share" />
+                            </div>
+                        </MudPaper>
+                    </MudItem>
+                }
+            </MudGrid>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public SimulationResult Result { get; set; } = null!;
+
+    /// <summary>Numéro d'ordre d'allocation, nom et étiquette PERSONNAGE, comme sur la carte de saisie du groupe.</summary>
+    private RenderFragment GroupHeader(GroupLosses losses) =>
+        @<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <span class="wh-group-number">@(losses.Index + 1)</span>
+            <MudText Typo="Typo.subtitle1">@losses.Group.Name</MudText>
+            @if (losses.Group.IsCharacter)
+            {
+                <MudChip T="string" Size="Size.Small" Variant="Variant.Filled" Class="wh-character-chip">@L["Group_IsCharacter"]</MudChip>
+            }
+        </MudStack>;
+
+    /// <summary>La tuile Precision donne la part des PV ; la part des figurines (achevées) en indicateur, expliquée.</summary>
+    private List<StatTile.Stat> PrecisionStats(GroupLosses target) =>
+    [
+        new("☠", L["Groups_PrecisionKills"], target.PrecisionKillShare.ToString("P0"), L["Help_PrecisionKills"]),
+        new("♥", L["Groups_PrecisionDamage"], target.PrecisionDamageShare.ToString("P0"), L["Help_PrecisionShare"]),
+    ];
+}

@@ -88,6 +88,20 @@ public class FullSimTests() : ComponentTestContext(renderPopoverProvider: false)
     }
 
     [Fact]
+    public void Results_have_a_groups_tab()
+    {
+        var shell = Open(AppRoutes.FullSim);
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimPage>()));
+        shell.Find("[data-test=run]").Click();
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimResultsPage>()));
+
+        shell.FindAll(".mud-tab").Single(tab => tab.TextContent.Contains("Groupes")).Click();
+
+        shell.WaitForAssertion(() => Assert.NotNull(shell.Find("[data-test=groups-report]")));
+        Assert.NotEmpty(shell.FindAll("[data-test^=group-losses-]"));
+    }
+
+    [Fact]
     public void Full_sim_result_and_settings_are_separate_from_the_quick_sim()
     {
         var shell = Open(AppRoutes.FullSim);

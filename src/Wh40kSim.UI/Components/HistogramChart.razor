@@ -4,7 +4,8 @@
     colonne. Sans les valeurs négligeables aux extrémités (comme les tableaux). Couleurs tirées du CSS (--wh-accent) :
     elles suivent le thème et le camp de la section qui l'entoure. Les barres où l'unité est détruite (unité entière,
     et au-delà pour une distribution prolongée) sont hachurées à 45° ; pour une distribution prolongée (Extended), les
-    colonnes au-delà de l'unité (la marge) sont aussi atténuées, séparées par un pointillé et notées « 5 + 2 ».
+    colonnes au-delà de l'unité (la marge) sont aussi atténuées et séparées par un pointillé ; leur infobulle donne le
+    détail « 7 (5 + 2) ».
 *@
 @using System.Globalization
 
@@ -43,7 +44,7 @@
             }
             @if (ShowLabel(i))
             {
-                <g><text class="wh-chart-axis" x="@F(ColumnX(i) + ColumnWidth / 2)" y="@F(Height - 8)" text-anchor="middle">@Label(row.Value)</text></g>
+                <g><text class="wh-chart-axis" x="@F(ColumnX(i) + ColumnWidth / 2)" y="@F(Height - 8)" text-anchor="middle">@row.Value</text></g>
             }
         }
 
@@ -74,7 +75,7 @@
     {
         var row = _rows[hovered];
         <div class="wh-chart-tooltip" style="left: @F(Math.Clamp((ColumnX(hovered) + ColumnWidth / 2) / Width * 100, 12, 88))%" data-test="chart-tooltip">
-            <strong>@string.Format(ValueTitle, Label(row.Value))</strong><br />
+            <strong>@string.Format(ValueTitle, TooltipLabel(row.Value))</strong><br />
             @L["Chart_Exactly"] : @row.Exactly.ToString("P1")<br />
             @L["Chart_AtLeast"] : @row.AtLeast.ToString("P1")
             @if (IsWiped(row.Value))
@@ -158,8 +159,12 @@
     /// <summary>Unité détruite : valeur égale à l'effectif de l'unité, ou au-delà (marge).</summary>
     private bool IsWiped(int value) => UnitSize is int size && value >= size;
 
-    private string Label(int value) =>
-        Extended && UnitSize is int size && value > size ? L["Results_Beyond", size, value - size].Value : value.ToString();
+    /// <summary>
+    /// Valeur dans l'infobulle : au-delà de l'unité (marge), suivie du détail « (11 + 2) ». Sous l'axe, le nombre seul
+    /// (le détail y devenait illisible).
+    /// </summary>
+    private string TooltipLabel(int value) =>
+        Extended && UnitSize is int size && value > size ? $"{value} ({L["Results_Beyond", size, value - size]})" : value.ToString();
 
     /// <summary>Pas « rond » (1, 2 ou 5 × 10^n) proche de <paramref name="raw"/>.</summary>
     private static double NiceStep(double raw)

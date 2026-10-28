@@ -67,16 +67,19 @@ public class HistogramChartTests : ComponentTestContext
     }
 
     [Fact]
-    public void Beyond_the_unit_columns_are_dimmed_and_labelled_with_the_margin()
+    public void Beyond_the_unit_columns_are_dimmed_with_the_exact_number_on_the_axis()
     {
         var chart = RenderChart(unitSize: 2, extended: true);
 
         Assert.Single(chart.FindAll("rect.wh-chart-bar-beyond"));
         Assert.Single(chart.FindAll("line.wh-chart-limit"));
-        // Unité entière (2) et au-delà (2 + 1) : toutes deux hachurées
+        // Unité entière (2) et au-delà (3) : toutes deux hachurées
         Assert.Equal(2, chart.FindAll("[data-test=chart-hatch]").Count);
+        var axisLabels = chart.FindAll("text.wh-chart-axis").Select(t => t.TextContent).ToList();
+        Assert.Contains("3", axisLabels);
+        Assert.DoesNotContain(axisLabels, label => label.Contains('+'));
         chart.FindAll("[data-test=chart-column]")[3].MouseOver();
-        Assert.Contains("Figurines tuées : 2 + 1", chart.Find("[data-test=chart-tooltip]").TextContent);
+        Assert.Contains("Figurines tuées : 3 (2 + 1)", chart.Find("[data-test=chart-tooltip]").TextContent);
     }
 
     [Fact]

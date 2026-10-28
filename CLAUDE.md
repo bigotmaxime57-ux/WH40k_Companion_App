@@ -617,6 +617,10 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
 - Phase 3, étape 6 (Full sim : squelette et graphiques) : fusionnée dans `main`. 377 tests verts (178 Core,
   52 Simulation, 147 UI) ; `NonRegressionTests` inchangés. Prochaine étape : 7 (rapport par groupe, avec Precision),
   à préciser.
+- Distribution pour les tests (branche `outillage/distribution-apercu`) : fusionnée dans `main`. Zip autonome
+  (`tools/publier.ps1`, profil `win-x64`), version affichée sur l'accueil ; préversion **`v0.3-apercu.1`** publiée
+  dans les Releases GitHub (avec les scénarios locaux de l'utilisateur, accord du 2026-10-28). 379 tests verts
+  (178 Core, 52 Simulation, 149 UI). Retours du testeur attendus (tickets ou messages).
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

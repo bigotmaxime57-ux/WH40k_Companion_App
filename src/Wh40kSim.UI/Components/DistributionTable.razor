@@ -1,15 +1,15 @@
 @*
-    Tableau P(= k) / P(≥ k) d'une distribution, sans les lignes négligeables aux extrémités, avec une barre
-    proportionnelle à P(= k) (la plus probable fait toute la largeur). Pas encore les graphiques de la phase 3.
+    Tableau d'une distribution : probabilité d'obtenir exactement k, puis au moins k, sans les lignes négligeables aux
+    extrémités, avec une barre proportionnelle à « exactement » (la plus probable fait toute la largeur).
 *@
 
 <MudText Typo="Typo.subtitle2" Class="mt-3">@Title</MudText>
 <MudSimpleTable Dense="true" Striped="true" data-test="distribution">
     <thead>
         <tr>
-            <th>k</th>
-            <th>P(= k)</th>
-            <th>P(≥ k)</th>
+            <th>@ValueHeader</th>
+            <th>@L["Chart_Exactly"]</th>
+            <th>@L["Chart_AtLeast"]</th>
         </tr>
     </thead>
     <tbody>
@@ -37,6 +37,10 @@
 
     [Parameter, EditorRequired]
     public string Title { get; set; } = "";
+
+    /// <summary>En-tête de la première colonne : ce qu'on compte (« Figurines », « PV »).</summary>
+    [Parameter, EditorRequired]
+    public string ValueHeader { get; set; } = "";
 
     [Parameter, EditorRequired]
     public DiscreteDistribution Distribution { get; set; } = null!;

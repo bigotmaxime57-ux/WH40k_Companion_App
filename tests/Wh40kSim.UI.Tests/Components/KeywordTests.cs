@@ -156,4 +156,17 @@ public class KeywordTests : ComponentTestContext
 
         Assert.Equal("9 × Fusil : A2 CT3+ F4 PA0 D1", card.Find("[data-test=weapon-summary]").TextContent);
     }
+
+    [Fact]
+    public void Weapon_card_shows_a_shooting_or_melee_pictogram_even_when_collapsed()
+    {
+        var ranged = Render<WeaponEditor>(p => p.Add(c => c.Weapon, new WeaponForm()));
+        var melee = Render<WeaponEditor>(p => p.Add(c => c.Weapon,
+            new WeaponForm(new WeaponGroup { Weapon = new WeaponProfile { Type = WeaponType.Melee } })));
+
+        Assert.NotNull(ranged.Find("[data-test=weapon-ranged-icon]"));
+        Assert.Empty(ranged.FindAll("[data-test=weapon-melee-icon]"));
+        melee.Find("[data-test=toggle-weapon]").Click();
+        Assert.NotNull(melee.Find("[data-test=weapon-melee-icon]"));
+    }
 }

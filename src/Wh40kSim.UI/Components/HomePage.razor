@@ -1,7 +1,7 @@
 @*
-    Accueil : une tuile par mode de l'application (seulement ceux qui existent), qui ouvre l'écran correspondant.
-    Les tuiles sont des liens (clavier : Tab puis Entrée ; en web, clic du milieu pour un autre onglet) ; un clic passe
-    par ScreenNavigator, qui affiche la barre de chargement avant de construire l'écran.
+    Accueil : une tuile par mode de l'application (seulement ceux qui existent), les unes sous les autres, qui ouvre
+    l'écran correspondant. Les tuiles sont des liens (clavier : Tab puis Entrée ; en web, clic du milieu pour un autre
+    onglet) ; un clic passe par ScreenNavigator, qui affiche la barre de chargement avant de construire l'écran.
 *@
 @page "/"
 @inject ScreenNavigator Screens
@@ -9,15 +9,20 @@
 <MudStack Spacing="4" Class="pa-6">
     <MudText Typo="Typo.h5" Class="wh-brand">@L["Home_Title"]</MudText>
 
-    <MudGrid Spacing="3">
-        <MudItem xs="12" sm="6" md="4">
-            <a href="@AppRoutes.QuickSim" class="wh-home-tile" @onclick="() => Screens.OpenAsync(AppRoutes.QuickSim)"
-               @onclick:preventDefault data-test="tile-quick-sim">
-                <MudPaper Elevation="3" Class="pa-5 wh-section">
-                    <SectionHeader Icon="@Icons.Material.Filled.Bolt" Title="@L["Mode_QuickSim"]" />
-                    <MudText Typo="Typo.body2">@L["Home_QuickSimDescription"]</MudText>
-                </MudPaper>
-            </a>
-        </MudItem>
-    </MudGrid>
+    <MudStack Spacing="3" Class="wh-home-tiles">
+        <a href="@AppRoutes.QuickSim" class="wh-home-tile" @onclick="() => Screens.OpenAsync(AppRoutes.QuickSim)"
+           @onclick:preventDefault data-test="tile-quick-sim">
+            <MudPaper Elevation="3" Class="pa-5 wh-section">
+                <SectionHeader Icon="@Icons.Material.Filled.Bolt" Title="@L["Mode_QuickSim"]" />
+                <MudText Typo="Typo.body2">@L["Home_QuickSimDescription"]</MudText>
+            </MudPaper>
+        </a>
+        <a href="@AppRoutes.FullSim" class="wh-home-tile" @onclick="() => Screens.OpenAsync(AppRoutes.FullSim)"
+           @onclick:preventDefault data-test="tile-full-sim">
+            <MudPaper Elevation="3" Class="pa-5 wh-section">
+                <SectionHeader Icon="@Icons.Material.Filled.Insights" Title="@L["Mode_FullSim"]" />
+                <MudText Typo="Typo.body2">@L["Home_FullSimDescription"]</MudText>
+            </MudPaper>
+        </a>
+    </MudStack>
 </MudStack>

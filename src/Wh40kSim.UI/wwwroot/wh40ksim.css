@@ -112,6 +112,11 @@
 }
 
 /* Tuiles de l'accueil : la carte entière est un lien, qui se soulève au survol ou au focus clavier */
+/* Tuiles de l'accueil les unes sous les autres, sur une largeur de lecture confortable */
+.wh-home-tiles {
+    max-width: 46rem;
+}
+
 .wh-home-tile {
     border-radius: var(--mud-default-borderradius);
     color: inherit;
@@ -368,18 +373,35 @@
     border-top: 2px dashed var(--mud-palette-primary) !important;
 }
 
+/* Tuile : titre en bandeau sur toute la largeur, puis un corps qui remplit la hauteur restante (contenu centré dedans) */
 .wh-tile {
     background: var(--mud-palette-background-gray);
     border: 1px solid var(--mud-palette-lines-default);
     border-radius: var(--mud-default-borderradius);
-    padding: .6rem .8rem;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
+/* Bandeau du titre : même style que le bouton Lancer (dégradé du thème en Néon, couleur principale ailleurs) */
 .wh-tile-label {
-    color: var(--mud-palette-text-secondary);
+    background: var(--wh-gradient, var(--mud-palette-primary));
+    color: var(--mud-palette-primary-text);
     font-size: .8rem;
-    letter-spacing: .06em;
+    font-weight: 600;
+    letter-spacing: .08em;
+    padding: .3rem .8rem;
     text-transform: uppercase;
+}
+
+.wh-tile-bad .wh-tile-label {
+    background: var(--mud-palette-error);
+    color: var(--mud-palette-error-text);
+}
+
+.wh-tile-good .wh-tile-label {
+    background: var(--mud-palette-success);
+    color: var(--mud-palette-success-text);
 }
 
 .wh-tile-value {
@@ -418,12 +440,261 @@
     font-weight: 600;
 }
 
-.wh-tile-detail {
-    color: var(--mud-palette-text-secondary);
-    font-size: .8rem;
+/* Carte d'arme : bandeau du type à gauche (fond plein couleur du camp, pictogramme blanc centré), contenu à droite */
+.wh-weapon-card {
+    display: flex;
+    overflow: hidden;
 }
 
-/* Tableaux de distribution : nombres alignés, barre proportionnelle à P(= k) */
+.wh-shell .wh-weapon-card.wh-subcard {
+    border-left-width: 1px !important;
+}
+
+.wh-weapon-band {
+    align-items: center;
+    background: var(--wh-accent);
+    display: flex;
+    flex: 0 0 3rem;
+    justify-content: center;
+}
+
+.wh-weapon-body {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Cartes d'arme et de groupe : en-tête (nom extensible, type et nombre à largeur fixe), puis des lignes séparées par
+   un filet léger, chacune avec son libellé dans une colonne commune et ses champs de même largeur */
+.wh-card-name {
+    flex: 1 1 8rem;
+    min-width: 8rem;
+}
+
+.wh-card-type {
+    flex: 0 0 8.5rem;
+}
+
+.wh-card-count {
+    flex: 0 0 7rem;
+}
+
+.wh-character-check {
+    flex-shrink: 0;
+}
+
+.wh-card-row {
+    align-items: center;
+    border-top: 1px solid color-mix(in srgb, var(--mud-palette-lines-default) 70%, transparent);
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 6rem minmax(0, 1fr);
+    margin-top: .6rem;
+    padding-top: .6rem;
+}
+
+/* Ligne de caractéristiques : --wh-cols champs de même largeur, comme la ligne d'une fiche */
+.wh-stat-line {
+    display: grid;
+    gap: .75rem;
+    grid-template-columns: repeat(var(--wh-cols, 5), minmax(0, 1fr));
+}
+
+.wh-weapon-type-icon {
+    color: #ffffff;
+    font-size: 1.75rem !important;
+}
+
+/* Corps de la tuile : valeur contre le bord gauche, indicateurs en colonne contre le bord droit (dessous si la tuile
+   est trop étroite) */
+.wh-tile-body {
+    align-items: center;
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    gap: .25rem 1.25rem;
+    justify-content: space-between;
+    padding: .5rem .8rem;
+}
+
+.wh-tile-stats {
+    display: flex;
+    flex-direction: column;
+    gap: .1rem;
+}
+
+.wh-tile-stat {
+    align-items: center;
+    color: var(--mud-palette-text-secondary);
+    display: flex;
+    font-size: .8rem;
+    gap: .35rem;
+    white-space: nowrap;
+}
+
+.wh-tile-stat-symbol {
+    color: var(--mud-palette-primary);
+    font-weight: 700;
+    text-align: center;
+    width: 1em;
+}
+
+.wh-tile-stat-value {
+    color: var(--mud-palette-text-primary);
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+}
+
+/* Histogramme SVG (HistogramChart) : barres « exactement » à la couleur du camp, courbe « au moins » en couleur du
+   texte, moyenne en pointillé. Le SVG s'agrandit à la largeur disponible ; l'infobulle est un bloc HTML posé dessus. */
+.wh-chart {
+    position: relative;
+}
+
+/* Le SVG du graphique seulement : les icônes (bulle « ? ») sont aussi des SVG */
+.wh-chart > svg {
+    display: block;
+    height: auto;
+    overflow: visible;
+    width: 100%;
+}
+
+.wh-chart-grid {
+    stroke: var(--mud-palette-lines-default);
+    stroke-width: 1;
+}
+
+.wh-chart-axis {
+    fill: var(--mud-palette-text-secondary);
+    font-size: 11px;
+}
+
+.wh-chart-axis-curve {
+    fill: var(--mud-palette-text-primary);
+}
+
+.wh-chart-bar {
+    fill: var(--wh-accent);
+    opacity: .85;
+    transition: opacity .1s;
+}
+
+.wh-chart-bar-hover {
+    opacity: 1;
+}
+
+.wh-chart-bar-beyond {
+    fill: color-mix(in srgb, var(--wh-accent) 45%, transparent);
+}
+
+.wh-chart-curve {
+    fill: none;
+    stroke: var(--mud-palette-text-primary);
+    stroke-width: 2;
+}
+
+.wh-chart-dot {
+    fill: var(--mud-palette-text-primary);
+}
+
+.wh-chart-limit {
+    stroke: var(--mud-palette-text-secondary);
+    stroke-dasharray: 4 3;
+}
+
+/* Moyenne : trait plein et fin, à ne pas confondre avec le pointillé de la limite de l'unité (marge) */
+.wh-chart-mean {
+    stroke: var(--mud-palette-text-secondary);
+    stroke-width: 1.5;
+}
+
+/* Barres « unité détruite » : hachures à 45° couleur du fond, posées sur la barre (motif SVG du graphique) */
+.wh-chart-hatch-line {
+    stroke: var(--mud-palette-surface);
+    stroke-opacity: .75;
+    stroke-width: 2;
+}
+
+.wh-chart-hit {
+    fill: transparent;
+}
+
+.wh-chart-tooltip {
+    background: var(--mud-palette-surface);
+    border: 1px solid var(--wh-accent);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .35);
+    color: var(--mud-palette-text-primary);
+    font-size: 12px;
+    padding: 4px 8px;
+    pointer-events: none;
+    position: absolute;
+    top: 4px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+.wh-chart-legend {
+    color: var(--mud-palette-text-secondary);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 12px;
+    gap: 16px;
+    margin-top: 4px;
+}
+
+.wh-chart-legend > span > i {
+    border-radius: 2px;
+    display: inline-block;
+    height: 12px;
+    margin-right: 6px;
+    vertical-align: -1px;
+    width: 12px;
+}
+
+.wh-chart-swatch-bar {
+    background: var(--wh-accent);
+}
+
+.wh-chart-swatch-hatch {
+    background: repeating-linear-gradient(45deg, var(--wh-accent) 0 3px,
+        color-mix(in srgb, var(--mud-palette-surface) 75%, var(--wh-accent)) 3px 5px);
+}
+
+.wh-chart-swatch-curve {
+    background: var(--mud-palette-text-primary);
+    height: 3px !important;
+    vertical-align: 3px !important;
+}
+
+/* Repères verticaux, comme sur le graphique : moyenne en trait plein, limite de l'unité en pointillé */
+.wh-chart-swatch-mean,
+.wh-chart-swatch-limit {
+    border-left: 2px solid var(--mud-palette-text-secondary);
+    border-radius: 0 !important;
+    width: 0 !important;
+}
+
+.wh-chart-swatch-limit {
+    border-left-style: dashed;
+}
+
+/* Entrées de la légende seulement (pas les éléments internes de la bulle « ? », qui grossiraient) */
+.wh-chart-legend > span {
+    align-items: center;
+    display: inline-flex;
+    gap: .25rem;
+}
+
+/* Bandeau du Full sim : champs du nombre de simulations et de la graine à largeur fixe, progression en bout de ligne */
+.wh-banner-field {
+    width: 11rem;
+}
+
+.wh-banner-progress {
+    flex: 1 1 12rem;
+}
+
+/* Tableaux de distribution : nombres alignés, barre proportionnelle à « exactement » */
 .wh-number {
     font-variant-numeric: tabular-nums;
     text-align: right;
@@ -570,6 +841,24 @@
     background: var(--wh-gradient) !important;
     box-shadow: 0 0 14px rgba(var(--wh-accent-rgb), .55);
     color: #ffffff !important;
+}
+
+/* Bandeau des armes : couleur du camp fondue dans la nuit indigo (moins criard qu'un aplat sur une grande surface) */
+.wh-shell.wh-neon .wh-weapon-band {
+    background: linear-gradient(180deg,
+        color-mix(in srgb, var(--wh-accent) 62%, #140c30) 0%,
+        color-mix(in srgb, var(--wh-accent) 38%, #140c30) 100%);
+    box-shadow: inset -1px 0 0 rgba(var(--wh-accent-rgb), .45);
+}
+
+.wh-shell.wh-neon .wh-weapon-type-icon {
+    filter: drop-shadow(0 0 4px rgba(var(--wh-accent-rgb), .9));
+}
+
+/* Bandeau des tuiles : texte blanc et halo, comme le bouton Lancer */
+.wh-shell.wh-neon .wh-tile-neutral .wh-tile-label {
+    box-shadow: 0 0 14px rgba(var(--wh-accent-rgb), .55);
+    color: #ffffff;
 }
 
 .wh-shell.wh-neon .mud-button-filled-primary:not(:disabled):hover,

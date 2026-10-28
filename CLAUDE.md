@@ -329,7 +329,10 @@ couvrir par l'API et le client ; le découpage sera revu en début de phase.
 
 ## Phase 3 : étapes
 
-Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisée et validée avant d'être codée.
+Découpage validé par l'utilisateur le 2026-10-27, revu le 2026-10-28 : le Full sim se construit écran par écran
+(étapes 6 à 9) au lieu de tout calculer avant l'interface ; chaque rapport est une tranche complète (statistiques dans
+`Wh40kSim.Simulation`, testées, puis l'écran qui ne fait que les dessiner). Chaque étape sera précisée et validée
+avant d'être codée.
 
 1. **Générateur aléatoire sans biais** (#10). `new Random(graine)` garde l'ancien algorithme de .NET, légèrement biaisé
    (~0,15 point de trop sur P(unité détruite) dans le cas mesuré, ~10 fois l'erreur statistique).
@@ -351,7 +354,9 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
    fichier, scénario complet compris. Quick sim : Ouvrir / Enregistrer dans les cartes Attaquant et Défenseur (le
    scénario complet garde ses boutons) ; `IScenarioFileService` étendu, hôte desktop adapté. Premier pas vers la phase 6,
    sans figer la fiche d'unité. Décisions de l'utilisateur : « Ouvrir » de la barre accepte un fichier partiel et ne
-   remplace que cette partie ; confirmation avant de remplacer une partie seulement si la saisie est modifiée ; mêmes
+   remplace que cette partie ; confirmation avant de remplacer une partie seulement si la saisie est modifiée (précisé
+   le 2026-10-28 : si **cette partie** a été modifiée à la main depuis son dernier chargement ou enregistrement ;
+   `ScenarioSession.AttackerDirty` / `DefenderDirty`, le scénario gardant son propre indicateur et son « * ») ; mêmes
    dossiers que les scénarios. Conséquence : un scénario complet exige désormais attaquant et défenseur (une partie
    absente était remplacée en silence par une unité vide).
 4. **Points (#2, version légère).** Points optionnels sur l'attaquant et sur chaque groupe du défenseur (un leader a son
@@ -375,23 +380,81 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
    - Console : section « Dégâts bruts » (moyenne, gaspillage et sa part). Pas d'affichage dans l'interface (Full sim).
    - Tests : dés imposés (D3 contre 1 PV, réduction, FNP, Devastating Wounds), bruts ≥ PV retirés, égalité avec des
      armes D1, valeur exacte ; ticket #6 fermé par le commit (`Closes #6`).
-6. **Statistiques détaillées, côté Simulation** (tout ce que le Full sim affichera, calculé et testé, affiché par la
-   console) : distribution des pertes par groupe (% de kill par groupe, P(tuer le PERSONNAGE)) ; PV retirés et
-   figurines tuées par profil d'arme ; part des pertes de PERSONNAGE dues aux attaques Precision ; analyses en points
-   (tanking, kill threat : définitions à arrêter avec l'utilisateur). Si ces suivis ralentissent la boucle : option de
-   simulation, pour garder le Quick sim rapide.
-7. **Full sim, côté UI.** Choix de la technique de graphiques en début d'étape, prototype sur captures (critères :
-   desktop et WebAssembly, 4 thèmes et couleurs de camp, barres + courbe, infobulles, N courbes superposées, poids,
-   testable avec bUnit ; essayer `MudChart` d'abord, sinon composants SVG maison ; bibliothèque JS déconseillée).
-   Tableau de bord : histogramme enrichi, P(≥ k), dégâts par arme, % de kill par groupe, gaspillage, points.
-   Tag intermédiaire proposé : `v0.3`.
-8. **Comparaison, côté Simulation.** Deux sens (#1) : N attaquants contre une cible, ou un attaquant contre N cibles ;
+Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
+- Aucun dé supplémentaire : non-régression au bit près. Le Core n'apporte que l'attribution nécessaire (pool qui a
+  infligé chaque dégât, attaque « grâce à Precision »).
+- Temps mesuré à chaque étape ; si les suivis ralentissent la boucle, option de simulation pour garder le Quick sim
+  rapide.
+- Résultats en records simples (sérialisables, contrat JSON de la phase 7).
+- Indicateurs en points seulement si l'attaquant et tous les groupes ont des points (comme l'étape 4).
+- **Console** (décision de l'utilisateur, 2026-10-28) : outil de debug, alignée sur le Quick sim ; les statistiques
+  du Full sim n'y sont pas ajoutées (ce qu'elle affiche déjà, marge, points, dégâts bruts, reste).
+
+6. **Full sim : squelette et graphiques.** Précisée avec l'utilisateur le 2026-10-28 :
+   - **Graphiques d'abord** : prototype sur captures dans les 4 thèmes (critères : desktop et WebAssembly, couleurs
+     de camp, barres + courbe sur le même graphique, infobulles, N courbes superposées pour la comparaison, poids,
+     testable avec bUnit ; `MudChart` d'abord, composant SVG maison seulement si un critère échoue ; bibliothèque JS
+     déconseillée). L'utilisateur choisit sur les captures ; page d'essai retirée ensuite.
+     **Choix du 2026-10-28 : SVG maison** (prototype sur captures dans les 4 thèmes). MudChart n'a qu'un type par
+     graphique (pas de barres + courbe), garde une taille fixe (texte minuscule, barres fines) et des infobulles
+     brutes ; le SVG maison passe tous les critères, couleurs par le CSS du thème et du camp, personnalisable à volonté
+     (marqueurs, infobulles détaillées, repères).
+   - **Écran de saisie** (`/full-sim`, tuile sur l'accueil) : même scénario que le Quick sim (`ScenarioSession`) ;
+     colonne Attaquant et colonne Défenseur côte à côte, Situation en pleine largeur dessous ; pas de résultats.
+     **Bandeau en haut** : Nouveau / Ouvrir / Enregistrer et nom du fichier, puis les réglages du Quick sim (nombre de
+     simulations, graine, Lancer, progression, Annuler). Erreurs de validation affichées comme au Quick sim. Mêmes
+     raccourcis clavier. À la fin d'une simulation, ouverture de l'écran des résultats ; annulée, on reste sur la saisie.
+   - **Écran des résultats** (`/full-sim/results`, même fenêtre, décision de l'utilisateur) : un onglet par graphique
+     ou tableau de bord ; en-tête (scénario, simulations, graine, durée) ; retour à la saisie. Sans résultat : message
+     qui renvoie à la saisie.
+   - **Premier onglet « Distributions »** : le contenu des tableaux du Quick sim en **vrai histogramme** (décision de
+     l'utilisateur) : figurines tuées et PV retirés, barres P(= k) et courbe P(≥ k), infobulle au survol, bascule
+     « Afficher la marge » (prolongement au-delà de l'unité, comme au Quick sim).
+   - **Résultat séparé** du Quick sim (décision de l'utilisateur) : le Full sim a son propre résultat, son nombre de
+     simulations et sa graine dans `ScenarioSession` ; le scénario reste commun.
+   - Quick sim inchangé à l'écran ; ce que les deux écrans partagent (barre de fichiers, confirmation avant de perdre
+     une saisie, lancement et annulation) est mis en commun plutôt que copié.
+   - Tests bUnit : navigation saisie → résultats, Lancer désactivé si invalide, résultat séparé, onglet sans résultat.
+   - Retours de l'utilisateur intégrés (vérifiés sur captures) : libellés en mots (« Exactement », « Au moins »,
+     Quick sim compris) ; accueil en colonne ; tuiles du Quick sim en tête de l'onglet (`SummaryTiles`), titre en
+     bandeau au style du bouton Lancer, valeur à gauche, médiane / écart-type / 80 % à droite avec symboles et bulles
+     « ? » ; histogramme : courbe lissée monotone (`MonotoneCurve`) passant par les seules valeurs possibles, barres
+     « unité détruite » hachurées à 45°, moyenne en trait plein, limite de l'unité en pointillé, nombre exact sous
+     l'axe, légende complète (moyenne marge comprise expliquée) ; queue de droite des distributions filtrée sur
+     P(≥ k) (`DiscreteDistribution.Rows`, la colonne de l'unité ne disparaît plus avec la marge) ; cartes d'arme et
+     de groupe découpées en lignes (en-tête, « Profil », « Mots-clés » / « Protections », filets, grilles CSS),
+     bandeau du type d'arme (viseur / épées, Lucide) ; duplication d'un groupe ; champs de dés vérifiés à la sortie
+     du champ ; confirmation par partie (attaquant / défenseur) ; fenêtre desktop rouverte agrandie.
+7. **Rapport par groupe** (avec Precision).
+   - **Pertes par groupe** : distribution des figurines tuées de chaque groupe d'allocation ; % de kill par groupe
+     (P(groupe entièrement tué)), P(tuer le PERSONNAGE) pour chaque groupe PERSONNAGE, moyenne.
+   - **Precision** (décision de l'utilisateur, 2026-10-28) : part des pertes de PERSONNAGE (figurines et PV) **grâce
+     à Precision** : attaque allouée au PERSONNAGE visé alors qu'un garde du corps vivait encore (sans Precision, elle
+     serait allée sur un garde).
+   - Tests : dés imposés (Precision avec et sans garde du corps), % de kill par groupe cohérent avec P(unité détruite).
+8. **Rapport par arme** (avec les dégâts bruts).
+   - Dégâts bruts et gaspillage de l'étape 5 (distribution des bruts comparée aux PV retirés).
+   - PV retirés, figurines tuées, dégâts bruts (donc gaspillage) en moyenne et en part du total, **par pool** (armes
+     aux attaques identiques lancées ensemble, dés indiscernables), nommé d'après ses armes. Figurine attribuée à
+     l'attaque qui l'achève ; pertes réelles seulement (pas la marge).
+   - Tests : dés imposés (attribution au pool, attaque qui achève), sommes par arme = totaux.
+9. **Rapport en points** (#2).
+   - Saisie des points dans l'écran de saisie du Full sim (attaquant, chaque groupe du défenseur) ; points détruits
+     et rendement de l'étape 4.
+   - **Kill threat** (décision de l'utilisateur, 2026-10-28 : rentabilité) : distribution des points détruits par
+     simulation (au prorata des PV, en points entiers arrondis à l'inférieur : exact pour P(≥ son coût)),
+     P(détruire au moins sa propre valeur).
+   - **Tanking** (décision de l'utilisateur, 2026-10-28 : les deux) : valeur conservée (points du défenseur qui
+     survivent, en moyenne ; P(garder au moins la moitié de sa valeur), comptée exactement) et coût pour détruire
+     (points de l'attaquant × PV de l'unité / moyenne des PV retirés **excédent compris**, approximation linéaire).
+   - Tests : valeurs exactes en points. Tag intermédiaire proposé : `v0.3`.
+10. **Comparaison, côté Simulation.** Deux sens (#1) : N attaquants contre une cible, ou un attaquant contre N cibles ;
    situation commune. Même graine pour toutes les entrées (tirages partagés : écarts plus fiables). Indicateurs :
    moyennes, P(détruire l'unité), P(≥ k), % de l'unité détruite et points détruits (comparables entre cibles
    différentes) ; meilleure entrée pour chaque indicateur, ex æquo compris. JSON d'une comparaison ; console.
-9. **Comparaison, côté UI.** Entrées prises dans le scénario courant ou dans des fichiers (partiels ou complets),
+11. **Comparaison, côté UI.** Entrées prises dans le scénario courant ou dans des fichiers (partiels ou complets),
    dupliquées, renommées ; distributions superposées ; tableau côte à côte, meilleure entrée mise en évidence ;
-   ouvrir / enregistrer. Fin de phase : README, tag (`v0.3.1` si `v0.3` a été posé à l'étape 7).
+   ouvrir / enregistrer. Fin de phase : README, tag (`v0.3.1` si `v0.3` a été posé à l'étape 9).
 
 ## Décisions techniques
 
@@ -428,10 +491,15 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
   Les anciens fichiers avec `toughness` sur le défenseur sont refusés au chargement (JSON strict, testé).
 - **Tests aller-retour** : comparer les scénarios via `ScenarioJson.Serialize` (les records contenant des listes ne sont
   pas égaux par valeur).
-- **Composants (Wh40kSim.UI/Components)** : le scénario courant (`ScenarioForm`, fichier, modifications, dernier
-  résultat, nombre de simulations, graine, simulation en cours) est tenu par `ScenarioSession` (service scoped, enregistré
-  par `AddWh40kSimUI`), qui survit au changement d'écran ; `SimulatorPage` le revalide (`ToScenario()` puis
-  `Validate()`) à chaque `Changed` remonté par un panneau. Les options de situation dépendent du dernier scénario lisible
+- **Composants (Wh40kSim.UI/Components)** : le scénario courant (`ScenarioForm`, fichier, modifications, simulation en
+  cours) est tenu par `ScenarioSession` (service scoped, enregistré par `AddWh40kSimUI`), qui survit au changement
+  d'écran ; chaque mode y a ses réglages et son dernier résultat (`SimulationRun` : `QuickSim`, `FullSim`), effacés
+  tous deux quand un autre scénario est chargé. Les écrans de saisie (`SimulatorPage`, `FullSimPage`) héritent de
+  `ScenarioEditorPage` (fichiers, confirmation, validation, lancement, raccourcis ; `Run` désigne le mode,
+  `OnSimulationCompleted` la suite), avec `ScenarioToolbar` et `KeywordDrawer` en commun ; ils revalident le scénario
+  (`ToScenario()` puis `Validate()`) à chaque `Changed` remonté par un panneau. Graphiques : composants SVG maison
+  (`HistogramChart`), couleurs par le CSS (`--wh-accent` du camp), libellés en mots (« Exactement », « Au moins »)
+  plutôt qu'en notation P(= k) ; « 1 chance sur N » essayé puis retiré (redondant avec le pourcentage). Les options de situation dépendent du dernier scénario lisible
   (stable pendant une saisie de dés invalide). Listes « aucune » / « premier PERSONNAGE » : valeur sentinelle (0, "")
   convertie en null dans le composant. Textes : `IStringLocalizer<Strings>` injecté dans `_Imports.razor`, un seul
   `Resources/Strings.resx` (clé `Zone_Élément`), `StringsTests` vérifie qu'aucune clé ne manque ni ne traîne.
@@ -452,7 +520,8 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
   panneau ; dans un panneau en demi-largeur, n'utiliser que `xs` / `sm`.
 - **Hôte desktop (Wh40kSim.Desktop)** : réduit au minimum. Toute l'interface est `AppShell` (Wh40kSim.UI) :
   fournisseurs MudBlazor, barre de titre (retour à l'accueil, nom de l'écran, menu des thèmes), puis le routeur Blazor
-  vers les écrans (`HomePage` `/`, `SimulatorPage` `/quick-sim` ; adresses dans `AppRoutes`). Ouverture d'un écran
+  vers les écrans (`HomePage` `/`, `SimulatorPage` `/quick-sim`, `FullSimPage` `/full-sim`, `FullSimResultsPage`
+  `/full-sim/results` ; adresses dans `AppRoutes`). Ouverture d'un écran
   depuis l'accueil par `ScreenNavigator` : barre de chargement dessinée avant la construction de l'écran (première
   construction lente : compilation à la volée), retirée ensuite. Pas de `RegisterLocationChangingHandler` asynchrone :
   bUnit ne termine pas la navigation dans ce cas. Réutilisable tel quel par
@@ -539,11 +608,15 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
   Quick sim à la demande de l'utilisateur (saisie au Full sim).
 - Skill `/debut-journee` (synchronisation, build et tests complets, point du jour) : fusionné dans `main`.
   340 tests verts (172 Core, 48 Simulation, 120 UI).
-- Phase 3, étape 5 (dégâts bruts, #6) : fusionnée dans `main` (ticket #6 fermé). Prochaine étape : 6 (statistiques
-  détaillées, côté Simulation), à préciser avec l'utilisateur (définitions des analyses en points). 349 tests verts (178 Core, 51 Simulation, 120 UI) ; `NonRegressionTests` inchangés (aucun dé supplémentaire).
+- Phase 3, étape 5 (dégâts bruts, #6) : fusionnée dans `main` (ticket #6 fermé). 349 tests verts (178 Core,
+  51 Simulation, 120 UI) ; `NonRegressionTests` inchangés (aucun dé supplémentaire).
   Gaspillage déduit des moyennes (bruts - PV retirés et excédent), sans distribution propre.
-- Skill `/voir-sc` (capture d'écran du presse-papiers) : fusionné dans `main`, pendant l'étape 6 (branche
-  `phase3/etape6-full-sim-squelette`, en cours).
+- Fin de la phase 3 redécoupée le 2026-10-28 (Full sim écran par écran, voir « Phase 3 : étapes ») ; définitions
+  du kill threat, du tanking et de la part de Precision arrêtées avec l'utilisateur (étapes 7 et 9).
+- Skill `/voir-sc` (capture d'écran du presse-papiers) : fusionné dans `main`, pendant l'étape 6.
+- Phase 3, étape 6 (Full sim : squelette et graphiques) : fusionnée dans `main`. 377 tests verts (178 Core,
+  52 Simulation, 147 UI) ; `NonRegressionTests` inchangés. Prochaine étape : 7 (rapport par groupe, avec Precision),
+  à préciser.
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

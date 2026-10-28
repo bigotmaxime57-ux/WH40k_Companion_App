@@ -116,15 +116,17 @@ public sealed class DiscreteDistribution
 
     /// <summary>
     /// Lignes du tableau P(= k) / P(≥ k), sans les lignes négligeables aux extrémités (probabilité inférieure à
-    /// <paramref name="minProbability"/>). Les lignes négligeables situées entre deux lignes affichées sont gardées ;
-    /// il reste toujours au moins une ligne.
+    /// <paramref name="minProbability"/>) : au début, P(= k) ; à la fin, P(≥ k). Une queue étalée sur plusieurs valeurs
+    /// chacune négligeable (ex. les cas « unité détruite » répartis sur la marge) reste donc visible tant qu'on a une
+    /// chance réelle de l'atteindre. Les lignes négligeables situées entre deux lignes affichées sont gardées ; il reste
+    /// toujours au moins une ligne.
     /// </summary>
     public IReadOnlyList<DistributionRow> Rows(double minProbability = DefaultMinRowProbability)
     {
         int first = 0;
         while (first < MaxValue && ProbabilityExactly(first) < minProbability) first++;
         int last = MaxValue;
-        while (last > first && ProbabilityExactly(last) < minProbability) last--;
+        while (last > first && ProbabilityAtLeast(last) < minProbability) last--;
 
         var rows = new DistributionRow[last - first + 1];
         for (int k = first; k <= last; k++)

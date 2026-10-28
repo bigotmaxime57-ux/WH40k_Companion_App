@@ -4,7 +4,10 @@ using Wh40kSim.UI.Theme;
 
 namespace Wh40kSim.Desktop;
 
-/// <summary>Application MAUI : une seule fenêtre, centrée, qui contient le BlazorWebView (<see cref="MainPage"/>).</summary>
+/// <summary>
+/// Application MAUI : une seule fenêtre, centrée, qui contient le BlazorWebView (<see cref="MainPage"/>) ; rouverte
+/// agrandie si elle l'était à la dernière fermeture.
+/// </summary>
 public partial class App : Application
 {
     private const double PreferredWidth = 1400;
@@ -34,7 +37,7 @@ public partial class App : Application
         // Thème connu avant le premier affichage : choix mémorisé, sinon celui qui correspond au mode de Windows
         var theme = _preferences.GetTheme() ?? Wh40kTheme.Default(RequestedTheme == AppTheme.Dark);
 
-        return new Window(new MainPage(theme))
+        var window = new Window(new MainPage(theme))
         {
             Title = _title,
             Width = width,
@@ -44,5 +47,32 @@ public partial class App : Application
             MinimumWidth = MinimumWidth,
             MinimumHeight = MinimumHeight,
         };
+
+        // Agrandie ou non : mémorisé à la fermeture, rétabli à l'ouverture (la taille normale reste celle ci-dessus)
+        window.Created += (_, _) =>
+        {
+            if (_preferences.WindowMaximized)
+            {
+                SetMaximized(window);
+            }
+        };
+        window.Destroying += (_, _) => _preferences.WindowMaximized = IsMaximized(window);
+        return window;
     }
+
+#if WINDOWS
+    private static Microsoft.UI.Windowing.OverlappedPresenter? Presenter(Window window) =>
+        (window.Handler?.PlatformView as Microsoft.UI.Xaml.Window)?.AppWindow.Presenter as Microsoft.UI.Windowing.OverlappedPresenter;
+
+    private static void SetMaximized(Window window) => Presenter(window)?.Maximize();
+
+    private static bool IsMaximized(Window window) =>
+        Presenter(window)?.State == Microsoft.UI.Windowing.OverlappedPresenterState.Maximized;
+#else
+    private static void SetMaximized(Window window)
+    {
+    }
+
+    private static bool IsMaximized(Window window) => false;
+#endif
 }

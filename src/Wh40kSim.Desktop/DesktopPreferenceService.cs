@@ -10,6 +10,14 @@ namespace Wh40kSim.Desktop;
 public sealed class DesktopPreferenceService(IPreferences preferences) : IPreferenceService
 {
     private const string ThemeKey = "theme";
+    private const string WindowMaximizedKey = "window-maximized";
+
+    /// <summary>La fenêtre était agrandie (plein écran) à la dernière fermeture : on la rouvre agrandie.</summary>
+    public bool WindowMaximized
+    {
+        get => preferences.Get(WindowMaximizedKey, false);
+        set => preferences.Set(WindowMaximizedKey, value);
+    }
 
     /// <summary>Thème mémorisé, ou null s'il n'y en a pas (ou si la valeur enregistrée n'est plus un thème connu).</summary>
     public ThemeChoice? GetTheme() =>

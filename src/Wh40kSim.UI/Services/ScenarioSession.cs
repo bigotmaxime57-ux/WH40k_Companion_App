@@ -1,12 +1,11 @@
-using Wh40kSim.Simulation;
 using Wh40kSim.UI.Forms;
 
 namespace Wh40kSim.UI.Services;
 
 /// <summary>
-/// Scénario courant de l'application et ce qui l'accompagne (fichier, modifications, dernier résultat, réglages de la
-/// simulation) : il survit au changement d'écran et sera partagé par le Quick sim et le Full sim. Service « scoped » :
-/// une instance par fenêtre en desktop, par onglet en web.
+/// Scénario courant de l'application et ce qui l'accompagne (fichier, modifications, puis réglages et dernier résultat
+/// de chaque mode) : il survit au changement d'écran et il est partagé par le Quick sim et le Full sim. Service
+/// « scoped » : une instance par fenêtre en desktop, par onglet en web.
 /// </summary>
 public sealed class ScenarioSession
 {
@@ -21,12 +20,27 @@ public sealed class ScenarioSession
     /// <summary>Le formulaire a été modifié depuis le dernier « Nouveau », « Ouvrir » ou « Enregistrer ».</summary>
     public bool IsDirty { get; set; }
 
-    /// <summary>Résultat de la dernière simulation, effacé quand un autre scénario est chargé.</summary>
-    public SimulationResult? Result { get; set; }
+    /// <summary>
+    /// L'attaquant a été modifié à la main depuis son dernier chargement ou enregistrement (scénario ou fichier
+    /// attaquant) : décide de la confirmation avant de le remplacer par un autre.
+    /// </summary>
+    public bool AttackerDirty { get; set; }
 
-    public int Iterations { get; set; } = 1_000_000;
+    /// <summary>Même chose pour le défenseur (voir <see cref="AttackerDirty"/>).</summary>
+    public bool DefenderDirty { get; set; }
 
-    public int? Seed { get; set; }
+    /// <summary>Réglages et résultat du Quick sim.</summary>
+    public SimulationRun QuickSim { get; } = new();
+
+    /// <summary>Réglages et résultat du Full sim, séparés de ceux du Quick sim (décision de l'utilisateur).</summary>
+    public SimulationRun FullSim { get; } = new();
+
+    /// <summary>Un autre scénario est chargé : les résultats des deux modes ne lui correspondent plus.</summary>
+    public void ClearResults()
+    {
+        QuickSim.Result = null;
+        FullSim.Result = null;
+    }
 
     /// <summary>Une simulation est en cours : on ne quitte pas l'écran tant qu'elle n'est pas finie ou annulée.</summary>
     public bool IsRunning

@@ -1,52 +1,38 @@
 @*
     Écran « Quick sim » : saisie du scénario à gauche ; erreurs, simulation et résultats à droite (colonne qui reste
     visible au défilement) ; sélecteur de mots-clés dans un panneau latéral. Ouvert depuis l'accueil (route
-    AppRoutes.QuickSim), dans la mise en page d'AppShell. Raccourcis : Ctrl+Entrée lancer, Ctrl+S enregistrer, Ctrl+O ouvrir.
+    AppRoutes.QuickSim), dans la mise en page d'AppShell. Logique commune avec le Full sim : ScenarioEditorPage.
 *@
 @page "/quick-sim"
-@using Wh40kSim.UI.Keywords
+@inherits ScenarioEditorPage
 
 <MudStack Spacing="3" Class="pa-4">
-    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-        <MudTooltip Text="@L["Toolbar_NewHelp"]">
-            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.NoteAdd" Disabled="Running" OnClick="NewScenarioAsync"
-                       data-test="new">@L["Toolbar_New"]</MudButton>
-        </MudTooltip>
-        <MudTooltip Text="@L["Toolbar_OpenHelp"]">
-            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.FolderOpen" Disabled="Running" OnClick="OpenAsync"
-                       data-test="open">@L["Toolbar_Open"]</MudButton>
-        </MudTooltip>
-        <MudTooltip Text="@L["Toolbar_SaveHelp"]">
-            <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Save" Disabled="@(!CanSave)" OnClick="SaveAsync"
-                       data-test="save">@L["Toolbar_Save"]</MudButton>
-        </MudTooltip>
-        <MudText Typo="Typo.body2" data-test="file-name">@FileLabel</MudText>
-    </MudStack>
+    <ScenarioToolbar Running="Running" CanSave="CanSave" FileLabel="@FileLabel" OnNew="NewScenarioAsync" OnOpen="OpenAsync" OnSave="SaveAsync" />
 
-    @if (_message is not null)
+    @if (Message is not null)
     {
-        <MudAlert Severity="_messageSeverity" ShowCloseIcon="true" CloseIconClicked="() => _message = null" data-test="message">@_message</MudAlert>
+        <MudAlert Severity="MessageSeverity" ShowCloseIcon="true" CloseIconClicked="ClearMessage" data-test="message">@Message</MudAlert>
     }
 
     <MudGrid Spacing="3">
         <MudItem xs="12" lg="7">
             <MudStack Spacing="3">
-                <AttackerPanel Attacker="Form.Attacker" Changed="OnFormChanged" EditKeywords="EditKeywords"
+                <AttackerPanel Attacker="Form.Attacker" Changed="OnAttackerChanged" EditKeywords="EditKeywords"
                                OnOpen="OpenAttackerAsync" OnSave="SaveAttackerAsync" FileActionsDisabled="Running" SaveDisabled="!CanSaveAttacker" />
-                <DefenderPanel Defender="Form.Defender" Changed="OnFormChanged"
+                <DefenderPanel Defender="Form.Defender" Changed="OnDefenderChanged"
                                OnOpen="OpenDefenderAsync" OnSave="SaveDefenderAsync" FileActionsDisabled="Running" />
-                <ContextPanel Context="Form.Context" Reference="_reference" Changed="OnFormChanged" />
+                <ContextPanel Context="Form.Context" Reference="Reference" Changed="OnFormChanged" />
             </MudStack>
         </MudItem>
         <MudItem xs="12" lg="5">
             <div class="wh-sticky-column">
                 <MudStack Spacing="3">
-                    <ScenarioErrors Errors="_errors" HasDiceErrors="_hasDiceErrors" />
-                    <SimulationPanel @bind-Iterations="Session.Iterations" @bind-Seed="Session.Seed" CanRun="CanRun" Running="Running" Progress="_progress"
+                    <ScenarioErrors Errors="Errors" HasDiceErrors="HasDiceErrors" />
+                    <SimulationPanel @bind-Iterations="Run.Iterations" @bind-Seed="Run.Seed" CanRun="CanRun" Running="Running" Progress="Progress"
                                      OnRun="RunAsync" OnCancel="Cancel" />
-                    @if (Session.Result is not null)
+                    @if (Run.Result is not null)
                     {
-                        <ResultsView Result="Session.Result" />
+                        <ResultsView Result="Run.Result" />
                     }
                 </MudStack>
             </div>
@@ -54,16 +40,8 @@
     </MudGrid>
 </MudStack>
 
-<MudDrawer Open="_keywordWeapon is not null" OpenChanged="OnKeywordPanelOpenChanged" Anchor="Anchor.End" Variant="DrawerVariant.Temporary"
-           Overlay="false" ClipMode="DrawerClipMode.Always" Width="440px" Elevation="6" Class="wh-keyword-panel" data-test="keyword-panel">
-    @if (_keywordWeapon is not null)
-    {
-        <div class="pa-4">
-            <SectionHeader Icon="@Icons.Material.Filled.Sell" Title="@L["Keywords_Title"]">
-                <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" OnClick="CloseKeywords" data-test="close-keywords" />
-            </SectionHeader>
-            <MudText Typo="Typo.body2" Class="mb-3">@L["Keywords_ForWeapon", _keywordWeapon.Name]</MudText>
-            <KeywordPicker TTarget="WeaponAbilitiesForm" Target="_keywordWeapon.Abilities" Definitions="WeaponKeywords.All" Changed="OnFormChanged" />
-        </div>
-    }
-</MudDrawer>
+<KeywordDrawer Weapon="KeywordWeapon" OnClose="CloseKeywords" Changed="OnAttackerChanged" />
+
+@code {
+    protected override SimulationRun Run => Session.QuickSim;
+}

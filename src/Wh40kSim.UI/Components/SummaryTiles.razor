@@ -1,0 +1,63 @@
+@*
+    Tuiles de synthèse d'un résultat : figurines tuées et PV retirés en moyenne, probabilité de détruire l'unité.
+    Partagées par le Quick sim (ResultsView) et le Full sim (onglet Distributions). La marge s'affiche sous la moyenne
+    sans la remplacer : les tuiles restent les pertes réelles, plafonnées à l'unité.
+*@
+
+<div class="wh-tiles my-3">
+    <StatTile Label="@L["Results_Kills"]" Value="@Result.Kills.Mean.ToString("F2")" Stats="@Stats(Result.Kills)" data-test="tile-kills">
+        @if (Extended)
+        {
+            @MarginLine(Result.KillMarginWhenWiped, L["Results_MarginKillsHelp", ExcessModel], "margin-kills")
+        }
+    </StatTile>
+    <StatTile Label="@L["Results_Damage"]" Value="@Result.Damage.Mean.ToString("F2")" Stats="@Stats(Result.Damage)" data-test="tile-damage">
+        @if (Extended)
+        {
+            @MarginLine(Result.DamageMarginWhenWiped, L["Results_MarginDamageHelp", ExcessModel], "margin-damage")
+        }
+    </StatTile>
+    <StatTile Label="@L["Results_Wipe"]" Value="@Result.ProbabilityWipe.ToString("P1")" Tone="WipeTone" data-test="wipe" />
+</div>
+
+@code {
+    /// <summary>Seuils de fiabilité de la destruction de l'unité (choix de l'utilisateur) : rouge en dessous, vert au-delà.</summary>
+    public const double WipeUnreliableBelow = 0.50;
+
+    public const double WipeReliableAbove = 0.84;
+
+    [Parameter, EditorRequired]
+    public SimulationResult Result { get; set; } = null!;
+
+    /// <summary>Marge affichée sous les moyennes (« Afficher la marge »).</summary>
+    [Parameter]
+    public bool Extended { get; set; }
+
+    private StatTile.TileTone WipeTone => Result.ProbabilityWipe switch
+    {
+        < WipeUnreliableBelow => StatTile.TileTone.Bad,
+        > WipeReliableAbove => StatTile.TileTone.Good,
+        _ => StatTile.TileTone.Neutral,
+    };
+
+    /// <summary>Profil des figurines virtuelles de la marge (premier garde du corps), décrit pour une figurine.</summary>
+    private string ExcessModel => (Result.ExcessProfile with { Count = 1 }).Describe();
+
+    /// <summary>
+    /// Marge sous la moyenne d'une tuile, « +1,33 (Marge) », expliquée par une bulle « ? ». Un tiret si l'unité n'est
+    /// jamais détruite : la marge n'est alors pas définie (l'interrupteur est d'ailleurs masqué).
+    /// </summary>
+    private RenderFragment MarginLine(double value, string help, string test) =>
+        @<div class="wh-tile-margin">
+            <span class="wh-tile-margin-value" data-test="@test">@L["Results_MarginValue", Result.ProbabilityWipe > 0 ? "+" + value.ToString("F2") : "—"]</span>
+            <HelpBubble Lines="@([help])" />
+        </div>;
+
+    /// <summary>Médiane, écart-type et fourchette des 80 % centraux, avec une explication pour chacun.</summary>
+    private List<StatTile.Stat> Stats(DiscreteDistribution distribution) =>
+    [
+        new("½", L["Tile_Median"], distribution.Median.ToString(), L["Help_Median"]),
+        new("±", L["Tile_StdDev"], distribution.StdDev.ToString("F2"), L["Help_StdDev"]),
+        new("↔", L["Tile_CentralRange"], L["Tile_RangeValue", distribution.CentralRange.Low, distribution.CentralRange.High], L["Help_CentralRange"]),
+    ];
+}

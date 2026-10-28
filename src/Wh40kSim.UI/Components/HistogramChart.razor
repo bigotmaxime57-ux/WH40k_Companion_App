@@ -1,0 +1,209 @@
+@*
+    Histogramme d'une distribution, en SVG : barres « exactement k » (axe de gauche), courbe « au moins k » (axe de
+    droite, 0 à 100 %) et trait plein de la moyenne (expliqué en légende), sur le même graphique ; infobulle au survol d'une
+    colonne. Sans les valeurs négligeables aux extrémités (comme les tableaux). Couleurs tirées du CSS (--wh-accent) :
+    elles suivent le thème et le camp de la section qui l'entoure. Les barres où l'unité est détruite (unité entière,
+    et au-delà pour une distribution prolongée) sont hachurées à 45° ; pour une distribution prolongée (Extended), les
+    colonnes au-delà de l'unité (la marge) sont aussi atténuées et séparées par un pointillé ; leur infobulle donne le
+    détail « 7 (5 + 2) ».
+*@
+@using System.Globalization
+
+<div class="wh-chart" data-test="histogram">
+    <svg viewBox="0 0 @F(Width) @F(Height)" role="img" aria-label="@Title">
+        @* Hachures à 45° des barres « unité détruite » : identifiant propre à ce graphique (plusieurs par page) *@
+        <defs>
+            <pattern id="@_hatchId" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                <line class="wh-chart-hatch-line" x1="0" y1="0" x2="0" y2="6" />
+            </pattern>
+        </defs>
+        @* Grille et axe de gauche (exactement k) *@
+        @foreach (double tick in _leftTicks)
+        {
+            <g>
+                <line class="wh-chart-grid" x1="@F(Left)" y1="@F(Y(tick / _maxExactly))" x2="@F(Width - Right)" y2="@F(Y(tick / _maxExactly))" />
+                <text class="wh-chart-axis" x="@F(Left - 6)" y="@F(Y(tick / _maxExactly) + 4)" text-anchor="end">@tick.ToString("P0")</text>
+            </g>
+        }
+        @* Axe de droite (au moins k) *@
+        @foreach (double tick in RightTicks)
+        {
+            <g><text class="wh-chart-axis wh-chart-axis-curve" x="@F(Width - Right + 6)" y="@F(Y(tick) + 4)">@tick.ToString("P0")</text></g>
+        }
+
+        @for (int i = 0; i < _rows.Count; i++)
+        {
+            var row = _rows[i];
+            double height = Bottom - Y(row.Exactly / _maxExactly);
+            <rect class="@BarClass(i)" x="@F(ColumnX(i) + ColumnWidth * 0.12)" y="@F(Bottom - height)"
+                  width="@F(ColumnWidth * 0.76)" height="@F(height)" data-test="chart-bar" />
+            @if (IsWiped(row.Value))
+            {
+                <rect x="@F(ColumnX(i) + ColumnWidth * 0.12)" y="@F(Bottom - height)" width="@F(ColumnWidth * 0.76)" height="@F(height)"
+                      fill="@($"url(#{_hatchId})")" data-test="chart-hatch" />
+            }
+            @if (ShowLabel(i))
+            {
+                <g><text class="wh-chart-axis" x="@F(ColumnX(i) + ColumnWidth / 2)" y="@F(Height - 8)" text-anchor="middle">@row.Value</text></g>
+            }
+        }
+
+        @if (_firstBeyond >= 0)
+        {
+            <line class="wh-chart-limit" x1="@F(ColumnX(_firstBeyond))" y1="@F(Top)" x2="@F(ColumnX(_firstBeyond))" y2="@F(Bottom)" />
+        }
+
+        <line class="wh-chart-mean" x1="@F(MeanX)" y1="@F(Top)" x2="@F(MeanX)" y2="@F(Bottom)" data-test="chart-mean" />
+
+        @* Courbe lissée (monotone) par les seules valeurs qui arrivent : pas d'escalier sur les valeurs impossibles *@
+        <path class="wh-chart-curve" d="@_curvePath" data-test="chart-curve" />
+        @foreach (int i in _curveColumns)
+        {
+            <circle class="wh-chart-dot" cx="@F(ColumnX(i) + ColumnWidth / 2)" cy="@F(Y(_rows[i].AtLeast))" r="@(_hover == i ? "4.5" : "2.5")" />
+        }
+
+        @* Zones de survol, par-dessus le reste : toute la hauteur de la colonne *@
+        @for (int i = 0; i < _rows.Count; i++)
+        {
+            int index = i;
+            <rect class="wh-chart-hit" x="@F(ColumnX(i))" y="@F(Top)" width="@F(ColumnWidth)" height="@F(Bottom - Top)"
+                  @onmouseover="() => _hover = index" @onmouseout="() => _hover = null" data-test="chart-column" />
+        }
+    </svg>
+
+    @if (_hover is int hovered)
+    {
+        var row = _rows[hovered];
+        <div class="wh-chart-tooltip" style="left: @F(Math.Clamp((ColumnX(hovered) + ColumnWidth / 2) / Width * 100, 12, 88))%" data-test="chart-tooltip">
+            <strong>@string.Format(ValueTitle, TooltipLabel(row.Value))</strong><br />
+            @L["Chart_Exactly"] : @row.Exactly.ToString("P1")<br />
+            @L["Chart_AtLeast"] : @row.AtLeast.ToString("P1")
+            @if (IsWiped(row.Value))
+            {
+                <span><br /><em>@L["Chart_WipedTooltip"]</em></span>
+            }
+        </div>
+    }
+
+    <div class="wh-chart-legend">
+        <span><i class="wh-chart-swatch-bar"></i>@L["Chart_Exactly"]</span>
+        @if (_rows.Any(r => IsWiped(r.Value)))
+        {
+            <span data-test="legend-wiped"><i class="wh-chart-swatch-hatch"></i>@L["Chart_WipedTooltip"]</span>
+        }
+        <span><i class="wh-chart-swatch-curve"></i>@L["Chart_AtLeastAxis"]</span>
+        <span data-test="legend-mean">
+            <i class="wh-chart-swatch-mean"></i>@(Extended ? L["Chart_MeanExtended", Distribution.Mean.ToString("F2")] : L["Chart_Mean", Distribution.Mean.ToString("F2")])
+            @if (Extended && MeanHelp is not null)
+            {
+                <HelpBubble Lines="@([MeanHelp])" />
+            }
+        </span>
+        @if (_firstBeyond >= 0)
+        {
+            <span data-test="legend-limit"><i class="wh-chart-swatch-limit"></i>@L["Chart_UnitLimit"]</span>
+        }
+    </div>
+</div>
+
+@code {
+    // Repère du SVG (agrandi à la largeur disponible, texte compris)
+    private const double Width = 640, Height = 280, Left = 46, Right = 44, Top = 12, Bottom = 250;
+    private static readonly double[] RightTicks = [0, 0.25, 0.5, 0.75, 1];
+
+    private IReadOnlyList<DistributionRow> _rows = [];
+    private double _maxExactly = 1;
+    private double[] _leftTicks = [];
+    private int _firstBeyond = -1;   // première colonne de la marge (distribution prolongée), -1 sinon
+    private readonly string _hatchId = "wh-hatch-" + Guid.NewGuid().ToString("N");
+    private List<int> _curveColumns = [];
+    private string _curvePath = "";
+    private int? _hover;
+
+    [Parameter, EditorRequired]
+    public DiscreteDistribution Distribution { get; set; } = null!;
+
+    /// <summary>Nom du graphique pour les lecteurs d'écran.</summary>
+    [Parameter]
+    public string Title { get; set; } = "";
+
+    /// <summary>Titre de l'infobulle, {0} = valeur survolée (ex. « Figurines tuées : {0} »).</summary>
+    [Parameter, EditorRequired]
+    public string ValueTitle { get; set; } = "{0}";
+
+    /// <summary>Effectif de l'unité (figurines ou PV) : sa colonne est celle de l'unité détruite.</summary>
+    [Parameter]
+    public int? UnitSize { get; set; }
+
+    /// <summary>Distribution prolongée au-delà de l'unité (marge) : colonnes suivantes atténuées et notées « 5 + 2 ».</summary>
+    [Parameter]
+    public bool Extended { get; set; }
+
+    /// <summary>
+    /// Explication de la moyenne d'une distribution prolongée (bulle « ? » de la légende) : elle porte sur toutes les
+    /// simulations, alors que la marge des tuiles ne compte que celles où l'unité est détruite.
+    /// </summary>
+    [Parameter]
+    public string? MeanHelp { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        _rows = Distribution.Rows();
+        double max = _rows.Max(r => r.Exactly);
+        double step = NiceStep(max / 4);
+        _maxExactly = Math.Max(step, Math.Ceiling(max / step - 1e-9) * step);
+        _leftTicks = Enumerable.Range(0, (int)Math.Round(_maxExactly / step) + 1).Select(i => i * step).ToArray();
+        var values = _rows.Select(r => r.Value).ToList();
+        _firstBeyond = Extended && UnitSize is int size ? values.FindIndex(v => v > size) : -1;
+        _curveColumns = CurveColumns();
+        _curvePath = MonotoneCurve.ToSvgPath(_curveColumns.Select(i => (ColumnX(i) + ColumnWidth / 2, Y(_rows[i].AtLeast))).ToList());
+        _hover = null;
+    }
+
+    private double ColumnWidth => (Width - Left - Right) / _rows.Count;
+
+    private double ColumnX(int i) => Left + i * ColumnWidth;
+
+    /// <summary>Les lignes se suivent sans trou : la moyenne se place entre les centres des colonnes.</summary>
+    private double MeanX => ColumnX(0) + (Distribution.Mean - _rows[0].Value + 0.5) * ColumnWidth;
+
+    private static double Y(double fraction) => Bottom - fraction * (Bottom - Top);
+
+    /// <summary>
+    /// Colonnes par lesquelles passe la courbe « au moins » : celles dont la valeur arrive (barre non nulle). Une valeur
+    /// impossible (ex. un nombre impair de PV avec des armes à 2 dégâts) ne fait que prolonger un palier, d'où l'escalier.
+    /// </summary>
+    private List<int> CurveColumns()
+    {
+        var columns = Enumerable.Range(0, _rows.Count).Where(i => _rows[i].Exactly > 0).ToList();
+        return columns.Count >= 2 ? columns : Enumerable.Range(0, _rows.Count).ToList();
+    }
+
+    private string BarClass(int i) =>
+        "wh-chart-bar" + (_firstBeyond >= 0 && i >= _firstBeyond ? " wh-chart-bar-beyond" : "") + (_hover == i ? " wh-chart-bar-hover" : "");
+
+    /// <summary>Au plus une vingtaine de graduations sous l'axe, pour rester lisible.</summary>
+    private bool ShowLabel(int i) => i % (int)Math.Ceiling(_rows.Count / 20.0) == 0;
+
+    /// <summary>Unité détruite : valeur égale à l'effectif de l'unité, ou au-delà (marge).</summary>
+    private bool IsWiped(int value) => UnitSize is int size && value >= size;
+
+    /// <summary>
+    /// Valeur dans l'infobulle : au-delà de l'unité (marge), suivie du détail « (11 + 2) ». Sous l'axe, le nombre seul
+    /// (le détail y devenait illisible).
+    /// </summary>
+    private string TooltipLabel(int value) =>
+        Extended && UnitSize is int size && value > size ? $"{value} ({L["Results_Beyond", size, value - size]})" : value.ToString();
+
+    /// <summary>Pas « rond » (1, 2 ou 5 × 10^n) proche de <paramref name="raw"/>.</summary>
+    private static double NiceStep(double raw)
+    {
+        if (raw <= 0) return 0.05;
+        double magnitude = Math.Pow(10, Math.Floor(Math.Log10(raw)));
+        double n = raw / magnitude;
+        return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * magnitude;
+    }
+
+    /// <summary>Coordonnée SVG : point décimal quelle que soit la culture de l'appli (fr-FR écrirait une virgule).</summary>
+    private static string F(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+}

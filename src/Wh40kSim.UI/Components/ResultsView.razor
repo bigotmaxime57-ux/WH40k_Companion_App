@@ -5,27 +5,12 @@
 
 <MudPaper Elevation="3" Class="pa-4 wh-section" data-test="results">
     <SectionHeader Icon="@Icons.Material.Filled.Assessment" Title="@L["Results_Title"]"
-                   Help="@([L["Help_Wipe", WipeUnreliableBelow.ToString("P0"), WipeReliableAbove.ToString("P0")], L["Help_Results"]])" />
+                   Help="@([L["Help_Wipe", SummaryTiles.WipeUnreliableBelow.ToString("P0"), SummaryTiles.WipeReliableAbove.ToString("P0")], L["Help_Results"]])" />
     <MudText Typo="Typo.caption" GutterBottom="true" data-test="results-header">
         @L["Results_Header", Result.Iterations.ToString("N0"), Result.Elapsed.TotalSeconds.ToString("F2"), Result.Seed]
     </MudText>
 
-    @* La marge s'affiche sous la moyenne sans la remplacer : les tuiles restent les pertes réelles, plafonnées à l'unité *@
-    <div class="wh-tiles my-3">
-        <StatTile Label="@L["Results_Kills"]" Value="@Result.Kills.Mean.ToString("F2")" Detail="@Detail(Result.Kills)" data-test="tile-kills">
-            @if (_extended)
-            {
-                @MarginLine(Result.KillMarginWhenWiped, L["Results_MarginKillsHelp", ExcessModel], "margin-kills")
-            }
-        </StatTile>
-        <StatTile Label="@L["Results_Damage"]" Value="@Result.Damage.Mean.ToString("F2")" Detail="@Detail(Result.Damage)" data-test="tile-damage">
-            @if (_extended)
-            {
-                @MarginLine(Result.DamageMarginWhenWiped, L["Results_MarginDamageHelp", ExcessModel], "margin-damage")
-            }
-        </StatTile>
-        <StatTile Label="@L["Results_Wipe"]" Value="@Result.ProbabilityWipe.ToString("P1")" Tone="WipeTone" data-test="wipe" />
-    </div>
+    <SummaryTiles Result="Result" Extended="_extended" />
 
     @if (Result.ProbabilityWipe > 0)
     {
@@ -55,24 +40,12 @@
         </tbody>
     </MudSimpleTable>
 
-    <DistributionTable Title="@L["Results_Kills"]" Distribution="Kills" UnitSize="@(_extended ? Result.TotalModels : null)" />
-    <DistributionTable Title="@L["Results_Damage"]" Distribution="Damage" UnitSize="@(_extended ? Result.TotalWounds : null)" />
+    <DistributionTable Title="@L["Results_Kills"]" ValueHeader="@L["Results_KillsShort"]" Distribution="Kills" UnitSize="@(_extended ? Result.TotalModels : null)" />
+    <DistributionTable Title="@L["Results_Damage"]" ValueHeader="@L["Results_DamageShort"]" Distribution="Damage" UnitSize="@(_extended ? Result.TotalWounds : null)" />
 </MudPaper>
 
 @code {
-    /// <summary>Seuils de fiabilité de la destruction de l'unité (choix de l'utilisateur) : rouge en dessous, vert au-delà.</summary>
-    private const double WipeUnreliableBelow = 0.50;
-
-    private const double WipeReliableAbove = 0.84;
-
     private bool _extended;
-
-    private StatTile.TileTone WipeTone => Result.ProbabilityWipe switch
-    {
-        < WipeUnreliableBelow => StatTile.TileTone.Bad,
-        > WipeReliableAbove => StatTile.TileTone.Good,
-        _ => StatTile.TileTone.Neutral,
-    };
 
     [Parameter, EditorRequired]
     public SimulationResult Result { get; set; } = null!;
@@ -80,21 +53,8 @@
     /// <summary>Profil des figurines virtuelles de la marge (premier garde du corps), décrit pour une figurine.</summary>
     private string ExcessModel => (Result.ExcessProfile with { Count = 1 }).Describe();
 
-    /// <summary>
-    /// Marge sous la moyenne d'une tuile, « +1,33 (Marge) », expliquée par une bulle « ? ». Un tiret si l'unité n'est
-    /// jamais détruite : la marge n'est alors pas définie (l'interrupteur est d'ailleurs masqué).
-    /// </summary>
-    private RenderFragment MarginLine(double value, string help, string test) =>
-        @<div class="wh-tile-margin">
-            <span class="wh-tile-margin-value" data-test="@test">@L["Results_MarginValue", Result.ProbabilityWipe > 0 ? "+" + value.ToString("F2") : "—"]</span>
-            <HelpBubble Lines="@([help])" />
-        </div>;
-
     /// <summary>Distributions des tableaux : réelles, ou prolongées au-delà de la destruction de l'unité (marge).</summary>
     private DiscreteDistribution Kills => _extended ? Result.ExtendedKills : Result.Kills;
 
     private DiscreteDistribution Damage => _extended ? Result.ExtendedDamage : Result.Damage;
-
-    private string Detail(DiscreteDistribution distribution) => L["Results_TileDetail",
-        distribution.Median, distribution.StdDev.ToString("F2"), distribution.CentralRange.Low, distribution.CentralRange.High];
 }

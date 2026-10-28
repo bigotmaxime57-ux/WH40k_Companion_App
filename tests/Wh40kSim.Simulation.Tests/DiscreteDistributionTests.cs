@@ -86,6 +86,20 @@ public class DiscreteDistributionTests
     }
 
     [Fact]
+    public void A_tail_spread_over_several_negligible_values_stays_visible_while_it_can_be_reached()
+    {
+        // Sur 10 000 simulations, 10 (0,1 %) atteignent 3 ou plus, étalés sur 3 à 7 : chaque valeur seule est sous le
+        // seuil de 0,05 %, mais « au moins 3 » (0,1 %) et « au moins 4 » (0,06 %) ne le sont pas
+        long[] counts = [5_000, 4_990, 0, 4, 3, 1, 1, 1];
+        var distribution = new DiscreteDistribution(counts);
+
+        var rows = distribution.Rows(minProbability: 0.0005);
+
+        Assert.Equal([0, 1, 2, 3, 4], rows.Select(r => r.Value));
+        Assert.Equal(0.001, rows[3].AtLeast, precision: 10);
+    }
+
+    [Fact]
     public void Rows_always_keep_at_least_one_value()
     {
         var rows = new DiscreteDistribution([0, 0, 1]).Rows(minProbability: 2);

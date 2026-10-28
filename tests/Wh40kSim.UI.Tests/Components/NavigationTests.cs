@@ -22,6 +22,8 @@ public class NavigationTests() : ComponentTestContext(renderPopoverProvider: fal
     [Theory]
     [InlineData(typeof(HomePage), AppRoutes.Home)]
     [InlineData(typeof(SimulatorPage), AppRoutes.QuickSim)]
+    [InlineData(typeof(FullSimPage), AppRoutes.FullSim)]
+    [InlineData(typeof(FullSimResultsPage), AppRoutes.FullSimResults)]
     public void Routes_match_the_page_directives(Type page, string route)
     {
         var template = Assert.Single(page.GetCustomAttributes<RouteAttribute>()).Template;
@@ -64,7 +66,7 @@ public class NavigationTests() : ComponentTestContext(renderPopoverProvider: fal
     public void Entry_and_result_are_kept_after_a_trip_home()
     {
         var shell = OpenQuickSim();
-        shell.Find("input[data-test=attacks]").Input("D6+1");
+        shell.Find("input[data-test=attacks]").Change("D6+1");
         shell.Find("[data-test=run]").Click();
         shell.WaitForElement("[data-test=results]");
 

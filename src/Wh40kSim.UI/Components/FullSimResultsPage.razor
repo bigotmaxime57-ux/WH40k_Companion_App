@@ -1,0 +1,81 @@
+@*
+    Écran des résultats du Full sim : en-tête (scénario, simulations, graine, durée), retour à la saisie, puis un onglet
+    par graphique ou tableau de bord. Lit Session.FullSim.Result sans aucun calcul ; sans résultat, renvoie à la saisie.
+*@
+@page "/full-sim/results"
+@inject ScenarioSession Session
+@inject NavigationManager Navigation
+
+<MudStack Spacing="3" Class="pa-4">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Wrap="Wrap.Wrap">
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.ArrowBack" OnClick="BackToEntry"
+                   data-test="back-to-entry">@L["FullSim_BackToEntry"]</MudButton>
+        @if (Result is not null)
+        {
+            <MudText Typo="Typo.body2" data-test="results-header">
+                @L["FullSim_ResultsHeader", Result.Scenario.Attacker.Name, Result.Scenario.Defender.Name,
+                    Result.Iterations.ToString("N0"), Result.Seed, Result.Elapsed.TotalSeconds.ToString("F2")]
+            </MudText>
+        }
+    </MudStack>
+
+    @if (Result is null)
+    {
+        <MudAlert Severity="Severity.Info" data-test="no-result">@L["FullSim_NoResult"]</MudAlert>
+    }
+    else
+    {
+        <MudTabs Elevation="3" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="pa-4" Class="wh-results-tabs">
+            <MudTabPanel Text="@L["FullSim_TabDistributions"]" Icon="@Icons.Material.Filled.BarChart" data-test="tab-distributions">
+                <SummaryTiles Result="Result" Extended="_extended" />
+                @if (Result.ProbabilityWipe > 0)
+                {
+                    <div class="wh-subsection-title">
+                        <MudSwitch T="bool" Color="Color.Primary" Label="@L["Results_Extended"]" @bind-Value="_extended" data-test="extended" />
+                        <HelpBubble Lines="@([L["Help_Margin"], L["Help_MarginChart"]])" />
+                    </div>
+                    @if (_extended)
+                    {
+                        <MudText Typo="Typo.caption" Class="wh-muted d-block mt-1" data-test="excess-explanation">
+                            @L["Results_ExtendedHelp", (Result.ExcessProfile with { Count = 1 }).Describe()]
+                        </MudText>
+                    }
+                }
+                <MudGrid Spacing="3" Class="mt-1">
+                    <MudItem xs="12" lg="6">
+                        <MudPaper Elevation="2" Class="pa-4 wh-section wh-attacker">
+                            <SectionHeader Icon="@Icons.Material.Filled.PersonOff" Title="@L["Results_Kills"]" />
+                            <HistogramChart Distribution="@(_extended ? Result.ExtendedKills : Result.Kills)" Title="@L["Results_Kills"]"
+                                            ValueTitle="@L["Chart_KillsValue"]" UnitSize="Result.TotalModels" Extended="_extended"
+                                            MeanHelp="@ExtendedMeanHelp(Result.Kills, Result.KillMarginWhenWiped, Result.ExtendedKills)" />
+                        </MudPaper>
+                    </MudItem>
+                    <MudItem xs="12" lg="6">
+                        <MudPaper Elevation="2" Class="pa-4 wh-section wh-defender">
+                            <SectionHeader Icon="@Icons.Material.Filled.HeartBroken" Title="@L["Results_Damage"]" />
+                            <HistogramChart Distribution="@(_extended ? Result.ExtendedDamage : Result.Damage)" Title="@L["Results_Damage"]"
+                                            ValueTitle="@L["Chart_DamageValue"]" UnitSize="Result.TotalWounds" Extended="_extended"
+                                            MeanHelp="@ExtendedMeanHelp(Result.Damage, Result.DamageMarginWhenWiped, Result.ExtendedDamage)" />
+                        </MudPaper>
+                    </MudItem>
+                </MudGrid>
+            </MudTabPanel>
+        </MudTabs>
+    }
+</MudStack>
+
+@code {
+    private bool _extended;
+
+    private SimulationResult? Result => Session.FullSim.Result;
+
+    private void BackToEntry() => Navigation.NavigateTo(AppRoutes.FullSim);
+
+    /// <summary>
+    /// Pourquoi la moyenne marge comprise n'est pas « moyenne + marge » : la marge des tuiles ne compte que les
+    /// simulations où l'unité est détruite. Toutes les valeurs viennent du résultat, rien n'est recalculé ici.
+    /// </summary>
+    private string ExtendedMeanHelp(DiscreteDistribution real, double marginWhenWiped, DiscreteDistribution extended) =>
+        L["Help_ExtendedMean", real.Mean.ToString("F2"), marginWhenWiped.ToString("F2"),
+            Result!.ProbabilityWipe.ToString("P1"), extended.Mean.ToString("F2")];
+}

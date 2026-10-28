@@ -136,6 +136,12 @@
   <data name="Defender_RemoveGroup" xml:space="preserve">
     <value>Supprimer le groupe</value>
   </data>
+  <data name="Defender_DuplicateGroup" xml:space="preserve">
+    <value>Dupliquer le groupe</value>
+  </data>
+  <data name="Defender_CopyName" xml:space="preserve">
+    <value>{0} (copie)</value>
+  </data>
   <data name="Defender_SaveHelp" xml:space="preserve">
     <value>Enregistrer le défenseur seul (boosts compris), pour le réutiliser dans d'autres scénarios</value>
   </data>
@@ -451,8 +457,26 @@
   <data name="Results_LossesPerGroup" xml:space="preserve">
     <value>Pertes moyennes par groupe</value>
   </data>
-  <data name="Results_TileDetail" xml:space="preserve">
-    <value>médiane {0} · écart-type {1} · 80 % des cas : {2} à {3}</value>
+  <data name="Tile_Median" xml:space="preserve">
+    <value>Médiane</value>
+  </data>
+  <data name="Tile_StdDev" xml:space="preserve">
+    <value>Écart-type</value>
+  </data>
+  <data name="Tile_CentralRange" xml:space="preserve">
+    <value>80 % des cas</value>
+  </data>
+  <data name="Tile_RangeValue" xml:space="preserve">
+    <value>{0} à {1}</value>
+  </data>
+  <data name="Help_Median" xml:space="preserve">
+    <value>Médiane : la valeur du milieu. Dans la moitié des simulations, on fait au moins autant ; dans l'autre moitié, au plus autant. Contrairement à la moyenne, elle n'est pas tirée vers le haut par quelques résultats exceptionnels.</value>
+  </data>
+  <data name="Help_StdDev" xml:space="preserve">
+    <value>Écart-type : à quel point les résultats s'écartent de la moyenne. Petit, ils sont réguliers et restent proches de la moyenne ; grand, ils varient beaucoup d'une partie à l'autre (attaque plus aléatoire). Exemple : 10 figurines tuées en moyenne avec un écart-type de 2, c'est le plus souvent entre 8 et 12.</value>
+  </data>
+  <data name="Help_CentralRange" xml:space="preserve">
+    <value>80 % des cas : la fourchette où tombent 8 simulations sur 10. Les 10 % les plus malchanceuses font moins, les 10 % les plus chanceuses font plus.</value>
   </data>
   <data name="Results_Title" xml:space="preserve">
     <value>Résultats</value>
@@ -517,6 +541,15 @@
   <data name="Weapon_Abilities" xml:space="preserve">
     <value>Mots-clés</value>
   </data>
+  <data name="Weapon_Profile" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="Group_Profile" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="Group_Protections" xml:space="preserve">
+    <value>Protections</value>
+  </data>
   <data name="Weapon_Ap" xml:space="preserve">
     <value>PA</value>
   </data>
@@ -561,5 +594,65 @@
   </data>
   <data name="Weapon_WeaponSkill" xml:space="preserve">
     <value>CC</value>
+  </data>
+  <data name="Mode_FullSim" xml:space="preserve">
+    <value>Full sim</value>
+  </data>
+  <data name="Home_FullSimDescription" xml:space="preserve">
+    <value>Le même scénario, analysé en détail : graphiques et tableaux de bord, un onglet par analyse.</value>
+  </data>
+  <data name="FullSim_ShowResults" xml:space="preserve">
+    <value>Voir les résultats</value>
+  </data>
+  <data name="FullSim_BackToEntry" xml:space="preserve">
+    <value>Retour à la saisie</value>
+  </data>
+  <data name="FullSim_ResultsHeader" xml:space="preserve">
+    <value>{0} contre {1} · {2} simulations · graine {3} · {4} s</value>
+  </data>
+  <data name="FullSim_NoResult" xml:space="preserve">
+    <value>Aucun résultat pour l'instant : lancez une simulation depuis l'écran de saisie.</value>
+  </data>
+  <data name="FullSim_TabDistributions" xml:space="preserve">
+    <value>Distributions</value>
+  </data>
+  <data name="Help_MarginChart" xml:space="preserve">
+    <value>Sur les graphiques, au-delà du pointillé, les barres atténuées sont la marge : « 5 + 2 » signifie l'unité entière (5), plus 2 au-delà.</value>
+  </data>
+  <data name="Chart_Exactly" xml:space="preserve">
+    <value>Exactement</value>
+  </data>
+  <data name="Chart_AtLeast" xml:space="preserve">
+    <value>Au moins</value>
+  </data>
+  <data name="Chart_AtLeastAxis" xml:space="preserve">
+    <value>Au moins (axe de droite)</value>
+  </data>
+  <data name="Chart_Mean" xml:space="preserve">
+    <value>Moyenne : {0}</value>
+  </data>
+  <data name="Chart_MeanExtended" xml:space="preserve">
+    <value>Moyenne marge comprise : {0}</value>
+  </data>
+  <data name="Chart_UnitLimit" xml:space="preserve">
+    <value>Limite de l'unité</value>
+  </data>
+  <data name="Help_ExtendedMean" xml:space="preserve">
+    <value>Moyenne sur toutes les simulations, figurines virtuelles comprises. Ce n'est pas la moyenne de la tuile plus la marge : la marge (+{1}) ne compte que les simulations où l'unité est détruite ({2}), elle vaut zéro dans les autres. D'où {0} + {1} × {2} ≈ {3}.</value>
+  </data>
+  <data name="Chart_WipedTooltip" xml:space="preserve">
+    <value>Unité détruite</value>
+  </data>
+  <data name="Chart_KillsValue" xml:space="preserve">
+    <value>Figurines tuées : {0}</value>
+  </data>
+  <data name="Chart_DamageValue" xml:space="preserve">
+    <value>PV retirés : {0}</value>
+  </data>
+  <data name="Results_KillsShort" xml:space="preserve">
+    <value>Figurines</value>
+  </data>
+  <data name="Results_DamageShort" xml:space="preserve">
+    <value>PV</value>
   </data>
 </root>

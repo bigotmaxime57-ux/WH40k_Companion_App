@@ -1,8 +1,9 @@
 @*
-    Un groupe d'allocation (figurines aux mêmes caractéristiques, ou un PERSONNAGE), dans une carte : en-tête avec numéro
-    d'ordre, nom (ou résumé du Core une fois replié) et boutons monter / descendre / supprimer ; filet rouge pour un
-    PERSONNAGE. Colonnes xs / sm seulement : les points de rupture de MudGrid suivent la largeur de la fenêtre, pas celle
-    du panneau.
+    Un groupe d'allocation (figurines aux mêmes caractéristiques, ou un PERSONNAGE), dans une carte découpée comme celle
+    d'une arme : en-tête (numéro d'ordre, nom, nombre de figurines, case PERSONNAGE, boutons monter / descendre /
+    dupliquer / supprimer), puis la ligne « Profil » (Endurance, PV, sauvegarde) et la ligne « Protections » (invulnérable, insensible
+    à la douleur, réduction de dégâts), séparées par un filet, libellés alignés. Replié : résumé du Core. Filet plus
+    large et étiquette pour un PERSONNAGE.
 *@
 
 <MudPaper Outlined="true" Class="@($"pa-4 my-3 wh-subcard {(Group.IsCharacter ? "wh-subcard-character" : "")}")" data-test="group">
@@ -12,21 +13,31 @@
         <span class="wh-group-number">@Number</span>
         @if (_expanded)
         {
-            <MudTextField T="string" Label="@L["Group_Name"]" @bind-Value="Group.Name" @bind-Value:after="NotifyChanged" data-test="group-name" />
+            <div class="wh-card-name">
+                <MudTextField T="string" Label="@L["Group_Name"]" @bind-Value="Group.Name" @bind-Value:after="NotifyChanged" data-test="group-name" />
+            </div>
+            <div class="wh-card-count">
+                <MudNumericField T="int" Label="@L["Group_Count"]" Min="1" @bind-Value="Group.Count" @bind-Value:after="NotifyChanged" />
+            </div>
+            <MudCheckBox T="bool" Label="@L["Group_IsCharacter"]" @bind-Value="Group.IsCharacter" @bind-Value:after="NotifyChanged"
+                         Class="wh-character-check" data-test="is-character" />
         }
         else
         {
             <MudText Typo="Typo.body1" Class="wh-summary" data-test="group-summary">@Group.ToModelGroup().Describe()</MudText>
-        }
-        @if (Group.IsCharacter)
-        {
-            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Filled" Class="wh-character-chip">@L["Group_IsCharacter"]</MudChip>
+            @if (Group.IsCharacter)
+            {
+                <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Filled" Class="wh-character-chip">@L["Group_IsCharacter"]</MudChip>
+            }
         }
         <MudTooltip Text="@L["Defender_MoveUp"]">
             <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" Disabled="@(!CanMoveUp)" OnClick="OnMoveUp" data-test="move-up" />
         </MudTooltip>
         <MudTooltip Text="@L["Defender_MoveDown"]">
             <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Size="Size.Small" Disabled="@(!CanMoveDown)" OnClick="OnMoveDown" data-test="move-down" />
+        </MudTooltip>
+        <MudTooltip Text="@L["Defender_DuplicateGroup"]">
+            <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Size="Size.Small" OnClick="OnDuplicate" data-test="duplicate-group" />
         </MudTooltip>
         <MudTooltip Text="@L["Defender_RemoveGroup"]">
             <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="wh-delete" OnClick="OnRemove" data-test="remove-group" />
@@ -35,23 +46,12 @@
 
     @if (_expanded)
     {
-        <MudGrid Spacing="3" Class="mt-1">
-            <MudItem xs="6" sm="4">
-                <MudNumericField T="int" Label="@L["Group_Count"]" Min="1" @bind-Value="Group.Count" @bind-Value:after="NotifyChanged" />
-            </MudItem>
-            <MudItem xs="6" sm="4">
-                <MudCheckBox T="bool" Label="@L["Group_IsCharacter"]" @bind-Value="Group.IsCharacter" @bind-Value:after="NotifyChanged"
-                             data-test="is-character" />
-            </MudItem>
-            <MudItem xs="12" sm="4" Class="d-none d-sm-flex" />
-            <MudItem xs="6" sm="4">
+        <div class="wh-card-row">
+            <MudText Typo="Typo.subtitle2" Class="wh-card-row-label">@L["Group_Profile"]</MudText>
+            <div class="wh-stat-line" style="--wh-cols: 3">
                 <MudNumericField T="int" Label="@L["Group_Toughness"]" Min="1" @bind-Value="Group.Toughness" @bind-Value:after="NotifyChanged"
                                  data-test="toughness" />
-            </MudItem>
-            <MudItem xs="6" sm="4">
                 <MudNumericField T="int" Label="@L["Group_Wounds"]" Min="1" @bind-Value="Group.Wounds" @bind-Value:after="NotifyChanged" />
-            </MudItem>
-            <MudItem xs="6" sm="4">
                 <MudSelect T="int" Label="@L["Group_Save"]" @bind-Value="Group.Save" @bind-Value:after="NotifyChanged">
                     @foreach (int value in TwoToSix)
                     {
@@ -59,8 +59,12 @@
                     }
                     <MudSelectItem T="int" Value="7">@L["Group_None"]</MudSelectItem>
                 </MudSelect>
-            </MudItem>
-            <MudItem xs="6" sm="4">
+            </div>
+        </div>
+
+        <div class="wh-card-row">
+            <MudText Typo="Typo.subtitle2" Class="wh-card-row-label">@L["Group_Protections"]</MudText>
+            <div class="wh-stat-line" style="--wh-cols: 3">
                 <MudSelect T="int" Label="@L["Group_InvulnerableSave"]" @bind-Value="InvulnerableChoice" @bind-Value:after="NotifyChanged">
                     <MudSelectItem T="int" Value="None">@L["Group_None"]</MudSelectItem>
                     @foreach (int value in TwoToSix)
@@ -68,8 +72,6 @@
                         <MudSelectItem T="int" Value="value">@($"{value}++")</MudSelectItem>
                     }
                 </MudSelect>
-            </MudItem>
-            <MudItem xs="6" sm="4">
                 <MudSelect T="int" Label="@L["Group_FeelNoPain"]" @bind-Value="FeelNoPainChoice" @bind-Value:after="NotifyChanged">
                     <MudSelectItem T="int" Value="None">@L["Group_None"]</MudSelectItem>
                     @foreach (int value in TwoToSix)
@@ -77,11 +79,9 @@
                         <MudSelectItem T="int" Value="value">@($"{value}+")</MudSelectItem>
                     }
                 </MudSelect>
-            </MudItem>
-            <MudItem xs="6" sm="4">
                 <MudNumericField T="int" Label="@L["Group_DamageReduction"]" Min="0" @bind-Value="Group.DamageReduction" @bind-Value:after="NotifyChanged" />
-            </MudItem>
-        </MudGrid>
+            </div>
+        </div>
     }
 </MudPaper>
 
@@ -114,6 +114,9 @@
 
     [Parameter]
     public EventCallback OnMoveDown { get; set; }
+
+    [Parameter]
+    public EventCallback OnDuplicate { get; set; }
 
     [Parameter]
     public EventCallback OnRemove { get; set; }

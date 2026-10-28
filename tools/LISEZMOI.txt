@@ -1,0 +1,37 @@
+Wh40kSim - Simulateur de dégâts (Warhammer 40 000, 11e édition)
+==================================================================
+
+Version d'aperçu, pour tests. Merci de l'essayer !
+
+
+Lancer l'application
+--------------------
+
+1. Décompressez le zip dans un dossier de votre choix (par exemple Documents\Wh40kSim).
+   Ne la lancez pas depuis le zip sans l'avoir décompressé.
+2. Double-cliquez sur Wh40kSim.Desktop.exe.
+
+Rien à installer : tout est inclus. Il faut Windows 10 (version 1809 ou plus récente) ou Windows 11, en 64 bits,
+avec WebView2, déjà présent sur Windows 11 et sur un Windows 10 à jour (il est fourni avec le navigateur Edge).
+
+Au premier lancement, Windows peut afficher « Windows a protégé votre ordinateur » : l'application n'est pas signée
+par un éditeur reconnu. Cliquez sur « Informations complémentaires », puis sur « Exécuter quand même ».
+
+
+Pour commencer
+--------------
+
+- Écran d'accueil : « Quick sim » (tout sur une page) ou « Full sim » (saisie, puis résultats détaillés en onglets).
+- Des scénarios d'exemple sont dans le dossier « scenarios » : bouton « Ouvrir » (scénario complet), ou les boutons
+  dossier des cartes Attaquant et Défenseur (une seule partie).
+- Les bulles « ? » expliquent chaque notion au survol (après une seconde).
+
+
+Signaler un problème ou une idée
+--------------------------------
+
+Indiquez la version affichée en bas de l'écran d'accueil, ce que vous faisiez et, si possible, une capture d'écran et
+le fichier du scénario (bouton « Enregistrer »).
+
+- Sur GitHub (compte gratuit) : https://github.com/bigotmaxime57-ux/WH40k_Companion_App/issues
+- Ou directement à la personne qui vous a envoyé l'application.

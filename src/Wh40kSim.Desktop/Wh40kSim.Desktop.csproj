@@ -20,8 +20,11 @@
 
     <ApplicationTitle>Wh40kSim</ApplicationTitle>
     <ApplicationId>com.wh40ksim.desktop</ApplicationId>
-    <ApplicationDisplayVersion>0.2</ApplicationDisplayVersion>
-    <ApplicationVersion>1</ApplicationVersion>
+    <!-- Version : affichée sur l'accueil (InformationalVersion) et dans le nom du zip de distribution -->
+    <ApplicationDisplayVersion>0.3</ApplicationDisplayVersion>
+    <ApplicationVersion>2</ApplicationVersion>
+    <InformationalVersion>0.3-apercu.1</InformationalVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>

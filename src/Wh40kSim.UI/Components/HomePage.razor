@@ -25,4 +25,15 @@
             </MudPaper>
         </a>
     </MudStack>
+
+    @if (Version is not null)
+    {
+        <MudText Typo="Typo.caption" Class="wh-muted" data-test="app-version">@L["Home_Version", Version]</MudText>
+    }
 </MudStack>
+
+@code {
+    /// <summary>Version de l'application (fournie par l'hôte, via AppShell), à citer pour signaler un problème.</summary>
+    [CascadingParameter(Name = "AppVersion")]
+    public string? Version { get; set; }
+}

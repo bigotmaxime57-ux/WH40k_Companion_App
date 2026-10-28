@@ -55,6 +55,14 @@ public sealed class DefenderState
     /// <summary>PV retirés aux figurines virtuelles après la destruction de l'unité.</summary>
     public int ExcessDamage { get; private set; }
 
+    /// <summary>
+    /// Dégâts bruts : ce que chaque attaque non sauvegardée (ou chaque salve de blessures mortelles) aurait retiré
+    /// sans plafond par figurine, après boost de dégâts du défenseur, réduction de dégâts et Feel No Pain. Compte
+    /// aussi les attaques contre les figurines virtuelles de l'excédent : la mesure ne s'arrête à la destruction de
+    /// l'unité que si l'excédent n'est pas suivi (résolution sans dés d'excédent).
+    /// </summary>
+    public int RawDamage { get; private set; }
+
     public int AliveInGroup(int group) => _alive[group];
 
     public int KilledInGroup(int group) => _groups[group].Count - _alive[group];
@@ -120,6 +128,7 @@ public sealed class DefenderState
         _excessFrontWounds = ExcessProfile.Wounds;
         ExcessModelsKilled = 0;
         ExcessDamage = 0;
+        RawDamage = 0;
     }
 
     /// <summary>
@@ -165,6 +174,8 @@ public sealed class DefenderState
         {
             return;
         }
+
+        RawDamage += lost;
 
         if (excess)
         {

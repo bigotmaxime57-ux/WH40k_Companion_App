@@ -55,6 +55,18 @@ internal static class ReportPrinter
         {
             PrintExcess(result);
         }
+
+        PrintRawDamage(result);
+    }
+
+    /// <summary>Dégâts bruts (sans plafond par figurine) et part perdue sur des figurines déjà achevées.</summary>
+    private static void PrintRawDamage(SimulationResult result)
+    {
+        WriteTitle("Dégâts bruts");
+        Console.WriteLine("Dégâts de chaque attaque non sauvegardée comptés en entier, sans plafond par figurine ni arrêt à la destruction :");
+        Console.WriteLine($"Dégâts bruts     : {Summarize(result.RawDamage)}");
+        Console.WriteLine($"Gaspillage       : {result.MeanWastedDamage:F2} en moyenne, soit {result.WastedShare:P1} des dégâts bruts " +
+                          "(dégâts au-delà des PV de la figurine touchée, marge non comprise)");
     }
 
     /// <summary>Distributions prolongées au-delà de la destruction de l'unité : la marge de l'attaquant.</summary>

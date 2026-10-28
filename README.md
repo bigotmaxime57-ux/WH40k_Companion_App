@@ -115,6 +115,15 @@ simulations où l'unité est détruite. Dans l'interface, les tuiles du haut res
 marge » ajoute la marge sous leur moyenne, « +1,33 (Marge) », et prolonge les tableaux, dont les lignes au-delà de l'unité sont notées
 « 5 + 2 » (les 5 figurines de l'unité, plus 2 virtuelles).
 
+## Dégâts bruts et gaspillage
+
+Les **dégâts bruts** comptent en entier les dégâts de chaque attaque non sauvegardée (et de chaque salve de
+blessures mortelles), après réduction de dégâts et Feel No Pain, sans plafond par figurine ni arrêt à la destruction
+de l'unité (les figurines virtuelles de l'excédent comptent aussi). Le **gaspillage** est la différence avec les PV
+retirés, excédent compris : un D3 qui fait 3 sur une figurine à 1 PV gaspille 2. Ce qui dépasse la destruction de
+l'unité n'en fait pas partie : c'est la marge. Aucun dé supplémentaire n'est tiré. Affichés par la console (section
+« Dégâts bruts ») ; dans l'interface au Full sim.
+
 ## Hypothèses restantes
 
 - **Réduction de dégâts** : non appliquée aux blessures mortelles (elles ne sont pas une attaque allouée).

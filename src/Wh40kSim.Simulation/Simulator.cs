@@ -119,6 +119,7 @@ public static class Simulator
         // Distributions prolongées (réel + excédent) : pas de maximum connu à l'avance, les tableaux s'agrandissent
         private long[] _extendedKills = new long[defender.TotalModels + 1];
         private long[] _extendedDamage = new long[defender.TotalWounds + 1];
+        private long[] _rawDamage = new long[defender.TotalWounds + 1];
 
         public void Record(DefenderState state)
         {
@@ -132,6 +133,7 @@ public static class Simulator
 
             Increment(ref _extendedKills, state.ModelsKilled + state.ExcessModelsKilled);
             Increment(ref _extendedDamage, state.DamageDealt + state.ExcessDamage);
+            Increment(ref _rawDamage, state.RawDamage);
         }
 
         public void Merge(Accumulator other)
@@ -142,13 +144,15 @@ public static class Simulator
             for (int i = 0; i < _damagePerGroup.Length; i++) _damagePerGroup[i] += other._damagePerGroup[i];
             Add(ref _extendedKills, other._extendedKills);
             Add(ref _extendedDamage, other._extendedDamage);
+            Add(ref _rawDamage, other._rawDamage);
         }
 
         public SimulationResult ToResult(Scenario scenario, int seed, TimeSpan elapsed) =>
             new(scenario, seed, elapsed,
                 new DiscreteDistribution(_kills), new DiscreteDistribution(_damage), _killedPerGroup, _damagePerGroup,
                 new DiscreteDistribution(TrimTrailingZeros(_extendedKills, _kills.Length)),
-                new DiscreteDistribution(TrimTrailingZeros(_extendedDamage, _damage.Length)));
+                new DiscreteDistribution(TrimTrailingZeros(_extendedDamage, _damage.Length)),
+                new DiscreteDistribution(TrimTrailingZeros(_rawDamage, _damage.Length)));
 
         private static void Increment(ref long[] histogram, int value)
         {

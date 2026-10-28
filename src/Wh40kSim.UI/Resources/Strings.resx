@@ -634,9 +634,6 @@
   <data name="Help_ExtendedMean" xml:space="preserve">
     <value>Moyenne sur toutes les simulations, figurines virtuelles comprises. Ce n'est pas la moyenne de la tuile plus la marge : la marge (+{1}) ne compte que les simulations où l'unité est détruite ({2}), elle vaut zéro dans les autres. D'où {0} + {1} × {2} ≈ {3}.</value>
   </data>
-  <data name="Chart_MeanShort" xml:space="preserve">
-    <value>moy.</value>
-  </data>
   <data name="Chart_WipedTooltip" xml:space="preserve">
     <value>Unité détruite</value>
   </data>

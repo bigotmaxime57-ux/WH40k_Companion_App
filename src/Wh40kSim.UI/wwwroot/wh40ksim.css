@@ -606,12 +606,6 @@
     stroke-width: 1.5;
 }
 
-.wh-chart-mean-label {
-    fill: var(--mud-palette-text-secondary);
-    font-size: 11px;
-    font-style: italic;
-}
-
 /* Barres « unité détruite » : hachures à 45° couleur du fond, posées sur la barre (motif SVG du graphique) */
 .wh-chart-hatch-line {
     stroke: var(--mud-palette-surface);
@@ -647,7 +641,7 @@
     margin-top: 4px;
 }
 
-.wh-chart-legend i {
+.wh-chart-legend > span > i {
     border-radius: 2px;
     display: inline-block;
     height: 12px;
@@ -683,9 +677,11 @@
     border-left-style: dashed;
 }
 
-.wh-chart-legend span {
+/* Entrées de la légende seulement (pas les éléments internes de la bulle « ? », qui grossiraient) */
+.wh-chart-legend > span {
     align-items: center;
     display: inline-flex;
+    gap: .25rem;
 }
 
 /* Bandeau du Full sim : champs du nombre de simulations et de la graine à largeur fixe, progression en bout de ligne */

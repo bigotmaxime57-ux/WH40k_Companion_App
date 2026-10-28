@@ -1,6 +1,6 @@
 @*
     Histogramme d'une distribution, en SVG : barres « exactement k » (axe de gauche), courbe « au moins k » (axe de
-    droite, 0 à 100 %) et trait plein de la moyenne (« moy. »), sur le même graphique ; infobulle au survol d'une
+    droite, 0 à 100 %) et trait plein de la moyenne (expliqué en légende), sur le même graphique ; infobulle au survol d'une
     colonne. Sans les valeurs négligeables aux extrémités (comme les tableaux). Couleurs tirées du CSS (--wh-accent) :
     elles suivent le thème et le camp de la section qui l'entoure. Les barres où l'unité est détruite (unité entière,
     et au-delà pour une distribution prolongée) sont hachurées à 45° ; pour une distribution prolongée (Extended), les
@@ -53,8 +53,7 @@
             <line class="wh-chart-limit" x1="@F(ColumnX(_firstBeyond))" y1="@F(Top)" x2="@F(ColumnX(_firstBeyond))" y2="@F(Bottom)" />
         }
 
-        <line class="wh-chart-mean" x1="@F(MeanX)" y1="@F(Top + 14)" x2="@F(MeanX)" y2="@F(Bottom)" data-test="chart-mean" />
-        <g><text class="wh-chart-mean-label" x="@F(MeanX)" y="@F(Top + 9)" text-anchor="middle">@L["Chart_MeanShort"]</text></g>
+        <line class="wh-chart-mean" x1="@F(MeanX)" y1="@F(Top)" x2="@F(MeanX)" y2="@F(Bottom)" data-test="chart-mean" />
 
         @* Courbe lissée (monotone) par les seules valeurs qui arrivent : pas d'escalier sur les valeurs impossibles *@
         <path class="wh-chart-curve" d="@_curvePath" data-test="chart-curve" />

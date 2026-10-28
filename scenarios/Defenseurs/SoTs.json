@@ -1,0 +1,48 @@
+{
+  "defender": {
+    "name": "SoTs",
+    "boosts": {
+      "inCover": false,
+      "skill": 0,
+      "hitRoll": 0,
+      "woundRoll": 0,
+      "ap": 0,
+      "damage": 0
+    },
+    "groups": [
+      {
+        "name": "Scarab occult Terminators",
+        "count": 9,
+        "isCharacter": false,
+        "toughness": 6,
+        "wounds": 3,
+        "save": 2,
+        "invulnerableSave": 4,
+        "feelNoPain": null,
+        "damageReduction": 0
+      },
+      {
+        "name": "Scarab occult TSorcerer",
+        "count": 1,
+        "isCharacter": false,
+        "toughness": 6,
+        "wounds": 4,
+        "save": 2,
+        "invulnerableSave": 4,
+        "feelNoPain": null,
+        "damageReduction": 0
+      },
+      {
+        "name": "Sorcerer in Terminator Armour",
+        "count": 1,
+        "isCharacter": true,
+        "toughness": 6,
+        "wounds": 5,
+        "save": 2,
+        "invulnerableSave": 4,
+        "feelNoPain": null,
+        "damageReduction": 0
+      }
+    ]
+  }
+}

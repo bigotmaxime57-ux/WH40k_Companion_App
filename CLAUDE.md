@@ -380,7 +380,28 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
    console) : distribution des pertes par groupe (% de kill par groupe, P(tuer le PERSONNAGE)) ; PV retirés et
    figurines tuées par profil d'arme ; part des pertes de PERSONNAGE dues aux attaques Precision ; analyses en points
    (tanking, kill threat : définitions à arrêter avec l'utilisateur). Si ces suivis ralentissent la boucle : option de
-   simulation, pour garder le Quick sim rapide.
+   simulation, pour garder le Quick sim rapide. Précisée et validée le 2026-10-28 :
+   - **Pertes par groupe** : distribution des figurines tuées de chaque groupe d'allocation ; % de kill par groupe
+     (P(groupe entièrement tué)), P(tuer le PERSONNAGE) pour chaque groupe PERSONNAGE, moyenne.
+   - **Par profil d'arme** : PV retirés, figurines tuées, dégâts bruts (donc gaspillage) en moyenne et en part du
+     total, **par pool** (armes aux attaques identiques lancées ensemble, dés indiscernables), nommé d'après ses armes.
+     Figurine attribuée à l'attaque qui l'achève ; pertes réelles seulement (pas la marge).
+   - **Precision** (décision de l'utilisateur) : part des pertes de PERSONNAGE (figurines et PV) **grâce à
+     Precision** : attaque allouée au PERSONNAGE visé alors qu'un garde du corps vivait encore (sans Precision, elle
+     serait allée sur un garde).
+   - **Kill threat** (décision de l'utilisateur : rentabilité) : distribution des points détruits par simulation (au
+     prorata des PV, en points entiers arrondis à l'inférieur : exact pour P(≥ son coût)), P(détruire au moins sa
+     propre valeur).
+   - **Tanking** (décision de l'utilisateur : les deux) : valeur conservée (points du défenseur qui survivent, en
+     moyenne ; P(garder au moins la moitié de sa valeur), comptée exactement) et coût pour détruire (points de
+     l'attaquant × PV de l'unité / moyenne des PV retirés **excédent compris**, approximation linéaire).
+   - Indicateurs en points seulement si attaquant et tous les groupes ont des points (comme l'étape 4).
+   - Core : chaque dégât attribué à son pool, avec l'indication « grâce à Precision ». Aucun dé consommé :
+     non-régression au bit près. Temps mesuré : option seulement si le surcoût se voit.
+   - Résultats en records simples (sérialisables, contrat JSON de la phase 7) ; console : sections par groupe, par
+     arme, Precision, points.
+   - Tests : dés imposés (attribution au pool, attaque qui achève, Precision avec et sans garde du corps), sommes
+     par arme = totaux, % de kill par groupe cohérent avec P(unité détruite), valeurs exactes en points.
 7. **Full sim, côté UI.** Choix de la technique de graphiques en début d'étape, prototype sur captures (critères :
    desktop et WebAssembly, 4 thèmes et couleurs de camp, barres + courbe, infobulles, N courbes superposées, poids,
    testable avec bUnit ; essayer `MudChart` d'abord, sinon composants SVG maison ; bibliothèque JS déconseillée).
@@ -541,8 +562,10 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
 - Skill `/debut-journee` (synchronisation, build et tests complets, point du jour) : fusionné dans `main`.
   340 tests verts (172 Core, 48 Simulation, 120 UI).
 - Phase 3, étape 5 (dégâts bruts, #6) : fusionnée dans `main` (ticket #6 fermé). Prochaine étape : 6 (statistiques
-  détaillées, côté Simulation), à préciser avec l'utilisateur (définitions des analyses en points). 349 tests verts (178 Core, 51 Simulation, 120 UI) ; `NonRegressionTests` inchangés (aucun dé supplémentaire).
+  détaillées, côté Simulation). 349 tests verts (178 Core, 51 Simulation, 120 UI) ; `NonRegressionTests` inchangés (aucun dé supplémentaire).
   Gaspillage déduit des moyennes (bruts - PV retirés et excédent), sans distribution propre.
+- Phase 3, étape 6 (statistiques détaillées) : précisée et validée (voir « Phase 3 : étapes »), **à coder** sur la
+  branche `phase3/etape6-statistiques-detaillees`.
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

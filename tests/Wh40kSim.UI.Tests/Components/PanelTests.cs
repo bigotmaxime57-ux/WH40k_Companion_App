@@ -131,6 +131,29 @@ public class AttackerPanelTests : ComponentTestContext
     }
 
     [Fact]
+    public void Duplicating_a_group_inserts_an_independent_copy_and_keeps_the_allocation_order()
+    {
+        var form = new DefenderForm(new DefenderUnit
+        {
+            Groups =
+            [
+                new ModelGroup { Name = "Gardes", Count = 5 },
+                new ModelGroup { Name = "Leader", IsCharacter = true, Wounds = 4 },
+            ],
+        });
+        var panel = Render<DefenderPanel>(p => p.Add(c => c.Defender, form));
+
+        panel.ClickUntil("[data-test=duplicate-group]", () => form.Groups.Count == 3);
+        Assert.Equal(["Gardes", "Gardes (copie)", "Leader"], form.Groups.Select(g => g.Name));
+        form.Groups[1].Count = 2;
+        Assert.Equal(5, form.Groups[0].Count);
+
+        // Un PERSONNAGE copié reste après les gardes du corps
+        panel.FindAll("[data-test=duplicate-group]")[2].Click();
+        Assert.Equal(["Gardes", "Gardes (copie)", "Leader", "Leader (copie)"], form.Groups.Select(g => g.Name));
+    }
+
+    [Fact]
     public void Weapons_can_be_added_and_removed()
     {
         var form = new AttackerForm();

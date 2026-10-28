@@ -1,7 +1,7 @@
 @*
     Un groupe d'allocation (figurines aux mêmes caractéristiques, ou un PERSONNAGE), dans une carte découpée comme celle
     d'une arme : en-tête (numéro d'ordre, nom, nombre de figurines, case PERSONNAGE, boutons monter / descendre /
-    supprimer), puis la ligne « Profil » (Endurance, PV, sauvegarde) et la ligne « Protections » (invulnérable, insensible
+    dupliquer / supprimer), puis la ligne « Profil » (Endurance, PV, sauvegarde) et la ligne « Protections » (invulnérable, insensible
     à la douleur, réduction de dégâts), séparées par un filet, libellés alignés. Replié : résumé du Core. Filet plus
     large et étiquette pour un PERSONNAGE.
 *@
@@ -35,6 +35,9 @@
         </MudTooltip>
         <MudTooltip Text="@L["Defender_MoveDown"]">
             <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Size="Size.Small" Disabled="@(!CanMoveDown)" OnClick="OnMoveDown" data-test="move-down" />
+        </MudTooltip>
+        <MudTooltip Text="@L["Defender_DuplicateGroup"]">
+            <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Size="Size.Small" OnClick="OnDuplicate" data-test="duplicate-group" />
         </MudTooltip>
         <MudTooltip Text="@L["Defender_RemoveGroup"]">
             <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="wh-delete" OnClick="OnRemove" data-test="remove-group" />
@@ -111,6 +114,9 @@
 
     [Parameter]
     public EventCallback OnMoveDown { get; set; }
+
+    [Parameter]
+    public EventCallback OnDuplicate { get; set; }
 
     [Parameter]
     public EventCallback OnRemove { get; set; }

@@ -136,6 +136,12 @@
   <data name="Defender_RemoveGroup" xml:space="preserve">
     <value>Supprimer le groupe</value>
   </data>
+  <data name="Defender_DuplicateGroup" xml:space="preserve">
+    <value>Dupliquer le groupe</value>
+  </data>
+  <data name="Defender_CopyName" xml:space="preserve">
+    <value>{0} (copie)</value>
+  </data>
   <data name="Defender_SaveHelp" xml:space="preserve">
     <value>Enregistrer le défenseur seul (boosts compris), pour le réutiliser dans d'autres scénarios</value>
   </data>

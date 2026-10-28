@@ -61,4 +61,7 @@ public sealed class ModelGroupForm
         DamageReduction = DamageReduction,
         Points = Points,
     };
+
+    /// <summary>Copie indépendante (toutes les propriétés sont des valeurs simples).</summary>
+    public ModelGroupForm Clone() => (ModelGroupForm)MemberwiseClone();
 }

@@ -26,7 +26,8 @@
         var group = Defender.Groups[index];
         <ModelGroupEditor @key="group" Group="group" Number="index + 1" Changed="NotifyChanged"
                           CanMoveUp="CanMove(index, -1)" CanMoveDown="CanMove(index, 1)"
-                          OnMoveUp="() => Move(index, -1)" OnMoveDown="() => Move(index, 1)" OnRemove="() => Remove(group)" />
+                          OnMoveUp="() => Move(index, -1)" OnMoveDown="() => Move(index, 1)"
+                          OnDuplicate="() => Duplicate(group)" OnRemove="() => Remove(group)" />
     }
 
     <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Text" Color="Color.Primary" OnClick="Add"
@@ -96,6 +97,15 @@
         }
         int target = index + offset;
         (Defender.Groups[index], Defender.Groups[target]) = (Defender.Groups[target], Defender.Groups[index]);
+        return NotifyChanged();
+    }
+
+    /// <summary>Copie juste après l'original : l'ordre d'allocation reste valide (un PERSONNAGE copié suit l'original).</summary>
+    private Task Duplicate(ModelGroupForm group)
+    {
+        var copy = group.Clone();
+        copy.Name = L["Defender_CopyName", group.Name];
+        Defender.Groups.Insert(Defender.Groups.IndexOf(group) + 1, copy);
         return NotifyChanged();
     }
 

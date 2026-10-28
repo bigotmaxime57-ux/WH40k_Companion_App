@@ -440,11 +440,32 @@
     font-weight: 600;
 }
 
-/* Pictogramme du type d'arme (viseur, épées croisées) devant le nom, couleur du camp */
+/* Carte d'arme : bandeau du type à gauche (fond plein couleur du camp, pictogramme blanc centré), contenu à droite */
+.wh-weapon-card {
+    display: flex;
+    overflow: hidden;
+}
+
+.wh-shell .wh-weapon-card.wh-subcard {
+    border-left-width: 1px !important;
+}
+
+.wh-weapon-band {
+    align-items: center;
+    background: var(--wh-accent);
+    display: flex;
+    flex: 0 0 3rem;
+    justify-content: center;
+}
+
+.wh-weapon-body {
+    flex: 1;
+    min-width: 0;
+}
+
 .wh-weapon-type-icon {
-    color: var(--wh-accent);
-    flex-shrink: 0;
-    font-size: 1.6rem !important;
+    color: #ffffff;
+    font-size: 1.75rem !important;
 }
 
 /* Corps de la tuile : valeur contre le bord gauche, indicateurs en colonne contre le bord droit (dessous si la tuile

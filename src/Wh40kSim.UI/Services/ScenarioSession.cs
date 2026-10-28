@@ -20,6 +20,15 @@ public sealed class ScenarioSession
     /// <summary>Le formulaire a été modifié depuis le dernier « Nouveau », « Ouvrir » ou « Enregistrer ».</summary>
     public bool IsDirty { get; set; }
 
+    /// <summary>
+    /// L'attaquant a été modifié à la main depuis son dernier chargement ou enregistrement (scénario ou fichier
+    /// attaquant) : décide de la confirmation avant de le remplacer par un autre.
+    /// </summary>
+    public bool AttackerDirty { get; set; }
+
+    /// <summary>Même chose pour le défenseur (voir <see cref="AttackerDirty"/>).</summary>
+    public bool DefenderDirty { get; set; }
+
     /// <summary>Réglages et résultat du Quick sim.</summary>
     public SimulationRun QuickSim { get; } = new();
 

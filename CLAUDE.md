@@ -354,7 +354,9 @@ avant d'être codée.
    fichier, scénario complet compris. Quick sim : Ouvrir / Enregistrer dans les cartes Attaquant et Défenseur (le
    scénario complet garde ses boutons) ; `IScenarioFileService` étendu, hôte desktop adapté. Premier pas vers la phase 6,
    sans figer la fiche d'unité. Décisions de l'utilisateur : « Ouvrir » de la barre accepte un fichier partiel et ne
-   remplace que cette partie ; confirmation avant de remplacer une partie seulement si la saisie est modifiée ; mêmes
+   remplace que cette partie ; confirmation avant de remplacer une partie seulement si la saisie est modifiée (précisé
+   le 2026-10-28 : si **cette partie** a été modifiée à la main depuis son dernier chargement ou enregistrement ;
+   `ScenarioSession.AttackerDirty` / `DefenderDirty`, le scénario gardant son propre indicateur et son « * ») ; mêmes
    dossiers que les scénarios. Conséquence : un scénario complet exige désormais attaquant et défenseur (une partie
    absente était remplacée en silence par une unité vide).
 4. **Points (#2, version légère).** Points optionnels sur l'attaquant et sur chaque groupe du défenseur (un leader a son

@@ -17,9 +17,9 @@
     <MudGrid Spacing="3">
         <MudItem xs="12" lg="7">
             <MudStack Spacing="3">
-                <AttackerPanel Attacker="Form.Attacker" Changed="OnFormChanged" EditKeywords="EditKeywords"
+                <AttackerPanel Attacker="Form.Attacker" Changed="OnAttackerChanged" EditKeywords="EditKeywords"
                                OnOpen="OpenAttackerAsync" OnSave="SaveAttackerAsync" FileActionsDisabled="Running" SaveDisabled="!CanSaveAttacker" />
-                <DefenderPanel Defender="Form.Defender" Changed="OnFormChanged"
+                <DefenderPanel Defender="Form.Defender" Changed="OnDefenderChanged"
                                OnOpen="OpenDefenderAsync" OnSave="SaveDefenderAsync" FileActionsDisabled="Running" />
                 <ContextPanel Context="Form.Context" Reference="Reference" Changed="OnFormChanged" />
             </MudStack>
@@ -40,7 +40,7 @@
     </MudGrid>
 </MudStack>
 
-<KeywordDrawer Weapon="KeywordWeapon" OnClose="CloseKeywords" Changed="OnFormChanged" />
+<KeywordDrawer Weapon="KeywordWeapon" OnClose="CloseKeywords" Changed="OnAttackerChanged" />
 
 @code {
     protected override SimulationRun Run => Session.QuickSim;

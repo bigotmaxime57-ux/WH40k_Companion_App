@@ -147,10 +147,25 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
         StateHasChanged();
     });
 
+    /// <summary>Modification hors attaquant et défenseur (situation) : seul le scénario est modifié.</summary>
     protected void OnFormChanged()
     {
         Session.IsDirty = true;
         Refresh();
+    }
+
+    /// <summary>Modification de l'attaquant (armes, mots-clés, boosts) : le scénario et l'attaquant sont modifiés.</summary>
+    protected void OnAttackerChanged()
+    {
+        Session.AttackerDirty = true;
+        OnFormChanged();
+    }
+
+    /// <summary>Modification du défenseur (groupes, boosts) : le scénario et le défenseur sont modifiés.</summary>
+    protected void OnDefenderChanged()
+    {
+        Session.DefenderDirty = true;
+        OnFormChanged();
     }
 
     private void Refresh()
@@ -180,17 +195,27 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
     {
         Session.Form = form;
         Session.FileName = fileName;
-        Session.IsDirty = false;
+        MarkAllSaved();
         Session.ClearResults();
         KeywordWeapon = null;
         Message = null;
         Refresh();
     }
 
-    /// <summary>Demande confirmation avant d'abandonner des modifications non enregistrées.</summary>
-    private async Task<bool> ConfirmDiscardAsync()
+    private void MarkAllSaved()
     {
-        if (!Session.IsDirty)
+        Session.IsDirty = false;
+        Session.AttackerDirty = false;
+        Session.DefenderDirty = false;
+    }
+
+    /// <summary>
+    /// Demande confirmation avant d'abandonner des modifications non enregistrées de ce qui va être remplacé :
+    /// <paramref name="modified"/> = le scénario entier, ou seulement la partie concernée (attaquant, défenseur).
+    /// </summary>
+    private async Task<bool> ConfirmDiscardAsync(bool modified)
+    {
+        if (!modified)
         {
             return true;
         }
@@ -201,7 +226,7 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
 
     protected async Task NewScenarioAsync()
     {
-        if (Running || !await ConfirmDiscardAsync())
+        if (Running || !await ConfirmDiscardAsync(Session.IsDirty))
         {
             return;
         }
@@ -210,11 +235,23 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
 
     /// <summary>
     /// Bouton « Ouvrir » de la barre : un scénario complet remplace tout ; un fichier attaquant (ou défenseur) ne
-    /// remplace que cette partie, comme le bouton de la carte correspondante.
+    /// remplace que cette partie, comme le bouton de la carte correspondante. Le fichier est choisi d'abord : la
+    /// confirmation porte sur ce qu'il remplace (le scénario, ou seulement l'attaquant ou le défenseur).
     /// </summary>
     protected async Task OpenAsync()
     {
-        if (Running || !await ConfirmDiscardAsync() || await PickFileAsync() is not var (fileName, file))
+        if (Running || await PickFileAsync() is not var (fileName, file))
+        {
+            return;
+        }
+
+        bool modified = file.Kind switch
+        {
+            ScenarioFileKind.Scenario => Session.IsDirty,
+            ScenarioFileKind.Attacker => Session.AttackerDirty,
+            _ => Session.DefenderDirty,
+        };
+        if (!await ConfirmDiscardAsync(modified))
         {
             return;
         }
@@ -236,7 +273,7 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
     /// <summary>Remplace l'attaquant par celui d'un fichier attaquant ou d'un scénario complet.</summary>
     protected async Task OpenAttackerAsync()
     {
-        if (Running || !await ConfirmDiscardAsync() || await PickFileAsync() is not var (fileName, file))
+        if (Running || !await ConfirmDiscardAsync(Session.AttackerDirty) || await PickFileAsync() is not var (fileName, file))
         {
             return;
         }
@@ -252,7 +289,7 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
     /// <summary>Remplace le défenseur par celui d'un fichier défenseur ou d'un scénario complet.</summary>
     protected async Task OpenDefenderAsync()
     {
-        if (Running || !await ConfirmDiscardAsync() || await PickFileAsync() is not var (fileName, file))
+        if (Running || !await ConfirmDiscardAsync(Session.DefenderDirty) || await PickFileAsync() is not var (fileName, file))
         {
             return;
         }
@@ -280,11 +317,15 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
         }
     }
 
-    /// <summary>Une partie chargée modifie le scénario courant, qui garde son nom de fichier.</summary>
+    /// <summary>
+    /// Une partie chargée modifie le scénario courant, qui garde son nom de fichier ; la partie elle-même correspond
+    /// à son fichier (rien à perdre en la remplaçant).
+    /// </summary>
     private void LoadAttacker(AttackerUnit attacker, string fileName)
     {
         Form.Attacker = new AttackerForm(attacker);
         Session.IsDirty = true;
+        Session.AttackerDirty = false;
         ShowMessage(L["File_AttackerLoaded", fileName], Severity.Success);
         Refresh();
     }
@@ -293,6 +334,7 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
     {
         Form.Defender = new DefenderForm(defender);
         Session.IsDirty = true;
+        Session.DefenderDirty = false;
         ShowMessage(L["File_DefenderLoaded", fileName], Severity.Success);
         Refresh();
     }
@@ -308,18 +350,24 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
         if (written is not null)
         {
             Session.FileName = written;
-            Session.IsDirty = false;
+            MarkAllSaved();
         }
     }
 
-    /// <summary>Enregistre l'attaquant seul (boosts compris) ; le scénario courant n'est pas considéré comme enregistré.</summary>
+    /// <summary>
+    /// Enregistre l'attaquant seul (boosts compris) : l'attaquant est sauvé (le remplacer ne fait rien perdre), mais le
+    /// scénario courant n'est pas considéré comme enregistré.
+    /// </summary>
     protected async Task SaveAttackerAsync()
     {
         if (CanSaveAttacker)
         {
             var attacker = Form.Attacker.ToAttackerUnit();
-            await WriteAsync(ScenarioJson.Serialize(attacker), SuggestedFileName(attacker.Name, L["File_DefaultAttacker"]),
-                name => L["File_AttackerSaved", name]);
+            if (await WriteAsync(ScenarioJson.Serialize(attacker), SuggestedFileName(attacker.Name, L["File_DefaultAttacker"]),
+                    name => L["File_AttackerSaved", name]) is not null)
+            {
+                Session.AttackerDirty = false;
+            }
         }
     }
 
@@ -328,8 +376,11 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
         if (!Running)
         {
             var defender = Form.Defender.ToDefenderUnit();
-            await WriteAsync(ScenarioJson.Serialize(defender), SuggestedFileName(defender.Name, L["File_DefaultDefender"]),
-                name => L["File_DefenderSaved", name]);
+            if (await WriteAsync(ScenarioJson.Serialize(defender), SuggestedFileName(defender.Name, L["File_DefaultDefender"]),
+                    name => L["File_DefenderSaved", name]) is not null)
+            {
+                Session.DefenderDirty = false;
+            }
         }
     }
 

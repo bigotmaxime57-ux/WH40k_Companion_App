@@ -172,6 +172,69 @@ public class PartialFileTests : ComponentTestContext
         Simulations.Gate.SetResult();
     }
 
+    [Fact]
+    public void Loading_an_attacker_then_a_defender_asks_nothing_since_the_defender_was_never_edited()
+    {
+        var page = Render<SimulatorPage>();
+        Files.ToOpen = FakeScenarioFileService.File("fusiliers.json", Attacker());
+        page.Find("[data-test=open-attacker]").Click();
+        Assert.EndsWith("*", page.Find("[data-test=file-name]").TextContent);
+
+        Files.ToOpen = FakeScenarioFileService.File("cible.json", Defender() with { Name = "Gardes" });
+        page.Find("[data-test=open-defender]").Click();
+
+        Assert.Equal("Gardes", page.Instance.Form.Defender.Name);
+        Assert.Equal("Fusiliers", page.Instance.Form.Attacker.Name);
+        Assert.Empty(Dialogs!.FindAll("button"));
+    }
+
+    [Fact]
+    public void Only_the_edited_part_asks_for_confirmation()
+    {
+        var page = Render<SimulatorPage>();
+        page.Find("input[data-test=toughness]").Change("7");
+
+        // L'attaquant n'a pas été modifié : remplacé sans question
+        Files.ToOpen = FakeScenarioFileService.File("fusiliers.json", Attacker());
+        page.Find("[data-test=open-attacker]").Click();
+        Assert.Equal("Fusiliers", page.Instance.Form.Attacker.Name);
+
+        // Le défenseur l'a été : confirmation, et rien ne change si on annule
+        Files.ToOpen = FakeScenarioFileService.File("cible.json", Defender() with { Name = "Gardes" });
+        page.Find("[data-test=open-defender]").Click();
+        DialogButton("Annuler").Click();
+        Assert.Equal(7, page.Instance.Form.Defender.Groups[0].Toughness);
+    }
+
+    [Fact]
+    public void A_saved_part_can_be_replaced_without_confirmation()
+    {
+        var page = Render<SimulatorPage>();
+        page.Find("input[data-test=toughness]").Change("7");
+        page.Find("[data-test=save-defender]").Click();
+
+        Files.ToOpen = FakeScenarioFileService.File("cible.json", Defender() with { Name = "Gardes" });
+        page.Find("[data-test=open-defender]").Click();
+
+        Assert.Equal("Gardes", page.Instance.Form.Defender.Name);
+        // Le scénario complet, lui, n'est toujours pas enregistré
+        Assert.EndsWith("*", page.Find("[data-test=file-name]").TextContent);
+    }
+
+    [Fact]
+    public void The_main_open_button_asks_about_the_part_its_file_replaces()
+    {
+        var page = Render<SimulatorPage>();
+        page.Find("input[data-test=attacks]").Change("3");
+
+        // Fichier défenseur via « Ouvrir » : seul l'attaquant est modifié, donc pas de question
+        Files.ToOpen = FakeScenarioFileService.File("cible.json", Defender() with { Name = "Gardes" });
+        page.Find("[data-test=open]").Click();
+
+        Assert.Equal("Gardes", page.Instance.Form.Defender.Name);
+        Assert.Equal("3", page.Instance.Form.Attacker.Weapons[0].Attacks);
+    }
+
     private AngleSharp.Dom.IElement DialogButton(string text)
     {
         AngleSharp.Dom.IElement? button = null;

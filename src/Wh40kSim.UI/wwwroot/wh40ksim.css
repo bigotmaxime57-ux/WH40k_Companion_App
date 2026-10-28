@@ -440,6 +440,13 @@
     font-weight: 600;
 }
 
+/* Pictogramme du type d'arme (viseur, épées croisées) devant le nom, couleur du camp */
+.wh-weapon-type-icon {
+    color: var(--wh-accent);
+    flex-shrink: 0;
+    font-size: 1.6rem !important;
+}
+
 /* Corps de la tuile : valeur contre le bord gauche, indicateurs en colonne contre le bord droit (dessous si la tuile
    est trop étroite) */
 .wh-tile-body {

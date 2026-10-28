@@ -1,6 +1,7 @@
 @*
-    Un profil d'arme et le nombre de figurines qui l'utilisent. Repliable : une fois replié, une ligne de résumé (Describe
-    du Core). Les mots-clés actifs sont des étiquettes ; le bouton « Mots-clés » ouvre le sélecteur (panneau latéral).
+    Un profil d'arme et le nombre de figurines qui l'utilisent. Pictogramme du type devant le nom (viseur : tir, épées :
+    mêlée). Repliable : une fois replié, une ligne de résumé (Describe du Core). Les mots-clés actifs sont des
+    étiquettes ; le bouton « Mots-clés » ouvre le sélecteur (panneau latéral).
 *@
 @using Wh40kSim.UI.Keywords
 
@@ -8,6 +9,10 @@
     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
         <MudIconButton Icon="@(_expanded ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)" Size="Size.Small"
                        OnClick="() => _expanded = !_expanded" data-test="toggle-weapon" />
+        <MudTooltip Text="@(Weapon.Type == WeaponType.Melee ? L["Weapon_Melee"] : L["Weapon_Ranged"])">
+            <MudIcon Icon="@WeaponIcons.For(Weapon.Type)" Class="wh-weapon-type-icon"
+                     data-test="@(Weapon.Type == WeaponType.Melee ? "weapon-melee-icon" : "weapon-ranged-icon")" />
+        </MudTooltip>
         @if (_expanded)
         {
             <MudTextField T="string" Label="@L["Weapon_Name"]" @bind-Value="Weapon.Name" @bind-Value:after="NotifyChanged" />

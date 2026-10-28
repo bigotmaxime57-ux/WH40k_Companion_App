@@ -799,6 +799,18 @@
     color: #ffffff !important;
 }
 
+/* Bandeau des armes : couleur du camp fondue dans la nuit indigo (moins criard qu'un aplat sur une grande surface) */
+.wh-shell.wh-neon .wh-weapon-band {
+    background: linear-gradient(180deg,
+        color-mix(in srgb, var(--wh-accent) 62%, #140c30) 0%,
+        color-mix(in srgb, var(--wh-accent) 38%, #140c30) 100%);
+    box-shadow: inset -1px 0 0 rgba(var(--wh-accent-rgb), .45);
+}
+
+.wh-shell.wh-neon .wh-weapon-type-icon {
+    filter: drop-shadow(0 0 4px rgba(var(--wh-accent-rgb), .9));
+}
+
 /* Bandeau des tuiles : texte blanc et halo, comme le bouton Lancer */
 .wh-shell.wh-neon .wh-tile-neutral .wh-tile-label {
     box-shadow: 0 0 14px rgba(var(--wh-accent-rgb), .55);

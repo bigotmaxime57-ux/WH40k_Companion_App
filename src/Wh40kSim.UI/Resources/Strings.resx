@@ -604,9 +604,6 @@
   <data name="Chart_WipedTooltip" xml:space="preserve">
     <value>Unité détruite</value>
   </data>
-  <data name="Chart_OneIn" xml:space="preserve">
-    <value>(1 chance sur {0})</value>
-  </data>
   <data name="Chart_KillsValue" xml:space="preserve">
     <value>Figurines tuées : {0}</value>
   </data>

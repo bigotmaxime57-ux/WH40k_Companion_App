@@ -76,7 +76,7 @@
         <div class="wh-chart-tooltip" style="left: @F(Math.Clamp((ColumnX(hovered) + ColumnWidth / 2) / Width * 100, 12, 88))%" data-test="chart-tooltip">
             <strong>@string.Format(ValueTitle, Label(row.Value))</strong><br />
             @L["Chart_Exactly"] : @row.Exactly.ToString("P1")<br />
-            @L["Chart_AtLeast"] : @row.AtLeast.ToString("P1")@OneIn(row.AtLeast)
+            @L["Chart_AtLeast"] : @row.AtLeast.ToString("P1")
             @if (IsWiped(row.Value))
             {
                 <span><br /><em>@L["Chart_WipedTooltip"]</em></span>
@@ -160,17 +160,6 @@
 
     private string Label(int value) =>
         Extended && UnitSize is int size && value > size ? L["Results_Beyond", size, value - size].Value : value.ToString();
-
-    /// <summary>« (1 chance sur 2,4) » pour une probabilité strictement entre 0 et 1.</summary>
-    private string OneIn(double probability)
-    {
-        if (probability is <= 0 or >= 1)
-        {
-            return "";
-        }
-        double n = 1 / probability;
-        return " " + L["Chart_OneIn", n < 10 ? n.ToString("0.#") : n.ToString("N0")];
-    }
 
     /// <summary>Pas « rond » (1, 2 ou 5 × 10^n) proche de <paramref name="raw"/>.</summary>
     private static double NiceStep(double raw)

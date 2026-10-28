@@ -487,8 +487,8 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
   `ScenarioEditorPage` (fichiers, confirmation, validation, lancement, raccourcis ; `Run` désigne le mode,
   `OnSimulationCompleted` la suite), avec `ScenarioToolbar` et `KeywordDrawer` en commun ; ils revalident le scénario
   (`ToScenario()` puis `Validate()`) à chaque `Changed` remonté par un panneau. Graphiques : composants SVG maison
-  (`HistogramChart`), couleurs par le CSS (`--wh-accent` du camp), libellés en mots (« Exactement », « Au moins »,
-  « 1 chance sur N ») plutôt qu'en notation P(= k). Les options de situation dépendent du dernier scénario lisible
+  (`HistogramChart`), couleurs par le CSS (`--wh-accent` du camp), libellés en mots (« Exactement », « Au moins »)
+  plutôt qu'en notation P(= k) ; « 1 chance sur N » essayé puis retiré (redondant avec le pourcentage). Les options de situation dépendent du dernier scénario lisible
   (stable pendant une saisie de dés invalide). Listes « aucune » / « premier PERSONNAGE » : valeur sentinelle (0, "")
   convertie en null dans le composant. Textes : `IStringLocalizer<Strings>` injecté dans `_Imports.razor`, un seul
   `Resources/Strings.resx` (clé `Zone_Élément`), `StringsTests` vérifie qu'aucune clé ne manque ni ne traîne.

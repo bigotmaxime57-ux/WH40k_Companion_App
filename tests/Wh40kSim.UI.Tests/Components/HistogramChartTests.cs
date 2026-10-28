@@ -43,21 +43,11 @@ public class HistogramChartTests : ComponentTestContext
         Assert.Contains("Figurines tuées : 2", tooltip);
         Assert.Contains("Exactement : 30,0 %", tooltip);
         Assert.Contains("Au moins : 50,0 %", tooltip);
-        Assert.Contains("1 chance sur 2", tooltip);
+        Assert.DoesNotContain("chance", tooltip);
         Assert.DoesNotContain("P(", chart.Markup);
 
         chart.FindAll("[data-test=chart-column]")[2].MouseOut();
         Assert.Empty(chart.FindAll("[data-test=chart-tooltip]"));
-    }
-
-    [Fact]
-    public void Certain_values_have_no_odds()
-    {
-        var chart = RenderChart();
-
-        chart.FindAll("[data-test=chart-column]")[0].MouseOver();
-
-        Assert.DoesNotContain("chance", chart.Find("[data-test=chart-tooltip]").TextContent);
     }
 
     [Fact]

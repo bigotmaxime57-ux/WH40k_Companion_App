@@ -22,16 +22,16 @@
             @if (_expanded)
             {
                 @* Identité de l'arme : nom, type et nombre de porteurs *@
-                <div class="wh-weapon-name">
+                <div class="wh-card-name">
                     <MudTextField T="string" Label="@L["Weapon_Name"]" @bind-Value="Weapon.Name" @bind-Value:after="NotifyChanged" />
                 </div>
-                <div class="wh-weapon-type">
+                <div class="wh-card-type">
                     <MudSelect T="WeaponType" Label="@L["Weapon_Type"]" @bind-Value="Weapon.Type" @bind-Value:after="NotifyChanged">
                         <MudSelectItem T="WeaponType" Value="WeaponType.Ranged">@L["Weapon_Ranged"]</MudSelectItem>
                         <MudSelectItem T="WeaponType" Value="WeaponType.Melee">@L["Weapon_Melee"]</MudSelectItem>
                     </MudSelect>
                 </div>
-                <div class="wh-weapon-count">
+                <div class="wh-card-count">
                     <MudNumericField T="int" Label="@L["Weapon_ModelCount"]" Min="1" @bind-Value="Weapon.ModelCount" @bind-Value:after="NotifyChanged" />
                 </div>
             }
@@ -50,9 +50,9 @@
         @if (_expanded)
         {
             @* Ligne de profil, comme sur une fiche : cinq caractéristiques de même largeur *@
-            <div class="wh-weapon-row mt-2">
-                <MudText Typo="Typo.subtitle2" Class="wh-weapon-row-label">@L["Weapon_Profile"]</MudText>
-                <div class="wh-profile-line" data-test="weapon-profile">
+            <div class="wh-card-row">
+                <MudText Typo="Typo.subtitle2" Class="wh-card-row-label">@L["Weapon_Profile"]</MudText>
+                <div class="wh-stat-line" style="--wh-cols: 5" data-test="weapon-profile">
                     <MudTextField T="string" Label="@L["Weapon_Attacks"]" Immediate="true" @bind-Value="Weapon.Attacks" @bind-Value:after="NotifyChanged"
                                   Error="@(!IsDice(Weapon.Attacks))" ErrorText="@L["Dice_Invalid"]" data-test="attacks" />
                     <MudSelect T="int" Label="@(Weapon.Type == WeaponType.Ranged ? L["Weapon_BallisticSkill"] : L["Weapon_WeaponSkill"])"
@@ -69,8 +69,8 @@
                 </div>
             </div>
 
-            <div class="wh-weapon-row mt-3">
-                <MudText Typo="Typo.subtitle2" Class="wh-weapon-row-label">@L["Weapon_Abilities"]</MudText>
+            <div class="wh-card-row">
+                <MudText Typo="Typo.subtitle2" Class="wh-card-row-label">@L["Weapon_Abilities"]</MudText>
                 <div class="wh-keywords" data-test="weapon-keywords">
                     @foreach (var keyword in WeaponKeywords.All.Where(k => k.IsActive(Weapon.Abilities)))
                     {

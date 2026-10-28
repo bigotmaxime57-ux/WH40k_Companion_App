@@ -538,6 +538,12 @@
   <data name="Weapon_Profile" xml:space="preserve">
     <value>Profil</value>
   </data>
+  <data name="Group_Profile" xml:space="preserve">
+    <value>Profil</value>
+  </data>
+  <data name="Group_Protections" xml:space="preserve">
+    <value>Protections</value>
+  </data>
   <data name="Weapon_Ap" xml:space="preserve">
     <value>PA</value>
   </data>

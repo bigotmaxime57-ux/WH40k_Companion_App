@@ -463,33 +463,40 @@
     min-width: 0;
 }
 
-/* En-tête de l'arme : nom extensible, type et porteurs à largeur fixe */
-.wh-weapon-name {
+/* Cartes d'arme et de groupe : en-tête (nom extensible, type et nombre à largeur fixe), puis des lignes séparées par
+   un filet léger, chacune avec son libellé dans une colonne commune et ses champs de même largeur */
+.wh-card-name {
     flex: 1 1 8rem;
     min-width: 8rem;
 }
 
-.wh-weapon-type {
+.wh-card-type {
     flex: 0 0 8.5rem;
 }
 
-.wh-weapon-count {
+.wh-card-count {
     flex: 0 0 7rem;
 }
 
-/* Lignes « Profil » et « Mots-clés » : libellé dans une colonne commune, contenu à droite */
-.wh-weapon-row {
-    align-items: center;
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: 5.5rem minmax(0, 1fr);
+.wh-character-check {
+    flex-shrink: 0;
 }
 
-/* Profil : cinq caractéristiques de même largeur, comme la ligne d'une fiche */
-.wh-profile-line {
+.wh-card-row {
+    align-items: center;
+    border-top: 1px solid color-mix(in srgb, var(--mud-palette-lines-default) 70%, transparent);
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 6rem minmax(0, 1fr);
+    margin-top: .6rem;
+    padding-top: .6rem;
+}
+
+/* Ligne de caractéristiques : --wh-cols champs de même largeur, comme la ligne d'une fiche */
+.wh-stat-line {
     display: grid;
     gap: .75rem;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--wh-cols, 5), minmax(0, 1fr));
 }
 
 .wh-weapon-type-icon {

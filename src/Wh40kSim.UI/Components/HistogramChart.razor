@@ -56,8 +56,9 @@
         <line class="wh-chart-mean" x1="@F(MeanX)" y1="@F(Top + 14)" x2="@F(MeanX)" y2="@F(Bottom)" data-test="chart-mean" />
         <g><text class="wh-chart-mean-label" x="@F(MeanX)" y="@F(Top + 9)" text-anchor="middle">@L["Chart_MeanShort"]</text></g>
 
-        <polyline class="wh-chart-curve" points="@CurvePoints" />
-        @for (int i = 0; i < _rows.Count; i++)
+        @* Courbe lissée (monotone) par les seules valeurs qui arrivent : pas d'escalier sur les valeurs impossibles *@
+        <path class="wh-chart-curve" d="@_curvePath" data-test="chart-curve" />
+        @foreach (int i in _curveColumns)
         {
             <circle class="wh-chart-dot" cx="@F(ColumnX(i) + ColumnWidth / 2)" cy="@F(Y(_rows[i].AtLeast))" r="@(_hover == i ? "4.5" : "2.5")" />
         }
@@ -106,6 +107,8 @@
     private double[] _leftTicks = [];
     private int _firstBeyond = -1;   // première colonne de la marge (distribution prolongée), -1 sinon
     private readonly string _hatchId = "wh-hatch-" + Guid.NewGuid().ToString("N");
+    private List<int> _curveColumns = [];
+    private string _curvePath = "";
     private int? _hover;
 
     [Parameter, EditorRequired]
@@ -136,6 +139,8 @@
         _leftTicks = Enumerable.Range(0, (int)Math.Round(_maxExactly / step) + 1).Select(i => i * step).ToArray();
         var values = _rows.Select(r => r.Value).ToList();
         _firstBeyond = Extended && UnitSize is int size ? values.FindIndex(v => v > size) : -1;
+        _curveColumns = CurveColumns();
+        _curvePath = MonotoneCurve.ToSvgPath(_curveColumns.Select(i => (ColumnX(i) + ColumnWidth / 2, Y(_rows[i].AtLeast))).ToList());
         _hover = null;
     }
 
@@ -148,7 +153,15 @@
 
     private static double Y(double fraction) => Bottom - fraction * (Bottom - Top);
 
-    private string CurvePoints => string.Join(" ", _rows.Select((r, i) => $"{F(ColumnX(i) + ColumnWidth / 2)},{F(Y(r.AtLeast))}"));
+    /// <summary>
+    /// Colonnes par lesquelles passe la courbe « au moins » : celles dont la valeur arrive (barre non nulle). Une valeur
+    /// impossible (ex. un nombre impair de PV avec des armes à 2 dégâts) ne fait que prolonger un palier, d'où l'escalier.
+    /// </summary>
+    private List<int> CurveColumns()
+    {
+        var columns = Enumerable.Range(0, _rows.Count).Where(i => _rows[i].Exactly > 0).ToList();
+        return columns.Count >= 2 ? columns : Enumerable.Range(0, _rows.Count).ToList();
+    }
 
     private string BarClass(int i) =>
         "wh-chart-bar" + (_firstBeyond >= 0 && i >= _firstBeyond ? " wh-chart-bar-beyond" : "") + (_hover == i ? " wh-chart-bar-hover" : "");

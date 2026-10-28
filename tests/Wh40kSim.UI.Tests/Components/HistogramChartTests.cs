@@ -33,6 +33,22 @@ public class HistogramChartTests : ComponentTestContext
     }
 
     [Fact]
+    public void The_smooth_curve_skips_impossible_values_but_their_column_keeps_its_tooltip()
+    {
+        // Dégâts par pas de 2 : 1 et 3 n'arrivent jamais
+        var chart = Render<HistogramChart>(p => p
+            .Add(c => c.Distribution, new DiscreteDistribution(new long[] { 100, 0, 400, 0, 500 }))
+            .Add(c => c.ValueTitle, "PV retirés : {0}"));
+
+        Assert.StartsWith("M", chart.Find("[data-test=chart-curve]").GetAttribute("d"));
+        Assert.Equal(3, chart.FindAll("circle.wh-chart-dot").Count);
+        Assert.Equal(5, chart.FindAll("[data-test=chart-column]").Count);
+
+        chart.FindAll("[data-test=chart-column]")[3].MouseOver();
+        Assert.Contains("Au moins : 50,0 %", chart.Find("[data-test=chart-tooltip]").TextContent);
+    }
+
+    [Fact]
     public void Hovering_a_column_shows_the_probabilities_in_words()
     {
         var chart = RenderChart();

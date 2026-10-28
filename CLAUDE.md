@@ -542,6 +542,8 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
 - Phase 3, étape 5 (dégâts bruts, #6) : fusionnée dans `main` (ticket #6 fermé). Prochaine étape : 6 (statistiques
   détaillées, côté Simulation), à préciser avec l'utilisateur (définitions des analyses en points). 349 tests verts (178 Core, 51 Simulation, 120 UI) ; `NonRegressionTests` inchangés (aucun dé supplémentaire).
   Gaspillage déduit des moyennes (bruts - PV retirés et excédent), sans distribution propre.
+- Skill `/voir-sc` (capture d'écran du presse-papiers) : fusionné dans `main`, pendant l'étape 6 (branche
+  `phase3/etape6-full-sim-squelette`, en cours).
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

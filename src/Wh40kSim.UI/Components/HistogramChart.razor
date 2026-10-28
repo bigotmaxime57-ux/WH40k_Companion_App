@@ -2,14 +2,20 @@
     Histogramme d'une distribution, en SVG : barres « exactement k » (axe de gauche), courbe « au moins k » (axe de
     droite, 0 à 100 %) et trait plein de la moyenne (« moy. »), sur le même graphique ; infobulle au survol d'une
     colonne. Sans les valeurs négligeables aux extrémités (comme les tableaux). Couleurs tirées du CSS (--wh-accent) :
-    elles suivent le thème et le camp de la section qui l'entoure. La colonne de l'unité entière est notée « détruite » ;
-    pour une distribution prolongée (Extended), les colonnes au-delà (la marge) sont atténuées, séparées par un
-    pointillé et notées « 5 + 2 ».
+    elles suivent le thème et le camp de la section qui l'entoure. Les barres où l'unité est détruite (unité entière,
+    et au-delà pour une distribution prolongée) sont hachurées à 45° ; pour une distribution prolongée (Extended), les
+    colonnes au-delà de l'unité (la marge) sont aussi atténuées, séparées par un pointillé et notées « 5 + 2 ».
 *@
 @using System.Globalization
 
 <div class="wh-chart" data-test="histogram">
     <svg viewBox="0 0 @F(Width) @F(Height)" role="img" aria-label="@Title">
+        @* Hachures à 45° des barres « unité détruite » : identifiant propre à ce graphique (plusieurs par page) *@
+        <defs>
+            <pattern id="@_hatchId" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                <line class="wh-chart-hatch-line" x1="0" y1="0" x2="0" y2="6" />
+            </pattern>
+        </defs>
         @* Grille et axe de gauche (exactement k) *@
         @foreach (double tick in _leftTicks)
         {
@@ -30,6 +36,11 @@
             double height = Bottom - Y(row.Exactly / _maxExactly);
             <rect class="@BarClass(i)" x="@F(ColumnX(i) + ColumnWidth * 0.12)" y="@F(Bottom - height)"
                   width="@F(ColumnWidth * 0.76)" height="@F(height)" data-test="chart-bar" />
+            @if (IsWiped(row.Value))
+            {
+                <rect x="@F(ColumnX(i) + ColumnWidth * 0.12)" y="@F(Bottom - height)" width="@F(ColumnWidth * 0.76)" height="@F(height)"
+                      fill="@($"url(#{_hatchId})")" data-test="chart-hatch" />
+            }
             @if (ShowLabel(i))
             {
                 <g><text class="wh-chart-axis" x="@F(ColumnX(i) + ColumnWidth / 2)" y="@F(Height - 8)" text-anchor="middle">@Label(row.Value)</text></g>
@@ -39,13 +50,6 @@
         @if (_firstBeyond >= 0)
         {
             <line class="wh-chart-limit" x1="@F(ColumnX(_firstBeyond))" y1="@F(Top)" x2="@F(ColumnX(_firstBeyond))" y2="@F(Bottom)" />
-        }
-        else if (_wipedColumn >= 0)
-        {
-            @* Distribution réelle : la dernière colonne possible est l'unité entière, notée au-dessus de sa barre *@
-            double barTop = Y(_rows[_wipedColumn].Exactly / _maxExactly);
-            <g><text class="wh-chart-wiped" x="@F(ColumnX(_wipedColumn) + ColumnWidth / 2)" y="@F(barTop - 6)" text-anchor="middle"
-                     data-test="chart-wiped">@L["Chart_Wiped"]</text></g>
         }
 
         <line class="wh-chart-mean" x1="@F(MeanX)" y1="@F(Top + 14)" x2="@F(MeanX)" y2="@F(Bottom)" data-test="chart-mean" />
@@ -73,7 +77,7 @@
             <strong>@string.Format(ValueTitle, Label(row.Value))</strong><br />
             @L["Chart_Exactly"] : @row.Exactly.ToString("P1")<br />
             @L["Chart_AtLeast"] : @row.AtLeast.ToString("P1")@OneIn(row.AtLeast)
-            @if (UnitSize is int size && row.Value >= size)
+            @if (IsWiped(row.Value))
             {
                 <span><br /><em>@L["Chart_WipedTooltip"]</em></span>
             }
@@ -82,6 +86,10 @@
 
     <div class="wh-chart-legend">
         <span><i class="wh-chart-swatch-bar"></i>@L["Chart_Exactly"]</span>
+        @if (_rows.Any(r => IsWiped(r.Value)))
+        {
+            <span data-test="legend-wiped"><i class="wh-chart-swatch-hatch"></i>@L["Chart_WipedTooltip"]</span>
+        }
         <span><i class="wh-chart-swatch-curve"></i>@L["Chart_AtLeastAxis"]</span>
         <span><i class="wh-chart-swatch-mean"></i>@L["Chart_Mean", Distribution.Mean.ToString("F2")]</span>
     </div>
@@ -96,7 +104,7 @@
     private double _maxExactly = 1;
     private double[] _leftTicks = [];
     private int _firstBeyond = -1;   // première colonne de la marge (distribution prolongée), -1 sinon
-    private int _wipedColumn = -1;   // colonne de l'unité entière (distribution réelle), -1 si absente des lignes
+    private readonly string _hatchId = "wh-hatch-" + Guid.NewGuid().ToString("N");
     private int? _hover;
 
     [Parameter, EditorRequired]
@@ -127,7 +135,6 @@
         _leftTicks = Enumerable.Range(0, (int)Math.Round(_maxExactly / step) + 1).Select(i => i * step).ToArray();
         var values = _rows.Select(r => r.Value).ToList();
         _firstBeyond = Extended && UnitSize is int size ? values.FindIndex(v => v > size) : -1;
-        _wipedColumn = !Extended && UnitSize is int total ? values.IndexOf(total) : -1;
         _hover = null;
     }
 
@@ -147,6 +154,9 @@
 
     /// <summary>Au plus une vingtaine de graduations sous l'axe, pour rester lisible.</summary>
     private bool ShowLabel(int i) => i % (int)Math.Ceiling(_rows.Count / 20.0) == 0;
+
+    /// <summary>Unité détruite : valeur égale à l'effectif de l'unité, ou au-delà (marge).</summary>
+    private bool IsWiped(int value) => UnitSize is int size && value >= size;
 
     private string Label(int value) =>
         Extended && UnitSize is int size && value > size ? L["Results_Beyond", size, value - size].Value : value.ToString();

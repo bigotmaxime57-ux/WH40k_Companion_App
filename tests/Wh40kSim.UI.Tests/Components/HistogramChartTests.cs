@@ -27,6 +27,9 @@ public class HistogramChartTests : ComponentTestContext
         Assert.NotNull(chart.Find("[data-test=chart-mean]"));
         Assert.Contains("Moyenne : 1,60", chart.Markup);
         Assert.Empty(chart.FindAll("[data-test=chart-tooltip]"));
+        // Sans effectif d'unité, rien n'est hachuré ni annoncé dans la légende
+        Assert.Empty(chart.FindAll("[data-test=chart-hatch]"));
+        Assert.Empty(chart.FindAll("[data-test=legend-wiped]"));
     }
 
     [Fact]
@@ -58,11 +61,12 @@ public class HistogramChartTests : ComponentTestContext
     }
 
     [Fact]
-    public void The_whole_unit_column_is_marked_as_destroyed_without_any_margin_line()
+    public void The_whole_unit_column_is_hatched_and_explained_in_the_legend()
     {
         var chart = RenderChart(unitSize: 3);
 
-        Assert.Equal("détruite", chart.Find("[data-test=chart-wiped]").TextContent);
+        Assert.Single(chart.FindAll("[data-test=chart-hatch]"));
+        Assert.Contains("Unité détruite", chart.Find("[data-test=legend-wiped]").TextContent);
         Assert.Empty(chart.FindAll("line.wh-chart-limit"));
         Assert.Empty(chart.FindAll("rect.wh-chart-bar-beyond"));
 
@@ -79,7 +83,8 @@ public class HistogramChartTests : ComponentTestContext
 
         Assert.Single(chart.FindAll("rect.wh-chart-bar-beyond"));
         Assert.Single(chart.FindAll("line.wh-chart-limit"));
-        Assert.Empty(chart.FindAll("[data-test=chart-wiped]"));
+        // Unité entière (2) et au-delà (2 + 1) : toutes deux hachurées
+        Assert.Equal(2, chart.FindAll("[data-test=chart-hatch]").Count);
         chart.FindAll("[data-test=chart-column]")[3].MouseOver();
         Assert.Contains("Figurines tuées : 2 + 1", chart.Find("[data-test=chart-tooltip]").TextContent);
     }

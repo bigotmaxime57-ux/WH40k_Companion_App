@@ -601,9 +601,6 @@
   <data name="Chart_MeanShort" xml:space="preserve">
     <value>moy.</value>
   </data>
-  <data name="Chart_Wiped" xml:space="preserve">
-    <value>détruite</value>
-  </data>
   <data name="Chart_WipedTooltip" xml:space="preserve">
     <value>Unité détruite</value>
   </data>

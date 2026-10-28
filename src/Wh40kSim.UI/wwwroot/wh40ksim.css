@@ -496,10 +496,11 @@
     font-style: italic;
 }
 
-.wh-chart-wiped {
-    fill: var(--wh-accent);
-    font-size: 11px;
-    font-weight: 600;
+/* Barres « unité détruite » : hachures à 45° couleur du fond, posées sur la barre (motif SVG du graphique) */
+.wh-chart-hatch-line {
+    stroke: var(--mud-palette-surface);
+    stroke-opacity: .75;
+    stroke-width: 2;
 }
 
 .wh-chart-hit {
@@ -541,6 +542,11 @@
 
 .wh-chart-swatch-bar {
     background: var(--wh-accent);
+}
+
+.wh-chart-swatch-hatch {
+    background: repeating-linear-gradient(45deg, var(--wh-accent) 0 3px,
+        color-mix(in srgb, var(--mud-palette-surface) 75%, var(--wh-accent)) 3px 5px);
 }
 
 .wh-chart-swatch-curve {

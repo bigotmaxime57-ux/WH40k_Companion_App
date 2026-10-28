@@ -71,6 +71,7 @@
     private string? ScreenName => CurrentRoute switch
     {
         AppRoutes.QuickSim => L["Mode_QuickSim"].Value,
+        AppRoutes.FullSim or AppRoutes.FullSimResults => L["Mode_FullSim"].Value,
         _ => null,
     };
 

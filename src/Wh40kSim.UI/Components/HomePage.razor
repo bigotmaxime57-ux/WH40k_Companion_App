@@ -19,5 +19,14 @@
                 </MudPaper>
             </a>
         </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <a href="@AppRoutes.FullSim" class="wh-home-tile" @onclick="() => Screens.OpenAsync(AppRoutes.FullSim)"
+               @onclick:preventDefault data-test="tile-full-sim">
+                <MudPaper Elevation="3" Class="pa-5 wh-section">
+                    <SectionHeader Icon="@Icons.Material.Filled.Insights" Title="@L["Mode_FullSim"]" />
+                    <MudText Typo="Typo.body2">@L["Home_FullSimDescription"]</MudText>
+                </MudPaper>
+            </a>
+        </MudItem>
     </MudGrid>
 </MudStack>

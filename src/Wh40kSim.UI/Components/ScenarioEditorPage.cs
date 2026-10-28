@@ -1,41 +1,35 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Localization;
 using Microsoft.JSInterop;
 using MudBlazor;
 using Wh40kSim.Core.Model;
 using Wh40kSim.Core.Serialization;
-using Wh40kSim.Simulation;
 using Wh40kSim.UI.Forms;
+using Wh40kSim.UI.Resources;
 using Wh40kSim.UI.Services;
 
 namespace Wh40kSim.UI.Components;
 
 /// <summary>
-/// Écran « Quick sim ». Le scénario courant (formulaire, fichier, modifications non enregistrées, dernier résultat,
-/// réglages) est tenu par <see cref="ScenarioSession"/> et survit au changement d'écran ; la page garde ce qui s'en
-/// déduit (validation par le Core) et la simulation en cours. Le scénario est reconstruit et revalidé après chaque
-/// modification signalée par un panneau.
+/// Base des écrans de saisie d'un scénario (Quick sim, Full sim) : tout ce qu'ils partagent, sans la mise en page.
+/// Le scénario courant (formulaire, fichier, modifications non enregistrées) est tenu par <see cref="ScenarioSession"/>
+/// et survit au changement d'écran ; chaque écran a ses propres réglages et son résultat (<see cref="Run"/>). La page
+/// garde ce qui s'en déduit (validation par le Core) et la simulation en cours. Le scénario est reconstruit et
+/// revalidé après chaque modification signalée par un panneau. Raccourcis : Ctrl+Entrée lancer, Ctrl+S enregistrer,
+/// Ctrl+O ouvrir.
 /// </summary>
-public partial class SimulatorPage : IAsyncDisposable
+public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
 {
     private const string DefaultFileName = "scenario.json";
     private const string ShortcutsModule = "./_content/Wh40kSim.UI/wh40ksim.js";
 
     private Scenario? _scenario;          // scénario saisi, null tant qu'une expression de dés est invalide
-    private Scenario _reference = new();  // dernier scénario lisible : décide des options de situation à afficher
-    private IReadOnlyList<string> _errors = [];
-    private bool _hasDiceErrors;
-    private WeaponForm? _keywordWeapon;   // arme dont les mots-clés sont ouverts dans le panneau latéral
-
-    private double _progress;
     private CancellationTokenSource? _cancellation;
-
-    private string? _message;
-    private Severity _messageSeverity;
 
     private IJSObjectReference? _shortcutsModule;
     private IJSObjectReference? _shortcuts;
-    private DotNetObjectReference<SimulatorPage>? _self;
+    private DotNetObjectReference<ScenarioEditorPage>? _self;
 
     [Inject]
     private ISimulationService SimulationService { get; set; } = null!;
@@ -49,8 +43,15 @@ public partial class SimulatorPage : IAsyncDisposable
     [Inject]
     private IJSRuntime JS { get; set; } = null!;
 
+    /// <summary>Textes de l'interface (privé : les écrans dérivés ont leur propre « L », injecté par _Imports.razor).</summary>
     [Inject]
-    private ScenarioSession Session { get; set; } = null!;
+    private IStringLocalizer<Strings> L { get; set; } = null!;
+
+    [Inject]
+    protected ScenarioSession Session { get; set; } = null!;
+
+    /// <summary>Réglages et résultat du mode de cet écran.</summary>
+    protected abstract SimulationRun Run { get; }
 
     /// <summary>Formulaire en cours d'édition.</summary>
     public ScenarioForm Form => Session.Form;
@@ -58,18 +59,39 @@ public partial class SimulatorPage : IAsyncDisposable
     /// <summary>Le formulaire a été modifié depuis le dernier « Nouveau », « Ouvrir » ou « Enregistrer ».</summary>
     public bool IsDirty => Session.IsDirty;
 
-    private bool Running => Session.IsRunning;
+    /// <summary>Dernier scénario lisible : décide des options de situation à afficher (stable pendant une saisie de dés invalide).</summary>
+    protected Scenario Reference { get; private set; } = new();
 
-    private bool CanRun => !Running && _scenario is not null && _errors.Count == 0;
+    protected IReadOnlyList<string> Errors { get; private set; } = [];
+
+    protected bool HasDiceErrors { get; private set; }
+
+    /// <summary>Arme dont les mots-clés sont ouverts dans le panneau latéral.</summary>
+    protected WeaponForm? KeywordWeapon { get; private set; }
+
+    protected double Progress { get; private set; }
+
+    protected string? Message { get; private set; }
+
+    protected Severity MessageSeverity { get; private set; }
+
+    protected bool Running => Session.IsRunning;
+
+    protected bool CanRun => !Running && _scenario is not null && Errors.Count == 0;
 
     /// <summary>On peut enregistrer un scénario incohérent (à corriger plus tard), pas une saisie de dés illisible.</summary>
-    private bool CanSave => !Running && _scenario is not null;
+    protected bool CanSave => !Running && _scenario is not null;
 
     /// <summary>Les dés ne se saisissent que dans les armes : une erreur de dés rend l'attaquant (seul) illisible.</summary>
-    private bool CanSaveAttacker => !Running && !_hasDiceErrors;
+    protected bool CanSaveAttacker => !Running && !HasDiceErrors;
 
     /// <summary>Nom du fichier (ou « Nouveau scénario »), suivi de « * » s'il y a des modifications non enregistrées.</summary>
-    private string FileLabel => (Session.FileName ?? L["Toolbar_Untitled"]) + (Session.IsDirty ? " *" : "");
+    protected string FileLabel => (Session.FileName ?? L["Toolbar_Untitled"]) + (Session.IsDirty ? " *" : "");
+
+    /// <summary>Appelé quand une simulation se termine sans annulation (son résultat est dans <see cref="Run"/>).</summary>
+    protected virtual void OnSimulationCompleted()
+    {
+    }
 
     protected override void OnInitialized() => Refresh();
 
@@ -125,7 +147,7 @@ public partial class SimulatorPage : IAsyncDisposable
         StateHasChanged();
     });
 
-    private void OnFormChanged()
+    protected void OnFormChanged()
     {
         Session.IsDirty = true;
         Refresh();
@@ -136,21 +158,21 @@ public partial class SimulatorPage : IAsyncDisposable
         try
         {
             _scenario = Form.ToScenario();
-            _reference = _scenario;
-            _errors = _scenario.Validate();
-            _hasDiceErrors = false;
+            Reference = _scenario;
+            Errors = _scenario.Validate();
+            HasDiceErrors = false;
         }
         catch (FormatException)
         {
             _scenario = null;
-            _errors = [];
-            _hasDiceErrors = true;
+            Errors = [];
+            HasDiceErrors = true;
         }
 
         // L'arme dont les mots-clés étaient ouverts a été supprimée
-        if (_keywordWeapon is not null && !Form.Attacker.Weapons.Contains(_keywordWeapon))
+        if (KeywordWeapon is not null && !Form.Attacker.Weapons.Contains(KeywordWeapon))
         {
-            _keywordWeapon = null;
+            KeywordWeapon = null;
         }
     }
 
@@ -159,9 +181,9 @@ public partial class SimulatorPage : IAsyncDisposable
         Session.Form = form;
         Session.FileName = fileName;
         Session.IsDirty = false;
-        Session.Result = null;
-        _keywordWeapon = null;
-        _message = null;
+        Session.ClearResults();
+        KeywordWeapon = null;
+        Message = null;
         Refresh();
     }
 
@@ -177,7 +199,7 @@ public partial class SimulatorPage : IAsyncDisposable
         return discard == true;
     }
 
-    private async Task NewScenarioAsync()
+    protected async Task NewScenarioAsync()
     {
         if (Running || !await ConfirmDiscardAsync())
         {
@@ -190,7 +212,7 @@ public partial class SimulatorPage : IAsyncDisposable
     /// Bouton « Ouvrir » de la barre : un scénario complet remplace tout ; un fichier attaquant (ou défenseur) ne
     /// remplace que cette partie, comme le bouton de la carte correspondante.
     /// </summary>
-    private async Task OpenAsync()
+    protected async Task OpenAsync()
     {
         if (Running || !await ConfirmDiscardAsync() || await PickFileAsync() is not var (fileName, file))
         {
@@ -212,7 +234,7 @@ public partial class SimulatorPage : IAsyncDisposable
     }
 
     /// <summary>Remplace l'attaquant par celui d'un fichier attaquant ou d'un scénario complet.</summary>
-    private async Task OpenAttackerAsync()
+    protected async Task OpenAttackerAsync()
     {
         if (Running || !await ConfirmDiscardAsync() || await PickFileAsync() is not var (fileName, file))
         {
@@ -228,7 +250,7 @@ public partial class SimulatorPage : IAsyncDisposable
     }
 
     /// <summary>Remplace le défenseur par celui d'un fichier défenseur ou d'un scénario complet.</summary>
-    private async Task OpenDefenderAsync()
+    protected async Task OpenDefenderAsync()
     {
         if (Running || !await ConfirmDiscardAsync() || await PickFileAsync() is not var (fileName, file))
         {
@@ -275,7 +297,7 @@ public partial class SimulatorPage : IAsyncDisposable
         Refresh();
     }
 
-    private async Task SaveAsync()
+    protected async Task SaveAsync()
     {
         if (!CanSave)
         {
@@ -291,7 +313,7 @@ public partial class SimulatorPage : IAsyncDisposable
     }
 
     /// <summary>Enregistre l'attaquant seul (boosts compris) ; le scénario courant n'est pas considéré comme enregistré.</summary>
-    private async Task SaveAttackerAsync()
+    protected async Task SaveAttackerAsync()
     {
         if (CanSaveAttacker)
         {
@@ -301,7 +323,7 @@ public partial class SimulatorPage : IAsyncDisposable
         }
     }
 
-    private async Task SaveDefenderAsync()
+    protected async Task SaveDefenderAsync()
     {
         if (!Running)
         {
@@ -337,7 +359,7 @@ public partial class SimulatorPage : IAsyncDisposable
         return (name.Length > 0 ? name : fallback) + ".json";
     }
 
-    private async Task RunAsync()
+    protected async Task RunAsync()
     {
         if (!CanRun)
         {
@@ -345,19 +367,21 @@ public partial class SimulatorPage : IAsyncDisposable
         }
 
         Session.IsRunning = true;
-        _progress = 0;
-        _message = null;
+        Progress = 0;
+        Message = null;
         _cancellation = new CancellationTokenSource();
         // Les rapports arrivent des threads de calcul : on redessine via le contexte de l'interface
         var progress = new Progress<double>(value =>
         {
-            _progress = value;
+            Progress = value;
             _ = InvokeAsync(StateHasChanged);
         });
 
+        bool completed = false;
         try
         {
-            Session.Result = await SimulationService.RunAsync(_scenario!, Session.Iterations, Session.Seed, progress, _cancellation.Token);
+            Run.Result = await SimulationService.RunAsync(_scenario!, Run.Iterations, Run.Seed, progress, _cancellation.Token);
+            completed = true;
         }
         catch (OperationCanceledException)
         {
@@ -369,25 +393,24 @@ public partial class SimulatorPage : IAsyncDisposable
             _cancellation.Dispose();
             _cancellation = null;
         }
-    }
 
-    private void Cancel() => _cancellation?.Cancel();
-
-    private void EditKeywords(WeaponForm weapon) => _keywordWeapon = weapon;
-
-    private void CloseKeywords() => _keywordWeapon = null;
-
-    private void OnKeywordPanelOpenChanged(bool open)
-    {
-        if (!open)
+        if (completed)
         {
-            CloseKeywords();
+            OnSimulationCompleted();
         }
     }
 
+    protected void Cancel() => _cancellation?.Cancel();
+
+    protected void EditKeywords(WeaponForm weapon) => KeywordWeapon = weapon;
+
+    protected void CloseKeywords() => KeywordWeapon = null;
+
+    protected void ClearMessage() => Message = null;
+
     private void ShowMessage(string message, Severity severity)
     {
-        _message = message;
-        _messageSeverity = severity;
+        Message = message;
+        MessageSeverity = severity;
     }
 }

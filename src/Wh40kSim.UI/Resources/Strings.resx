@@ -562,4 +562,55 @@
   <data name="Weapon_WeaponSkill" xml:space="preserve">
     <value>CC</value>
   </data>
+  <data name="Mode_FullSim" xml:space="preserve">
+    <value>Full sim</value>
+  </data>
+  <data name="Home_FullSimDescription" xml:space="preserve">
+    <value>Le même scénario, analysé en détail : graphiques et tableaux de bord, un onglet par analyse.</value>
+  </data>
+  <data name="FullSim_ShowResults" xml:space="preserve">
+    <value>Voir les résultats</value>
+  </data>
+  <data name="FullSim_BackToEntry" xml:space="preserve">
+    <value>Retour à la saisie</value>
+  </data>
+  <data name="FullSim_ResultsHeader" xml:space="preserve">
+    <value>{0} contre {1} · {2} simulations · graine {3} · {4} s</value>
+  </data>
+  <data name="FullSim_NoResult" xml:space="preserve">
+    <value>Aucun résultat pour l'instant : lancez une simulation depuis l'écran de saisie.</value>
+  </data>
+  <data name="FullSim_TabDistributions" xml:space="preserve">
+    <value>Distributions</value>
+  </data>
+  <data name="Help_MarginChart" xml:space="preserve">
+    <value>Sur les graphiques, au-delà du pointillé, les barres atténuées sont la marge : « 5 + 2 » signifie l'unité entière (5), plus 2 au-delà.</value>
+  </data>
+  <data name="Chart_Exactly" xml:space="preserve">
+    <value>Exactement</value>
+  </data>
+  <data name="Chart_AtLeast" xml:space="preserve">
+    <value>Au moins</value>
+  </data>
+  <data name="Chart_AtLeastAxis" xml:space="preserve">
+    <value>Au moins (axe de droite)</value>
+  </data>
+  <data name="Chart_Mean" xml:space="preserve">
+    <value>Moyenne : {0}</value>
+  </data>
+  <data name="Chart_OneIn" xml:space="preserve">
+    <value>(1 chance sur {0})</value>
+  </data>
+  <data name="Chart_KillsValue" xml:space="preserve">
+    <value>Figurines tuées : {0}</value>
+  </data>
+  <data name="Chart_DamageValue" xml:space="preserve">
+    <value>PV retirés : {0}</value>
+  </data>
+  <data name="Results_KillsShort" xml:space="preserve">
+    <value>Figurines</value>
+  </data>
+  <data name="Results_DamageShort" xml:space="preserve">
+    <value>PV</value>
+  </data>
 </root>

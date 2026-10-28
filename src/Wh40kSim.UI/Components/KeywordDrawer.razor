@@ -1,0 +1,29 @@
+@* Panneau latéral des mots-clés d'une arme, ouvert tant que Weapon n'est pas null. *@
+@using Wh40kSim.UI.Keywords
+
+<MudDrawer Open="Weapon is not null" OpenChanged="OnOpenChanged" Anchor="Anchor.End" Variant="DrawerVariant.Temporary"
+           Overlay="false" ClipMode="DrawerClipMode.Always" Width="440px" Elevation="6" Class="wh-keyword-panel" data-test="keyword-panel">
+    @if (Weapon is not null)
+    {
+        <div class="pa-4">
+            <SectionHeader Icon="@Icons.Material.Filled.Sell" Title="@L["Keywords_Title"]">
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" OnClick="OnClose" data-test="close-keywords" />
+            </SectionHeader>
+            <MudText Typo="Typo.body2" Class="mb-3">@L["Keywords_ForWeapon", Weapon.Name]</MudText>
+            <KeywordPicker TTarget="WeaponAbilitiesForm" Target="Weapon.Abilities" Definitions="WeaponKeywords.All" Changed="Changed" />
+        </div>
+    }
+</MudDrawer>
+
+@code {
+    [Parameter]
+    public WeaponForm? Weapon { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    [Parameter]
+    public EventCallback Changed { get; set; }
+
+    private Task OnOpenChanged(bool open) => open ? Task.CompletedTask : OnClose.InvokeAsync();
+}

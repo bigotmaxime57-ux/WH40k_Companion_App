@@ -55,8 +55,8 @@
         </tbody>
     </MudSimpleTable>
 
-    <DistributionTable Title="@L["Results_Kills"]" Distribution="Kills" UnitSize="@(_extended ? Result.TotalModels : null)" />
-    <DistributionTable Title="@L["Results_Damage"]" Distribution="Damage" UnitSize="@(_extended ? Result.TotalWounds : null)" />
+    <DistributionTable Title="@L["Results_Kills"]" ValueHeader="@L["Results_KillsShort"]" Distribution="Kills" UnitSize="@(_extended ? Result.TotalModels : null)" />
+    <DistributionTable Title="@L["Results_Damage"]" ValueHeader="@L["Results_DamageShort"]" Distribution="Damage" UnitSize="@(_extended ? Result.TotalWounds : null)" />
 </MudPaper>
 
 @code {

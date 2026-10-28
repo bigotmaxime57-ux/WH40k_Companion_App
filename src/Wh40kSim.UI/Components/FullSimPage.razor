@@ -1,0 +1,55 @@
+@*
+    Écran de saisie du Full sim : bandeau en haut (fichiers, puis réglages et lancement de la simulation), colonnes
+    Attaquant et Défenseur côte à côte, Situation en pleine largeur dessous ; pas de résultats ici. Même scénario que
+    le Quick sim, mais réglages et résultat propres (Session.FullSim). À la fin d'une simulation, l'écran des
+    résultats s'ouvre ; annulée, on reste ici. Logique commune avec le Quick sim : ScenarioEditorPage.
+*@
+@page "/full-sim"
+@inherits ScenarioEditorPage
+@inject NavigationManager Navigation
+
+<MudStack Spacing="3" Class="pa-4">
+    <MudPaper Elevation="3" Class="pa-3 wh-section wh-banner" data-test="banner">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Wrap="Wrap.Wrap" Spacing="3">
+            <ScenarioToolbar Running="Running" CanSave="CanSave" FileLabel="@FileLabel" OnNew="NewScenarioAsync" OnOpen="OpenAsync" OnSave="SaveAsync" />
+            @if (Run.Result is not null && !Running)
+            {
+                <MudButton Variant="Variant.Text" Color="Color.Primary" EndIcon="@Icons.Material.Filled.ArrowForward"
+                           OnClick="ShowResults" data-test="show-results">@L["FullSim_ShowResults"]</MudButton>
+            }
+        </MudStack>
+        <MudDivider Class="my-2" />
+        <SimulationPanel Banner="true" @bind-Iterations="Run.Iterations" @bind-Seed="Run.Seed" CanRun="CanRun" Running="Running"
+                         Progress="Progress" OnRun="RunAsync" OnCancel="Cancel" />
+    </MudPaper>
+
+    @if (Message is not null)
+    {
+        <MudAlert Severity="MessageSeverity" ShowCloseIcon="true" CloseIconClicked="ClearMessage" data-test="message">@Message</MudAlert>
+    }
+    <ScenarioErrors Errors="Errors" HasDiceErrors="HasDiceErrors" />
+
+    <MudGrid Spacing="3">
+        <MudItem xs="12" md="6">
+            <AttackerPanel Attacker="Form.Attacker" Changed="OnFormChanged" EditKeywords="EditKeywords"
+                           OnOpen="OpenAttackerAsync" OnSave="SaveAttackerAsync" FileActionsDisabled="Running" SaveDisabled="!CanSaveAttacker" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <DefenderPanel Defender="Form.Defender" Changed="OnFormChanged"
+                           OnOpen="OpenDefenderAsync" OnSave="SaveDefenderAsync" FileActionsDisabled="Running" />
+        </MudItem>
+        <MudItem xs="12">
+            <ContextPanel Context="Form.Context" Reference="Reference" Changed="OnFormChanged" />
+        </MudItem>
+    </MudGrid>
+</MudStack>
+
+<KeywordDrawer Weapon="KeywordWeapon" OnClose="CloseKeywords" Changed="OnFormChanged" />
+
+@code {
+    protected override SimulationRun Run => Session.FullSim;
+
+    protected override void OnSimulationCompleted() => ShowResults();
+
+    private void ShowResults() => Navigation.NavigateTo(AppRoutes.FullSimResults);
+}

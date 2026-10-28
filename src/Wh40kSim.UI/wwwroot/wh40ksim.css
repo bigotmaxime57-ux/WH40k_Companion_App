@@ -423,7 +423,131 @@
     font-size: .8rem;
 }
 
-/* Tableaux de distribution : nombres alignés, barre proportionnelle à P(= k) */
+/* Histogramme SVG (HistogramChart) : barres « exactement » à la couleur du camp, courbe « au moins » en couleur du
+   texte, moyenne en pointillé. Le SVG s'agrandit à la largeur disponible ; l'infobulle est un bloc HTML posé dessus. */
+.wh-chart {
+    position: relative;
+}
+
+.wh-chart svg {
+    display: block;
+    height: auto;
+    overflow: visible;
+    width: 100%;
+}
+
+.wh-chart-grid {
+    stroke: var(--mud-palette-lines-default);
+    stroke-width: 1;
+}
+
+.wh-chart-axis {
+    fill: var(--mud-palette-text-secondary);
+    font-size: 11px;
+}
+
+.wh-chart-axis-curve {
+    fill: var(--mud-palette-text-primary);
+}
+
+.wh-chart-bar {
+    fill: var(--wh-accent);
+    opacity: .85;
+    transition: opacity .1s;
+}
+
+.wh-chart-bar-hover {
+    opacity: 1;
+}
+
+.wh-chart-bar-beyond {
+    fill: color-mix(in srgb, var(--wh-accent) 45%, transparent);
+}
+
+.wh-chart-curve {
+    fill: none;
+    stroke: var(--mud-palette-text-primary);
+    stroke-width: 2;
+}
+
+.wh-chart-dot {
+    fill: var(--mud-palette-text-primary);
+}
+
+.wh-chart-limit {
+    stroke: var(--mud-palette-text-secondary);
+    stroke-dasharray: 4 3;
+}
+
+.wh-chart-mean {
+    stroke: var(--wh-accent);
+    stroke-dasharray: 6 4;
+    stroke-width: 1.5;
+}
+
+.wh-chart-hit {
+    fill: transparent;
+}
+
+.wh-chart-tooltip {
+    background: var(--mud-palette-surface);
+    border: 1px solid var(--wh-accent);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .35);
+    color: var(--mud-palette-text-primary);
+    font-size: 12px;
+    padding: 4px 8px;
+    pointer-events: none;
+    position: absolute;
+    top: 4px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+.wh-chart-legend {
+    color: var(--mud-palette-text-secondary);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 12px;
+    gap: 16px;
+    margin-top: 4px;
+}
+
+.wh-chart-legend i {
+    border-radius: 2px;
+    display: inline-block;
+    height: 12px;
+    margin-right: 6px;
+    vertical-align: -1px;
+    width: 12px;
+}
+
+.wh-chart-swatch-bar {
+    background: var(--wh-accent);
+}
+
+.wh-chart-swatch-curve {
+    background: var(--mud-palette-text-primary);
+    height: 3px !important;
+    vertical-align: 3px !important;
+}
+
+.wh-chart-swatch-mean {
+    border-top: 2px dashed var(--wh-accent);
+    height: 0 !important;
+    vertical-align: 3px !important;
+}
+
+/* Bandeau du Full sim : champs du nombre de simulations et de la graine à largeur fixe, progression en bout de ligne */
+.wh-banner-field {
+    width: 11rem;
+}
+
+.wh-banner-progress {
+    flex: 1 1 12rem;
+}
+
+/* Tableaux de distribution : nombres alignés, barre proportionnelle à « exactement » */
 .wh-number {
     font-variant-numeric: tabular-nums;
     text-align: right;

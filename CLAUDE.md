@@ -480,10 +480,15 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
   Les anciens fichiers avec `toughness` sur le défenseur sont refusés au chargement (JSON strict, testé).
 - **Tests aller-retour** : comparer les scénarios via `ScenarioJson.Serialize` (les records contenant des listes ne sont
   pas égaux par valeur).
-- **Composants (Wh40kSim.UI/Components)** : le scénario courant (`ScenarioForm`, fichier, modifications, dernier
-  résultat, nombre de simulations, graine, simulation en cours) est tenu par `ScenarioSession` (service scoped, enregistré
-  par `AddWh40kSimUI`), qui survit au changement d'écran ; `SimulatorPage` le revalide (`ToScenario()` puis
-  `Validate()`) à chaque `Changed` remonté par un panneau. Les options de situation dépendent du dernier scénario lisible
+- **Composants (Wh40kSim.UI/Components)** : le scénario courant (`ScenarioForm`, fichier, modifications, simulation en
+  cours) est tenu par `ScenarioSession` (service scoped, enregistré par `AddWh40kSimUI`), qui survit au changement
+  d'écran ; chaque mode y a ses réglages et son dernier résultat (`SimulationRun` : `QuickSim`, `FullSim`), effacés
+  tous deux quand un autre scénario est chargé. Les écrans de saisie (`SimulatorPage`, `FullSimPage`) héritent de
+  `ScenarioEditorPage` (fichiers, confirmation, validation, lancement, raccourcis ; `Run` désigne le mode,
+  `OnSimulationCompleted` la suite), avec `ScenarioToolbar` et `KeywordDrawer` en commun ; ils revalident le scénario
+  (`ToScenario()` puis `Validate()`) à chaque `Changed` remonté par un panneau. Graphiques : composants SVG maison
+  (`HistogramChart`), couleurs par le CSS (`--wh-accent` du camp), libellés en mots (« Exactement », « Au moins »,
+  « 1 chance sur N ») plutôt qu'en notation P(= k). Les options de situation dépendent du dernier scénario lisible
   (stable pendant une saisie de dés invalide). Listes « aucune » / « premier PERSONNAGE » : valeur sentinelle (0, "")
   convertie en null dans le composant. Textes : `IStringLocalizer<Strings>` injecté dans `_Imports.razor`, un seul
   `Resources/Strings.resx` (clé `Zone_Élément`), `StringsTests` vérifie qu'aucune clé ne manque ni ne traîne.
@@ -504,7 +509,8 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
   panneau ; dans un panneau en demi-largeur, n'utiliser que `xs` / `sm`.
 - **Hôte desktop (Wh40kSim.Desktop)** : réduit au minimum. Toute l'interface est `AppShell` (Wh40kSim.UI) :
   fournisseurs MudBlazor, barre de titre (retour à l'accueil, nom de l'écran, menu des thèmes), puis le routeur Blazor
-  vers les écrans (`HomePage` `/`, `SimulatorPage` `/quick-sim` ; adresses dans `AppRoutes`). Ouverture d'un écran
+  vers les écrans (`HomePage` `/`, `SimulatorPage` `/quick-sim`, `FullSimPage` `/full-sim`, `FullSimResultsPage`
+  `/full-sim/results` ; adresses dans `AppRoutes`). Ouverture d'un écran
   depuis l'accueil par `ScreenNavigator` : barre de chargement dessinée avant la construction de l'écran (première
   construction lente : compilation à la volée), retirée ensuite. Pas de `RegisterLocationChangingHandler` asynchrone :
   bUnit ne termine pas la navigation dans ce cas. Réutilisable tel quel par

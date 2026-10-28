@@ -22,6 +22,8 @@ public class NavigationTests() : ComponentTestContext(renderPopoverProvider: fal
     [Theory]
     [InlineData(typeof(HomePage), AppRoutes.Home)]
     [InlineData(typeof(SimulatorPage), AppRoutes.QuickSim)]
+    [InlineData(typeof(FullSimPage), AppRoutes.FullSim)]
+    [InlineData(typeof(FullSimResultsPage), AppRoutes.FullSimResults)]
     public void Routes_match_the_page_directives(Type page, string route)
     {
         var template = Assert.Single(page.GetCustomAttributes<RouteAttribute>()).Template;

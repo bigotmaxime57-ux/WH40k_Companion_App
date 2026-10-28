@@ -1,47 +1,80 @@
-@* Lancement de la simulation : nombre d'itérations, graine, progression et annulation. *@
+@*
+    Lancement de la simulation : nombre d'itérations, graine, progression et annulation. En carte (Quick sim) ou en
+    bandeau sur une ligne (Banner, Full sim).
+*@
 
-<MudPaper Elevation="3" Class="pa-4 wh-section">
-    <SectionHeader Icon="@Icons.Material.Filled.Casino" Title="@L["Simulation_Title"]" Help="@([L["Help_Simulation"]])" />
-    <MudGrid Spacing="2">
-        <MudItem xs="6">
-            <MudNumericField T="int" Label="@L["Simulation_Iterations"]" Min="1" Max="100_000_000" Step="100_000" Disabled="Running"
-                             Value="Iterations" ValueChanged="IterationsChanged" />
-        </MudItem>
-        <MudItem xs="6">
-            <MudNumericField T="int?" Label="@L["Simulation_Seed"]" Clearable="true" Disabled="Running"
-                             Value="Seed" ValueChanged="SeedChanged" />
-        </MudItem>
-    </MudGrid>
-
-    <MudButtonGroup Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="mt-2">
-        @foreach (int preset in Presets)
-        {
-            @* Le groupe impose son style « contour » à ses boutons : le choix courant est rempli par une classe CSS *@
-            <MudButton Class="@(preset == Iterations ? "wh-preset-active" : null)" Disabled="Running"
-                       OnClick="() => IterationsChanged.InvokeAsync(preset)" data-test="@($"preset-{preset}")">@preset.ToString("N0")</MudButton>
-        }
-    </MudButtonGroup>
-
-    <MudStack Row="true" AlignItems="AlignItems.Center" Class="mt-3">
-        <MudTooltip Text="@L["Simulation_RunHelp"]">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PlayArrow"
-                       Disabled="@(!CanRun)" OnClick="OnRun" data-test="run">@L["Simulation_Run"]</MudButton>
-        </MudTooltip>
+@if (Banner)
+{
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Wrap="Wrap.Wrap" Class="wh-simulation-banner">
+        <div class="wh-banner-field">@IterationsField</div>
+        <div class="wh-banner-field">@SeedField</div>
+        @PresetButtons
+        @RunButtons
+        <HelpBubble Lines="@([L["Help_Simulation"]])" />
         @if (Running)
         {
-            <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Stop"
-                       OnClick="OnCancel" data-test="cancel">@L["Simulation_Cancel"]</MudButton>
+            <div class="wh-banner-progress">@ProgressBar</div>
         }
     </MudStack>
-
-    @if (Running)
-    {
-        <MudProgressLinear Color="Color.Primary" Min="0" Max="1" Value="Progress" Class="mt-3" data-test="progress" />
-        <MudText Typo="Typo.caption">@Progress.ToString("P0")</MudText>
-    }
-</MudPaper>
+}
+else
+{
+    <MudPaper Elevation="3" Class="pa-4 wh-section">
+        <SectionHeader Icon="@Icons.Material.Filled.Casino" Title="@L["Simulation_Title"]" Help="@([L["Help_Simulation"]])" />
+        <MudGrid Spacing="2">
+            <MudItem xs="6">@IterationsField</MudItem>
+            <MudItem xs="6">@SeedField</MudItem>
+        </MudGrid>
+        <div class="mt-2">@PresetButtons</div>
+        <div class="mt-3">@RunButtons</div>
+        @if (Running)
+        {
+            <div class="mt-3">@ProgressBar</div>
+        }
+    </MudPaper>
+}
 
 @code {
+    private RenderFragment IterationsField =>
+        @<MudNumericField T="int" Label="@L["Simulation_Iterations"]" Min="1" Max="100_000_000" Step="100_000" Disabled="Running"
+                          Value="Iterations" ValueChanged="IterationsChanged" />;
+
+    private RenderFragment SeedField =>
+        @<MudNumericField T="int?" Label="@L["Simulation_Seed"]" Clearable="true" Disabled="Running" Value="Seed" ValueChanged="SeedChanged" />;
+
+    private RenderFragment PresetButtons =>
+        @<MudButtonGroup Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">
+            @foreach (int preset in Presets)
+            {
+                @* Le groupe impose son style « contour » à ses boutons : le choix courant est rempli par une classe CSS *@
+                <MudButton Class="@(preset == Iterations ? "wh-preset-active" : null)" Disabled="Running"
+                           OnClick="() => IterationsChanged.InvokeAsync(preset)" data-test="@($"preset-{preset}")">@preset.ToString("N0")</MudButton>
+            }
+        </MudButtonGroup>;
+
+    private RenderFragment RunButtons =>
+        @<MudStack Row="true" AlignItems="AlignItems.Center">
+            <MudTooltip Text="@L["Simulation_RunHelp"]">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PlayArrow"
+                           Disabled="@(!CanRun)" OnClick="OnRun" data-test="run">@L["Simulation_Run"]</MudButton>
+            </MudTooltip>
+            @if (Running)
+            {
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Stop"
+                           OnClick="OnCancel" data-test="cancel">@L["Simulation_Cancel"]</MudButton>
+            }
+        </MudStack>;
+
+    private RenderFragment ProgressBar =>
+        @<div>
+            <MudProgressLinear Color="Color.Primary" Min="0" Max="1" Value="Progress" data-test="progress" />
+            <MudText Typo="Typo.caption">@Progress.ToString("P0")</MudText>
+        </div>;
+
+    /// <summary>Bandeau sur une ligne (Full sim) au lieu d'une carte.</summary>
+    [Parameter]
+    public bool Banner { get; set; }
+
     /// <summary>Choix rapides du nombre de simulations.</summary>
     private static readonly int[] Presets = [10_000, 100_000, 1_000_000, 10_000_000];
 

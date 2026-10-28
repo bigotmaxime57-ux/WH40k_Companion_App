@@ -394,6 +394,10 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
      de camp, barres + courbe sur le même graphique, infobulles, N courbes superposées pour la comparaison, poids,
      testable avec bUnit ; `MudChart` d'abord, composant SVG maison seulement si un critère échoue ; bibliothèque JS
      déconseillée). L'utilisateur choisit sur les captures ; page d'essai retirée ensuite.
+     **Choix du 2026-10-28 : SVG maison** (prototype sur captures dans les 4 thèmes). MudChart n'a qu'un type par
+     graphique (pas de barres + courbe), garde une taille fixe (texte minuscule, barres fines) et des infobulles
+     brutes ; le SVG maison passe tous les critères, couleurs par le CSS du thème et du camp, personnalisable à volonté
+     (marqueurs, infobulles détaillées, repères).
    - **Écran de saisie** (`/full-sim`, tuile sur l'accueil) : même scénario que le Quick sim (`ScenarioSession`) ;
      colonne Attaquant et colonne Défenseur côte à côte, Situation en pleine largeur dessous ; pas de résultats.
      **Bandeau en haut** : Nouveau / Ouvrir / Enregistrer et nom du fichier, puis les réglages du Quick sim (nombre de

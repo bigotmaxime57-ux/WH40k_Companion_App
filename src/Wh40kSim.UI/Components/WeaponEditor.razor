@@ -1,7 +1,9 @@
 @*
     Un profil d'arme et le nombre de figurines qui l'utilisent. Bandeau à gauche, fond plein couleur du camp, avec le
-    pictogramme du type (viseur : tir, épées : mêlée). Repliable : une fois replié, une ligne de résumé (Describe du Core). Les mots-clés actifs sont des
-    étiquettes ; le bouton « Mots-clés » ouvre le sélecteur (panneau latéral).
+    pictogramme du type (viseur : tir, épées : mêlée). En-tête : nom, type, nombre de porteurs ; puis la ligne
+    « Profil » (A, CT/CC, F, PA, D de même largeur, comme sur une fiche) et la ligne « Mots-clés », libellés alignés.
+    Repliable : une fois replié, une ligne de résumé (Describe du Core). Les mots-clés actifs sont des étiquettes ; le
+    bouton « Mots-clés » ouvre le sélecteur (panneau latéral).
 *@
 @using Wh40kSim.UI.Keywords
 
@@ -19,7 +21,19 @@
                            OnClick="() => _expanded = !_expanded" data-test="toggle-weapon" />
             @if (_expanded)
             {
-                <MudTextField T="string" Label="@L["Weapon_Name"]" @bind-Value="Weapon.Name" @bind-Value:after="NotifyChanged" />
+                @* Identité de l'arme : nom, type et nombre de porteurs *@
+                <div class="wh-weapon-name">
+                    <MudTextField T="string" Label="@L["Weapon_Name"]" @bind-Value="Weapon.Name" @bind-Value:after="NotifyChanged" />
+                </div>
+                <div class="wh-weapon-type">
+                    <MudSelect T="WeaponType" Label="@L["Weapon_Type"]" @bind-Value="Weapon.Type" @bind-Value:after="NotifyChanged">
+                        <MudSelectItem T="WeaponType" Value="WeaponType.Ranged">@L["Weapon_Ranged"]</MudSelectItem>
+                        <MudSelectItem T="WeaponType" Value="WeaponType.Melee">@L["Weapon_Melee"]</MudSelectItem>
+                    </MudSelect>
+                </div>
+                <div class="wh-weapon-count">
+                    <MudNumericField T="int" Label="@L["Weapon_ModelCount"]" Min="1" @bind-Value="Weapon.ModelCount" @bind-Value:after="NotifyChanged" />
+                </div>
             }
             else
             {
@@ -35,21 +49,12 @@
 
         @if (_expanded)
         {
-            <MudGrid Spacing="2">
-                <MudItem xs="6" sm="4" md="3">
-                    <MudSelect T="WeaponType" Label="@L["Weapon_Type"]" @bind-Value="Weapon.Type" @bind-Value:after="NotifyChanged">
-                        <MudSelectItem T="WeaponType" Value="WeaponType.Ranged">@L["Weapon_Ranged"]</MudSelectItem>
-                        <MudSelectItem T="WeaponType" Value="WeaponType.Melee">@L["Weapon_Melee"]</MudSelectItem>
-                    </MudSelect>
-                </MudItem>
-                <MudItem xs="6" sm="4" md="3">
-                    <MudNumericField T="int" Label="@L["Weapon_ModelCount"]" Min="1" @bind-Value="Weapon.ModelCount" @bind-Value:after="NotifyChanged" />
-                </MudItem>
-                <MudItem xs="6" sm="4" md="2">
+            @* Ligne de profil, comme sur une fiche : cinq caractéristiques de même largeur *@
+            <div class="wh-weapon-row mt-2">
+                <MudText Typo="Typo.subtitle2" Class="wh-weapon-row-label">@L["Weapon_Profile"]</MudText>
+                <div class="wh-profile-line" data-test="weapon-profile">
                     <MudTextField T="string" Label="@L["Weapon_Attacks"]" Immediate="true" @bind-Value="Weapon.Attacks" @bind-Value:after="NotifyChanged"
                                   Error="@(!IsDice(Weapon.Attacks))" ErrorText="@L["Dice_Invalid"]" data-test="attacks" />
-                </MudItem>
-                <MudItem xs="6" sm="4" md="2">
                     <MudSelect T="int" Label="@(Weapon.Type == WeaponType.Ranged ? L["Weapon_BallisticSkill"] : L["Weapon_WeaponSkill"])"
                                Disabled="Weapon.Abilities.Torrent" @bind-Value="Weapon.Skill" @bind-Value:after="NotifyChanged">
                         @foreach (int value in TwoToSix)
@@ -57,30 +62,26 @@
                             <MudSelectItem T="int" Value="value">@($"{value}+")</MudSelectItem>
                         }
                     </MudSelect>
-                </MudItem>
-                <MudItem xs="6" sm="4" md="2">
                     <MudNumericField T="int" Label="@L["Weapon_Strength"]" Min="1" @bind-Value="Weapon.Strength" @bind-Value:after="NotifyChanged" />
-                </MudItem>
-                <MudItem xs="6" sm="4" md="3">
                     <MudNumericField T="int" Label="@L["Weapon_Ap"]" Min="-6" Max="0" @bind-Value="Weapon.Ap" @bind-Value:after="NotifyChanged" />
-                </MudItem>
-                <MudItem xs="6" sm="4" md="3">
                     <MudTextField T="string" Label="@L["Weapon_Damage"]" Immediate="true" @bind-Value="Weapon.Damage" @bind-Value:after="NotifyChanged"
                                   Error="@(!IsDice(Weapon.Damage))" ErrorText="@L["Dice_Invalid"]" data-test="damage" />
-                </MudItem>
-            </MudGrid>
+                </div>
+            </div>
 
-            <div class="wh-keywords mt-3" data-test="weapon-keywords">
-                <MudText Typo="Typo.subtitle2">@L["Weapon_Abilities"]</MudText>
-                @foreach (var keyword in WeaponKeywords.All.Where(k => k.IsActive(Weapon.Abilities)))
-                {
-                    <MudTooltip Text="@L[keyword.HelpKey]">
-                        <MudChip T="string" Size="Size.Small" Color="@(IsValueInvalid(keyword) ? Color.Error : Color.Primary)" Variant="Variant.Outlined"
-                                 OnClick="OnEditKeywords" OnClose="() => Remove(keyword)" data-test="keyword-chip">@ChipLabel(keyword)</MudChip>
-                    </MudTooltip>
-                }
-                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
-                           OnClick="OnEditKeywords" data-test="edit-keywords">@L["Weapon_EditKeywords"]</MudButton>
+            <div class="wh-weapon-row mt-3">
+                <MudText Typo="Typo.subtitle2" Class="wh-weapon-row-label">@L["Weapon_Abilities"]</MudText>
+                <div class="wh-keywords" data-test="weapon-keywords">
+                    @foreach (var keyword in WeaponKeywords.All.Where(k => k.IsActive(Weapon.Abilities)))
+                    {
+                        <MudTooltip Text="@L[keyword.HelpKey]">
+                            <MudChip T="string" Size="Size.Small" Color="@(IsValueInvalid(keyword) ? Color.Error : Color.Primary)" Variant="Variant.Outlined"
+                                     OnClick="OnEditKeywords" OnClose="() => Remove(keyword)" data-test="keyword-chip">@ChipLabel(keyword)</MudChip>
+                        </MudTooltip>
+                    }
+                    <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+                               OnClick="OnEditKeywords" data-test="edit-keywords">@L["Weapon_EditKeywords"]</MudButton>
+                </div>
             </div>
         }
     </div>

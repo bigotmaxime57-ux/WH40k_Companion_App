@@ -463,6 +463,35 @@
     min-width: 0;
 }
 
+/* En-tête de l'arme : nom extensible, type et porteurs à largeur fixe */
+.wh-weapon-name {
+    flex: 1 1 8rem;
+    min-width: 8rem;
+}
+
+.wh-weapon-type {
+    flex: 0 0 8.5rem;
+}
+
+.wh-weapon-count {
+    flex: 0 0 7rem;
+}
+
+/* Lignes « Profil » et « Mots-clés » : libellé dans une colonne commune, contenu à droite */
+.wh-weapon-row {
+    align-items: center;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+}
+
+/* Profil : cinq caractéristiques de même largeur, comme la ligne d'une fiche */
+.wh-profile-line {
+    display: grid;
+    gap: .75rem;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
 .wh-weapon-type-icon {
     color: #ffffff;
     font-size: 1.75rem !important;

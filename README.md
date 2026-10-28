@@ -8,8 +8,9 @@ résultats, et une console de debug.
 
 1. Moteur de simulation (11e édition) et console : **terminé**.
 2. Interface graphique : application desktop Windows (MAUI Blazor Hybrid + MudBlazor) : **terminée** (`v0.2a`).
-3. Graphiques et comparaison : écran d'accueil, Quick sim (l'écran actuel), Full sim (statistiques détaillées,
-   graphiques), comparaison de plusieurs attaquants ou de plusieurs cibles.
+3. Graphiques et comparaison : écran d'accueil, Quick sim, Full sim (écran de saisie, puis résultats en onglets :
+   histogrammes, puis rapports par groupe, par arme et en points), comparaison de plusieurs attaquants ou de plusieurs
+   cibles. En cours.
 4. Traduction : anglais, choix de la langue, messages du Core.
 5. Mots-clés du défenseur (vrai Anti-X…), règles d'armée et détachements, stockage des règles.
 6. Gestion et sauvegarde des unités : bibliothèque, choix du loadout et des leaders.
@@ -30,8 +31,9 @@ src/Wh40kSim.Simulation      Monte Carlo : simulateur parallèle et déterminist
 src/Wh40kSim.Console         Appli console de debug (saisie interactive ou fichier JSON) : affichage uniquement
 src/Wh40kSim.Desktop         Application desktop Windows (MAUI Blazor Hybrid) : hôte de Wh40kSim.UI
 src/Wh40kSim.UI              Interface Blazor + MudBlazor partagée par les hôtes (aucune règle de jeu, aucun calcul)
-  Components/                AppShell (barre de titre, menu des thèmes, routeur), accueil et écran « Quick sim » :
-                             attaquant, défenseur, situation, simulation, résultats
+  Components/                AppShell (barre de titre, menu des thèmes, routeur), accueil, écrans « Quick sim » et
+                             « Full sim » (saisie, résultats en onglets) : attaquant, défenseur, situation,
+                             simulation, résultats, histogrammes SVG
   Forms/                     Modèles de formulaire modifiables, convertis vers / depuis les records du Core
   Resources/                 Textes de l'interface (Strings.resx, français)
   Services/                  Simulation hors du thread de l'interface, ouverture / enregistrement des scénarios,
@@ -149,8 +151,8 @@ Un boost absent vaut 0 (ou `"None"` pour une relance, `false` pour le couvert).
 Points (facultatifs) : `"points"` sur l'attaquant (coût de l'unité) et sur chaque groupe du défenseur (coût du groupe
 entier : un leader a son propre coût). Les points détruits se comptent au prorata des PV retirés (la moitié des PV d'un
 char vaut la moitié de ses points), seulement si chaque groupe a ses points ; le rendement les rapporte aux points de
-l'attaquant. Saisis et affichés dans l'interface au Full sim ; en attendant, à écrire dans le fichier (le Quick sim
-les garde à l'enregistrement), résultats affichés par la console.
+l'attaquant. Saisie et affichage dans l'interface prévus au Full sim (rapport en points) ; en attendant, à écrire
+dans le fichier (l'interface les garde à l'enregistrement), résultats affichés par la console.
 
 Un scénario complet contient `"attacker"` et `"defender"` (`"context"` facultatif). Un fichier peut aussi ne contenir
 qu'une partie, pour la réutiliser dans d'autres scénarios : `{ "attacker": { … } }` (fichier attaquant) ou

@@ -415,6 +415,16 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
    - Quick sim inchangé à l'écran ; ce que les deux écrans partagent (barre de fichiers, confirmation avant de perdre
      une saisie, lancement et annulation) est mis en commun plutôt que copié.
    - Tests bUnit : navigation saisie → résultats, Lancer désactivé si invalide, résultat séparé, onglet sans résultat.
+   - Retours de l'utilisateur intégrés (vérifiés sur captures) : libellés en mots (« Exactement », « Au moins »,
+     Quick sim compris) ; accueil en colonne ; tuiles du Quick sim en tête de l'onglet (`SummaryTiles`), titre en
+     bandeau au style du bouton Lancer, valeur à gauche, médiane / écart-type / 80 % à droite avec symboles et bulles
+     « ? » ; histogramme : courbe lissée monotone (`MonotoneCurve`) passant par les seules valeurs possibles, barres
+     « unité détruite » hachurées à 45°, moyenne en trait plein, limite de l'unité en pointillé, nombre exact sous
+     l'axe, légende complète (moyenne marge comprise expliquée) ; queue de droite des distributions filtrée sur
+     P(≥ k) (`DiscreteDistribution.Rows`, la colonne de l'unité ne disparaît plus avec la marge) ; cartes d'arme et
+     de groupe découpées en lignes (en-tête, « Profil », « Mots-clés » / « Protections », filets, grilles CSS),
+     bandeau du type d'arme (viseur / épées, Lucide) ; duplication d'un groupe ; champs de dés vérifiés à la sortie
+     du champ ; confirmation par partie (attaquant / défenseur) ; fenêtre desktop rouverte agrandie.
 7. **Rapport par groupe** (avec Precision).
    - **Pertes par groupe** : distribution des figurines tuées de chaque groupe d'allocation ; % de kill par groupe
      (P(groupe entièrement tué)), P(tuer le PERSONNAGE) pour chaque groupe PERSONNAGE, moyenne.
@@ -604,9 +614,9 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
 - Fin de la phase 3 redécoupée le 2026-10-28 (Full sim écran par écran, voir « Phase 3 : étapes ») ; définitions
   du kill threat, du tanking et de la part de Precision arrêtées avec l'utilisateur (étapes 7 et 9).
 - Skill `/voir-sc` (capture d'écran du presse-papiers) : fusionné dans `main`, pendant l'étape 6.
-- Phase 3, étape 6 (Full sim : squelette et graphiques) : **en cours** sur la branche
-  `phase3/etape6-full-sim-squelette` (SVG maison retenu ; saisie, résultats et onglet Distributions codés, ajustés
-  sur les retours de l'utilisateur).
+- Phase 3, étape 6 (Full sim : squelette et graphiques) : fusionnée dans `main`. 377 tests verts (178 Core,
+  52 Simulation, 147 UI) ; `NonRegressionTests` inchangés. Prochaine étape : 7 (rapport par groupe, avec Precision),
+  à préciser.
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

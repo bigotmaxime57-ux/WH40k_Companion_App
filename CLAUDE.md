@@ -28,9 +28,8 @@ Voir aussi `README.md` (structure de la solution, règles de jeu implémentées,
 - **Versions de paquets** : vérifier sur NuGet la dernière version stable compatible .NET 10 avant de référencer un paquet.
 - **Wh40kSim.Console** est conservé comme outil de debug : ne pas le supprimer, le garder compilable.
 - **Ne pas anticiper les phases suivantes** pendant une phase (ne pas la surcharger).
-- **« voir sc »** = regarder la capture d'écran que l'utilisateur a mise dans le presse-papiers. L'enregistrer dans le
-  scratchpad (PowerShell : `[System.Windows.Forms.Clipboard]::GetImage().Save(<chemin>.png, [System.Drawing.Imaging.ImageFormat]::Png)`
-  après `Add-Type -AssemblyName System.Windows.Forms, System.Drawing`), puis la lire comme une image.
+- **« voir sc »** = regarder la capture d'écran que l'utilisateur a mise dans le presse-papiers : skill `/voir-sc`
+  (`.claude/skills/voir-sc/SKILL.md`), qui l'enregistre dans le scratchpad puis la lit comme une image.
 
 ## Git
 

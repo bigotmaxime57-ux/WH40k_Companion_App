@@ -20,11 +20,13 @@
 
     <ApplicationTitle>Wh40kSim</ApplicationTitle>
     <ApplicationId>com.wh40ksim.desktop</ApplicationId>
-    <!-- Version : affichée sur l'accueil (InformationalVersion) et dans le nom du zip de distribution -->
+    <!-- Version : affichée sur l'accueil (InformationalVersion) et dans le nom de l'installateur -->
     <ApplicationDisplayVersion>0.3</ApplicationDisplayVersion>
-    <ApplicationVersion>2</ApplicationVersion>
-    <InformationalVersion>0.3-apercu.1</InformationalVersion>
+    <ApplicationVersion>3</ApplicationVersion>
+    <InformationalVersion>0.3-apercu.2</InformationalVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <!-- Traductions des bibliothèques (MAUI…) : français, et anglais pour la phase 4 ; pas les ~100 autres langues -->
+    <SatelliteResourceLanguages>fr;en</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>

@@ -8,7 +8,8 @@ namespace Wh40kSim.Desktop;
 /// Ouverture et enregistrement des fichiers JSON (scénarios, attaquants, défenseurs) avec les boîtes de dialogue de
 /// Windows : <see cref="IFilePicker"/> (MAUI) pour ouvrir, qui ne permet pas de choisir le dossier de départ, et
 /// <see cref="IFileSaver"/> (CommunityToolkit.Maui) pour enregistrer, qui part du dernier dossier utilisé, à défaut du
-/// dossier scenarios/ du dépôt s'il est trouvé. Le contenu est lu et écrit tel quel : l'interface l'interprète.
+/// dossier scenarios/ du dépôt s'il est trouvé (sinon celui de Documents\Wh40kSim, créé par l'installateur). Le contenu
+/// est lu et écrit tel quel : l'interface l'interprète.
 /// </summary>
 public sealed class DesktopScenarioFileService(IFilePicker filePicker, IFileSaver fileSaver) : IScenarioFileService
 {
@@ -61,7 +62,10 @@ public sealed class DesktopScenarioFileService(IFilePicker filePicker, IFileSave
         return Path.GetFileName(result.FilePath);
     }
 
-    /// <summary>Dossier "scenarios" à la racine de la solution (lancement depuis le dépôt), sinon null.</summary>
+    /// <summary>
+    /// Dossier "scenarios" à la racine de la solution (lancement depuis le dépôt), sinon Documents\Wh40kSim\scenarios
+    /// (application installée), sinon null.
+    /// </summary>
     private static string? FindScenariosDirectory()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
@@ -71,6 +75,12 @@ public sealed class DesktopScenarioFileService(IFilePicker filePicker, IFileSave
         }
 
         string? scenarios = directory is null ? null : Path.Combine(directory.FullName, "scenarios");
-        return Directory.Exists(scenarios) ? scenarios : null;
+        if (Directory.Exists(scenarios))
+        {
+            return scenarios;
+        }
+
+        string installed = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Wh40kSim", "scenarios");
+        return Directory.Exists(installed) ? installed : null;
     }
 }

@@ -528,7 +528,9 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
 - Phase 3, étape 4 (points, #2 version légère) : fusionnée dans `main` (ticket #2 commenté, laissé ouvert).
   Prochaine étape : 5 (dégâts bruts, #6). 340 tests verts (172 Core, 48 Simulation, 120 UI) ; `NonRegressionTests` inchangés. Champs de points retirés du
   Quick sim à la demande de l'utilisateur (saisie au Full sim).
-- Skill `/debut-journee` ajouté (branche `outillage/skill-debut-journee`, en attente de validation).
+- Skill `/debut-journee` (synchronisation, build et tests complets, point du jour) : fusionné dans `main`.
+  340 tests verts (172 Core, 48 Simulation, 120 UI). Prochaine étape : phase 3, étape 5 (dégâts bruts, #6), précisée
+  et validée sur la branche `phase3/etape5-degats-bruts`.
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

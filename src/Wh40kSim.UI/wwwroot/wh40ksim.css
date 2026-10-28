@@ -383,24 +383,25 @@
     overflow: hidden;
 }
 
+/* Bandeau du titre : même style que le bouton Lancer (dégradé du thème en Néon, couleur principale ailleurs) */
 .wh-tile-label {
-    background: color-mix(in srgb, var(--mud-palette-primary) 14%, transparent);
-    border-bottom: 1px solid color-mix(in srgb, var(--mud-palette-primary) 30%, transparent);
-    color: var(--mud-palette-text-secondary);
+    background: var(--wh-gradient, var(--mud-palette-primary));
+    color: var(--mud-palette-primary-text);
     font-size: .8rem;
-    letter-spacing: .06em;
+    font-weight: 600;
+    letter-spacing: .08em;
     padding: .3rem .8rem;
     text-transform: uppercase;
 }
 
 .wh-tile-bad .wh-tile-label {
-    background: color-mix(in srgb, var(--mud-palette-error) 16%, transparent);
-    border-bottom-color: color-mix(in srgb, var(--mud-palette-error) 35%, transparent);
+    background: var(--mud-palette-error);
+    color: var(--mud-palette-error-text);
 }
 
 .wh-tile-good .wh-tile-label {
-    background: color-mix(in srgb, var(--mud-palette-success) 16%, transparent);
-    border-bottom-color: color-mix(in srgb, var(--mud-palette-success) 35%, transparent);
+    background: var(--mud-palette-success);
+    color: var(--mud-palette-success-text);
 }
 
 .wh-tile-value {
@@ -768,6 +769,12 @@
     background: var(--wh-gradient) !important;
     box-shadow: 0 0 14px rgba(var(--wh-accent-rgb), .55);
     color: #ffffff !important;
+}
+
+/* Bandeau des tuiles : texte blanc et halo, comme le bouton Lancer */
+.wh-shell.wh-neon .wh-tile-neutral .wh-tile-label {
+    box-shadow: 0 0 14px rgba(var(--wh-accent-rgb), .55);
+    color: #ffffff;
 }
 
 .wh-shell.wh-neon .mud-button-filled-primary:not(:disabled):hover,

@@ -28,9 +28,8 @@ Voir aussi `README.md` (structure de la solution, règles de jeu implémentées,
 - **Versions de paquets** : vérifier sur NuGet la dernière version stable compatible .NET 10 avant de référencer un paquet.
 - **Wh40kSim.Console** est conservé comme outil de debug : ne pas le supprimer, le garder compilable.
 - **Ne pas anticiper les phases suivantes** pendant une phase (ne pas la surcharger).
-- **« voir sc »** = regarder la capture d'écran que l'utilisateur a mise dans le presse-papiers. L'enregistrer dans le
-  scratchpad (PowerShell : `[System.Windows.Forms.Clipboard]::GetImage().Save(<chemin>.png, [System.Drawing.Imaging.ImageFormat]::Png)`
-  après `Add-Type -AssemblyName System.Windows.Forms, System.Drawing`), puis la lire comme une image.
+- **« voir sc »** = regarder la capture d'écran que l'utilisateur a mise dans le presse-papiers : skill `/voir-sc`
+  (`.claude/skills/voir-sc/SKILL.md`), qui l'enregistre dans le scratchpad puis la lit comme une image.
 
 ## Git
 
@@ -543,6 +542,8 @@ Découpage validé par l'utilisateur le 2026-10-27. Chaque étape sera précisé
 - Phase 3, étape 5 (dégâts bruts, #6) : fusionnée dans `main` (ticket #6 fermé). Prochaine étape : 6 (statistiques
   détaillées, côté Simulation), à préciser avec l'utilisateur (définitions des analyses en points). 349 tests verts (178 Core, 51 Simulation, 120 UI) ; `NonRegressionTests` inchangés (aucun dé supplémentaire).
   Gaspillage déduit des moyennes (bruts - PV retirés et excédent), sans distribution propre.
+- Skill `/voir-sc` (capture d'écran du presse-papiers) : fusionné dans `main`, pendant l'étape 6 (branche
+  `phase3/etape6-full-sim-squelette`, en cours).
 
 Points notés pour la suite :
 - Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis

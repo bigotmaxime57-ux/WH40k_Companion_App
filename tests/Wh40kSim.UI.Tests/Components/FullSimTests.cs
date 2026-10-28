@@ -30,6 +30,20 @@ public class FullSimTests() : ComponentTestContext(renderPopoverProvider: false)
     }
 
     [Fact]
+    public void Home_screen_shows_the_version_given_by_the_host()
+    {
+        var shell = Render<AppShell>(p => p.Add(c => c.Version, "0.3-apercu.1"));
+
+        Assert.Equal("Version 0.3-apercu.1", shell.Find("[data-test=app-version]").TextContent);
+    }
+
+    [Fact]
+    public void Home_screen_shows_no_version_when_the_host_gives_none()
+    {
+        Assert.Empty(Render<AppShell>().FindAll("[data-test=app-version]"));
+    }
+
+    [Fact]
     public void Entry_screen_has_the_banner_and_the_three_panels_but_no_results()
     {
         var shell = Open(AppRoutes.FullSim);

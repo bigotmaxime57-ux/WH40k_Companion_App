@@ -68,6 +68,21 @@ L'application n'est pas empaquetée (pas de Microsoft Store) : le `.exe` est dan
 `src/Wh40kSim.Desktop/bin/<Configuration>/net10.0-windows10.0.19041.0/win-x64/`. Le lancer directement demande que
 .NET soit trouvable par Windows (installé dans `C:\Program Files\dotnet`, sinon variable `DOTNET_ROOT`).
 
+## Distribution (versions de test)
+
+Un zip autonome, sans installation : .NET et Windows App SDK sont inclus, seul WebView2 est requis chez l'utilisateur.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\publier.ps1                   # scénarios versionnés seulement
+powershell -ExecutionPolicy Bypass -File tools\publier.ps1 -LocalScenarios   # tout le dossier scenarios local
+```
+
+Le script publie avec le profil `win-x64` (`src/Wh40kSim.Desktop/Properties/PublishProfiles/`), ajoute
+`tools/LISEZMOI.txt` et les scénarios, puis écrit `dist/Wh40kSim-<version>-win-x64.zip` (environ 300 Mo décompressé).
+La version vient de `<InformationalVersion>` dans `Wh40kSim.Desktop.csproj` et s'affiche en bas de l'accueil.
+L'application n'est pas signée : au premier lancement, Windows SmartScreen demande « Exécuter quand même ».
+Les versions de test sont publiées en préversion dans les Releases GitHub du dépôt.
+
 ## Séquence d'attaque implémentée (règles 05 et 02.02.01, 11e édition)
 
 **Boosts** (auras, stratagèmes, aptitudes) : l'attaquant et le défenseur ont chacun les leurs, que le moteur cumule.

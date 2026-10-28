@@ -52,14 +52,17 @@
         </div>
     }
     <MudMainContent>
-        <Router AppAssembly="typeof(AppShell).Assembly">
-            <Found Context="routeData">
-                <RouteView RouteData="routeData" />
-            </Found>
-            <NotFound>
-                <HomePage />
-            </NotFound>
-        </Router>
+        @* Version fournie par l'hôte, affichée par l'accueil *@
+        <CascadingValue Name="AppVersion" Value="Version">
+            <Router AppAssembly="typeof(AppShell).Assembly">
+                <Found Context="routeData">
+                    <RouteView RouteData="routeData" />
+                </Found>
+                <NotFound>
+                    <HomePage />
+                </NotFound>
+            </Router>
+        </CascadingValue>
     </MudMainContent>
 </MudLayout>
 
@@ -84,6 +87,10 @@
     /// </summary>
     [Parameter]
     public ThemeChoice? InitialTheme { get; set; }
+
+    /// <summary>Version de l'application, fournie par l'hôte (affichée sur l'accueil) ; null = non affichée.</summary>
+    [Parameter]
+    public string? Version { get; set; }
 
     /// <summary>Thème affiché.</summary>
     public ThemeChoice Theme => _theme;

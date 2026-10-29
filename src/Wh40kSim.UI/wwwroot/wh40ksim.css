@@ -1025,6 +1025,20 @@
     white-space: nowrap;
 }
 
+/* Plus haute valeur d'une colonne (onglet Armes) ; teinte d'alerte quand c'est un défaut (gaspillage) */
+.wh-top,
+.wh-top-bad {
+    font-weight: 700;
+}
+
+.wh-top {
+    color: var(--mud-palette-primary);
+}
+
+.wh-top-bad {
+    color: var(--mud-palette-error);
+}
+
 .wh-bar-cell {
     min-width: 7rem;
 }

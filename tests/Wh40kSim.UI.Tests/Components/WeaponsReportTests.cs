@@ -48,6 +48,20 @@ public class WeaponsReportTests : ComponentTestContext
     }
 
     [Fact]
+    public void The_highest_value_of_each_column_is_highlighted()
+    {
+        var (report, result) = Render();
+
+        var rows = report.FindAll("[data-test=weapons-table] [data-test^=weapons-row-]");
+        int best = result.Pools[0].Damage.Mean > result.Pools[1].Damage.Mean ? 0 : 1;
+        Assert.Contains("wh-top", rows[best].QuerySelector("[data-test=weapons-damage]")!.ClassList);
+        Assert.DoesNotContain("wh-top", rows[1 - best].QuerySelector("[data-test=weapons-damage]")!.ClassList);
+        // Exactement une mise en avant par colonne (pas d'ex æquo ici), le gaspillage dans la teinte d'alerte
+        Assert.Equal(3, report.FindAll("[data-test=weapons-table] td.wh-top").Count);
+        Assert.Single(report.FindAll("[data-test=weapons-table] td.wh-top-bad"));
+    }
+
+    [Fact]
     public void Each_pool_has_its_own_section_with_tiles_and_a_histogram()
     {
         var (report, result) = Render();

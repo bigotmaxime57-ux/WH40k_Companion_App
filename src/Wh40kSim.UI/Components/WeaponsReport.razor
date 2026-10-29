@@ -27,10 +27,10 @@
                 {
                     <tr data-test="@($"weapons-row-{pool.Index}")">
                         <td><i class="@($"wh-share-swatch {ShareBar.ColorClass(pool.Index)}")"></i>@PoolName(pool)</td>
-                        <td class="wh-number">@L["Weapons_MeanAndShare", pool.Damage.Mean.ToString("F2"), pool.DamageShare.ToString("P0")]</td>
-                        <td class="wh-number">@L["Weapons_MeanAndShare", pool.MeanKills.ToString("F2"), pool.KillShare.ToString("P0")]</td>
-                        <td class="wh-number">@pool.MeanRawDamage.ToString("F2")</td>
-                        <td class="wh-number">@pool.WastedShare.ToString("P0")</td>
+                        <td class="@Highlight(pool, p => p.Damage.Mean, "wh-top")" data-test="weapons-damage">@L["Weapons_MeanAndShare", pool.Damage.Mean.ToString("F2"), pool.DamageShare.ToString("P0")]</td>
+                        <td class="@Highlight(pool, p => p.MeanKills, "wh-top")" data-test="weapons-kills">@L["Weapons_MeanAndShare", pool.MeanKills.ToString("F2"), pool.KillShare.ToString("P0")]</td>
+                        <td class="@Highlight(pool, p => p.MeanRawDamage, "wh-top")" data-test="weapons-raw">@pool.MeanRawDamage.ToString("F2")</td>
+                        <td class="@Highlight(pool, p => Math.Round(p.WastedShare, 2) * 100, "wh-top-bad")" data-test="weapons-waste">@pool.WastedShare.ToString("P0")</td>
                     </tr>
                 }
             </tbody>
@@ -94,6 +94,20 @@
     private IReadOnlyList<ShareBar.Part> SharesOfDamage =>
         Result.Pools.Select(p => new ShareBar.Part(PoolName(p), p.DamageShare,
             L["Weapons_MeanAndShare", p.Damage.Mean.ToString("F2"), p.DamageShare.ToString("P0")])).ToList();
+
+    /// <summary>
+    /// Classes d'une cellule du tableau : la plus haute valeur de la colonne est mise en avant (ex æquo compris, à la
+    /// précision affichée), seulement s'il y a plusieurs pools. Le gaspillage le plus haut est un défaut : autre teinte.
+    /// </summary>
+    private string Highlight(WeaponPoolLosses pool, Func<WeaponPoolLosses, double> value, string topClass)
+    {
+        if (Result.Pools.Count < 2)
+        {
+            return "wh-number";
+        }
+        double max = Result.Pools.Max(p => Math.Round(value(p), 2));
+        return Math.Round(value(pool), 2) == max ? $"wh-number {topClass}" : "wh-number";
+    }
 
     private List<StatTile.Stat> WasteStats(WeaponPoolLosses pool) =>
     [

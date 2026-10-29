@@ -106,16 +106,16 @@
                                 @Sub(c.MeanRapidFireAttacks, L["Weapons_FromRapidFire", c.MeanRapidFireAttacks.ToString("F2")])
                             </td>
                             <td class="wh-number" data-test="conversion-hits">
-                                @L["Weapons_MeanAndShare", c.MeanHits.ToString("F2"), c.HitRate.ToString("P0")]
+                                @Rates(c.MeanHits, c.HitRate, null)
                                 @Sub(c.MeanSustainedHits, L["Weapons_FromSustained", c.MeanSustainedHits.ToString("F2")])
                             </td>
                             <td class="wh-number" data-test="conversion-wounds">
-                                @L["Weapons_MeanAndShare", c.MeanWounds.ToString("F2"), c.WoundRate.ToString("P0")]
+                                @Rates(c.MeanWounds, c.WoundRate, c.WoundsPerAttack)
                                 @Sub(c.MeanLethalHits, L["Weapons_FromLethal", c.MeanLethalHits.ToString("F2"), c.LethalHitsGain.ToString("F2")])
                                 @Sub(c.MeanDevastatingWounds, L["Weapons_FromDevastating", c.MeanDevastatingWounds.ToString("F2")])
                             </td>
                             <td class="wh-number" data-test="conversion-failed-saves">
-                                @L["Weapons_MeanAndShare", c.MeanFailedSaves.ToString("F2"), c.FailedSaveRate.ToString("P0")]
+                                @Rates(c.MeanFailedSaves, c.FailedSaveRate, c.FailedSavesPerAttack)
                                 @Sub(c.MeanDevastatingWounds, L["Weapons_FromDevastatingSaves", c.MeanDevastatingWounds.ToString("F2"), c.DevastatingWoundsGain.ToString("F2")])
                             </td>
                         }
@@ -127,6 +127,7 @@
                 }
             </tbody>
         </MudSimpleTable>
+        <MudText Typo="Typo.caption" Class="wh-muted d-block mt-2" data-test="conversion-legend">@L["Weapons_ConversionLegend"]</MudText>
     </CollapsibleSection>
 
     <CollapsibleSection Icon="@Icons.Material.Filled.Whatshot" Title="@L["Weapons_RawTitle"]" Help="@([L["Help_RawDamage"], L["Help_NoWaste"], L["Help_WasteWhenSurvives"]])"
@@ -189,6 +190,15 @@
     /// <summary>Histogramme des PV perdus empilé par arme, aux couleurs de la barre de répartition (une seule arme : barres simples).</summary>
     private HistogramChart.BarStack? WasteByWeapon => Result.Pools.Count < 2 ? null
         : new(Result.Pools.Select(p => new HistogramChart.StackPart(PoolName(p), ShareBar.ColorClass(p.Index), p.WasteShareByTotal)).ToList());
+
+    /// <summary>
+    /// Valeur d'une étape, puis entre parenthèses son taux par rapport à l'étape précédente et, en atténué, la part des
+    /// attaques de base qui y arrive (« 3,10 (70 %, 51 %) ») : on voit d'où l'on vient. Pas de second taux pour les
+    /// touches, l'étape précédente étant déjà les attaques.
+    /// </summary>
+    private static RenderFragment Rates(double mean, double stepRate, double? perAttack) => perAttack is double origin
+        ? @<span>@mean.ToString("F2") (@stepRate.ToString("P0"), <span class="wh-conversion-origin" data-test="conversion-origin">@origin.ToString("P0")</span>)</span>
+        : @<span>@mean.ToString("F2") (@stepRate.ToString("P0"))</span>;
 
     /// <summary>Sous-ligne d'une cellule (part d'un mot-clé), seulement si le mot-clé a joué (moyenne non nulle).</summary>
     private static RenderFragment? Sub(double mean, string text) => mean > 0

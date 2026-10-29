@@ -35,6 +35,12 @@ public sealed record WeaponConversion(
     /// <summary>Sauvegardes ratées par blessure (Devastating Wounds comprises).</summary>
     public double FailedSaveRate => Ratio(MeanFailedSaves, MeanWounds);
 
+    /// <summary>Blessures par attaque (conversion cumulée depuis les attaques).</summary>
+    public double WoundsPerAttack => Ratio(MeanWounds, MeanAttacks);
+
+    /// <summary>Sauvegardes ratées par attaque (conversion cumulée depuis les attaques).</summary>
+    public double FailedSavesPerAttack => Ratio(MeanFailedSaves, MeanAttacks);
+
     /// <summary>
     /// Blessures gagnées grâce à Lethal Hits, estimées : chaque touche Lethal aurait échoué au jet de blessure dans la
     /// proportion observée sur les touches jetées par ce pool.

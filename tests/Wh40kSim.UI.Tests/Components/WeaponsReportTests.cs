@@ -88,6 +88,13 @@ public class WeaponsReportTests : ComponentTestContext
         Assert.Contains(conversion.LethalHitsGain.ToString("F2"), rows[0].QuerySelector("[data-test=conversion-wounds]")!.TextContent);
         // Sans mot-clé : aucune sous-ligne
         Assert.Empty(rows[1].QuerySelectorAll("[data-test=conversion-sub]"));
+        // Entre parenthèses, taux de l'étape puis part des attaques de base (blessures et sauvegardes ratées seulement :
+        // pour les touches, l'étape précédente est déjà les attaques)
+        var bolters = result.Pools[1].Conversion!;
+        Assert.Equal(2, rows[1].QuerySelectorAll("[data-test=conversion-origin]").Length);
+        var failed = rows[1].QuerySelector("[data-test=conversion-failed-saves]")!.TextContent;
+        Assert.Contains($"({bolters.FailedSaveRate:P0}, {bolters.FailedSavesPerAttack:P0})", failed);
+        Assert.NotNull(report.Find("[data-test=conversion-legend]"));
     }
 
     [Fact]

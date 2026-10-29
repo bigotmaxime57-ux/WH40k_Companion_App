@@ -419,6 +419,11 @@ rect.wh-share-5 { fill: var(--wh-share-5); }
     font-size: .8em;
 }
 
+/* Part des attaques de base, après le taux de l'étape : même parenthèse, plus discrète */
+.wh-conversion-origin {
+    color: var(--mud-palette-text-secondary);
+}
+
 rect.wh-chart-bar-neutral {
     fill: color-mix(in srgb, var(--mud-palette-text-primary) 35%, transparent);
 }

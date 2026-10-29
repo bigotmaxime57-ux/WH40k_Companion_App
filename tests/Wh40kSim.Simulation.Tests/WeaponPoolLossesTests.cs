@@ -3,10 +3,10 @@ using Wh40kSim.Core.Model;
 
 namespace Wh40kSim.Simulation.Tests;
 
-/// <summary>Rapport par arme : pertes par pool cohérentes avec les totaux, tirs sur une unité déjà détruite.</summary>
+/// <summary>Rapport par arme : pertes par pool cohÃ©rentes avec les totaux, tirs sur une unitÃ© dÃ©jÃ  dÃ©truite.</summary>
 public class WeaponPoolLossesTests
 {
-    /// <summary>Canon puis bolters et pistolets (même pool) contre 10 figurines à 2 PV.</summary>
+    /// <summary>Canon puis bolters et pistolets (mÃªme pool) contre 10 figurines Ã  2 PV.</summary>
     private static Scenario Squad(int bolters = 10) => new()
     {
         Attacker = new AttackerUnit
@@ -45,11 +45,42 @@ public class WeaponPoolLossesTests
         Assert.Equal(1, result.Pools.Sum(p => p.DamageShare), 10);
         Assert.Equal(1, result.Pools.Sum(p => p.KillShare), 10);
         Assert.All(result.Pools, p => Assert.True(p.MeanRawDamage >= p.Damage.Mean));
-        // Canon : au plus 6 attaques, donc au plus 6 figurines achevées
+        // Canon : au plus 6 attaques, donc au plus 6 figurines achevÃ©es
         Assert.Equal(0, result.Pools[0].Kills.ProbabilityAtLeast(7));
         Assert.True(result.Pools[0].Kills.ProbabilityAtLeast(1) > 0);
-        Assert.True(result.Pools[0].WastedShare > 0);      // canon D3 contre 2 PV : des dégâts perdus
-        Assert.Equal(0, result.Pools[1].MeanWastedDamage, 10);   // armes D1 : rien à perdre par figurine
+        Assert.True(result.Pools[0].WastedShare > 0);      // canon D3 contre 2 PV : des dÃ©gÃ¢ts perdus
+        Assert.Equal(0, result.Pools[1].MeanWastedDamage, 10);   // armes D1 : rien Ã  perdre par figurine
+    }
+
+    [Fact]
+    public void Waste_per_activation_matches_the_mean_waste_and_only_counts_when_the_unit_survives()
+    {
+        var result = Simulator.Run(Squad(), 100_000, seed: 24);
+
+        Assert.Equal(result.MeanWastedDamage, result.Waste.Mean, 10);
+        Assert.InRange(result.Waste.ProbabilityExactly(0), 0.01, 0.99);   // canon D3 : parfois rien, parfois des pertes
+        Assert.NotNull(result.MeanWasteWhenUnitSurvives);
+        Assert.True(result.MeanWasteWhenUnitSurvives > 0);
+    }
+
+    [Fact]
+    public void D1_weapons_never_waste_and_an_always_destroyed_unit_has_no_waste_when_it_survives()
+    {
+        // Bolters seuls (D1) : aucune perte possible par figurine
+        var bolters = Squad() with { Attacker = Squad().Attacker with { Weapons = [.. Squad().Attacker.Weapons.Skip(1)] } };
+        var d1 = Simulator.Run(bolters, 10_000, seed: 25);
+        Assert.Equal(1, d1.Waste.ProbabilityExactly(0));
+        Assert.Equal(0, d1.MeanWasteWhenUnitSurvives);
+
+        // Une figurine Ã  1 PV, touchÃ©e et blessÃ©e Ã  coup sÃ»r, sans sauvegarde : toujours dÃ©truite
+        var sure = new Scenario
+        {
+            Attacker = new AttackerUnit { Weapons = [new WeaponGroup { Weapon = new WeaponProfile { Name = "Lance", Attacks = 20, Skill = 2, Strength = 10, Damage = 3, Abilities = new WeaponAbilities { Torrent = true } } }] },
+            Defender = new DefenderUnit { Groups = [new ModelGroup { Name = "Cible", Count = 1, Wounds = 1, Toughness = 1, Save = 7 }] },
+        };
+        var wiped = Simulator.Run(sure, 1_000, seed: 26);
+        Assert.Equal(1, wiped.ProbabilityWipe);
+        Assert.Null(wiped.MeanWasteWhenUnitSurvives);
     }
 
     [Fact]
@@ -58,10 +89,10 @@ public class WeaponPoolLossesTests
         var result = Simulator.Run(Squad(bolters: 40), 50_000, seed: 23);
 
         Assert.Equal(0, result.Pools[0].ProbabilityUnitAlreadyDestroyed);
-        // Le canon ne détruit jamais l'unité à lui seul (au plus 6 morts sur 10) : les bolters tirent toujours
+        // Le canon ne dÃ©truit jamais l'unitÃ© Ã  lui seul (au plus 6 morts sur 10) : les bolters tirent toujours
         Assert.Equal(0, result.Pools[1].ProbabilityUnitAlreadyDestroyed);
 
-        // Ordre inversé : 40 bolters détruisent parfois (≈ 5 %) l'unité avant que le canon ne tire
+        // Ordre inversÃ© : 40 bolters dÃ©truisent parfois (â‰ˆ 5 %) l'unitÃ© avant que le canon ne tire
         var reversed = Squad(bolters: 40);
         reversed = reversed with { Attacker = reversed.Attacker with { Weapons = [.. reversed.Attacker.Weapons.Skip(1), reversed.Attacker.Weapons[0]] } };
         var late = Simulator.Run(reversed, 50_000, seed: 23);

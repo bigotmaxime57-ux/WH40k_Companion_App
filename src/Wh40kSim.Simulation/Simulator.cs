@@ -153,6 +153,11 @@ public static class Simulator
         private long[] _extendedDamage = new long[defender.TotalWounds + 1];
         private long[] _rawDamage = new long[defender.TotalWounds + 1];
 
+        // Gaspillage par simulation (bruts - PV retirés, marge comprise), et cumul dans les simulations où l'unité survit
+        private long[] _waste = new long[1];
+        private long _wasteWhenSurvived;
+        private long _survived;
+
         public void Record(DefenderState state)
         {
             _kills[state.ModelsKilled]++;
@@ -198,6 +203,14 @@ public static class Simulator
             Increment(ref _extendedKills, state.ModelsKilled + state.ExcessModelsKilled);
             Increment(ref _extendedDamage, state.DamageDealt + state.ExcessDamage);
             Increment(ref _rawDamage, state.RawDamage);
+
+            int waste = state.RawDamage - state.DamageDealt - state.ExcessDamage;
+            Increment(ref _waste, waste);
+            if (!state.IsDestroyed)
+            {
+                _wasteWhenSurvived += waste;
+                _survived++;
+            }
         }
 
         /// <summary>Travail des armes Precision sur un groupe PERSONNAGE (les seuls que Precision vise).</summary>
@@ -265,6 +278,9 @@ public static class Simulator
             Add(ref _extendedKills, other._extendedKills);
             Add(ref _extendedDamage, other._extendedDamage);
             Add(ref _rawDamage, other._rawDamage);
+            Add(ref _waste, other._waste);
+            _wasteWhenSurvived += other._wasteWhenSurvived;
+            _survived += other._survived;
         }
 
         public SimulationResult ToResult(Scenario scenario, int seed, TimeSpan elapsed)
@@ -294,7 +310,9 @@ public static class Simulator
                 new DiscreteDistribution(TrimTrailingZeros(_extendedKills, _kills.Length)),
                 new DiscreteDistribution(TrimTrailingZeros(_extendedDamage, _damage.Length)),
                 new DiscreteDistribution(TrimTrailingZeros(_rawDamage, _damage.Length)),
-                groups, new DiscreteDistribution(_bodyguardKills), new DiscreteDistribution(_bodyguardDamage), pools);
+                groups, new DiscreteDistribution(_bodyguardKills), new DiscreteDistribution(_bodyguardDamage), pools,
+                new DiscreteDistribution(TrimTrailingZeros(_waste, 1)),
+                _survived > 0 ? (double)_wasteWhenSurvived / _survived : null);
         }
 
         private PrecisionWeaponLosses PrecisionWeapons(int g, long iterations)

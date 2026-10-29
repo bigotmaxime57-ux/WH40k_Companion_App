@@ -644,16 +644,25 @@
     <value>Tire sur une unité déjà détruite</value>
   </data>
   <data name="Weapons_RawTitle" xml:space="preserve">
-    <value>Dégâts bruts, toutes armes</value>
+    <value>Gaspillage, toutes armes</value>
   </data>
   <data name="Weapons_WasteShareLabel" xml:space="preserve">
     <value>des dégâts bruts</value>
   </data>
-  <data name="Weapons_RawVersusDamage" xml:space="preserve">
-    <value>Dégâts bruts et PV retirés</value>
+  <data name="Weapons_WasteChart" xml:space="preserve">
+    <value>PV perdus par activation</value>
   </data>
-  <data name="Weapons_RawValue" xml:space="preserve">
-    <value>Dégâts bruts : {0}</value>
+  <data name="Chart_WasteValue" xml:space="preserve">
+    <value>PV perdus : {0}</value>
+  </data>
+  <data name="Weapons_Lost" xml:space="preserve">
+    <value>Perdus</value>
+  </data>
+  <data name="Weapons_NoWaste" xml:space="preserve">
+    <value>Aucune perte</value>
+  </data>
+  <data name="Weapons_WasteWhenSurvives" xml:space="preserve">
+    <value>Perdu quand l'unité survit</value>
   </data>
   <data name="Weapons_DamageWithMargin" xml:space="preserve">
     <value>PV retirés (marge comprise)</value>
@@ -668,7 +677,13 @@
     <value>« Tire sur une unité déjà détruite » : probabilité que l'unité soit déjà morte quand cette arme commence à tirer ; ses attaques ne servent alors à rien. Une valeur élevée suggère de la faire tirer plus tôt, ou de la garder pour une autre cible.</value>
   </data>
   <data name="Help_RawDamage" xml:space="preserve">
-    <value>Dégâts bruts : ce que chaque attaque non sauvegardée aurait retiré sans plafond par figurine (après réduction de dégâts et insensible à la douleur), y compris sur les figurines virtuelles de la marge. Le graphique les compare aux PV retirés marge comprise (contour en pointillé) : l'écart est le gaspillage.</value>
+    <value>Dégâts bruts : ce que chaque attaque non sauvegardée aurait retiré sans plafond par figurine (après réduction de dégâts et insensible à la douleur), y compris sur les figurines virtuelles de la marge. Ce qui dépasse les PV restants d'une figurine est perdu : la barre et le graphique montrent ces PV perdus à chaque activation.</value>
+  </data>
+  <data name="Help_NoWaste" xml:space="preserve">
+    <value>« Aucune perte » : probabilité qu'aucune attaque de l'activation ne dépasse les PV restants de sa figurine.</value>
+  </data>
+  <data name="Help_WasteWhenSurvives" xml:space="preserve">
+    <value>« Perdu quand l'unité survit » : PV perdus en moyenne dans les activations où l'unité n'est pas détruite. Ce sont eux qui coûtent : mieux répartis, ces dégâts auraient pu tuer une figurine de plus. Quand l'unité est détruite de toute façon, le gaspillage n'a rien coûté. Tiret si l'unité est toujours détruite.</value>
   </data>
   <data name="Help_WasteShare" xml:space="preserve">
     <value>Part des dégâts bruts perdue parce qu'une attaque dépasse les PV restants de sa figurine. Ce qui dépasse la destruction de l'unité n'en fait pas partie : c'est la marge.</value>

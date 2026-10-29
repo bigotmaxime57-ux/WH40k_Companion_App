@@ -26,8 +26,12 @@ public sealed class SimulationResult
         IReadOnlyList<GroupLosses> groups,
         DiscreteDistribution bodyguardKills,
         DiscreteDistribution bodyguardDamage,
-        IReadOnlyList<WeaponPoolLosses> pools)
+        IReadOnlyList<WeaponPoolLosses> pools,
+        DiscreteDistribution waste,
+        double? meanWasteWhenUnitSurvives)
     {
+        Waste = waste;
+        MeanWasteWhenUnitSurvives = meanWasteWhenUnitSurvives;
         Groups = groups;
         Pools = pools;
         // Gardes du corps : seulement s'il y en a et qu'ils protègent au moins un PERSONNAGE
@@ -134,6 +138,18 @@ public sealed class SimulationResult
     /// la destruction de l'unité n'en fait pas partie : c'est la marge (<see cref="DamageMarginWhenWiped"/>).
     /// </summary>
     public double MeanWastedDamage => RawDamage.Mean - ExtendedDamage.Mean;
+
+    /// <summary>
+    /// Gaspillage par activation : PV perdus dans une simulation (dégâts bruts - PV retirés, marge comprise), de 0 au
+    /// maximum observé. Sa moyenne est <see cref="MeanWastedDamage"/>.
+    /// </summary>
+    public DiscreteDistribution Waste { get; }
+
+    /// <summary>
+    /// Gaspillage moyen dans les simulations où l'unité survit : PV perdus qui auraient pu tuer une figurine de plus
+    /// (quand l'unité est détruite, le gaspillage n'a rien coûté). Null si l'unité est toujours détruite.
+    /// </summary>
+    public double? MeanWasteWhenUnitSurvives { get; }
 
     /// <summary>Pertes par pool d'attaques, dans l'ordre de résolution (rapport par arme).</summary>
     public IReadOnlyList<WeaponPoolLosses> Pools { get; }

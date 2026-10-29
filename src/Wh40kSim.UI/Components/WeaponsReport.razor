@@ -3,9 +3,10 @@
     (pertes réelles, sans la marge ; découpage par pool : armes aux attaques identiques lancées ensemble, dans l'ordre
     de résolution) :
     1. récapitulatif : barre multicolore de la répartition des PV retirés, puis un tableau, une ligne par pool ;
-    2. une section par pool : tuiles (figurines tuées, PV retirés, dégâts bruts et gaspillage, tir sur une unité déjà
-       détruite) et histogrammes des figurines tuées et des PV retirés par le pool ;
-    3. dégâts bruts toutes armes confondues (étape 5) : tuiles et histogramme des bruts, PV retirés superposés.
+    2. une section par pool : tuiles (figurines tuées, PV retirés, dégâts bruts, tir sur une unité déjà détruite), barre
+       des dégâts bruts retirés / perdus, histogrammes des figurines tuées et des PV retirés par le pool ;
+    3. gaspillage toutes armes confondues (étape 5) : tuiles, barre retirés / perdus, histogramme des PV perdus par
+       activation.
 *@
 
 <div data-test="weapons-report">
@@ -49,10 +50,18 @@
                 <div class="wh-tiles my-3">
                     <StatTile Label="@L["Groups_Killed"]" Value="@pool.MeanKills.ToString("F2")" data-test="pool-killed" />
                     <StatTile Label="@L["Groups_Damage"]" Value="@pool.Damage.Mean.ToString("F2")" data-test="pool-damage" />
-                    <StatTile Label="@L["Weapons_RawDamage"]" Value="@pool.MeanRawDamage.ToString("F2")" Stats="@WasteStats(pool)"
-                              data-test="pool-raw" />
+                    <StatTile Label="@L["Weapons_RawDamage"]" Value="@pool.MeanRawDamage.ToString("F2")" data-test="pool-raw" />
                     <StatTile Label="@L["Weapons_AlreadyDestroyed"]" Value="@pool.ProbabilityUnitAlreadyDestroyed.ToString("P1")"
                               data-test="pool-already-destroyed" />
+                </div>
+                <div class="wh-waste-bar mb-3">
+                    <SplitBar Title="@L["Weapons_RawDamage"]" Total="@pool.MeanRawDamage.ToString("F2")"
+                              Primary="@Fraction(pool.Damage.Mean, pool.MeanRawDamage)" Secondary="@Fraction(pool.MeanWastedDamage, pool.MeanRawDamage)"
+                              PrimaryLabel="@L["Groups_Damage"]"
+                              PrimaryValue="@L["Weapons_MeanAndShare", pool.Damage.Mean.ToString("F2"), (1 - pool.WastedShare).ToString("P0")]"
+                              SecondaryLabel="@L["Weapons_Lost"]"
+                              SecondaryValue="@L["Weapons_MeanAndShare", pool.MeanWastedDamage.ToString("F2"), pool.WastedShare.ToString("P0")]"
+                              Help="@([L["Help_PoolWaste"]])" data-test="pool-waste-bar" />
                 </div>
                 <MudGrid Spacing="3">
                     <MudItem xs="12" md="6">
@@ -70,19 +79,31 @@
         }
     </CollapsibleSection>
 
-    <CollapsibleSection Icon="@Icons.Material.Filled.Whatshot" Title="@L["Weapons_RawTitle"]" Help="@([L["Help_RawDamage"]])"
+    <CollapsibleSection Icon="@Icons.Material.Filled.Whatshot" Title="@L["Weapons_RawTitle"]" Help="@([L["Help_RawDamage"], L["Help_NoWaste"], L["Help_WasteWhenSurvives"]])"
                         data-test="raw-damage">
         <div class="wh-tiles mb-3">
             <StatTile Label="@L["Weapons_RawDamage"]" Value="@Result.RawDamage.Mean.ToString("F2")" data-test="raw-mean" />
             <StatTile Label="@L["Weapons_Waste"]" Value="@Result.MeanWastedDamage.ToString("F2")"
                       Stats="@([new StatTile.Stat("%", L["Weapons_WasteShareLabel"], Result.WastedShare.ToString("P1"), L["Help_WasteShare"])])"
                       data-test="raw-waste" />
+            <StatTile Label="@L["Weapons_NoWaste"]" Value="@Result.Waste.ProbabilityExactly(0).ToString("P1")" data-test="raw-no-waste" />
+            <StatTile Label="@L["Weapons_WasteWhenSurvives"]" Value="@(Result.MeanWasteWhenUnitSurvives?.ToString("F2") ?? "—")"
+                      data-test="raw-waste-survives" />
+        </div>
+        <div class="wh-waste-bar mb-3">
+            <SplitBar Title="@L["Weapons_RawDamage"]" Total="@Result.RawDamage.Mean.ToString("F2")"
+                      Primary="@Fraction(Result.ExtendedDamage.Mean, Result.RawDamage.Mean)"
+                      Secondary="@Fraction(Result.MeanWastedDamage, Result.RawDamage.Mean)"
+                      PrimaryLabel="@L["Weapons_DamageWithMargin"]"
+                      PrimaryValue="@L["Weapons_MeanAndShare", Result.ExtendedDamage.Mean.ToString("F2"), (1 - Result.WastedShare).ToString("P0")]"
+                      SecondaryLabel="@L["Weapons_Lost"]"
+                      SecondaryValue="@L["Weapons_MeanAndShare", Result.MeanWastedDamage.ToString("F2"), Result.WastedShare.ToString("P0")]"
+                      data-test="raw-waste-bar" />
         </div>
         <MudGrid Spacing="3">
             <MudItem xs="12" md="6">
-                <MudText Typo="Typo.subtitle2" Class="wh-muted">@L["Weapons_RawVersusDamage"]</MudText>
-                <HistogramChart Distribution="Result.RawDamage" Title="@L["Weapons_RawTitle"]" ValueTitle="@L["Weapons_RawValue"]"
-                                Overlay="Result.ExtendedDamage" OverlayLabel="@L["Weapons_DamageWithMargin"]" />
+                <MudText Typo="Typo.subtitle2" Class="wh-muted">@L["Weapons_WasteChart"]</MudText>
+                <HistogramChart Distribution="Result.Waste" Title="@L["Weapons_WasteChart"]" ValueTitle="@L["Chart_WasteValue"]" />
             </MudItem>
         </MudGrid>
     </CollapsibleSection>
@@ -114,9 +135,6 @@
         return Math.Round(value(pool), 2) == max ? $"wh-number {topClass}" : "wh-number";
     }
 
-    private List<StatTile.Stat> WasteStats(WeaponPoolLosses pool) =>
-    [
-        new("↯", L["Weapons_Waste"], L["Weapons_MeanAndShare", pool.MeanWastedDamage.ToString("F2"), pool.WastedShare.ToString("P0")],
-            L["Help_PoolWaste"]),
-    ];
+    /// <summary>Part d'une barre (0 si le total est nul : aucun dégât brut).</summary>
+    private static double Fraction(double part, double total) => total > 0 ? part / total : 0;
 }

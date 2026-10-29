@@ -505,9 +505,15 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
    - **2. Une section par pool** (sous-titre comme les groupes) : tuiles figurines tuées, PV retirés, dégâts bruts /
      gaspillage, et **« Tire sur une unité déjà détruite »** = P(unité détruite avant que ce pool ne tire) (utile pour
      l'ordre des armes, prépare l'optimiseur de l'étape 12) ; histogrammes des figurines tuées puis des PV retirés par ce pool.
-   - **3. Dégâts bruts, toutes armes confondues** (étape 5, jamais affichée jusqu'ici) : tuiles dégâts bruts moyens,
-     gaspillage et sa part ; histogramme des dégâts bruts superposé aux PV retirés. Dans cet onglet pour l'instant
-     (décision de l'utilisateur : à déplacer dans Distributions si elle s'y insère mieux).
+   - **3. Gaspillage, toutes armes confondues** (dégâts bruts de l'étape 5, jamais affichés jusqu'ici) : tuiles dégâts
+     bruts moyens, gaspillage et sa part, « aucune perte » (P(gaspillage = 0)), « perdu quand l'unité survit » (le
+     gaspillage qui coûte : quand l'unité est détruite, il n'a rien coûté) ; barre retirés / perdus ; **histogramme
+     des PV perdus par activation** (`SimulationResult.Waste`, `MeanWasteWhenUnitSurvives`). Retour de l'utilisateur :
+     l'histogramme des bruts superposé aux PV retirés de la première version ne montrait pas ce qui est perdu. Dans
+     cet onglet pour l'instant (décision de l'utilisateur : à déplacer dans Distributions si elle s'y insère mieux).
+   - Retours de l'utilisateur : plus haute valeur de chaque colonne du tableau en gras (gaspillage en teinte
+     d'alerte) ; histogrammes des figurines tuées puis des PV retirés par pool (`WeaponPoolLosses.Kills`) ; barre
+     dégâts bruts retirés / perdus par pool (partie perdue en teinte d'alerte).
    - **Gaspillage par pool** (décision de l'utilisateur) : les dégâts bruts d'un pool ne comptent que jusqu'à la
      destruction de l'unité ; gaspillage = bruts − PV retirés par ce pool (perte par figurine). Les attaques tirées
      sur une unité déjà détruite ne sont pas du gaspillage : l'indicateur « tire sur une unité déjà détruite » les

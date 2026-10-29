@@ -79,14 +79,28 @@ public class WeaponsReportTests : ComponentTestContext
     }
 
     [Fact]
-    public void Raw_damage_is_compared_to_the_damage_dealt_on_the_same_chart()
+    public void The_waste_section_shows_what_is_lost_per_activation()
     {
         var (report, result) = Render();
 
         var raw = report.Find("[data-test=raw-damage]");
         Assert.Contains(result.RawDamage.Mean.ToString("F2"), raw.QuerySelector("[data-test=raw-mean]")!.TextContent);
         Assert.Contains(result.WastedShare.ToString("P1"), raw.QuerySelector("[data-test=raw-waste]")!.TextContent);
-        Assert.NotEmpty(raw.QuerySelectorAll("[data-test=chart-overlay]"));
-        Assert.NotNull(raw.QuerySelector("[data-test=legend-overlay]"));
+        Assert.Contains(result.Waste.ProbabilityExactly(0).ToString("P1"), raw.QuerySelector("[data-test=raw-no-waste]")!.TextContent);
+        Assert.Contains(result.MeanWasteWhenUnitSurvives!.Value.ToString("F2"), raw.QuerySelector("[data-test=raw-waste-survives]")!.TextContent);
+        Assert.Contains(result.MeanWastedDamage.ToString("F2"), raw.QuerySelector("[data-test=raw-waste-bar] [data-test=split-secondary-value]")!.TextContent);
+        // Histogramme des PV perdus, plus de superposition
+        Assert.NotNull(raw.QuerySelector("[data-test=histogram]"));
+        Assert.Empty(raw.QuerySelectorAll("[data-test=chart-overlay]"));
+    }
+
+    [Fact]
+    public void Each_pool_shows_its_raw_damage_split_between_dealt_and_lost()
+    {
+        var (report, result) = Render();
+
+        var bar = report.Find("[data-test=weapon-pool-0] [data-test=pool-waste-bar]");
+        Assert.Contains(result.Pools[0].MeanWastedDamage.ToString("F2"), bar.QuerySelector("[data-test=split-secondary-value]")!.TextContent);
+        Assert.Contains(result.Pools[0].Damage.Mean.ToString("F2"), bar.QuerySelector("[data-test=split-primary-value]")!.TextContent);
     }
 }

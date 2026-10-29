@@ -312,6 +312,12 @@
     --wh-split-color: var(--mud-palette-success);
 }
 
+/* Barre retirés / perdus (onglet Armes) : la partie perdue en teinte d'alerte, pour qu'elle se voie */
+.wh-waste-bar .wh-split-bar-secondary,
+.wh-waste-bar .wh-split-bar-swatch-secondary {
+    background: color-mix(in srgb, var(--mud-palette-error) 75%, transparent);
+}
+
 .wh-split-bar-head {
     align-items: baseline;
     display: flex;

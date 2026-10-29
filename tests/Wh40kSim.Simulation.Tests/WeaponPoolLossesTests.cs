@@ -45,6 +45,9 @@ public class WeaponPoolLossesTests
         Assert.Equal(1, result.Pools.Sum(p => p.DamageShare), 10);
         Assert.Equal(1, result.Pools.Sum(p => p.KillShare), 10);
         Assert.All(result.Pools, p => Assert.True(p.MeanRawDamage >= p.Damage.Mean));
+        // Canon : au plus 6 attaques, donc au plus 6 figurines achevées
+        Assert.Equal(0, result.Pools[0].Kills.ProbabilityAtLeast(7));
+        Assert.True(result.Pools[0].Kills.ProbabilityAtLeast(1) > 0);
         Assert.True(result.Pools[0].WastedShare > 0);      // canon D3 contre 2 PV : des dégâts perdus
         Assert.Equal(0, result.Pools[1].MeanWastedDamage, 10);   // armes D1 : rien à perdre par figurine
     }

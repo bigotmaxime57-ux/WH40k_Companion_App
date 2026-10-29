@@ -11,7 +11,7 @@ namespace Wh40kSim.Simulation;
 /// <param name="Index">Position du pool dans l'ordre de résolution.</param>
 /// <param name="Weapons">Armes du pool, dans l'ordre de saisie (le nom du pool vient de leurs noms).</param>
 /// <param name="Damage">PV retirés par le pool (0 aux PV de l'unité).</param>
-/// <param name="MeanKills">Figurines achevées par le pool, en moyenne par simulation.</param>
+/// <param name="Kills">Figurines achevées par le pool (0 à l'effectif de l'unité).</param>
 /// <param name="MeanRawDamage">
 /// Dégâts bruts du pool en moyenne, jusqu'à la destruction de l'unité seulement : ce qui suit n'est pas du gaspillage
 /// mais un tir sur une unité déjà détruite (<see cref="ProbabilityUnitAlreadyDestroyed"/>).
@@ -23,12 +23,15 @@ public sealed record WeaponPoolLosses(
     int Index,
     IReadOnlyList<WeaponGroup> Weapons,
     DiscreteDistribution Damage,
-    double MeanKills,
+    DiscreteDistribution Kills,
     double MeanRawDamage,
     double ProbabilityUnitAlreadyDestroyed,
     double DamageShare,
     double KillShare)
 {
+    /// <summary>Figurines achevées par le pool, en moyenne par simulation.</summary>
+    public double MeanKills => Kills.Mean;
+
     /// <summary>Gaspillage moyen du pool : dégâts bruts perdus parce qu'une attaque dépasse les PV de sa figurine.</summary>
     public double MeanWastedDamage => MeanRawDamage - Damage.Mean;
 

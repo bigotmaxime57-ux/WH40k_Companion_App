@@ -4,7 +4,7 @@
     de résolution) :
     1. récapitulatif : barre multicolore de la répartition des PV retirés, puis un tableau, une ligne par pool ;
     2. une section par pool : tuiles (figurines tuées, PV retirés, dégâts bruts et gaspillage, tir sur une unité déjà
-       détruite) et histogramme des PV retirés par le pool ;
+       détruite) et histogrammes des figurines tuées et des PV retirés par le pool ;
     3. dégâts bruts toutes armes confondues (étape 5) : tuiles et histogramme des bruts, PV retirés superposés.
 *@
 
@@ -55,6 +55,11 @@
                               data-test="pool-already-destroyed" />
                 </div>
                 <MudGrid Spacing="3">
+                    <MudItem xs="12" md="6">
+                        <MudText Typo="Typo.subtitle2" Class="wh-muted">@L["Groups_Killed"]</MudText>
+                        <HistogramChart Distribution="pool.Kills" Title="@PoolName(pool)" ValueTitle="@L["Chart_KillsValue"]"
+                                        UnitSize="Result.TotalModels" />
+                    </MudItem>
                     <MudItem xs="12" md="6">
                         <MudText Typo="Typo.subtitle2" Class="wh-muted">@L["Groups_Damage"]</MudText>
                         <HistogramChart Distribution="pool.Damage" Title="@PoolName(pool)" ValueTitle="@L["Chart_DamageValue"]"

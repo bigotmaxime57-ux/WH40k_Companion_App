@@ -74,7 +74,8 @@ public class WeaponsReportTests : ComponentTestContext
         Assert.Contains(result.Pools[0].MeanRawDamage.ToString("F2"), canon.QuerySelector("[data-test=pool-raw]")!.TextContent);
         Assert.Contains(result.Pools[1].ProbabilityUnitAlreadyDestroyed.ToString("P1"),
             sections[1].QuerySelector("[data-test=pool-already-destroyed]")!.TextContent);
-        Assert.NotNull(canon.QuerySelector("[data-test=histogram]"));
+        // Figurines tuées puis PV retirés
+        Assert.Equal(2, canon.QuerySelectorAll("[data-test=histogram]").Length);
     }
 
     [Fact]

@@ -504,7 +504,7 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
      figurines tuées (moyenne, part du total), dégâts bruts (moyenne), gaspillage (part des dégâts bruts perdus).
    - **2. Une section par pool** (sous-titre comme les groupes) : tuiles figurines tuées, PV retirés, dégâts bruts /
      gaspillage, et **« Tire sur une unité déjà détruite »** = P(unité détruite avant que ce pool ne tire) (utile pour
-     l'ordre des armes, prépare l'optimiseur de l'étape 12) ; histogramme des PV retirés par ce pool.
+     l'ordre des armes, prépare l'optimiseur de l'étape 12) ; histogrammes des figurines tuées puis des PV retirés par ce pool.
    - **3. Dégâts bruts, toutes armes confondues** (étape 5, jamais affichée jusqu'ici) : tuiles dégâts bruts moyens,
      gaspillage et sa part ; histogramme des dégâts bruts superposé aux PV retirés. Dans cet onglet pour l'instant
      (décision de l'utilisateur : à déplacer dans Distributions si elle s'y insère mieux).
@@ -514,8 +514,8 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
      mesure. (Le gaspillage global de l'étape 5, lui, compte aussi la marge : il reste tel quel.)
    - Core : `DefenderState` compte par pool (indice dans `AttackResolver.Pools`) les PV retirés, les figurines
      achevées et les dégâts bruts de la séquence réelle ; le résolveur note si l'unité était déjà détruite au début de
-     chaque pool. Aucun dé en plus (non-régression au bit près). Simulation : distribution des PV retirés par pool,
-     moyennes des figurines, des bruts et du gaspillage, P(unité détruite avant le pool), en records simples ; temps
+     chaque pool. Aucun dé en plus (non-régression au bit près). Simulation : distributions des PV retirés et des figurines par pool,
+     moyennes des bruts et du gaspillage, P(unité détruite avant le pool), en records simples ; temps
      mesuré. Quick sim et console inchangés.
    - Tests : dés imposés (attribution au pool, attaque qui achève, bruts arrêtés à la destruction, pool tiré sur une
      unité détruite) ; cohérence (sommes par pool = totaux réels, parts = 100 %) ; bUnit (onglet, tableau, barre,

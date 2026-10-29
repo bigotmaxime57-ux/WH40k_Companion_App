@@ -141,10 +141,10 @@ public static class Simulator
         private readonly long[] _precisionFallsShort = new long[defender.Groups.Count];
         private readonly long[] _woundsLeftWhenShort = new long[defender.Groups.Count];
 
-        // Par pool d'attaques (ordre de résolution) : distribution des PV retirés, figurines achevées et dégâts bruts
+        // Par pool d'attaques (ordre de résolution) : distributions des PV retirés et des figurines achevées, dégâts bruts
         // (séquence réelle) cumulés, simulations où l'unité était déjà détruite quand le pool a tiré
         private readonly long[][] _poolDamage = Enumerable.Range(0, poolCount).Select(_ => new long[defender.TotalWounds + 1]).ToArray();
-        private readonly long[] _poolKills = new long[poolCount];
+        private readonly long[][] _poolKills = Enumerable.Range(0, poolCount).Select(_ => new long[defender.TotalModels + 1]).ToArray();
         private readonly long[] _poolRawDamage = new long[poolCount];
         private readonly long[] _poolOnDestroyedUnit = new long[poolCount];
 
@@ -187,7 +187,7 @@ public static class Simulator
             for (int p = 0; p < _poolKills.Length; p++)
             {
                 _poolDamage[p][state.DamageByPool(p)]++;
-                _poolKills[p] += state.KillsByPool(p);
+                _poolKills[p][state.KillsByPool(p)]++;
                 _poolRawDamage[p] += state.RawDamageByPool(p);
                 if (state.PoolFiredOnDestroyedUnit(p))
                 {
@@ -243,7 +243,7 @@ public static class Simulator
             for (int p = 0; p < _poolKills.Length; p++)
             {
                 for (int i = 0; i < _poolDamage[p].Length; i++) _poolDamage[p][i] += other._poolDamage[p][i];
-                _poolKills[p] += other._poolKills[p];
+                for (int i = 0; i < _poolKills[p].Length; i++) _poolKills[p][i] += other._poolKills[p][i];
                 _poolRawDamage[p] += other._poolRawDamage[p];
                 _poolOnDestroyedUnit[p] += other._poolOnDestroyedUnit[p];
             }
@@ -281,11 +281,12 @@ public static class Simulator
                 .Select((pool, p) =>
                 {
                     var damage = new DiscreteDistribution(_poolDamage[p]);
-                    double damageSum = damage.Mean * iterations;
+                    var kills = new DiscreteDistribution(_poolKills[p]);
+                    double damageSum = damage.Mean * iterations, killSum = kills.Mean * iterations;
                     return new WeaponPoolLosses(
-                        p, pool.Members, damage, (double)_poolKills[p] / iterations, (double)_poolRawDamage[p] / iterations,
+                        p, pool.Members, damage, kills, (double)_poolRawDamage[p] / iterations,
                         (double)_poolOnDestroyedUnit[p] / iterations,
-                        totalDamage > 0 ? damageSum / totalDamage : 0, totalKills > 0 ? _poolKills[p] / totalKills : 0);
+                        totalDamage > 0 ? damageSum / totalDamage : 0, totalKills > 0 ? killSum / totalKills : 0);
                 })
                 .ToList();
             return new(scenario, seed, elapsed,

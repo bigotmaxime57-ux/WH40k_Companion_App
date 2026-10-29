@@ -1025,9 +1025,12 @@
     white-space: nowrap;
 }
 
-/* Plus haute valeur d'une colonne (onglet Armes) ; teinte d'alerte quand c'est un défaut (gaspillage) */
+/* Plus haute valeur d'une colonne (onglet Armes) ; teinte d'alerte quand c'est un défaut (gaspillage).
+   Sélecteur renforcé : celui des cellules de MudSimpleTable impose sinon le poids normal */
 .wh-top,
-.wh-top-bad {
+.wh-top-bad,
+.mud-simple-table table * tr > td.wh-top,
+.mud-simple-table table * tr > td.wh-top-bad {
     font-weight: 700;
 }
 

@@ -1,11 +1,13 @@
 @*
-    Onglet « Armes » du Full sim, en trois sections repliables sans cadre, lues dans le résultat sans aucun calcul
+    Onglet « Armes » du Full sim, en quatre sections repliables sans cadre, lues dans le résultat sans aucun calcul
     (pertes réelles, sans la marge ; découpage par pool : armes aux attaques identiques lancées ensemble, dans l'ordre
     de résolution) :
     1. récapitulatif : barre multicolore de la répartition des PV retirés, puis un tableau, une ligne par pool ;
     2. une section par pool : tuiles (figurines tuées, PV retirés, dégâts bruts, tir sur une unité déjà détruite), barre
        des dégâts bruts retirés / perdus, histogrammes des figurines tuées et des PV retirés par le pool ;
-    3. gaspillage toutes armes confondues (étape 5) : tuiles, barre retirés / perdus, histogramme des PV perdus par
+    3. conversion des attaques : tableau attaques → touches → blessures → sauvegardes ratées par pool, avec la part des
+       mots-clés (Blast, Rapid Fire, Sustained Hits, Lethal Hits, Devastating Wounds) en sous-ligne ;
+    4. gaspillage toutes armes confondues (étape 5) : tuiles, barre retirés / perdus, histogramme des PV perdus par
        activation.
 *@
 
@@ -79,6 +81,54 @@
         }
     </CollapsibleSection>
 
+    <CollapsibleSection Icon="@Icons.Material.Filled.FilterAlt" Title="@L["Weapons_ConversionTitle"]"
+                        Help="@([L["Help_Conversion"], L["Help_ConversionKeywords"]])" data-test="weapons-conversion">
+        <MudSimpleTable Dense="true" Striped="true" data-test="conversion-table">
+            <thead>
+                <tr>
+                    <th>@L["Weapons_Pool"]</th>
+                    <th class="wh-number">@L["Weapons_Attacks"]</th>
+                    <th class="wh-number">@L["Weapons_Hits"]</th>
+                    <th class="wh-number">@L["Weapons_Wounds"]</th>
+                    <th class="wh-number">@L["Weapons_FailedSaves"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var pool in Result.Pools)
+                {
+                    <tr data-test="@($"conversion-row-{pool.Index}")">
+                        <td><i class="@($"wh-share-swatch {ShareBar.ColorClass(pool.Index)}")"></i>@PoolName(pool)</td>
+                        @if (pool.Conversion is { } c)
+                        {
+                            <td class="wh-number" data-test="conversion-attacks">
+                                @c.MeanAttacks.ToString("F2")
+                                @Sub(c.MeanBlastAttacks, L["Weapons_FromBlast", c.MeanBlastAttacks.ToString("F2")])
+                                @Sub(c.MeanRapidFireAttacks, L["Weapons_FromRapidFire", c.MeanRapidFireAttacks.ToString("F2")])
+                            </td>
+                            <td class="wh-number" data-test="conversion-hits">
+                                @L["Weapons_MeanAndShare", c.MeanHits.ToString("F2"), c.HitRate.ToString("P0")]
+                                @Sub(c.MeanSustainedHits, L["Weapons_FromSustained", c.MeanSustainedHits.ToString("F2")])
+                            </td>
+                            <td class="wh-number" data-test="conversion-wounds">
+                                @L["Weapons_MeanAndShare", c.MeanWounds.ToString("F2"), c.WoundRate.ToString("P0")]
+                                @Sub(c.MeanLethalHits, L["Weapons_FromLethal", c.MeanLethalHits.ToString("F2"), c.LethalHitsGain.ToString("F2")])
+                                @Sub(c.MeanDevastatingWounds, L["Weapons_FromDevastating", c.MeanDevastatingWounds.ToString("F2")])
+                            </td>
+                            <td class="wh-number" data-test="conversion-failed-saves">
+                                @L["Weapons_MeanAndShare", c.MeanFailedSaves.ToString("F2"), c.FailedSaveRate.ToString("P0")]
+                                @Sub(c.MeanDevastatingWounds, L["Weapons_FromDevastatingSaves", c.MeanDevastatingWounds.ToString("F2"), c.DevastatingWoundsGain.ToString("F2")])
+                            </td>
+                        }
+                        else
+                        {
+                            <td class="wh-number" colspan="4">@L["Weapons_NeverFired"]</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+    </CollapsibleSection>
+
     <CollapsibleSection Icon="@Icons.Material.Filled.Whatshot" Title="@L["Weapons_RawTitle"]" Help="@([L["Help_RawDamage"], L["Help_NoWaste"], L["Help_WasteWhenSurvives"]])"
                         data-test="raw-damage">
         <div class="wh-tiles mb-3">
@@ -139,6 +189,11 @@
     /// <summary>Histogramme des PV perdus empilé par arme, aux couleurs de la barre de répartition (une seule arme : barres simples).</summary>
     private HistogramChart.BarStack? WasteByWeapon => Result.Pools.Count < 2 ? null
         : new(Result.Pools.Select(p => new HistogramChart.StackPart(PoolName(p), ShareBar.ColorClass(p.Index), p.WasteShareByTotal)).ToList());
+
+    /// <summary>Sous-ligne d'une cellule (part d'un mot-clé), seulement si le mot-clé a joué (moyenne non nulle).</summary>
+    private static RenderFragment? Sub(double mean, string text) => mean > 0
+        ? @<span class="wh-conversion-sub" data-test="conversion-sub">@text</span>
+        : null;
 
     /// <summary>Part d'une barre (0 si le total est nul : aucun dégât brut).</summary>
     private static double Fraction(double part, double total) => total > 0 ? part / total : 0;

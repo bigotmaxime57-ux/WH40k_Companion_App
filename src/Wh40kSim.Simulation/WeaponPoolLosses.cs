@@ -23,6 +23,10 @@ namespace Wh40kSim.Simulation;
 /// Pour chaque gaspillage total k d'une simulation (indice, voir <see cref="SimulationResult.Waste"/>), part moyenne de
 /// ce pool dans ces k PV perdus, marge comprise (0 à 1 ; la somme sur les pools vaut 1 pour tout k atteint, k > 0).
 /// </param>
+/// <param name="Conversion">
+/// Conversion des attaques en touches, blessures et sauvegardes ratées ; null si le pool n'a jamais tiré sur une unité
+/// en jeu.
+/// </param>
 public sealed record WeaponPoolLosses(
     int Index,
     IReadOnlyList<WeaponGroup> Weapons,
@@ -32,7 +36,8 @@ public sealed record WeaponPoolLosses(
     double ProbabilityUnitAlreadyDestroyed,
     double DamageShare,
     double KillShare,
-    IReadOnlyList<double> WasteShareByTotal)
+    IReadOnlyList<double> WasteShareByTotal,
+    WeaponConversion? Conversion)
 {
     /// <summary>Figurines achevées par le pool, en moyenne par simulation.</summary>
     public double MeanKills => Kills.Mean;

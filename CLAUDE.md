@@ -513,6 +513,15 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
      `DefenderState.WasteByPool`, `WeaponPoolLosses.WasteShareByTotal`, `HistogramChart.Stack`). Retour de l'utilisateur :
      l'histogramme des bruts superposé aux PV retirés de la première version ne montrait pas ce qui est perdu. Dans
      cet onglet pour l'instant (décision de l'utilisateur : à déplacer dans Distributions si elle s'y insère mieux).
+   - **Conversion des attaques** (ajoutée à la demande de l'utilisateur, 2026-10-29) : section avec un tableau par pool,
+     attaques → touches (part des attaques) → blessures (part des touches) → sauvegardes ratées (part des blessures),
+     moyennes par activation où le pool tire sur une unité en jeu (dés comptés jusqu'au bout si l'unité meurt pendant
+     qu'il tire). Sous-lignes, seulement si le mot-clé joue : attaques de Blast et Rapid Fire, touches de Sustained
+     Hits, blessures Lethal Hits (avec le gain estimé : touches Lethal qui auraient raté le jet de blessure, au taux de
+     l'arme), Devastating Wounds (avec les sauvegardes évitées estimées). Core : `PoolConversion`
+     (`AttackResolver.ConversionOf`) ; Simulation : `WeaponConversion` (`WeaponPoolLosses.Conversion`, null si le pool
+     ne tire jamais sur une unité en jeu). Aucun dé en plus ; temps inchangé (médianes 3,69 s → 3,72 s, mesurées en
+     alternance).
    - Retours de l'utilisateur : plus haute valeur de chaque colonne du tableau en gras (gaspillage en teinte
      d'alerte) ; histogrammes des figurines tuées puis des PV retirés par pool (`WeaponPoolLosses.Kills`) ; barre
      dégâts bruts retirés / perdus par pool (partie perdue en teinte d'alerte).

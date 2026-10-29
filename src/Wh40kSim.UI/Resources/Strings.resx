@@ -649,6 +649,48 @@
   <data name="Weapons_WasteShareLabel" xml:space="preserve">
     <value>des dégâts bruts</value>
   </data>
+  <data name="Weapons_ConversionTitle" xml:space="preserve">
+    <value>Conversion des attaques</value>
+  </data>
+  <data name="Weapons_Attacks" xml:space="preserve">
+    <value>Attaques</value>
+  </data>
+  <data name="Weapons_Hits" xml:space="preserve">
+    <value>Touches</value>
+  </data>
+  <data name="Weapons_Wounds" xml:space="preserve">
+    <value>Blessures</value>
+  </data>
+  <data name="Weapons_FailedSaves" xml:space="preserve">
+    <value>Sauvegardes ratées</value>
+  </data>
+  <data name="Weapons_FromBlast" xml:space="preserve">
+    <value>dont +{0} Blast</value>
+  </data>
+  <data name="Weapons_FromRapidFire" xml:space="preserve">
+    <value>dont +{0} Rapid Fire</value>
+  </data>
+  <data name="Weapons_FromSustained" xml:space="preserve">
+    <value>dont +{0} Sustained</value>
+  </data>
+  <data name="Weapons_FromLethal" xml:space="preserve">
+    <value>dont {0} Lethal (≈ +{1} gagnées)</value>
+  </data>
+  <data name="Weapons_FromDevastating" xml:space="preserve">
+    <value>dont {0} Devastating</value>
+  </data>
+  <data name="Weapons_FromDevastatingSaves" xml:space="preserve">
+    <value>dont {0} mortelles (≈ {1} sauvegardes évitées)</value>
+  </data>
+  <data name="Weapons_NeverFired" xml:space="preserve">
+    <value>Ne tire jamais sur une unité en jeu</value>
+  </data>
+  <data name="Help_Conversion" xml:space="preserve">
+    <value>Ce que deviennent les attaques de chaque arme, en moyenne par activation : touches (part des attaques), blessures (part des touches), sauvegardes ratées (part des blessures). Une arme n'est comptée que quand elle commence à tirer sur une unité encore en jeu ; si l'unité meurt pendant qu'elle tire, ses dés restent comptés jusqu'au bout, pour que les taux décrivent l'arme.</value>
+  </data>
+  <data name="Help_ConversionKeywords" xml:space="preserve">
+    <value>Sous-lignes : attaques ajoutées par Blast et Rapid Fire, touches ajoutées par Sustained Hits, blessures sans jet de Lethal Hits, blessures critiques de Devastating Wounds (mortelles, sans sauvegarde). Les gains sont estimés avec les taux de l'arme : blessures gagnées = touches Lethal qui auraient raté le jet de blessure ; sauvegardes évitées = blessures Devastating qui auraient été sauvegardées.</value>
+  </data>
   <data name="Weapons_WasteChart" xml:space="preserve">
     <value>PV perdus par activation</value>
   </data>

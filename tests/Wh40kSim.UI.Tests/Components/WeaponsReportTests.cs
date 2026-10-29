@@ -62,6 +62,35 @@ public class WeaponsReportTests : ComponentTestContext
     }
 
     [Fact]
+    public void The_conversion_table_follows_each_pool_and_shows_keyword_parts_only_when_they_play()
+    {
+        // Canon avec Blast et Lethal Hits ; bolters et pistolets sans mot-clé
+        var scenario = Squad();
+        var cannon = scenario.Attacker.Weapons[0];
+        scenario = scenario with
+        {
+            Attacker = scenario.Attacker with
+            {
+                Weapons = [cannon with { Weapon = cannon.Weapon with { Abilities = new() { Blast = true, LethalHits = true } } },
+                    .. scenario.Attacker.Weapons.Skip(1)],
+            },
+        };
+        var result = Simulator.Run(scenario, 5_000, seed: 5);
+        var report = Render<WeaponsReport>(p => p.Add(c => c.Result, result));
+
+        var rows = report.FindAll("[data-test=conversion-table] [data-test^=conversion-row-]");
+        Assert.Equal(2, rows.Count);
+        var conversion = result.Pools[0].Conversion!;
+        Assert.Contains(conversion.MeanAttacks.ToString("F2"), rows[0].QuerySelector("[data-test=conversion-attacks]")!.TextContent);
+        Assert.Contains("Blast", rows[0].QuerySelector("[data-test=conversion-attacks]")!.TextContent);
+        Assert.Contains(conversion.HitRate.ToString("P0"), rows[0].QuerySelector("[data-test=conversion-hits]")!.TextContent);
+        Assert.Contains("Lethal", rows[0].QuerySelector("[data-test=conversion-wounds]")!.TextContent);
+        Assert.Contains(conversion.LethalHitsGain.ToString("F2"), rows[0].QuerySelector("[data-test=conversion-wounds]")!.TextContent);
+        // Sans mot-clé : aucune sous-ligne
+        Assert.Empty(rows[1].QuerySelectorAll("[data-test=conversion-sub]"));
+    }
+
+    [Fact]
     public void Each_pool_has_its_own_section_with_tiles_and_a_histogram()
     {
         var (report, result) = Render();

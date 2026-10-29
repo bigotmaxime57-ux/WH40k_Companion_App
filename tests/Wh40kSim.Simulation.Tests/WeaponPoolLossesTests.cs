@@ -94,6 +94,49 @@ public class WeaponPoolLossesTests
     }
 
     [Fact]
+    public void Conversion_rates_match_the_dice_and_keyword_gains_are_estimated()
+    {
+        var result = Simulator.Run(Squad(), 100_000, seed: 27);
+
+        // Bolters et pistolets : 22 attaques, touche sur 3+, F4 contre E4 (4+), sauvegarde 4+ sans PA
+        var bolters = result.Pools[1].Conversion!;
+        Assert.Equal(22, bolters.MeanAttacks, 10);
+        Assert.Equal(2.0 / 3, bolters.HitRate, 2);
+        Assert.Equal(0.5, bolters.WoundRate, 2);
+        Assert.Equal(0.5, bolters.FailedSaveRate, 2);
+        Assert.Equal(0, bolters.LethalHitsGain);
+
+        // Lethal Hits : une touche sur 6 (critiques) blesse sans jet ; sans eux, la moitié aurait raté (4+)
+        var lethal = Squad() with
+        {
+            Attacker = Squad().Attacker with
+            {
+                Weapons = [.. Squad().Attacker.Weapons.Skip(1).Select(g => g with { Weapon = g.Weapon with { Abilities = new() { LethalHits = true } } })],
+            },
+        };
+        var withLethal = Simulator.Run(lethal, 100_000, seed: 28).Pools[0].Conversion!;
+        Assert.Equal(22.0 / 6, withLethal.MeanLethalHits, 1);
+        Assert.Equal(withLethal.MeanLethalHits / 2, withLethal.LethalHitsGain, 1);
+    }
+
+    [Fact]
+    public void A_pool_that_never_fires_on_a_living_unit_has_no_conversion()
+    {
+        // 20 attaques Torrent F10 contre une figurine E1 à 1 PV : le second pool tire toujours dans le vide
+        var lance = new WeaponProfile { Name = "Lance", Attacks = 20, Strength = 10, Abilities = new WeaponAbilities { Torrent = true } };
+        var scenario = new Scenario
+        {
+            Attacker = new AttackerUnit { Weapons = [new WeaponGroup { Weapon = lance }, new WeaponGroup { Weapon = lance with { Name = "Pistolet", Attacks = 1, Strength = 9 } }] },
+            Defender = new DefenderUnit { Groups = [new ModelGroup { Name = "Cible", Count = 1, Wounds = 1, Toughness = 1 }] },
+        };
+
+        var result = Simulator.Run(scenario, 1_000, seed: 29);
+
+        Assert.NotNull(result.Pools[0].Conversion);
+        Assert.Null(result.Pools[1].Conversion);
+    }
+
+    [Fact]
     public void Only_later_pools_can_fire_on_a_destroyed_unit()
     {
         var result = Simulator.Run(Squad(bolters: 40), 50_000, seed: 23);

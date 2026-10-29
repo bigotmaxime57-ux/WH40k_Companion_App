@@ -55,7 +55,7 @@ public static class Simulator
                 for (int i = 0; i < count; i++)
                 {
                     worker.Resolver.Run(dice, excessDice);
-                    worker.Accumulator.Record(worker.Resolver.Target);
+                    worker.Accumulator.Record(worker.Resolver);
                 }
 
                 if (progress is not null)
@@ -161,8 +161,14 @@ public static class Simulator
         // Gaspillage de chaque pool, cumulé par gaspillage total de la simulation (histogramme empilé par arme)
         private readonly long[][] _poolWasteByTotal = Enumerable.Range(0, poolCount).Select(_ => new long[1]).ToArray();
 
-        public void Record(DefenderState state)
+        // Conversion des attaques de chaque pool, cumulée sur les simulations où il tire sur une unité en jeu :
+        // [0] nombre de ces simulations, puis attaques, Blast, Rapid Fire, touches, Sustained, Lethal, blessures,
+        // Devastating, sauvegardes ratées
+        private readonly long[][] _conversion = Enumerable.Range(0, poolCount).Select(_ => new long[10]).ToArray();
+
+        public void Record(AttackResolver resolver)
         {
+            var state = resolver.Target;
             _kills[state.ModelsKilled]++;
             _damage[state.DamageDealt]++;
             int bodyguardsKilled = 0;
@@ -197,6 +203,7 @@ public static class Simulator
                 _poolDamage[p][state.DamageByPool(p)]++;
                 _poolKills[p][state.KillsByPool(p)]++;
                 _poolRawDamage[p] += state.RawDamageByPool(p);
+                RecordConversion(_conversion[p], resolver.ConversionOf(p));
                 if (state.PoolFiredOnDestroyedUnit(p))
                 {
                     _poolOnDestroyedUnit[p]++;
@@ -222,6 +229,35 @@ public static class Simulator
                 _wasteWhenSurvived += waste;
                 _survived++;
             }
+        }
+
+        private static void RecordConversion(long[] sums, PoolConversion conversion)
+        {
+            if (!conversion.Fired)
+            {
+                return;
+            }
+            sums[0]++;
+            sums[1] += conversion.Attacks;
+            sums[2] += conversion.BlastAttacks;
+            sums[3] += conversion.RapidFireAttacks;
+            sums[4] += conversion.Hits;
+            sums[5] += conversion.SustainedHits;
+            sums[6] += conversion.LethalHits;
+            sums[7] += conversion.Wounds;
+            sums[8] += conversion.DevastatingWounds;
+            sums[9] += conversion.FailedSaves;
+        }
+
+        /// <summary>Conversion moyenne d'un pool sur les simulations où il a tiré ; null s'il n'a jamais tiré.</summary>
+        private static WeaponConversion? Conversion(long[] sums)
+        {
+            if (sums[0] == 0)
+            {
+                return null;
+            }
+            double Mean(int i) => (double)sums[i] / sums[0];
+            return new WeaponConversion(Mean(1), Mean(2), Mean(3), Mean(4), Mean(5), Mean(6), Mean(7), Mean(8), Mean(9));
         }
 
         /// <summary>Travail des armes Precision sur un groupe PERSONNAGE (les seuls que Precision vise).</summary>
@@ -269,6 +305,7 @@ public static class Simulator
                 for (int i = 0; i < _poolDamage[p].Length; i++) _poolDamage[p][i] += other._poolDamage[p][i];
                 for (int i = 0; i < _poolKills[p].Length; i++) _poolKills[p][i] += other._poolKills[p][i];
                 _poolRawDamage[p] += other._poolRawDamage[p];
+                for (int i = 0; i < _conversion[p].Length; i++) _conversion[p][i] += other._conversion[p][i];
                 _poolOnDestroyedUnit[p] += other._poolOnDestroyedUnit[p];
             }
             for (int i = 0; i < _precisionKilled.Length; i++) _precisionKilled[i] += other._precisionKilled[i];
@@ -316,7 +353,7 @@ public static class Simulator
                         p, pool.Members, damage, kills, (double)_poolRawDamage[p] / iterations,
                         (double)_poolOnDestroyedUnit[p] / iterations,
                         totalDamage > 0 ? damageSum / totalDamage : 0, totalKills > 0 ? killSum / totalKills : 0,
-                        WasteShares(_poolWasteByTotal[p], waste));
+                        WasteShares(_poolWasteByTotal[p], waste), Conversion(_conversion[p]));
                 })
                 .ToList();
             return new(scenario, seed, elapsed,

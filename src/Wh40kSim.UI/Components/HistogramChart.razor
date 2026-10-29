@@ -66,7 +66,8 @@
             }
             else
             {
-                <rect class="@BarClass(i)" x="@F(ColumnX(i) + ColumnWidth * 0.12)" y="@F(Bottom - height)"
+                @* Barres empilées : la valeur 0 n'appartient à aucune partie, teinte neutre (pas la couleur de la première) *@
+                <rect class="@(Stack is not null ? BarClass(i) + " wh-chart-bar-neutral" : BarClass(i))" x="@F(ColumnX(i) + ColumnWidth * 0.12)" y="@F(Bottom - height)"
                       width="@F(ColumnWidth * 0.76)" height="@F(height)" data-test="chart-bar" />
             }
             @if (IsWiped(row.Value))

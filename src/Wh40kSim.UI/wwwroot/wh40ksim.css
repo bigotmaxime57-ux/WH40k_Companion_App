@@ -412,6 +412,10 @@ rect.wh-share-3 { fill: var(--wh-share-3); }
 rect.wh-share-4 { fill: var(--wh-share-4); }
 rect.wh-share-5 { fill: var(--wh-share-5); }
 
+rect.wh-chart-bar-neutral {
+    fill: color-mix(in srgb, var(--mud-palette-text-primary) 35%, transparent);
+}
+
 .wh-chart-swatch-stack {
     border-radius: 2px;
     display: inline-block;

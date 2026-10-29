@@ -67,8 +67,8 @@ public class HistogramChartTests : ComponentTestContext
                 new HistogramChart.StackPart("Fusil", "wh-share-1", [0, 0, 0.25, 0.5]),
             ])));
 
-        // Valeur 0 : barre simple ; valeurs 1 à 3 : deux parties chacune
-        Assert.Single(chart.FindAll("[data-test=chart-bar]"));
+        // Valeur 0 : barre simple, neutre (d'aucune série) ; valeurs 1 à 3 : deux parties chacune
+        Assert.Contains("wh-chart-bar-neutral", Assert.Single(chart.FindAll("[data-test=chart-bar]")).ClassList);
         var parts = chart.FindAll("[data-test=chart-bar-stack]");
         Assert.Equal(6, parts.Count);
         double Height(AngleSharp.Dom.IElement e) => double.Parse(e.GetAttribute("height")!, System.Globalization.CultureInfo.InvariantCulture);

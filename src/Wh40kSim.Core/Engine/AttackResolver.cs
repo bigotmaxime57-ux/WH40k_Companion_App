@@ -296,7 +296,8 @@ public sealed class AttackResolver
                              && ((group.InvulnerableSave is int invuln && face >= invuln) || face + ap >= group.Save);
                 if (!saved)
                 {
-                    _target.ApplyDamage(g, RollDamage(weapon), mortalWounds: false, Dice, IsViaPrecision(g, precisionGroup));
+                    _target.ApplyDamage(g, RollDamage(weapon), mortalWounds: false, Dice, IsViaPrecision(g, precisionGroup),
+                        weapon.Abilities.Precision);
                 }
             }
         }
@@ -318,7 +319,8 @@ public sealed class AttackResolver
             {
                 return;
             }
-            _target.ApplyDamage(g, RollDamage(weapon), mortalWounds: true, Dice, IsViaPrecision(g, precisionGroup));
+            _target.ApplyDamage(g, RollDamage(weapon), mortalWounds: true, Dice, IsViaPrecision(g, precisionGroup),
+                weapon.Abilities.Precision);
         }
     }
 

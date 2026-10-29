@@ -5,7 +5,8 @@
     elles suivent le thème et le camp de la section qui l'entoure. Les barres où l'unité est détruite (unité entière,
     et au-delà pour une distribution prolongée) sont hachurées à 45° ; pour une distribution prolongée (Extended), les
     colonnes au-delà de l'unité (la marge) sont aussi atténuées et séparées par un pointillé ; leur infobulle donne le
-    détail « 7 (5 + 2) ».
+    détail « 7 (5 + 2) ». Barres empilées en option (Split) : chaque barre découpée en deux parties (ex. armes Precision
+    et autres armes), la seconde plus claire, avec les deux parts dans l'infobulle.
 *@
 @using System.Globalization
 
@@ -17,6 +18,12 @@
                 <line class="wh-chart-hatch-line" x1="0" y1="0" x2="0" y2="6" />
             </pattern>
         </defs>
+        @* Grille secondaire : chaque intervalle entre deux graduations coupé en 5, en pointillé discret, sans libellé *@
+        @foreach (double tick in _minorTicks)
+        {
+            <line class="wh-chart-grid-minor" x1="@F(Left)" y1="@F(Y(tick / _maxExactly))" x2="@F(Width - Right)" y2="@F(Y(tick / _maxExactly))"
+                  data-test="chart-grid-minor" />
+        }
         @* Grille et axe de gauche (exactement k) *@
         @foreach (double tick in _leftTicks)
         {
@@ -35,8 +42,20 @@
         {
             var row = _rows[i];
             double height = Bottom - Y(row.Exactly / _maxExactly);
-            <rect class="@BarClass(i)" x="@F(ColumnX(i) + ColumnWidth * 0.12)" y="@F(Bottom - height)"
-                  width="@F(ColumnWidth * 0.76)" height="@F(height)" data-test="chart-bar" />
+            @if (Split is not null)
+            {
+                @* Barre empilée : première partie en bas (couleur pleine), seconde au-dessus (plus claire) *@
+                double primary = height * ShareOf(row.Value);
+                <rect class="@(BarClass(i) + " wh-chart-bar-secondary")" x="@F(ColumnX(i) + ColumnWidth * 0.12)" y="@F(Bottom - height)"
+                      width="@F(ColumnWidth * 0.76)" height="@F(height - primary)" data-test="chart-bar-secondary" />
+                <rect class="@BarClass(i)" x="@F(ColumnX(i) + ColumnWidth * 0.12)" y="@F(Bottom - primary)"
+                      width="@F(ColumnWidth * 0.76)" height="@F(primary)" data-test="chart-bar" />
+            }
+            else
+            {
+                <rect class="@BarClass(i)" x="@F(ColumnX(i) + ColumnWidth * 0.12)" y="@F(Bottom - height)"
+                      width="@F(ColumnWidth * 0.76)" height="@F(height)" data-test="chart-bar" />
+            }
             @if (IsWiped(row.Value))
             {
                 <rect x="@F(ColumnX(i) + ColumnWidth * 0.12)" y="@F(Bottom - height)" width="@F(ColumnWidth * 0.76)" height="@F(height)"
@@ -78,6 +97,11 @@
             <strong>@string.Format(ValueTitle, TooltipLabel(row.Value))</strong><br />
             @L["Chart_Exactly"] : @row.Exactly.ToString("P1")<br />
             @L["Chart_AtLeast"] : @row.AtLeast.ToString("P1")
+            @if (Split is { } split && row.Value > 0)
+            {
+                <span data-test="chart-tooltip-split"><br />@split.PrimaryLabel : @ShareOf(row.Value).ToString("P0")
+                    · @split.SecondaryLabel : @((1 - ShareOf(row.Value)).ToString("P0"))</span>
+            }
             @if (IsWiped(row.Value))
             {
                 <span><br /><em>@L["Chart_WipedTooltip"]</em></span>
@@ -86,7 +110,15 @@
     }
 
     <div class="wh-chart-legend">
-        <span><i class="wh-chart-swatch-bar"></i>@L["Chart_Exactly"]</span>
+        @if (Split is { } legendSplit)
+        {
+            <span data-test="legend-split"><i class="wh-chart-swatch-bar"></i>@L["Chart_Exactly"] : @legendSplit.PrimaryLabel</span>
+            <span><i class="wh-chart-swatch-bar wh-chart-swatch-secondary"></i>@legendSplit.SecondaryLabel</span>
+        }
+        else
+        {
+            <span><i class="wh-chart-swatch-bar"></i>@L["Chart_Exactly"]</span>
+        }
         @if (_rows.Any(r => IsWiped(r.Value)))
         {
             <span data-test="legend-wiped"><i class="wh-chart-swatch-hatch"></i>@L["Chart_WipedTooltip"]</span>
@@ -111,9 +143,13 @@
     private const double Width = 640, Height = 280, Left = 46, Right = 44, Top = 12, Bottom = 250;
     private static readonly double[] RightTicks = [0, 0.25, 0.5, 0.75, 1];
 
+    /// <summary>Nombre de parts entre deux graduations de l'axe de gauche (lignes secondaires en pointillé).</summary>
+    private const int MinorDivisions = 5;
+
     private IReadOnlyList<DistributionRow> _rows = [];
     private double _maxExactly = 1;
     private double[] _leftTicks = [];
+    private double[] _minorTicks = [];
     private int _firstBeyond = -1;   // première colonne de la marge (distribution prolongée), -1 sinon
     private readonly string _hatchId = "wh-hatch-" + Guid.NewGuid().ToString("N");
     private List<int> _curveColumns = [];
@@ -146,6 +182,19 @@
     [Parameter]
     public string? MeanHelp { get; set; }
 
+    /// <summary>
+    /// Barres empilées : pour chaque valeur k (indice), part de la barre revenant à la première partie (0 à 1), et le
+    /// nom des deux parties (légende, infobulle). Null : barres simples.
+    /// </summary>
+    [Parameter]
+    public BarSplit? Split { get; set; }
+
+    /// <summary>Découpage des barres en deux parties (voir <see cref="Split"/>).</summary>
+    public sealed record BarSplit(IReadOnlyList<double> PrimaryShares, string PrimaryLabel, string SecondaryLabel);
+
+    private double ShareOf(int value) =>
+        Split is { } split && value >= 0 && value < split.PrimaryShares.Count ? Math.Clamp(split.PrimaryShares[value], 0, 1) : 1;
+
     protected override void OnParametersSet()
     {
         _rows = Distribution.Rows();
@@ -153,6 +202,9 @@
         double step = NiceStep(max / 4);
         _maxExactly = Math.Max(step, Math.Ceiling(max / step - 1e-9) * step);
         _leftTicks = Enumerable.Range(0, (int)Math.Round(_maxExactly / step) + 1).Select(i => i * step).ToArray();
+        _minorTicks = _leftTicks.Skip(1)
+            .SelectMany(tick => Enumerable.Range(1, MinorDivisions - 1).Select(k => tick - step + k * step / MinorDivisions))
+            .ToArray();
         var values = _rows.Select(r => r.Value).ToList();
         _firstBeyond = Extended && UnitSize is int size ? values.FindIndex(v => v > size) : -1;
         _curveColumns = CurveColumns();

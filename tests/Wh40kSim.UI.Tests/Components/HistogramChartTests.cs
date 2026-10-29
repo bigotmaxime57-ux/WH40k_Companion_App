@@ -34,6 +34,42 @@ public class HistogramChartTests : ComponentTestContext
     }
 
     [Fact]
+    public void Split_bars_are_stacked_in_two_parts_with_both_shares_in_the_tooltip()
+    {
+        // Valeurs 0 à 3 : à 2, les trois quarts viennent de la première partie
+        var chart = Render<HistogramChart>(p => p
+            .Add(c => c.Distribution, Sample)
+            .Add(c => c.ValueTitle, "PV retirés : {0}")
+            .Add(c => c.Split, new HistogramChart.BarSplit([0, 1, 0.75, 0.5], "Armes Precision", "Autres armes")));
+
+        var primary = chart.FindAll("[data-test=chart-bar]");
+        var secondary = chart.FindAll("[data-test=chart-bar-secondary]");
+        Assert.Equal(4, primary.Count);
+        Assert.Equal(4, secondary.Count);
+        double Height(AngleSharp.Dom.IElement e) => double.Parse(e.GetAttribute("height")!, System.Globalization.CultureInfo.InvariantCulture);
+        Assert.Equal(3 * Height(secondary[2]), Height(primary[2]), 1);   // 75 % / 25 %
+
+        chart.FindAll("[data-test=chart-column]")[2].MouseOver();
+        var tooltip = chart.Find("[data-test=chart-tooltip-split]").TextContent;
+        Assert.Contains("Armes Precision : 75", tooltip);
+        Assert.Contains("Autres armes : 25", tooltip);
+        Assert.Contains("Armes Precision", chart.Find("[data-test=legend-split]").TextContent);
+    }
+
+    [Fact]
+    public void Each_interval_between_two_gridlines_is_split_in_five_by_dotted_lines()
+    {
+        var chart = RenderChart();
+
+        int major = chart.FindAll("line.wh-chart-grid").Count;
+        var minor = chart.FindAll("[data-test=chart-grid-minor]");
+        Assert.True(major >= 2);
+        Assert.Equal((major - 1) * 4, minor.Count);
+        // Sans libellé : seules les graduations principales ont un texte sur l'axe de gauche
+        Assert.Equal(major, chart.FindAll("text.wh-chart-axis[text-anchor=end]").Count);
+    }
+
+    [Fact]
     public void The_smooth_curve_skips_impossible_values_but_their_column_keeps_its_tooltip()
     {
         // Dégâts par pas de 2 : 1 et 3 n'arrivent jamais

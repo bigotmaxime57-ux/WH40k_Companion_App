@@ -118,20 +118,25 @@ public sealed class DiscreteDistribution
     /// Lignes du tableau P(= k) / P(≥ k), sans les lignes négligeables aux extrémités (probabilité inférieure à
     /// <paramref name="minProbability"/>) : au début, P(= k) ; à la fin, P(≥ k). Une queue étalée sur plusieurs valeurs
     /// chacune négligeable (ex. les cas « unité détruite » répartis sur la marge) reste donc visible tant qu'on a une
-    /// chance réelle de l'atteindre. Les lignes négligeables situées entre deux lignes affichées sont gardées ; il reste
-    /// toujours au moins une ligne.
+    /// chance réelle de l'atteindre. Les lignes négligeables situées entre deux lignes affichées sont gardées, sauf avec
+    /// <paramref name="skipNegligibleInside"/> (tableaux : valeurs quasi impossibles, ex. 1, 4, 7 PV avec des dégâts de
+    /// 3) ; la dernière ligne reste toujours, elle marque jusqu'où l'on peut aller. Il reste toujours au moins une ligne.
     /// </summary>
-    public IReadOnlyList<DistributionRow> Rows(double minProbability = DefaultMinRowProbability)
+    public IReadOnlyList<DistributionRow> Rows(double minProbability = DefaultMinRowProbability, bool skipNegligibleInside = false)
     {
         int first = 0;
         while (first < MaxValue && ProbabilityExactly(first) < minProbability) first++;
         int last = MaxValue;
         while (last > first && ProbabilityAtLeast(last) < minProbability) last--;
 
-        var rows = new DistributionRow[last - first + 1];
+        var rows = new List<DistributionRow>(last - first + 1);
         for (int k = first; k <= last; k++)
         {
-            rows[k - first] = new DistributionRow(k, ProbabilityExactly(k), ProbabilityAtLeast(k));
+            if (skipNegligibleInside && k < last && ProbabilityExactly(k) < minProbability)
+            {
+                continue;
+            }
+            rows.Add(new DistributionRow(k, ProbabilityExactly(k), ProbabilityAtLeast(k)));
         }
         return rows;
     }

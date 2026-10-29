@@ -1,6 +1,14 @@
+using Wh40kSim.Core.Serialization;
 using Wh40kSim.UI.Forms;
 
 namespace Wh40kSim.UI.Services;
+
+/// <summary>Réponse à l'avertissement des résultats périmés : revoir les anciens résultats, ou relancer la simulation.</summary>
+public enum StaleResultsChoice
+{
+    ShowOld,
+    Rerun,
+}
 
 /// <summary>
 /// Scénario courant de l'application et ce qui l'accompagne (fichier, modifications, puis réglages et dernier résultat
@@ -34,6 +42,33 @@ public sealed class ScenarioSession
 
     /// <summary>Réglages et résultat du Full sim, séparés de ceux du Quick sim (décision de l'utilisateur).</summary>
     public SimulationRun FullSim { get; } = new();
+
+    /// <summary>
+    /// Choix retenu dans l'avertissement des résultats périmés du Full sim (« Retenir ce choix »), réappliqué sans
+    /// redemander ; null = demander. Vaut jusqu'à la fermeture de l'application, n'est pas mémorisé.
+    /// </summary>
+    public StaleResultsChoice? RememberedStaleResultsChoice { get; set; }
+
+    /// <summary>
+    /// Le dernier résultat de ce mode a été calculé sur un autre scénario que celui saisi (modifié depuis, ou
+    /// illisible) : comparaison des deux scénarios sérialisés, les records contenant des listes n'étant pas égaux par
+    /// valeur. Faux sans résultat.
+    /// </summary>
+    public bool IsStale(SimulationRun run)
+    {
+        if (run.Result is not { } result)
+        {
+            return false;
+        }
+        try
+        {
+            return ScenarioJson.Serialize(Form.ToScenario()) != ScenarioJson.Serialize(result.Scenario);
+        }
+        catch (FormatException)
+        {
+            return true;   // expression de dés illisible : le scénario saisi n'est plus celui du résultat
+        }
+    }
 
     /// <summary>Un autre scénario est chargé : les résultats des deux modes ne lui correspondent plus.</summary>
     public void ClearResults()

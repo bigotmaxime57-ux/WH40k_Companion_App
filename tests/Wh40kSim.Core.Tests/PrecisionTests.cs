@@ -58,6 +58,46 @@ public class PrecisionTests
     }
 
     [Fact]
+    public void Damage_from_precision_weapons_is_counted_wherever_it_lands()
+    {
+        var defender = new DefenderUnit { Groups = [Guards(), Character("Leader")] };
+        var resolver = new AttackResolver(Build.Scenario(Weapon(3, damage: 3), defender));
+
+        // Le leader meurt (3 PV), puis deux gardes (1 PV chacun) : tout vient de l'arme Precision
+        resolver.Run(new ScriptedDiceRoller(3, 3, 3, 2, 2, 2));
+
+        Assert.Equal(3, resolver.Target.PrecisionWeaponDamageInGroup(1));
+        Assert.Equal(2, resolver.Target.PrecisionWeaponDamageInGroup(0));
+    }
+
+    [Fact]
+    public void Damage_from_other_weapons_is_not_counted_as_precision_weapon_damage()
+    {
+        // Leader seul (3 PV) : l'arme Precision retire 2 PV, l'arme normale (pool suivant) l'achève avec 1 PV
+        var scenario = new Scenario
+        {
+            Attacker = new AttackerUnit
+            {
+                Weapons =
+                [
+                    new WeaponGroup { Weapon = Weapon(1, damage: 2) },
+                    new WeaponGroup { Weapon = Weapon(1, damage: 2, precision: false) },
+                ],
+            },
+            Defender = new DefenderUnit { Groups = [Character("Leader")] },
+        };
+        var resolver = new AttackResolver(scenario);
+
+        var dice = new ScriptedDiceRoller(3, 2, 3, 2);
+        resolver.Run(dice);
+
+        Assert.Equal(1, resolver.Target.KilledInGroup(0));
+        Assert.Equal(3, resolver.Target.DamageInGroup(0));
+        Assert.Equal(2, resolver.Target.PrecisionWeaponDamageInGroup(0));
+        Assert.Equal(0, dice.Remaining);   // aucun dé de plus
+    }
+
+    [Fact]
     public void Without_bodyguards_the_character_would_have_been_hit_anyway()
     {
         var defender = new DefenderUnit { Groups = [Character("Leader")] };
@@ -153,13 +193,14 @@ public class PrecisionTests
     }
 
     [Fact]
-    public void Precision_targets_are_the_chosen_character_or_every_character()
+    public void The_precision_target_is_the_chosen_character_or_else_the_first_one()
     {
         var defender = new DefenderUnit { Groups = [Guards(), Character("Leader"), Character("Soutien")] };
         var precise = Build.Scenario(Weapon(1, damage: 1), defender);
 
-        Assert.Equal([1, 2], precise.PrecisionTargets);
-        Assert.Equal([2], (precise with { Context = new AttackContext { PrecisionTarget = "Soutien" } }).PrecisionTargets);
-        Assert.Empty(Build.Scenario(Weapon(1, damage: 1, precision: false), defender).PrecisionTargets);
+        Assert.Equal(1, precise.PrecisionTargetGroup);
+        Assert.Equal(2, (precise with { Context = new AttackContext { PrecisionTarget = "Soutien" } }).PrecisionTargetGroup);
+        Assert.Null(Build.Scenario(Weapon(1, damage: 1, precision: false), defender).PrecisionTargetGroup);
+        Assert.Null(Build.Scenario(Weapon(1, damage: 1), new DefenderUnit { Groups = [Guards()] }).PrecisionTargetGroup);
     }
 }

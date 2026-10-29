@@ -1,0 +1,72 @@
+@*
+    Barre horizontale en deux parties sur toute la largeur (= 100 % d'une grandeur : probabilité, PV de la figurine…) :
+    une première partie pleine (couleur du camp), une seconde plus claire, le reste vide. Titre et valeur totale au-dessus,
+    légende des deux parties dessous. Couleur de fiabilité en option (Tone). Mise en forme seulement : les fractions,
+    les textes et la couleur viennent de l'appelant.
+*@
+@using System.Globalization
+
+<div class="@($"wh-split-bar wh-split-bar-{Tone.ToString().ToLowerInvariant()}")" @attributes="Attributes">
+    <div class="wh-split-bar-head">
+        <span class="wh-split-bar-title">@Title</span>
+        <span class="wh-split-bar-total">@Total</span>
+        @if (Help is not null)
+        {
+            <HelpBubble Lines="Help" />
+        }
+    </div>
+    <div class="wh-split-bar-track">
+        <div class="wh-split-bar-primary" style="width: @Percent(Primary)" data-test="split-primary"></div>
+        <div class="wh-split-bar-secondary" style="width: @Percent(Secondary)" data-test="split-secondary"></div>
+    </div>
+    <div class="wh-split-bar-legend">
+        <span><i class="wh-split-bar-swatch-primary"></i>@PrimaryLabel <strong data-test="split-primary-value">@PrimaryValue</strong></span>
+        <span><i class="wh-split-bar-swatch-secondary"></i>@SecondaryLabel <strong data-test="split-secondary-value">@SecondaryValue</strong></span>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    /// <summary>Valeur totale affichée à côté du titre (ex. « 91,1 % », « 3,79 / 4 »).</summary>
+    [Parameter, EditorRequired]
+    public string Total { get; set; } = "";
+
+    [Parameter]
+    public IReadOnlyList<string>? Help { get; set; }
+
+    /// <summary>
+    /// Couleur de fiabilité (comme la tuile « Unité détruite ») : rouge, neutre (couleur de la zone) ou vert ; les deux
+    /// parties et le total la prennent, la seconde partie restant plus claire.
+    /// </summary>
+    [Parameter]
+    public StatTile.TileTone Tone { get; set; }
+
+    /// <summary>Première partie, en fraction de la largeur (0 à 1).</summary>
+    [Parameter]
+    public double Primary { get; set; }
+
+    /// <summary>Seconde partie, à la suite de la première, en fraction de la largeur (0 à 1).</summary>
+    [Parameter]
+    public double Secondary { get; set; }
+
+    [Parameter, EditorRequired]
+    public string PrimaryLabel { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public string PrimaryValue { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public string SecondaryLabel { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public string SecondaryValue { get; set; } = "";
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? Attributes { get; set; }
+
+    /// <summary>Largeur CSS en pourcentage, bornée entre 0 et 100 (culture invariante : « 37.5% »).</summary>
+    private static string Percent(double fraction) =>
+        (Math.Clamp(fraction, 0, 1) * 100).ToString("0.##", CultureInfo.InvariantCulture) + "%";
+}

@@ -30,6 +30,11 @@ Voir aussi `README.md` (structure de la solution, règles de jeu implémentées,
 - **Ne pas anticiper les phases suivantes** pendant une phase (ne pas la surcharger).
 - **« voir sc »** = regarder la capture d'écran que l'utilisateur a mise dans le presse-papiers : skill `/voir-sc`
   (`.claude/skills/voir-sc/SKILL.md`), qui l'enregistre dans le scratchpad puis la lit comme une image.
+- **Tests à l'écran par l'utilisateur** (consigne du 2026-10-29) : après une modification, Claude ne lance pas
+  l'application et ne prend pas de captures pour vérifier ; il dit quoi tester, et l'utilisateur relance l'appli
+  lui-même depuis Rider (plus rapide). Lancer l'appli et prendre des captures seulement sur demande explicite.
+- **Captures supprimées après usage** : toute capture enregistrée par Claude (demande explicite, `/voir-sc`) est
+  effacée du scratchpad une fois lue et exploitée, pour ne pas accumuler d'images.
 
 ## Git
 
@@ -435,23 +440,54 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
    - **2. Gardes du corps** : tous les groupes non-PERSONNAGES ensemble : P(tous les gardes du corps détruits, donc
      PERSONNAGES exposés), distribution et moyenne des figurines de garde tuées. Affichée seulement s'il y a au moins
      un PERSONNAGE (sinon elle répéterait l'onglet Distributions).
-   - **3. Frappe Precision** : affichée si l'attaquant a une arme Precision et le défenseur un PERSONNAGE. Pour le
-     PERSONNAGE visé : P(tué), PV retirés en moyenne sur ses PV, part de ses pertes (figurines et PV) **grâce à
-     Precision**. Définition (décision de l'utilisateur, 2026-10-28) : attaque allouée au groupe visé par Precision
-     alors que, sans Precision, elle serait allée sur un autre groupe (garde du corps encore en vie, ou autre PERSONNAGE
-     placé devant) ; figurine attribuée à l'attaque qui l'achève.
+   - **3. Frappe Precision** : affichée si l'attaquant a une arme Precision et le défenseur un PERSONNAGE. Pour le seul
+     PERSONNAGE visé (`Scenario.PrecisionTargetGroup` : la cible choisie, sinon le premier PERSONNAGE ; décision de
+     l'utilisateur du 2026-10-29, les autres PERSONNAGES n'y ayant pas d'intérêt) — refaite avec l'utilisateur le
+     2026-10-29, la tuile « grâce à Precision » étant peu parlante ;
+     « armes Precision » = pools dont le profil a le mot-clé, un pool ne mélangeant jamais les deux) :
+     - **barre « tué » en deux parties** : P(tué) = tué par les armes Precision seules (tous ses PV perdus viennent
+       d'armes Precision) + tué avec l'aide des autres armes ;
+     - **barre « PV retirés » en deux parties** : PV moyens retirés par les armes Precision + par les autres armes,
+       sur ses PV ;
+     - **tué alors que des gardes du corps vivaient encore** (kill impossible sans Precision) ;
+     - **quand les armes Precision ne suffisent pas** (pas tué par elles seules) : PV qu'elles lui laissent en moyenne,
+       et la probabilité de ce cas ;
+     - **histogramme empilé** des PV retirés au PERSONNAGE : chaque barre P(= k) découpée selon la part moyenne des
+       armes Precision et des autres armes dans les simulations qui donnent k.
+     Écartés : « tué par Precision seule » en tuile (redondant avec la barre), gain par rapport à la même arme sans
+     Precision (peu utile hors stratagème), Precision « gaspillée » (les sauvegardes ratées repartent sur les autres
+     groupes). Le suivi « grâce à Precision » de la première version (`PrecisionKilledInGroup`…) reste calculé mais
+     n'est plus affiché.
    - **Cible de Precision** (déjà en place : liste de la Situation et `context.precisionTarget` quand il y a plusieurs
      PERSONNAGES et une arme Precision, pour les unités avec un leader et un support). Fonctionnement confirmé par
      l'utilisateur : le pool Precision envoie ses sauvegardes ratées d'abord sur la cible choisie, puis, la cible
      morte, dans l'ordre d'allocation normal du défenseur ; une cible choisie est la **seule** visée (les pools
      Precision suivants ne visent pas l'autre PERSONNAGE) ; sans choix, chaque pool vise le premier PERSONNAGE en vie.
    - Core : `DefenderState` compte par groupe les figurines tuées et PV retirés par les attaques « grâce à
-     Precision » (signalées par `AttackResolver`). Simulation : distributions des figurines tuées et des PV retirés
+     Precision » (signalées par `AttackResolver`), et les PV retirés par des armes Precision
+     (`PrecisionWeaponDamageInGroup`). Simulation : distributions des figurines tuées et des PV retirés
      par groupe, des figurines de garde tuées, P(entièrement tué), parts Precision, en records simples. Aucun dé en
      plus (non-régression au bit près) ; temps mesuré. Quick sim et console inchangés.
    - Tests : dés imposés (Precision avec et sans garde du corps, deux PERSONNAGES et cible choisie, figurine achevée
      par une attaque Precision) ; cohérence (P(dernier groupe entièrement tué) = P(unité détruite), somme des moyennes
      par groupe = moyenne totale) ; bUnit (sections affichées ou masquées selon le scénario).
+   - Retours de l'utilisateur intégrés à la validation (2026-10-29, vérifiés à l'écran par lui) :
+     - Onglet Groupes : tableau récapitulatif en tête (barre « Groupe détruit » à la couleur de fiabilité) ; sections
+       repliables (`CollapsibleSection`), titres plus grands et espacés (rouge sang en Grimdark, blanc lumineux en
+       Néon, pour les distinguer des sous-titres) ; groupes en sections sans cadre avec sous-titre ; deux histogrammes
+       (figurines, PV) pour un groupe de plusieurs figurines ; tuiles dans l'ordre de l'onglet Distributions
+       (figurines, PV, destruction à la couleur de fiabilité) ; gardes du corps : PV retirés (`BodyguardDamage`) ;
+       Frappe Precision refaite (voir ci-dessus), pour le seul PERSONNAGE visé.
+     - Résultats du Full sim à la couleur du thème, sans couleur de camp (`wh-report`) ; grille secondaire en pointillé
+       (5 parts) sur les histogrammes ; barre d'onglets collante, avec un retour compact (flèche ronde) une fois
+       collée (`watchSticky`, wh40ksim.js) ; dernier onglet retenu pour un même résultat (`SimulationRun.ResultsTab`).
+     - Résultats périmés : avertissement au Full sim (revoir les anciens résultats, relancer, Annuler / Échap, choix
+       retenu pour la session) et bandeau au Quick sim, d'après `ScenarioSession.IsStale`.
+     - Saisie : Situation en tête ; cible de Precision sur les cartes PERSONNAGE (rouge clignotante / grise, synchronisée
+       avec la liste de la Situation ; dès un seul PERSONNAGE) ; cible supprimée, décochée ou renommée suivie ; armes
+       réordonnables (flèches) ; panneaux Attaquant / Défenseur repliables sans perdre l'état des cartes ; bouton de
+       repli commun (`CollapseToggle`) à gauche partout ; panneau des mots-clés fermé au clic en dehors.
+     - Quick sim : lignes à 0,0 % masquées dans les tableaux (`DiscreteDistribution.Rows(skipNegligibleInside)`).
 8. **Rapport par arme** (avec les dégâts bruts).
    - Dégâts bruts et gaspillage de l'étape 5 (distribution des bruts comparée aux PV retirés).
    - PV retirés, figurines tuées, dégâts bruts (donc gaspillage) en moyenne et en part du total, **par pool** (armes
@@ -554,8 +590,9 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
   `data-theme`, posé par un script de `index.html` d'après l'adresse de départ (`MainPage` : `StartPath = "/?theme=…"` ;
   un script injecté « à la création du document » arrivait parfois trop tard), WebView2 transparente jusqu'au premier
   rendu.
-- **Vérification visuelle** : pas de test automatique du rendu. Captures d'écran de la fenêtre par un script PowerShell
-  (`CopyFromScreen`, clic et molette via `user32`) dans le scratchpad de Claude, lues comme des images.
+- **Vérification visuelle** : pas de test automatique du rendu ; c'est l'utilisateur qui teste à l'écran (voir
+  « Règles de travail »). Sur demande explicite seulement : captures d'écran de la fenêtre par un script PowerShell
+  (`CopyFromScreen`, clic et molette via `user32`) dans le scratchpad de Claude, lues comme des images, puis supprimées.
 
 ## Environnement de développement
 
@@ -653,7 +690,7 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
   le dépôt ni sur l'autre machine.
 - Phase 3, étape 7 (rapport par groupe) : branche `phase3/etape7-rapport-groupes`, **en attente de validation**.
   Onglet « Groupes » (`GroupsReport`) ; `GroupLosses` et `BodyguardKills` dans `SimulationResult`,
-  `DefenderState.PrecisionKilledInGroup` / `PrecisionDamageInGroup`, `Scenario.UsesPrecision` / `PrecisionTargets`.
+  `DefenderState.PrecisionKilledInGroup` / `PrecisionDamageInGroup`, `Scenario.UsesPrecision` / `PrecisionTargetGroup`.
   401 tests verts (187 Core, 58 Simulation, 156 UI) ; `NonRegressionTests` inchangés, sortie de la console identique ;
   temps mesuré (10 M simulations, scénario d'exemple) : 1,77 s sur `main`, 1,87 s sur la branche, dans le bruit de
   mesure, donc pas d'option. Pas encore vue à l'écran.

@@ -1,12 +1,13 @@
 @*
-    Écran de saisie du Full sim : bandeau en haut (fichiers, puis réglages et lancement de la simulation), colonnes
-    Attaquant et Défenseur côte à côte, Situation en pleine largeur dessous ; pas de résultats ici. Même scénario que
+    Écran de saisie du Full sim : bandeau en haut (fichiers, puis réglages et lancement de la simulation), Situation en
+    pleine largeur, puis colonnes Attaquant et Défenseur côte à côte ; pas de résultats ici. Même scénario que
     le Quick sim, mais réglages et résultat propres (Session.FullSim). À la fin d'une simulation, l'écran des
     résultats s'ouvre ; annulée, on reste ici. Logique commune avec le Quick sim : ScenarioEditorPage.
 *@
 @page "/full-sim"
 @inherits ScenarioEditorPage
 @inject NavigationManager Navigation
+@inject IDialogService Dialogs
 
 <MudStack Spacing="3" Class="pa-4">
     <MudPaper Elevation="3" Class="pa-3 wh-section wh-banner" data-test="banner">
@@ -15,7 +16,7 @@
             @if (Run.Result is not null && !Running)
             {
                 <MudButton Variant="Variant.Text" Color="Color.Primary" EndIcon="@Icons.Material.Filled.ArrowForward"
-                           OnClick="ShowResults" data-test="show-results">@L["FullSim_ShowResults"]</MudButton>
+                           OnClick="ShowResultsRequestedAsync" data-test="show-results">@L["FullSim_ShowResults"]</MudButton>
             }
         </MudStack>
         <MudDivider Class="my-2" />
@@ -30,16 +31,19 @@
     <ScenarioErrors Errors="Errors" HasDiceErrors="HasDiceErrors" />
 
     <MudGrid Spacing="3">
+        @* Situation en tête (plus visible qu'en bas, choix de l'utilisateur), puis Attaquant et Défenseur côte à côte *@
+        <MudItem xs="12">
+            <ContextPanel Context="Form.Context" Reference="Reference" Changed="OnFormChanged" />
+        </MudItem>
         <MudItem xs="12" md="6">
             <AttackerPanel Attacker="Form.Attacker" Changed="OnAttackerChanged" EditKeywords="EditKeywords"
                            OnOpen="OpenAttackerAsync" OnSave="SaveAttackerAsync" FileActionsDisabled="Running" SaveDisabled="!CanSaveAttacker" />
         </MudItem>
         <MudItem xs="12" md="6">
             <DefenderPanel Defender="Form.Defender" Changed="OnDefenderChanged"
-                           OnOpen="OpenDefenderAsync" OnSave="SaveDefenderAsync" FileActionsDisabled="Running" />
-        </MudItem>
-        <MudItem xs="12">
-            <ContextPanel Context="Form.Context" Reference="Reference" Changed="OnFormChanged" />
+                           OnOpen="OpenDefenderAsync" OnSave="SaveDefenderAsync" FileActionsDisabled="Running"
+                           ShowPrecisionTargets="Reference.PrecisionTargetGroup is not null" PrecisionTarget="@Form.Context.PrecisionTarget"
+                           PrecisionTargetChanged="OnPrecisionTargetChanged" />
         </MudItem>
     </MudGrid>
 </MudStack>
@@ -52,4 +56,43 @@
     protected override void OnSimulationCompleted() => ShowResults();
 
     private void ShowResults() => Navigation.NavigateTo(AppRoutes.FullSimResults);
+
+    /// <summary>
+    /// « Voir les résultats » : si le scénario a changé depuis le calcul, propose de revoir les anciens résultats ou de
+    /// relancer la simulation. Un choix retenu pendant la session est réappliqué sans redemander, sauf « Relancer » avec
+    /// un scénario invalide (impossible : on redemande).
+    /// </summary>
+    private async Task ShowResultsRequestedAsync()
+    {
+        if (!ResultIsStale)
+        {
+            ShowResults();
+            return;
+        }
+
+        var choice = Session.RememberedStaleResultsChoice;
+        if (choice is null || (choice == StaleResultsChoice.Rerun && !CanRun))
+        {
+            var parameters = new DialogParameters<StaleResultsDialog> { { d => d.CanRerun, CanRun } };
+            var dialog = await Dialogs.ShowAsync<StaleResultsDialog>(L["StaleResults_Title"], parameters, StaleResultsDialog.Options);
+            if (await dialog.Result is not { Canceled: false, Data: StaleResultsDialog.Answer answer })
+            {
+                return;   // Annuler ou Échap : on reste sur la saisie
+            }
+            choice = answer.Choice;
+            if (answer.Remember)
+            {
+                Session.RememberedStaleResultsChoice = choice;
+            }
+        }
+
+        if (choice == StaleResultsChoice.Rerun)
+        {
+            await RunAsync();
+        }
+        else
+        {
+            ShowResults();
+        }
+    }
 }

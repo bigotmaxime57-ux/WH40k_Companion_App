@@ -1,6 +1,7 @@
-@* En-tête de section : icône du thème, titre, bulle d'aide éventuelle, et éventuellement des actions à droite. *@
+@* En-tête de section : élément de tête éventuel (bouton de repli), icône du thème, titre, bulle d'aide éventuelle, et éventuellement des actions à droite. *@
 
 <div class="wh-section-header">
+    @Leading
     <MudIcon Icon="@Icon" />
     <MudText Typo="Typo.h6">@Title</MudText>
     @if (Help is not null)
@@ -23,6 +24,10 @@
     /// <summary>Explications de la section, derrière une bulle « ? » à côté du titre.</summary>
     [Parameter]
     public IReadOnlyList<string>? Help { get; set; }
+
+    /// <summary>Élément placé avant l'icône (bouton de repli d'une section repliable).</summary>
+    [Parameter]
+    public RenderFragment? Leading { get; set; }
 
     /// <summary>Actions affichées à droite du titre (boutons…).</summary>
     [Parameter]

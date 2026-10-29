@@ -1,37 +1,51 @@
 @*
     Attaquant : nom, boosts (pour toutes ses armes) et profils d'armes, résolus dans l'ordre de la liste. Boutons
-    Ouvrir / Enregistrer de l'attaquant seul dans l'en-tête, si la page les fournit.
+    Ouvrir / Enregistrer de l'attaquant seul dans l'en-tête, si la page les fournit. Repliable (déplié à l'ouverture) sans perdre l'état des cartes qu'il contient.
 *@
 
 <MudPaper Elevation="3" Class="pa-4 wh-section wh-attacker" data-test="attacker-panel">
     <SectionHeader Icon="@Icons.Material.Filled.GpsFixed" Title="@L["Attacker_Title"]">
-        @if (OnOpen.HasDelegate)
-        {
-            <PartFileActions OpenHelp="@L["Attacker_OpenHelp"]" SaveHelp="@L["Attacker_SaveHelp"]" Disabled="FileActionsDisabled"
-                             SaveDisabled="SaveDisabled" OnOpen="OnOpen" OnSave="OnSave" Part="attacker" />
-        }
+        <Leading>
+            <CollapseToggle @bind-Expanded="_expanded" data-test="toggle-attacker" />
+        </Leading>
+        <ChildContent>
+            @if (OnOpen.HasDelegate)
+            {
+                <PartFileActions OpenHelp="@L["Attacker_OpenHelp"]" SaveHelp="@L["Attacker_SaveHelp"]" Disabled="FileActionsDisabled"
+                                 SaveDisabled="SaveDisabled" OnOpen="OnOpen" OnSave="OnSave" Part="attacker" />
+            }
+        </ChildContent>
     </SectionHeader>
-    <MudTextField T="string" Label="@L["Attacker_Name"]" @bind-Value="Attacker.Name" @bind-Value:after="NotifyChanged" />
+    @* Contenu masqué plutôt que retiré : les cartes d'arme et de groupe gardent leur état replié ou déplié *@
+    <div hidden="@(!_expanded)" data-test="attacker-content">
+        <MudTextField T="string" Label="@L["Attacker_Name"]" @bind-Value="Attacker.Name" @bind-Value:after="NotifyChanged" />
 
-    <AttackerBoostsEditor Boosts="Attacker.Boosts" Changed="NotifyChanged" />
+        <AttackerBoostsEditor Boosts="Attacker.Boosts" Changed="NotifyChanged" />
 
-    <div class="wh-subsection-title mt-4" data-test="weapons-title">
-        <MudText Typo="Typo.subtitle1">@L["Attacker_Weapons"]</MudText>
-        <HelpBubble Lines="@([L["Attacker_WeaponsHelp"]])" />
+        <div class="wh-subsection-title mt-4" data-test="weapons-title">
+            <MudText Typo="Typo.subtitle1">@L["Attacker_Weapons"]</MudText>
+            <HelpBubble Lines="@([L["Attacker_WeaponsHelp"]])" />
+        </div>
+
+        @for (int i = 0; i < Attacker.Weapons.Count; i++)
+        {
+            int index = i;
+            var weapon = Attacker.Weapons[index];
+            <WeaponEditor @key="weapon" Weapon="weapon" Changed="NotifyChanged"
+                          CanMoveUp="index > 0" CanMoveDown="index < Attacker.Weapons.Count - 1"
+                          OnMoveUp="() => Move(index, -1)" OnMoveDown="() => Move(index, 1)"
+                          OnDuplicate="() => Duplicate(weapon)" OnRemove="() => Remove(weapon)"
+                          OnEditKeywords="() => EditKeywords.InvokeAsync(weapon)" />
+        }
+
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Text" Color="Color.Primary" OnClick="Add"
+                   data-test="add-weapon">@L["Attacker_AddWeapon"]</MudButton>
     </div>
-
-    @foreach (var weapon in Attacker.Weapons)
-    {
-        <WeaponEditor @key="weapon" Weapon="weapon" Changed="NotifyChanged"
-                      OnDuplicate="() => Duplicate(weapon)" OnRemove="() => Remove(weapon)"
-                      OnEditKeywords="() => EditKeywords.InvokeAsync(weapon)" />
-    }
-
-    <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Text" Color="Color.Primary" OnClick="Add"
-               data-test="add-weapon">@L["Attacker_AddWeapon"]</MudButton>
 </MudPaper>
 
 @code {
+    private bool _expanded = true;
+
     [Parameter, EditorRequired]
     public AttackerForm Attacker { get; set; } = null!;
 
@@ -64,6 +78,18 @@
     private Task Add()
     {
         Attacker.Weapons.Add(new WeaponForm());
+        return NotifyChanged();
+    }
+
+    /// <summary>Change l'ordre de résolution : les armes (leurs pools) sont résolues de haut en bas.</summary>
+    private Task Move(int index, int offset)
+    {
+        int target = index + offset;
+        if (target < 0 || target >= Attacker.Weapons.Count)
+        {
+            return Task.CompletedTask;
+        }
+        (Attacker.Weapons[index], Attacker.Weapons[target]) = (Attacker.Weapons[target], Attacker.Weapons[index]);
         return NotifyChanged();
     }
 

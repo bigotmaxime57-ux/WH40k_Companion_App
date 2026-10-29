@@ -49,6 +49,17 @@
     --wh-character: color-mix(in srgb, var(--wh-accent) 65%, black);
 }
 
+/*
+   Résultats du Full sim (.wh-report) : pas de couleur de camp, on regarde toujours ce que les armes font au défenseur.
+   Graphiques, tuiles, barres et sous-titres prennent la couleur principale du thème (or, laiton, lavande…), avec sa
+   version RVB pour les transparences et une teinte plus foncée pour les PERSONNAGES.
+*/
+.wh-shell .wh-report {
+    --wh-accent: var(--mud-palette-primary);
+    --wh-accent-rgb: var(--mud-palette-primary-rgb);
+    --wh-character: color-mix(in srgb, var(--mud-palette-primary) 65%, black);
+}
+
 .wh-shell .mud-main-content {
     background: radial-gradient(ellipse at top, var(--mud-palette-background-gray) 0%, var(--mud-palette-background) 70%);
     min-height: 100vh;
@@ -218,6 +229,193 @@
     gap: .4rem;
 }
 
+/*
+   Bouton de repli commun (CollapseToggle), toujours à gauche du titre : cerclé et teinté de la couleur de la zone
+   (camp dans une carte, or ailleurs), rempli au survol, pour qu'on le repère au premier coup d'œil.
+*/
+.wh-collapse-toggle.mud-icon-button {
+    background-color: rgba(var(--mud-palette-primary-rgb), .14);
+    border: 1px solid rgba(var(--mud-palette-primary-rgb), .7);
+    color: var(--mud-palette-primary);
+    transition: background-color .15s, color .15s;
+}
+
+.wh-collapse-toggle.mud-icon-button:hover {
+    background-color: var(--mud-palette-primary);
+    color: var(--mud-palette-primary-text);
+}
+
+.wh-shell.wh-neon .wh-collapse-toggle.mud-icon-button {
+    box-shadow: 0 0 8px rgba(var(--mud-palette-primary-rgb), .55);
+}
+
+/*
+   Sections repliables des rapports (onglet Groupes du Full sim) : titre plus grand, bien séparé de son contenu et de
+   la section précédente.
+*/
+.wh-report-section + .wh-report-section {
+    margin-top: 2.75rem;
+}
+
+.wh-report-section > .wh-section-header {
+    margin-bottom: 1.5rem;
+}
+
+.wh-report-section > .wh-section-header .mud-typography-h6 {
+    font-size: 1.45rem;
+    letter-spacing: .08em;
+}
+
+.wh-report-section > .wh-section-header > .mud-icon-root {
+    font-size: 1.9rem;
+}
+
+/*
+   Grimdark : les titres de section des rapports (« Pertes par groupe »…) avaient le même or que les sous-titres de
+   groupe. Ils prennent l'autre couleur du thème, le rouge sang, éclairci pour rester lisible sur le fond presque noir
+   (plus spécifique que la règle Grimdark des en-têtes de section). Néon a sa propre règle plus bas.
+*/
+.wh-shell.wh-grimdark .wh-report-section > .wh-section-header .mud-typography-h6 {
+    color: #c8423a;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .9), 0 0 12px rgba(200, 66, 58, .45);
+}
+
+/* Section d'un groupe (rapport par groupe) : pas de cadre, espacée de la précédente ; filet plus épais en teinte foncée du camp pour un PERSONNAGE */
+.wh-group-section {
+    margin-top: 2.25rem;
+}
+
+/* Première section juste sous le titre (Frappe Precision) : l'espace du titre suffit */
+.wh-group-section:first-child {
+    margin-top: 0;
+}
+
+.wh-group-section-character .wh-group-title {
+    border-bottom: 2px solid var(--wh-character);
+}
+
+/*
+   Barre en deux parties (SplitBar, Frappe Precision) : première partie pleine (couleur du camp), seconde plus claire,
+   le reste vide ; toute la largeur = 100 %.
+*/
+.wh-split-bar {
+    --wh-split-color: var(--wh-accent);
+    margin-top: .5rem;
+}
+
+/* Couleur de fiabilité (barre « PERSONNAGE tué ») : mêmes couleurs que la tuile « Unité détruite » */
+.wh-split-bar-bad {
+    --wh-split-color: var(--mud-palette-error);
+}
+
+.wh-split-bar-good {
+    --wh-split-color: var(--mud-palette-success);
+}
+
+.wh-split-bar-head {
+    align-items: baseline;
+    display: flex;
+    gap: .5rem;
+    margin-bottom: .35rem;
+}
+
+.wh-split-bar-title {
+    color: var(--mud-palette-text-secondary);
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.wh-split-bar-total {
+    color: var(--wh-split-color);
+    font-size: 1.3rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+}
+
+.wh-split-bar-track {
+    background: color-mix(in srgb, var(--mud-palette-text-primary) 12%, transparent);
+    border-radius: 5px;
+    display: flex;
+    height: 14px;
+    overflow: hidden;
+}
+
+.wh-split-bar-primary,
+.wh-split-bar-swatch-primary {
+    background: var(--wh-split-color);
+}
+
+.wh-split-bar-secondary,
+.wh-split-bar-swatch-secondary {
+    background: color-mix(in srgb, var(--wh-split-color) 40%, transparent);
+}
+
+.wh-split-bar-legend {
+    color: var(--mud-palette-text-secondary);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: .8rem;
+    gap: .25rem 1.25rem;
+    margin-top: .35rem;
+}
+
+.wh-split-bar-legend strong {
+    color: var(--mud-palette-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.wh-split-bar-legend i {
+    border-radius: 2px;
+    display: inline-block;
+    height: 10px;
+    margin-right: .35rem;
+    width: 10px;
+}
+
+.wh-shell.wh-neon .wh-split-bar-primary {
+    box-shadow: 0 0 8px color-mix(in srgb, var(--wh-split-color) 80%, transparent);
+}
+
+/* Sous-titre d'un groupe (rapports) : numéro et nom plus grands, couleur du camp, filet dessous */
+.wh-group-title {
+    border-bottom: 1px solid rgba(var(--wh-accent-rgb), .45);
+    margin-bottom: .5rem;
+    padding-bottom: .5rem;
+}
+
+.wh-group-title .mud-typography-subtitle1 {
+    color: var(--wh-accent);
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+}
+
+/*
+   Cible de Precision sur les cartes PERSONNAGE du défenseur : rouge clignotante pour le PERSONNAGE visé, grise pour les
+   autres (un clic les choisit). Pas de clignotement si le système demande de réduire les animations.
+*/
+.wh-precision-target.mud-icon-button {
+    color: var(--mud-palette-text-disabled);
+}
+
+.wh-precision-target.wh-precision-target-active.mud-icon-button {
+    animation: wh-precision-blink 1.2s ease-in-out infinite;
+    color: var(--mud-palette-error);
+}
+
+@keyframes wh-precision-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .25; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wh-precision-target.wh-precision-target-active.mud-icon-button {
+        animation: none;
+    }
+}
+
 /* Petits titres des rangées de boosts (Touche, Blessure…) */
 .wh-boost-row-title {
     color: var(--wh-accent);
@@ -229,6 +427,37 @@
 
 .wh-muted {
     color: var(--mud-palette-text-secondary);
+}
+
+/*
+   Résultats du Full sim : la barre d'onglets se colle sous la barre de titre au défilement, au-dessus du contenu des
+   onglets. MudBlazor coupe les dépassements des onglets arrondis (overflow: hidden), ce qui empêche une barre
+   collante : on les laisse dépasser. Le retour compact (flèche ronde) n'apparaît que barre collée (classe wh-stuck,
+   posée par watchSticky de wh40ksim.js), quand le bouton du haut est sorti de l'écran.
+*/
+.wh-results-tabs.mud-tabs-rounded {
+    overflow: visible;
+}
+
+/* Barre de titre compacte (MudAppBar Dense) : 48 px */
+.wh-results-tabs > .mud-tabs-tabbar {
+    position: sticky;
+    top: 48px;
+    z-index: 5;
+}
+
+.wh-tabs-back {
+    align-items: center;
+    display: none;
+    padding: 0 .5rem 0 .75rem;
+}
+
+.wh-tabs-back .mud-icon-button {
+    border-radius: 50%;
+}
+
+.wh-stuck .wh-tabs-back {
+    display: flex;
 }
 
 /* Colonne de droite (simulation, résultats) : reste visible sous la barre de titre, avec son propre défilement */
@@ -323,6 +552,15 @@
 /* Sélecteur de mots-clés (panneau latéral) */
 .wh-keyword-panel {
     border-left: 2px solid var(--mud-palette-primary);
+}
+
+/*
+   Voile du panneau des mots-clés (seul panneau latéral temporaire de l'appli) : transparent, la page reste visible ; il
+   ne sert qu'à fermer le panneau au clic en dehors.
+*/
+.mud-drawer-overlay-temporary,
+.mud-drawer-overlay-temporary .mud-overlay-scrim {
+    background-color: transparent !important;
 }
 
 .wh-keyword-categories {
@@ -563,6 +801,14 @@
     stroke-width: 1;
 }
 
+/* Grille secondaire (5 parts entre deux graduations) : même couleur, en pointillé et plus transparente */
+.wh-chart-grid-minor {
+    opacity: .9;
+    stroke: var(--mud-palette-lines-default);
+    stroke-dasharray: 2 4;
+    stroke-width: 1;
+}
+
 .wh-chart-axis {
     fill: var(--mud-palette-text-secondary);
     font-size: 11px;
@@ -584,6 +830,11 @@
 
 .wh-chart-bar-beyond {
     fill: color-mix(in srgb, var(--wh-accent) 45%, transparent);
+}
+
+/* Barres empilées : seconde partie (au-dessus) plus claire, comme dans les barres en deux parties */
+.wh-chart-bar-secondary {
+    fill: rgba(var(--wh-accent-rgb), .4);
 }
 
 .wh-chart-curve {
@@ -655,6 +906,10 @@
     background: var(--wh-accent);
 }
 
+.wh-chart-swatch-bar.wh-chart-swatch-secondary {
+    background: rgba(var(--wh-accent-rgb), .4);
+}
+
 .wh-chart-swatch-hatch {
     background: repeating-linear-gradient(45deg, var(--wh-accent) 0 3px,
         color-mix(in srgb, var(--mud-palette-surface) 75%, var(--wh-accent)) 3px 5px);
@@ -714,6 +969,55 @@
     border-radius: 1px;
     height: 4px;
     margin-top: 2px;
+}
+
+/*
+   Probabilité de détruire un groupe (tableau récapitulatif de l'onglet Groupes) : barre sur toute la largeur de la
+   colonne (100 %), couleur de fiabilité des tuiles (rouge sous 50 %, vert au-delà de 84 %, couleur du camp entre les
+   deux), pourcentage à droite.
+*/
+.wh-groups-summary .wh-wipe-column {
+    width: 32%;
+}
+
+.wh-wipe-cell {
+    align-items: center;
+    display: flex;
+    gap: .75rem;
+    --wh-wipe-color: var(--mud-palette-primary);
+}
+
+.wh-wipe-bad {
+    --wh-wipe-color: var(--mud-palette-error);
+}
+
+.wh-wipe-good {
+    --wh-wipe-color: var(--mud-palette-success);
+}
+
+.wh-wipe-track {
+    background: color-mix(in srgb, var(--mud-palette-text-primary) 12%, transparent);
+    border-radius: 4px;
+    flex: 1;
+    height: 8px;
+    overflow: hidden;
+}
+
+.wh-wipe-fill {
+    background: var(--wh-wipe-color);
+    border-radius: 4px;
+    height: 100%;
+    min-width: 2px;
+}
+
+.wh-wipe-cell .wh-number {
+    color: var(--wh-wipe-color);
+    font-weight: 600;
+    min-width: 3.5rem;
+}
+
+.wh-shell.wh-neon .wh-wipe-fill {
+    box-shadow: 0 0 6px var(--wh-wipe-color);
 }
 
 /* --- Thème sombre, style Grimdark --------------------------------------------------------------------- */
@@ -811,6 +1115,15 @@
 
 .wh-shell.wh-neon .wh-section-header > .mud-icon-root {
     filter: drop-shadow(0 0 6px rgba(var(--wh-accent-rgb), .9));
+}
+
+/*
+   Titres des sections des rapports : la lavande de la zone neutre est trop proche du bleu des sous-titres de groupe
+   (en Grimdark, l'or et le vert se distinguent). Blanc néon à halo lavande : ils ressortent par la luminosité.
+*/
+.wh-shell.wh-neon .wh-report-section > .wh-section-header .mud-typography-h6 {
+    color: #f6f3ff;
+    text-shadow: 0 0 4px rgba(255, 255, 255, .6), 0 0 12px rgba(143, 123, 255, .95), 0 0 24px rgba(143, 123, 255, .6);
 }
 
 .wh-shell.wh-neon .wh-section-header::after {

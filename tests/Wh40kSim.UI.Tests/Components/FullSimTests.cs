@@ -88,6 +88,61 @@ public class FullSimTests() : ComponentTestContext(renderPopoverProvider: false)
     }
 
     [Fact]
+    public void A_compact_back_button_waits_in_the_sticky_tab_bar()
+    {
+        var shell = Open(AppRoutes.FullSim);
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimPage>()));
+        shell.Find("[data-test=run]").Click();
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimResultsPage>()));
+
+        // Bouton texte en haut, hors de la barre ; flèche ronde dans la barre (montrée par le CSS une fois collée)
+        Assert.Empty(shell.FindAll(".mud-tabs-tabbar [data-test=back-to-entry]"));
+        Assert.NotNull(shell.Find(".wh-results-tabs > .mud-tabs-tabbar .wh-tabs-back [data-test=back-to-entry-compact]"));
+        Assert.Contains(JSInterop.Invocations, i => i.Identifier == "watchSticky");
+
+        shell.Find("[data-test=back-to-entry-compact]").Click();
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimPage>()));
+    }
+
+    [Fact]
+    public void The_results_reopen_on_the_last_tab_until_a_new_simulation()
+    {
+        var shell = Open(AppRoutes.FullSim);
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimPage>()));
+        shell.Find("[data-test=run]").Click();
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimResultsPage>()));
+        shell.FindAll(".mud-tab").Single(tab => tab.TextContent.Contains("Groupes")).Click();
+        shell.WaitForAssertion(() => Assert.NotNull(shell.Find("[data-test=groups-report]")));
+
+        // Retour à la saisie puis aux résultats : toujours l'onglet Groupes
+        shell.Find("[data-test=back-to-entry]").Click();
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimPage>()));
+        shell.Find("[data-test=show-results]").Click();
+        shell.WaitForAssertion(() => Assert.NotNull(shell.Find("[data-test=groups-report]")));
+        Assert.Equal(1, Session.FullSim.ResultsTab);
+
+        // Nouvelle simulation : retour à l'onglet Distributions
+        shell.Find("[data-test=back-to-entry]").Click();
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimPage>()));
+        shell.Find("[data-test=run]").Click();
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimResultsPage>()));
+        shell.WaitForAssertion(() => Assert.Empty(shell.FindAll("[data-test=groups-report]")));
+        Assert.Equal(0, Session.FullSim.ResultsTab);
+    }
+
+    [Fact]
+    public void Results_use_the_theme_colour_rather_than_a_side_colour()
+    {
+        var shell = Open(AppRoutes.FullSim);
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimPage>()));
+        shell.Find("[data-test=run]").Click();
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimResultsPage>()));
+
+        Assert.NotNull(shell.Find(".wh-report [data-test=histogram]"));
+        Assert.Empty(shell.FindAll(".wh-report .wh-attacker, .wh-report .wh-defender"));
+    }
+
+    [Fact]
     public void Results_have_a_groups_tab()
     {
         var shell = Open(AppRoutes.FullSim);
@@ -147,6 +202,143 @@ public class FullSimTests() : ComponentTestContext(renderPopoverProvider: false)
 
         shell.Find("[data-test=back-to-entry]").Click();
         shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimPage>()));
+    }
+
+    /// <summary>Lance une simulation puis revient à la saisie (le bouton « Voir les résultats » est alors affiché).</summary>
+    private IRenderedComponent<AppShell> SimulateAndComeBack()
+    {
+        var shell = Open(AppRoutes.FullSim);
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimPage>()));
+        shell.Find("[data-test=run]").Click();
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimResultsPage>()));
+        Navigation.NavigateTo(AppRoutes.FullSim);
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimPage>()));
+        return shell;
+    }
+
+    [Fact]
+    public void Unchanged_scenario_shows_the_results_without_warning()
+    {
+        var shell = SimulateAndComeBack();
+
+        shell.Find("[data-test=show-results]").Click();
+
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimResultsPage>()));
+        Assert.Empty(shell.FindAll("[data-test=stale-show-old]"));
+    }
+
+    [Fact]
+    public void Changed_scenario_warns_and_can_show_the_old_results()
+    {
+        var shell = SimulateAndComeBack();
+        var old = Session.FullSim.Result;
+        shell.Find("[data-test=add-weapon]").Click();
+
+        shell.Find("[data-test=show-results]").Click();
+        shell.WaitForElement("[data-test=stale-show-old]").Click();
+
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimResultsPage>()));
+        Assert.Same(old, Session.FullSim.Result);
+        Assert.Equal(1, Simulations.Calls);
+        Assert.NotNull(shell.Find("[data-test=stale-results-banner]"));   // rappel sur l'écran des résultats
+    }
+
+    [Fact]
+    public void Cancel_closes_the_warning_and_stays_on_the_entry_screen()
+    {
+        var shell = SimulateAndComeBack();
+        shell.Find("[data-test=add-weapon]").Click();
+
+        shell.Find("[data-test=show-results]").Click();
+        shell.WaitForElement("[data-test=stale-cancel]").Click();
+
+        shell.WaitForAssertion(() => Assert.Empty(shell.FindAll("[data-test=stale-cancel]")));
+        Assert.NotNull(shell.FindComponent<FullSimPage>());
+        Assert.Equal(1, Simulations.Calls);
+        Assert.Null(Session.RememberedStaleResultsChoice);
+        Assert.True(StaleResultsDialog.Options.CloseOnEscapeKey);   // Échap fait comme Annuler
+    }
+
+    [Fact]
+    public void Changed_scenario_warns_and_can_rerun_the_simulation()
+    {
+        var shell = SimulateAndComeBack();
+        shell.Find("[data-test=add-weapon]").Click();
+
+        shell.Find("[data-test=show-results]").Click();
+        shell.WaitForElement("[data-test=stale-rerun]").Click();
+
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimResultsPage>()));
+        Assert.Equal(2, Simulations.Calls);
+        Assert.Equal(2, Session.FullSim.Result!.Scenario.Attacker.Weapons.Count);
+        Assert.Empty(shell.FindAll("[data-test=stale-results-banner]"));
+    }
+
+    [Fact]
+    public void Rerun_is_disabled_when_the_changed_scenario_is_invalid()
+    {
+        var shell = SimulateAndComeBack();
+        shell.Find("[data-test=remove-group]").Click();
+
+        shell.Find("[data-test=show-results]").Click();
+
+        Assert.True(shell.WaitForElement("[data-test=stale-rerun]").HasAttribute("disabled"));
+        Assert.NotNull(shell.Find("[data-test=stale-cannot-rerun]"));
+    }
+
+    /// <summary>Modifie le scénario, demande les résultats et répond à l'avertissement en retenant le choix.</summary>
+    private void AnswerAndRemember(IRenderedComponent<AppShell> shell, string button)
+    {
+        shell.Find("[data-test=add-weapon]").Click();
+        shell.Find("[data-test=show-results]").Click();
+        shell.WaitForElement("input[data-test=stale-remember]").Change(true);
+        shell.Find($"[data-test={button}]").Click();
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimResultsPage>()));
+        Navigation.NavigateTo(AppRoutes.FullSim);
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimPage>()));
+    }
+
+    [Fact]
+    public void A_remembered_show_old_choice_is_applied_without_asking()
+    {
+        var shell = SimulateAndComeBack();
+        AnswerAndRemember(shell, "stale-show-old");
+        Assert.Equal(StaleResultsChoice.ShowOld, Session.RememberedStaleResultsChoice);
+
+        shell.Find("[data-test=add-weapon]").Click();
+        shell.Find("[data-test=show-results]").Click();
+
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimResultsPage>()));
+        Assert.Empty(shell.FindAll("[data-test=stale-show-old]"));
+        Assert.Equal(1, Simulations.Calls);
+    }
+
+    [Fact]
+    public void A_remembered_rerun_choice_is_applied_without_asking()
+    {
+        var shell = SimulateAndComeBack();
+        AnswerAndRemember(shell, "stale-rerun");
+        Assert.Equal(StaleResultsChoice.Rerun, Session.RememberedStaleResultsChoice);
+
+        shell.Find("[data-test=add-weapon]").Click();
+        shell.Find("[data-test=show-results]").Click();
+
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimResultsPage>()));
+        Assert.Empty(shell.FindAll("[data-test=stale-rerun]"));
+        Assert.Equal(3, Simulations.Calls);
+        Assert.Equal(3, Session.FullSim.Result!.Scenario.Attacker.Weapons.Count);
+    }
+
+    [Fact]
+    public void A_remembered_rerun_asks_again_when_the_scenario_is_invalid()
+    {
+        var shell = SimulateAndComeBack();
+        AnswerAndRemember(shell, "stale-rerun");
+
+        shell.Find("[data-test=remove-group]").Click();
+        shell.Find("[data-test=show-results]").Click();
+
+        Assert.True(shell.WaitForElement("[data-test=stale-rerun]").HasAttribute("disabled"));
     }
 
     [Fact]

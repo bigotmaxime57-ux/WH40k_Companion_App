@@ -1,8 +1,12 @@
-@* Panneau latéral des mots-clés d'une arme, ouvert tant que Weapon n'est pas null. *@
+@*
+    Panneau latéral des mots-clés d'une arme, ouvert tant que Weapon n'est pas null. Un clic en dehors le ferme : voile
+    de MudBlazor (OverlayAutoClose), rendu transparent pour garder la page visible derrière.
+*@
 @using Wh40kSim.UI.Keywords
 
 <MudDrawer Open="Weapon is not null" OpenChanged="OnOpenChanged" Anchor="Anchor.End" Variant="DrawerVariant.Temporary"
-           Overlay="false" ClipMode="DrawerClipMode.Always" Width="440px" Elevation="6" Class="wh-keyword-panel" data-test="keyword-panel">
+           Overlay="true" OverlayAutoClose="true"
+           ClipMode="DrawerClipMode.Always" Width="440px" Elevation="6" Class="wh-keyword-panel" data-test="keyword-panel">
     @if (Weapon is not null)
     {
         <div class="pa-4">

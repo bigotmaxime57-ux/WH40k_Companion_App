@@ -1,12 +1,18 @@
 @*
-    Écran des résultats du Full sim : en-tête (scénario, simulations, graine, durée), retour à la saisie, puis un onglet
-    par graphique ou tableau de bord. Lit Session.FullSim.Result sans aucun calcul ; sans résultat, renvoie à la saisie.
+    Écran des résultats du Full sim : retour à la saisie et en-tête (scénario, simulations, graine, durée), puis un
+    onglet par graphique ou tableau de bord. La barre d'onglets reste visible au défilement ; une fois collée en haut,
+    elle montre un retour compact (flèche ronde), le bouton du haut étant sorti de l'écran. Lit Session.FullSim.Result
+    sans aucun calcul ; sans résultat, renvoie à la saisie.
 *@
 @page "/full-sim/results"
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
 @inject ScenarioSession Session
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
-<MudStack Spacing="3" Class="pa-4">
+@* wh-report : couleur principale du thème partout, sans couleur de camp (voir wh40ksim.css) *@
+<MudStack Spacing="3" Class="pa-4 wh-report">
     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Wrap="Wrap.Wrap">
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.ArrowBack" OnClick="BackToEntry"
                    data-test="back-to-entry">@L["FullSim_BackToEntry"]</MudButton>
@@ -25,7 +31,26 @@
     }
     else
     {
-        <MudTabs Elevation="3" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="pa-4" Class="wh-results-tabs">
+        @if (Session.IsStale(Session.FullSim))
+        {
+            <MudAlert Severity="Severity.Warning" data-test="stale-results-banner">@L["StaleResults_Banner"]</MudAlert>
+        }
+        @* Repère juste au-dessus de la barre d'onglets : quand il passe sous la barre de titre, la barre est collée *@
+        <div @ref="_stickySentinel"></div>
+        <div @ref="_tabsHost" data-test="results-tabs-host">
+            @* Onglet retenu dans la session pour ce résultat (retrouvé en revenant de la saisie, remis à zéro par un nouveau calcul) *@
+            <MudTabs Elevation="3" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="pa-4" Class="wh-results-tabs"
+                     HeaderPosition="TabHeaderPosition.Before" @bind-ActivePanelIndex="Session.FullSim.ResultsTab">
+                <Header>
+                    <div class="wh-tabs-back">
+                        <MudTooltip Text="@L["FullSim_BackToEntry"]">
+                            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Variant="Variant.Outlined" Color="Color.Primary"
+                                           Size="Size.Small" OnClick="BackToEntry" aria-label="@L["FullSim_BackToEntry"]"
+                                           data-test="back-to-entry-compact" />
+                        </MudTooltip>
+                    </div>
+                </Header>
+                <ChildContent>
             <MudTabPanel Text="@L["FullSim_TabDistributions"]" Icon="@Icons.Material.Filled.BarChart" data-test="tab-distributions">
                 <SummaryTiles Result="Result" Extended="_extended" />
                 @if (Result.ProbabilityWipe > 0)
@@ -43,7 +68,7 @@
                 }
                 <MudGrid Spacing="3" Class="mt-1">
                     <MudItem xs="12" lg="6">
-                        <MudPaper Elevation="2" Class="pa-4 wh-section wh-attacker">
+                        <MudPaper Elevation="2" Class="pa-4 wh-section">
                             <SectionHeader Icon="@Icons.Material.Filled.PersonOff" Title="@L["Results_Kills"]" />
                             <HistogramChart Distribution="@(_extended ? Result.ExtendedKills : Result.Kills)" Title="@L["Results_Kills"]"
                                             ValueTitle="@L["Chart_KillsValue"]" UnitSize="Result.TotalModels" Extended="_extended"
@@ -51,7 +76,7 @@
                         </MudPaper>
                     </MudItem>
                     <MudItem xs="12" lg="6">
-                        <MudPaper Elevation="2" Class="pa-4 wh-section wh-defender">
+                        <MudPaper Elevation="2" Class="pa-4 wh-section">
                             <SectionHeader Icon="@Icons.Material.Filled.HeartBroken" Title="@L["Results_Damage"]" />
                             <HistogramChart Distribution="@(_extended ? Result.ExtendedDamage : Result.Damage)" Title="@L["Results_Damage"]"
                                             ValueTitle="@L["Chart_DamageValue"]" UnitSize="Result.TotalWounds" Extended="_extended"
@@ -63,16 +88,59 @@
             <MudTabPanel Text="@L["FullSim_TabGroups"]" Icon="@Icons.Material.Filled.Shield" data-test="tab-groups">
                 <GroupsReport Result="Result" />
             </MudTabPanel>
-        </MudTabs>
+                </ChildContent>
+            </MudTabs>
+        </div>
     }
 </MudStack>
 
 @code {
+    /// <summary>Hauteur de la barre de titre compacte, sous laquelle la barre d'onglets se colle (même valeur dans le CSS).</summary>
+    private const int AppBarHeight = 48;
+
     private bool _extended;
+    private ElementReference _stickySentinel;
+    private ElementReference _tabsHost;
+    private IJSObjectReference? _module;
+    private IJSObjectReference? _stickyWatch;
 
     private SimulationResult? Result => Session.FullSim.Result;
 
     private void BackToEntry() => Navigation.NavigateTo(AppRoutes.FullSim);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || Result is null)
+        {
+            return;
+        }
+        try
+        {
+            _module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/Wh40kSim.UI/wh40ksim.js");
+            if (_module is not null)
+            {
+                _stickyWatch = await _module.InvokeAsync<IJSObjectReference>("watchSticky", _stickySentinel, _tabsHost, AppBarHeight);
+            }
+        }
+        catch (JSException)
+        {
+            // Pas d'observation possible : la barre reste collante, seul le retour compact ne s'affiche pas
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_stickyWatch is not null) await _stickyWatch.InvokeVoidAsync("dispose");
+            if (_stickyWatch is not null) await _stickyWatch.DisposeAsync();
+            if (_module is not null) await _module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // L'interface est déjà fermée : rien à détacher
+        }
+    }
 
     /// <summary>
     /// Pourquoi la moyenne marge comprise n'est pas « moyenne + marge » : la marge des tuiles ne compte que les

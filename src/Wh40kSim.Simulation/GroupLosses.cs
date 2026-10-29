@@ -12,13 +12,17 @@ namespace Wh40kSim.Simulation;
 /// <param name="Index">Position du groupe dans l'ordre d'allocation du défenseur.</param>
 /// <param name="MeanPrecisionKills">Figurines du groupe achevées grâce à Precision, en moyenne par simulation.</param>
 /// <param name="MeanPrecisionDamage">PV retirés au groupe grâce à Precision, en moyenne par simulation.</param>
+/// <param name="PrecisionWeapons">
+/// Travail des armes Precision sur un groupe PERSONNAGE ; null si l'attaquant n'en a pas, ou pour un garde du corps.
+/// </param>
 public sealed record GroupLosses(
     int Index,
     ModelGroup Group,
     DiscreteDistribution Kills,
     DiscreteDistribution Damage,
     double MeanPrecisionKills,
-    double MeanPrecisionDamage)
+    double MeanPrecisionDamage,
+    PrecisionWeaponLosses? PrecisionWeapons = null)
 {
     /// <summary>Probabilité que tout le groupe soit tué (pour un groupe PERSONNAGE : tuer le PERSONNAGE).</summary>
     public double ProbabilityWiped => Kills.ProbabilityAtLeast(Group.Count);

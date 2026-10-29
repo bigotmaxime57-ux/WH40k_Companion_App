@@ -109,6 +109,167 @@ public class SimulatorPageTests : ComponentTestContext
     }
 
     [Fact]
+    public void Changing_the_scenario_after_a_run_flags_the_results_as_stale_until_rerun()
+    {
+        var page = Render<SimulatorPage>();
+        page.Find("[data-test=run]").Click();
+        page.WaitForElement("[data-test=results]");
+        Assert.Empty(page.FindAll("[data-test=stale-results-banner]"));
+
+        page.Find("[data-test=add-weapon]").Click();
+
+        Assert.NotNull(page.Find("[data-test=stale-results-banner]"));
+        Assert.NotNull(page.Find("[data-test=results]"));   // anciens résultats toujours affichés, sans grisé
+
+        page.Find("[data-test=stale-rerun]").Click();
+
+        page.WaitForAssertion(() => Assert.Equal(2, Simulations.Calls));
+        page.WaitForAssertion(() => Assert.Empty(page.FindAll("[data-test=stale-results-banner]")));
+    }
+
+    [Fact]
+    public void Attacker_and_defender_panels_can_be_collapsed()
+    {
+        var page = Render<SimulatorPage>();
+
+        page.Find("[data-test=toggle-attacker]").Click();
+
+        Assert.True(page.Find("[data-test=attacker-content]").HasAttribute("hidden"));
+        Assert.False(page.Find("[data-test=defender-content]").HasAttribute("hidden"));
+
+        page.Find("[data-test=toggle-defender]").Click();
+        Assert.True(page.Find("[data-test=defender-content]").HasAttribute("hidden"));
+        Assert.Contains("wh-collapse-toggle", page.Find("[data-test=toggle-attacker]").ClassName);
+
+        page.Find("[data-test=toggle-attacker]").Click();
+        Assert.False(page.Find("[data-test=attacker-content]").HasAttribute("hidden"));
+    }
+
+    [Fact]
+    public void A_collapsed_weapon_stays_collapsed_when_the_attacker_is_folded_and_unfolded()
+    {
+        var page = Render<SimulatorPage>();
+        page.Find("[data-test=toggle-weapon]").Click();
+        Assert.Equal("false", page.Find("[data-test=toggle-weapon]").GetAttribute("aria-expanded"));
+
+        page.Find("[data-test=toggle-attacker]").Click();
+        page.Find("[data-test=toggle-attacker]").Click();
+
+        Assert.Equal("false", page.Find("[data-test=toggle-weapon]").GetAttribute("aria-expanded"));
+    }
+
+    /// <summary>Une arme Precision contre des gardes, un leader et un soutien : le choix de la cible compte.</summary>
+    private IRenderedComponent<SimulatorPage> OpenTwoCharacters()
+    {
+        Files.ToOpen = FakeScenarioFileService.File("precision.json", new Scenario
+        {
+            Attacker = new AttackerUnit
+            {
+                Weapons = [new WeaponGroup { Weapon = new WeaponProfile { Abilities = new WeaponAbilities { Precision = true } } }],
+            },
+            Defender = new DefenderUnit
+            {
+                Groups =
+                [
+                    new ModelGroup { Name = "Gardes", Count = 5 },
+                    new ModelGroup { Name = "Leader", IsCharacter = true, Wounds = 4 },
+                    new ModelGroup { Name = "Soutien", IsCharacter = true, Wounds = 3 },
+                ],
+            },
+        });
+        var page = Render<SimulatorPage>();
+        page.Find("[data-test=open]").Click();
+        page.WaitForElement("[data-test=precision-target-toggle]");
+        return page;
+    }
+
+    private static bool[] TargetStates(IRenderedComponent<SimulatorPage> page) =>
+        page.FindAll("[data-test=precision-target-toggle]").Select(t => t.ClassList.Contains("wh-precision-target-active")).ToArray();
+
+    [Fact]
+    public void Weapons_can_be_moved_up_and_down_to_change_the_resolution_order()
+    {
+        var page = Render<SimulatorPage>();
+        page.Find("[data-test=add-weapon]").Click();
+        page.Instance.Form.Attacker.Weapons[0].Name = "Première";
+        page.Instance.Form.Attacker.Weapons[1].Name = "Seconde";
+        page.Render();
+
+        var up = page.FindAll("[data-test=move-weapon-up]");
+        var down = page.FindAll("[data-test=move-weapon-down]");
+        Assert.True(up[0].HasAttribute("disabled"));     // la première ne monte pas
+        Assert.True(down[1].HasAttribute("disabled"));   // la dernière ne descend pas
+
+        page.FindAll("[data-test=move-weapon-down]")[0].Click();
+
+        Assert.Equal(["Seconde", "Première"], page.Instance.Form.Attacker.Weapons.Select(w => w.Name));
+        Assert.True(page.Instance.IsDirty);
+
+        page.FindAll("[data-test=move-weapon-up]")[1].Click();
+        Assert.Equal(["Première", "Seconde"], page.Instance.Form.Attacker.Weapons.Select(w => w.Name));
+    }
+
+    [Fact]
+    public void Situation_comes_before_the_attacker_and_the_defender()
+    {
+        var page = Render<SimulatorPage>();
+
+        string markup = page.Markup;
+        Assert.True(markup.IndexOf("data-test=\"context\"") < markup.IndexOf("data-test=\"attacker-panel\""));
+        Assert.True(markup.IndexOf("data-test=\"context\"") < markup.IndexOf("data-test=\"defender-panel\""));
+    }
+
+    [Fact]
+    public void Each_character_card_shows_a_precision_target_the_first_one_by_default()
+    {
+        var page = OpenTwoCharacters();
+
+        Assert.Equal([true, false], TargetStates(page));   // leader visé par défaut, soutien en gris ; rien sur les gardes
+        Assert.Null(page.Instance.Form.Context.PrecisionTarget);
+    }
+
+    [Fact]
+    public void Clicking_a_grey_target_chooses_it_and_clicking_it_again_goes_back_to_the_default()
+    {
+        var page = OpenTwoCharacters();
+
+        page.FindAll("[data-test=precision-target-toggle]")[1].Click();
+        Assert.Equal("Soutien", page.Instance.Form.Context.PrecisionTarget);
+        Assert.Equal([false, true], TargetStates(page));
+
+        page.FindAll("[data-test=precision-target-toggle]")[1].Click();
+        Assert.Null(page.Instance.Form.Context.PrecisionTarget);
+        Assert.Equal([true, false], TargetStates(page));
+    }
+
+    [Fact]
+    public void A_removed_target_goes_back_to_the_default_and_a_renamed_one_is_followed()
+    {
+        var page = OpenTwoCharacters();
+        page.FindAll("[data-test=precision-target-toggle]")[1].Click();
+
+        page.FindAll("input[data-test=group-name]")[2].Change("Psyker");
+        Assert.Equal("Psyker", page.Instance.Form.Context.PrecisionTarget);
+
+        page.FindAll("[data-test=remove-group]")[2].Click();
+        Assert.Null(page.Instance.Form.Context.PrecisionTarget);
+        // Un seul PERSONNAGE : sa cible reste affichée (visé par défaut), mais plus de liste dans la Situation
+        Assert.Equal([true], TargetStates(page));
+        Assert.Empty(page.FindAll("[data-test=precision-target]"));
+    }
+
+    [Fact]
+    public void Without_a_precision_weapon_no_character_shows_a_target()
+    {
+        var page = OpenTwoCharacters();
+
+        page.Instance.Form.Attacker.Weapons[0].Abilities.Precision = false;
+        page.Find("[data-test=add-weapon]").Click();   // une modification de l'attaquant fait relire le scénario
+
+        Assert.Empty(page.FindAll("[data-test=precision-target-toggle]"));
+    }
+
+    [Fact]
     public void Running_can_be_cancelled()
     {
         Simulations.Gate = new TaskCompletionSource();

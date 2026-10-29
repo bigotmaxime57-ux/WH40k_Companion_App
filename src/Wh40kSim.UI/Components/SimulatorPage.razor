@@ -1,7 +1,8 @@
 @*
-    Écran « Quick sim » : saisie du scénario à gauche ; erreurs, simulation et résultats à droite (colonne qui reste
+    Écran « Quick sim » : saisie du scénario à gauche (Situation, Attaquant, Défenseur) ; erreurs, simulation et résultats à droite (colonne qui reste
     visible au défilement) ; sélecteur de mots-clés dans un panneau latéral. Ouvert depuis l'accueil (route
     AppRoutes.QuickSim), dans la mise en page d'AppShell. Logique commune avec le Full sim : ScenarioEditorPage.
+    Si le scénario a changé depuis le calcul, un bandeau avertit que les résultats sont ceux de l'ancien.
 *@
 @page "/quick-sim"
 @inherits ScenarioEditorPage
@@ -17,11 +18,14 @@
     <MudGrid Spacing="3">
         <MudItem xs="12" lg="7">
             <MudStack Spacing="3">
+                @* Situation en tête (plus visible qu'en bas, choix de l'utilisateur) *@
+                <ContextPanel Context="Form.Context" Reference="Reference" Changed="OnFormChanged" />
                 <AttackerPanel Attacker="Form.Attacker" Changed="OnAttackerChanged" EditKeywords="EditKeywords"
                                OnOpen="OpenAttackerAsync" OnSave="SaveAttackerAsync" FileActionsDisabled="Running" SaveDisabled="!CanSaveAttacker" />
                 <DefenderPanel Defender="Form.Defender" Changed="OnDefenderChanged"
-                               OnOpen="OpenDefenderAsync" OnSave="SaveDefenderAsync" FileActionsDisabled="Running" />
-                <ContextPanel Context="Form.Context" Reference="Reference" Changed="OnFormChanged" />
+                               OnOpen="OpenDefenderAsync" OnSave="SaveDefenderAsync" FileActionsDisabled="Running"
+                               ShowPrecisionTargets="Reference.PrecisionTargetGroup is not null" PrecisionTarget="@Form.Context.PrecisionTarget"
+                               PrecisionTargetChanged="OnPrecisionTargetChanged" />
             </MudStack>
         </MudItem>
         <MudItem xs="12" lg="5">
@@ -32,6 +36,16 @@
                                      OnRun="RunAsync" OnCancel="Cancel" />
                     @if (Run.Result is not null)
                     {
+                        @if (ResultIsStale && !Running)
+                        {
+                            @* Résultats affichés à côté de la saisie : avertissement dans la page plutôt qu'une boîte à chaque modification *@
+                            <MudAlert Severity="Severity.Warning" data-test="stale-results-banner">
+                                <div>@L["StaleResults_Banner"]</div>
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small" Class="mt-2"
+                                           StartIcon="@Icons.Material.Filled.PlayArrow" Disabled="!CanRun" OnClick="RunAsync"
+                                           data-test="stale-rerun">@L["StaleResults_Rerun"]</MudButton>
+                            </MudAlert>
+                        }
                         <ResultsView Result="Run.Result" />
                     }
                 </MudStack>

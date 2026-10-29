@@ -3,18 +3,28 @@
     d'une arme : en-tête (numéro d'ordre, nom, nombre de figurines, case PERSONNAGE, boutons monter / descendre /
     dupliquer / supprimer), puis la ligne « Profil » (Endurance, PV, sauvegarde) et la ligne « Protections » (invulnérable, insensible
     à la douleur, réduction de dégâts), séparées par un filet, libellés alignés. Replié : résumé du Core. Filet plus
-    large et étiquette pour un PERSONNAGE.
+    large et étiquette pour un PERSONNAGE. Avec une arme Precision, une cible sur chaque PERSONNAGE (même seul) : rouge
+    clignotante pour celui que Precision vise, grise pour les autres (un clic le choisit) ; même réglage que la liste de
+    la Situation (qui n'apparaît qu'à partir de deux PERSONNAGES).
 *@
 
 <MudPaper Outlined="true" Class="@($"pa-4 my-3 wh-subcard {(Group.IsCharacter ? "wh-subcard-character" : "")}")" data-test="group">
     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-        <MudIconButton Icon="@(_expanded ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)" Size="Size.Small"
-                       OnClick="() => _expanded = !_expanded" data-test="toggle-group" />
+        <CollapseToggle @bind-Expanded="_expanded" data-test="toggle-group" />
         <span class="wh-group-number">@Number</span>
+        @if (PrecisionTarget is { } isTarget)
+        {
+            <MudTooltip Text="@PrecisionTooltip(isTarget)">
+                <MudIconButton Icon="@Icons.Material.Filled.GpsFixed" Size="Size.Small"
+                               Class="@(isTarget ? "wh-precision-target wh-precision-target-active" : "wh-precision-target")"
+                               OnClick="OnPrecisionTargetClick" aria-label="@PrecisionTooltip(isTarget)"
+                               aria-pressed="@(isTarget ? "true" : "false")" data-test="precision-target-toggle" />
+            </MudTooltip>
+        }
         @if (_expanded)
         {
             <div class="wh-card-name">
-                <MudTextField T="string" Label="@L["Group_Name"]" @bind-Value="Group.Name" @bind-Value:after="NotifyChanged" data-test="group-name" />
+                <MudTextField T="string" Label="@L["Group_Name"]" Value="Group.Name" ValueChanged="RenameAsync" data-test="group-name" />
             </div>
             <div class="wh-card-count">
                 <MudNumericField T="int" Label="@L["Group_Count"]" Min="1" @bind-Value="Group.Count" @bind-Value:after="NotifyChanged" />
@@ -120,6 +130,36 @@
 
     [Parameter]
     public EventCallback OnRemove { get; set; }
+
+    /// <summary>
+    /// Cible de Precision : null = pas de cible affichée (pas un PERSONNAGE, ou le choix ne compte pas) ; vrai = ce
+    /// PERSONNAGE est visé ; faux = un autre l'est.
+    /// </summary>
+    [Parameter]
+    public bool? PrecisionTarget { get; set; }
+
+    /// <summary>La cible visée vient du choix « premier PERSONNAGE » par défaut (et non d'un choix explicite).</summary>
+    [Parameter]
+    public bool PrecisionTargetIsDefault { get; set; }
+
+    /// <summary>Clic sur la cible : choisir ce PERSONNAGE, ou revenir au choix par défaut s'il était déjà choisi.</summary>
+    [Parameter]
+    public EventCallback OnPrecisionTargetClick { get; set; }
+
+    /// <summary>Renommage (ancien nom, nouveau nom) : la cible de Precision suit le PERSONNAGE renommé.</summary>
+    [Parameter]
+    public EventCallback<(string OldName, string NewName)> Renamed { get; set; }
+
+    private string PrecisionTooltip(bool isTarget) =>
+        !isTarget ? L["Group_PrecisionChoose"] : PrecisionTargetIsDefault ? L["Group_PrecisionDefault"] : L["Group_PrecisionChosen"];
+
+    private async Task RenameAsync(string name)
+    {
+        string old = Group.Name;
+        Group.Name = name;
+        await Renamed.InvokeAsync((old, name));
+        await NotifyChanged();
+    }
 
     private int InvulnerableChoice
     {

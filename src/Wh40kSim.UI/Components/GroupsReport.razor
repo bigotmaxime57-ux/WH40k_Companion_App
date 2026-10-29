@@ -1,85 +1,154 @@
 @*
-    Onglet « Groupes » du Full sim, en trois sections, lues dans le résultat sans aucun calcul (pertes réelles, sans la
-    marge) :
-    1. une carte par groupe d'allocation, dans l'ordre (numéro, filet et étiquette PERSONNAGE comme à la saisie) :
-       tuiles et histogramme, des figurines tuées pour un groupe de plusieurs figurines, des PV retirés pour une seule ;
+    Onglet « Groupes » du Full sim, en trois sections repliables, lues dans le résultat sans aucun calcul (pertes
+    réelles, sans la marge) :
+    1. un tableau récapitulatif des groupes, puis une section par groupe d'allocation, dans l'ordre (sous-titre avec
+       numéro, nom et étiquette PERSONNAGE comme à la saisie) : tuiles et histogrammes, figurines tuées et PV retirés
+       pour un groupe de plusieurs figurines, PV retirés seulement pour une figurine seule ;
     2. les gardes du corps pris ensemble, s'ils protègent au moins un PERSONNAGE ;
-    3. la frappe Precision, pour chaque PERSONNAGE que Precision peut viser.
+    3. la frappe Precision, pour le PERSONNAGE visé (la cible choisie, sinon le premier PERSONNAGE).
+    Pas de cadre autour des informations (choix de l'utilisateur) : sous-titres, tuiles et graphiques sur le fond.
 *@
 
 <div data-test="groups-report">
-    <SectionHeader Icon="@Icons.Material.Filled.Shield" Title="@L["Groups_LossesTitle"]" Help="@([L["Help_GroupLosses"]])" />
-    <MudGrid Spacing="3" Class="mb-4">
+    <CollapsibleSection Icon="@Icons.Material.Filled.Shield" Title="@L["Groups_LossesTitle"]" Help="@([L["Help_GroupLosses"]])"
+                        data-test="group-losses">
+        <MudSimpleTable Dense="true" Striped="true" Class="mb-4 wh-groups-summary" data-test="groups-summary">
+            <thead>
+                <tr>
+                    <th>@L["Groups_Group"]</th>
+                    <th class="wh-wipe-column">@L["Groups_Wiped"]</th>
+                    <th class="wh-number">@L["Groups_Damage"]</th>
+                    <th class="wh-number">@L["Groups_Killed"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var losses in Result.Groups)
+                {
+                    <tr data-test="@($"group-summary-{losses.Index}")">
+                        <td>@GroupHeader(losses)</td>
+                        <td>@WipeBar(losses.ProbabilityWiped)</td>
+                        <td class="wh-number">@DamageOutOf(losses)</td>
+                        <td class="wh-number">@(losses.Group.Count > 1 ? KillsOutOf(losses) : "—")</td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+
+        @* Une section par groupe (sans cadre) : sous-titre, tuiles, histogrammes ; un PERSONNAGE reprend la teinte foncée du camp *@
         @foreach (var losses in Result.Groups)
         {
-            <MudItem xs="12" lg="6">
-                <MudPaper Outlined="true" Class="@($"pa-4 wh-defender wh-subcard {(losses.Group.IsCharacter ? "wh-subcard-character" : "")}")"
-                          data-test="@($"group-losses-{losses.Index}")">
-                    @GroupHeader(losses)
-                    <div class="wh-tiles my-3">
-                        @if (losses.Group.Count > 1)
-                        {
-                            <StatTile Label="@L["Groups_Killed"]" Value="@L["Groups_OutOf", losses.Kills.Mean.ToString("F2"), losses.Group.Count]"
-                                      data-test="group-killed" />
-                        }
-                        <StatTile Label="@(losses.Group.IsCharacter ? L["Groups_CharacterKilled"] : L["Groups_Wiped"])"
-                                  Value="@losses.ProbabilityWiped.ToString("P1")" data-test="group-wiped" />
-                        <StatTile Label="@L["Groups_Damage"]" Value="@L["Groups_OutOf", losses.Damage.Mean.ToString("F2"), losses.Group.Count * losses.Group.Wounds]"
-                                  data-test="group-damage" />
-                    </div>
-                    @if (losses.Group.Count > 1)
+            bool several = losses.Group.Count > 1;
+            <section class="@($"wh-group-section {(losses.Group.IsCharacter ? "wh-group-section-character" : "")}")"
+                     data-test="@($"group-losses-{losses.Index}")">
+                <div class="wh-group-title" data-test="group-title">@GroupHeader(losses)</div>
+                @* Même ordre que l'onglet Distributions : figurines tuées, PV retirés, destruction (couleur de fiabilité) *@
+                <div class="wh-tiles my-3">
+                    @if (several)
                     {
-                        <HistogramChart Distribution="losses.Kills" Title="@losses.Group.Name" ValueTitle="@L["Chart_KillsValue"]"
-                                        UnitSize="losses.Group.Count" />
+                        <StatTile Label="@L["Groups_Killed"]" Value="@KillsOutOf(losses)" data-test="group-killed" />
                     }
-                    else
+                    <StatTile Label="@L["Groups_Damage"]" Value="@DamageOutOf(losses)" data-test="group-damage" />
+                    <StatTile Label="@(losses.Group.IsCharacter ? L["Groups_CharacterKilled"] : L["Groups_Wiped"])"
+                              Value="@losses.ProbabilityWiped.ToString("P1")" Tone="SummaryTiles.WipeToneFor(losses.ProbabilityWiped)"
+                              data-test="group-wiped" />
+                </div>
+                <MudGrid Spacing="3">
+                    @if (several)
                     {
+                        <MudItem xs="12" md="6">
+                            <MudText Typo="Typo.subtitle2" Class="wh-muted">@L["Groups_Killed"]</MudText>
+                            <HistogramChart Distribution="losses.Kills" Title="@losses.Group.Name" ValueTitle="@L["Chart_KillsValue"]"
+                                            UnitSize="losses.Group.Count" />
+                        </MudItem>
+                    }
+                    @* Une figurine seule : histogramme des PV en demi-largeur, comme ceux des groupes de plusieurs figurines *@
+                    <MudItem xs="12" md="6">
+                        <MudText Typo="Typo.subtitle2" Class="wh-muted">@L["Groups_Damage"]</MudText>
                         <HistogramChart Distribution="losses.Damage" Title="@losses.Group.Name" ValueTitle="@L["Chart_DamageValue"]"
-                                        UnitSize="losses.Group.Wounds" />
-                    }
-                </MudPaper>
-            </MudItem>
+                                        UnitSize="losses.Group.Count * losses.Group.Wounds" />
+                    </MudItem>
+                </MudGrid>
+            </section>
         }
-    </MudGrid>
+    </CollapsibleSection>
 
-    @if (Result.BodyguardKills is { } bodyguards)
+    @if (Result is { BodyguardKills: { } bodyguards, BodyguardDamage: { } bodyguardDamage })
     {
-        <div class="mb-4" data-test="bodyguards">
-            <SectionHeader Icon="@Icons.Material.Filled.Groups" Title="@L["Groups_BodyguardsTitle"]" Help="@([L["Help_Bodyguards"]])" />
-            <MudPaper Outlined="true" Class="pa-4 wh-defender wh-subcard">
+        <CollapsibleSection Icon="@Icons.Material.Filled.Groups" Title="@L["Groups_BodyguardsTitle"]" Help="@([L["Help_Bodyguards"]])"
+                            data-test="bodyguards">
+            @* Sans cadre, comme les groupes : tuiles puis histogrammes (figurines, PV) en demi-largeur *@
+            <div>
                 <div class="wh-tiles mb-3">
-                    <StatTile Label="@L["Groups_BodyguardsWiped"]" Value="@Result.ProbabilityBodyguardsWiped!.Value.ToString("P1")"
-                              data-test="bodyguards-wiped" />
                     <StatTile Label="@L["Groups_BodyguardsKilled"]" Value="@L["Groups_OutOf", bodyguards.Mean.ToString("F2"), bodyguards.MaxValue]"
                               data-test="bodyguards-killed" />
+                    <StatTile Label="@L["Groups_Damage"]" Value="@L["Groups_OutOf", bodyguardDamage.Mean.ToString("F2"), bodyguardDamage.MaxValue]"
+                              data-test="bodyguards-damage" />
+                    <StatTile Label="@L["Groups_BodyguardsWiped"]" Value="@Result.ProbabilityBodyguardsWiped!.Value.ToString("P1")"
+                              Tone="SummaryTiles.WipeToneFor(Result.ProbabilityBodyguardsWiped!.Value)" data-test="bodyguards-wiped" />
                 </div>
-                <HistogramChart Distribution="bodyguards" Title="@L["Groups_BodyguardsTitle"]" ValueTitle="@L["Chart_KillsValue"]"
-                                UnitSize="bodyguards.MaxValue" />
-            </MudPaper>
-        </div>
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" md="6">
+                        <MudText Typo="Typo.subtitle2" Class="wh-muted">@L["Groups_BodyguardsKilled"]</MudText>
+                        <HistogramChart Distribution="bodyguards" Title="@L["Groups_BodyguardsTitle"]" ValueTitle="@L["Chart_KillsValue"]"
+                                        UnitSize="bodyguards.MaxValue" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudText Typo="Typo.subtitle2" Class="wh-muted">@L["Groups_Damage"]</MudText>
+                        <HistogramChart Distribution="bodyguardDamage" Title="@L["Groups_BodyguardsTitle"]" ValueTitle="@L["Chart_DamageValue"]"
+                                        UnitSize="bodyguardDamage.MaxValue" />
+                    </MudItem>
+                </MudGrid>
+            </div>
+        </CollapsibleSection>
     }
 
-    @if (Result.PrecisionTargets.Count > 0)
+    @if (Result.PrecisionTarget is { } target)
     {
-        <div data-test="precision">
-            <SectionHeader Icon="@Icons.Material.Filled.GpsFixed" Title="@L["Groups_PrecisionTitle"]" Help="@([L["Help_PrecisionStrike"]])" />
-            <MudGrid Spacing="3">
-                @foreach (var target in Result.PrecisionTargets)
-                {
-                    <MudItem xs="12" lg="6">
-                        <MudPaper Outlined="true" Class="pa-4 wh-attacker wh-subcard" data-test="@($"precision-target-{target.Index}")">
-                            @GroupHeader(target)
-                            <div class="wh-tiles mt-3">
-                                <StatTile Label="@L["Groups_CharacterKilled"]" Value="@target.ProbabilityWiped.ToString("P1")" />
-                                <StatTile Label="@L["Groups_Damage"]" Value="@L["Groups_OutOf", target.Damage.Mean.ToString("F2"), target.Group.Wounds]" />
-                                <StatTile Label="@L["Groups_PrecisionShare"]" Value="@target.PrecisionDamageShare.ToString("P0")"
-                                          Stats="@PrecisionStats(target)" data-test="precision-share" />
-                            </div>
-                        </MudPaper>
+        <CollapsibleSection Icon="@Icons.Material.Filled.GpsFixed" Title="@L["Groups_PrecisionTitle"]"
+                            Help="@([L["Help_PrecisionStrike"], L["Help_KilledWhileGuardsAlive"]])"
+                            data-test="precision">
+            @* Le seul PERSONNAGE visé par Precision (la cible choisie, sinon le premier), sans cadre, avec son sous-titre *@
+            @{
+                var work = target.PrecisionWeapons!;
+                int wounds = target.Group.Count * target.Group.Wounds;
+            }
+            <section class="wh-group-section" data-test="@($"precision-target-{target.Index}")">
+                <div class="wh-group-title" data-test="group-title">@GroupHeader(target)</div>
+                @* Barres en deux parties : ce que font les armes Precision seules, et ce qu'y ajoutent les autres armes *@
+                <MudGrid Spacing="3" Class="mt-1">
+                    <MudItem xs="12" md="6">
+                        <SplitBar Title="@L["Groups_CharacterKilled"]" Total="@target.ProbabilityWiped.ToString("P1")"
+                                  Help="@([L["Help_PrecisionKillBar"]])" Tone="SummaryTiles.WipeToneFor(target.ProbabilityWiped)"
+                                  Primary="work.ProbabilityKilledByPrecisionAlone" Secondary="work.ProbabilityKilledWithHelp"
+                                  PrimaryLabel="@L["Groups_PrecisionAlone"]" PrimaryValue="@work.ProbabilityKilledByPrecisionAlone.ToString("P1")"
+                                  SecondaryLabel="@L["Groups_WithOtherWeapons"]" SecondaryValue="@work.ProbabilityKilledWithHelp.ToString("P1")"
+                                  data-test="precision-kill-bar" />
                     </MudItem>
-                }
-            </MudGrid>
-        </div>
+                    <MudItem xs="12" md="6">
+                        <SplitBar Title="@L["Groups_Damage"]" Total="@L["Groups_OutOf", target.Damage.Mean.ToString("F2"), wounds]"
+                                  Help="@([L["Help_PrecisionDamageBar"]])"
+                                  Primary="@(work.MeanPrecisionDamage / wounds)" Secondary="@(work.MeanOtherDamage / wounds)"
+                                  PrimaryLabel="@L["Groups_PrecisionWeapons"]" PrimaryValue="@work.MeanPrecisionDamage.ToString("F2")"
+                                  SecondaryLabel="@L["Groups_OtherWeapons"]" SecondaryValue="@work.MeanOtherDamage.ToString("F2")"
+                                  data-test="precision-damage-bar" />
+                    </MudItem>
+                </MudGrid>
+                <div class="wh-tiles my-3">
+                    <StatTile Label="@L["Groups_KilledWhileGuardsAlive"]" Value="@work.ProbabilityKilledWhileBodyguardsAlive.ToString("P1")"
+                              data-test="precision-guards-alive" />
+                    <StatTile Label="@L["Groups_PrecisionShort"]" Value="@L["Groups_WoundsLeft", work.MeanWoundsLeftWhenShort.ToString("F2")]"
+                              Stats="@ShortStats(work)" data-test="precision-short" />
+                </div>
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" md="6">
+                        <MudText Typo="Typo.subtitle2" Class="wh-muted">@L["Groups_DamageBySource"]</MudText>
+                        <HistogramChart Distribution="target.Damage" Title="@target.Group.Name" ValueTitle="@L["Chart_DamageValue"]"
+                                        UnitSize="wounds"
+                                        Split="@(new HistogramChart.BarSplit(work.PrecisionShareByDamage, L["Groups_PrecisionWeapons"], L["Groups_OtherWeapons"]))" />
+                    </MudItem>
+                </MudGrid>
+            </section>
+        </CollapsibleSection>
     }
 </div>
 
@@ -87,7 +156,10 @@
     [Parameter, EditorRequired]
     public SimulationResult Result { get; set; } = null!;
 
-    /// <summary>Numéro d'ordre d'allocation, nom et étiquette PERSONNAGE, comme sur la carte de saisie du groupe.</summary>
+    /// <summary>
+    /// Numéro d'ordre d'allocation, nom et étiquette PERSONNAGE, comme sur la carte de saisie du groupe. Dans le
+    /// tableau tel quel ; en tête d'une carte, dans un sous-titre (wh-group-title : plus grand, couleur du camp, filet).
+    /// </summary>
     private RenderFragment GroupHeader(GroupLosses losses) =>
         @<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
             <span class="wh-group-number">@(losses.Index + 1)</span>
@@ -98,10 +170,32 @@
             }
         </MudStack>;
 
-    /// <summary>La tuile Precision donne la part des PV ; la part des figurines (achevées) en indicateur, expliquée.</summary>
-    private List<StatTile.Stat> PrecisionStats(GroupLosses target) =>
+    /// <summary>
+    /// Probabilité de détruire le groupe en barre horizontale (toute la largeur = 100 %), colorée selon la fiabilité
+    /// comme la tuile « Unité détruite », avec le pourcentage à côté.
+    /// </summary>
+    private RenderFragment WipeBar(double probability) =>
+        @<div class="@($"wh-wipe-cell wh-wipe-{SummaryTiles.WipeToneFor(probability).ToString().ToLowerInvariant()}")" data-test="group-wipe-bar">
+            <div class="wh-wipe-track">
+                <div class="wh-wipe-fill" style="width: @Percent(probability)"></div>
+            </div>
+            <span class="wh-number">@probability.ToString("P1")</span>
+        </div>;
+
+    /// <summary>Largeur CSS en pourcentage (culture invariante : « 37.5% »).</summary>
+    private static string Percent(double probability) =>
+        (probability * 100).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture) + "%";
+
+    /// <summary>Figurines tuées en moyenne sur l'effectif du groupe (« 5,60 / 10 »).</summary>
+    private string KillsOutOf(GroupLosses losses) => L["Groups_OutOf", losses.Kills.Mean.ToString("F2"), losses.Group.Count];
+
+    /// <summary>PV retirés en moyenne sur les PV du groupe (« 11,20 / 20 »).</summary>
+    private string DamageOutOf(GroupLosses losses) =>
+        L["Groups_OutOf", losses.Damage.Mean.ToString("F2"), losses.Group.Count * losses.Group.Wounds];
+
+    /// <summary>Quand les armes Precision ne suffisent pas : dans quelle part des simulations, expliqué.</summary>
+    private List<StatTile.Stat> ShortStats(PrecisionWeaponLosses work) =>
     [
-        new("☠", L["Groups_PrecisionKills"], target.PrecisionKillShare.ToString("P0"), L["Help_PrecisionKills"]),
-        new("♥", L["Groups_PrecisionDamage"], target.PrecisionDamageShare.ToString("P0"), L["Help_PrecisionShare"]),
+        new("%", L["Groups_PrecisionShortChance"], work.ProbabilityPrecisionFallsShort.ToString("P1"), L["Help_PrecisionShort"]),
     ];
 }

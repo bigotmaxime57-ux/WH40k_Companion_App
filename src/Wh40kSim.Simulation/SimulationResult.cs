@@ -22,8 +22,17 @@ public sealed class SimulationResult
         long[] damagePerGroup,
         DiscreteDistribution extendedKills,
         DiscreteDistribution extendedDamage,
-        DiscreteDistribution rawDamage)
+        DiscreteDistribution rawDamage,
+        IReadOnlyList<GroupLosses> groups,
+        DiscreteDistribution bodyguardKills,
+        DiscreteDistribution bodyguardDamage)
     {
+        Groups = groups;
+        // Gardes du corps : seulement s'il y en a et qu'ils protègent au moins un PERSONNAGE
+        var defenderGroups = scenario.Defender.Groups;
+        bool bodyguards = defenderGroups.Any(g => g.IsCharacter) && defenderGroups.Any(g => !g.IsCharacter);
+        BodyguardKills = bodyguards ? bodyguardKills : null;
+        BodyguardDamage = bodyguards ? bodyguardDamage : null;
         Scenario = scenario;
         Seed = seed;
         Elapsed = elapsed;
@@ -129,4 +138,28 @@ public sealed class SimulationResult
 
     /// <summary>Profil des figurines virtuelles qui encaissent l'excédent (voir <see cref="DefenderUnit.ExcessProfile"/>).</summary>
     public ModelGroup ExcessProfile => Scenario.Defender.ExcessProfile!;
+
+    /// <summary>Pertes de chaque groupe d'allocation, dans l'ordre d'allocation du défenseur (pertes réelles).</summary>
+    public IReadOnlyList<GroupLosses> Groups { get; }
+
+    /// <summary>
+    /// Figurines de garde du corps tuées (tous les groupes non-PERSONNAGES ensemble, de 0 à leur effectif total). Null
+    /// s'il n'y a pas à la fois des gardes du corps et au moins un PERSONNAGE : il n'y a alors personne à protéger.
+    /// </summary>
+    public DiscreteDistribution? BodyguardKills { get; }
+
+    /// <summary>
+    /// PV retirés aux gardes du corps (tous les groupes non-PERSONNAGES ensemble, de 0 à la somme de leurs PV). Null
+    /// dans les mêmes cas que <see cref="BodyguardKills"/>.
+    /// </summary>
+    public DiscreteDistribution? BodyguardDamage { get; }
+
+    /// <summary>Probabilité que tous les gardes du corps soient tués : les PERSONNAGES sont alors exposés.</summary>
+    public double? ProbabilityBodyguardsWiped => BodyguardKills?.ProbabilityAtLeast(BodyguardKills.MaxValue);
+
+    /// <summary>
+    /// PERSONNAGE visé par Precision (voir <see cref="Scenario.PrecisionTargetGroup"/>) : la cible choisie, sinon le
+    /// premier PERSONNAGE ; null sans arme Precision ou sans PERSONNAGE.
+    /// </summary>
+    public GroupLosses? PrecisionTarget => Scenario.PrecisionTargetGroup is int g ? Groups[g] : null;
 }

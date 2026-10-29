@@ -17,7 +17,36 @@ public sealed record Scenario
     /// </summary>
     [JsonIgnore]
     public bool PrecisionTargetMatters =>
-        Attacker.Weapons.Any(w => w.Weapon.Abilities.Precision) && Defender.Groups.Count(g => g.IsCharacter) > 1;
+        UsesPrecision && Defender.Groups.Count(g => g.IsCharacter) > 1;
+
+    /// <summary>Au moins une arme de l'attaquant a Precision.</summary>
+    [JsonIgnore]
+    public bool UsesPrecision => Attacker.Weapons.Any(w => w.Weapon.Abilities.Precision);
+
+    /// <summary>
+    /// Groupe PERSONNAGE visé par Precision (indice dans l'ordre d'allocation) : la cible choisie si elle est nommée,
+    /// sinon le premier PERSONNAGE (celui que chaque pool vise d'abord). Null sans arme Precision, sans PERSONNAGE, ou
+    /// si la cible nommée n'existe pas (la validation le signale).
+    /// </summary>
+    [JsonIgnore]
+    public int? PrecisionTargetGroup
+    {
+        get
+        {
+            if (!UsesPrecision)
+            {
+                return null;
+            }
+            for (int g = 0; g < Defender.Groups.Count; g++)
+            {
+                if (Defender.Groups[g].IsCharacter && (Context.PrecisionTarget is null || Defender.Groups[g].Name == Context.PrecisionTarget))
+                {
+                    return g;
+                }
+            }
+            return null;
+        }
+    }
 
     /// <summary>Renvoie la liste des incohérences (vide si le scénario est valide).</summary>
     public IReadOnlyList<string> Validate()

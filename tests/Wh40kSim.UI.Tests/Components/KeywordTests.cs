@@ -147,6 +147,19 @@ public class KeywordTests : ComponentTestContext
     }
 
     [Fact]
+    public void Keyword_panel_closes_when_clicking_outside()
+    {
+        var page = Render<SimulatorPage>();
+        page.Find("[data-test=edit-keywords]").Click();
+        Assert.NotEmpty(page.FindAll("[data-test=keyword-row]"));
+
+        // Voile transparent autour du panneau : un clic dessus = un clic en dehors du panneau
+        page.Find(".mud-drawer-overlay").Click();
+
+        page.WaitForAssertion(() => Assert.Empty(page.FindAll("[data-test=keyword-row]")));
+    }
+
+    [Fact]
     public void Collapsed_weapon_shows_the_core_summary()
     {
         var weapon = new WeaponForm(new WeaponGroup { ModelCount = 9, Weapon = new WeaponProfile { Name = "Fusil", Attacks = 2, Skill = 3 } });

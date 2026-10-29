@@ -1,40 +1,52 @@
 @*
     Défenseur : ses groupes d'allocation, dans l'ordre où ils encaissent (le premier d'abord). Boutons Ouvrir /
-    Enregistrer du défenseur seul dans l'en-tête, si la page les fournit.
+    Enregistrer du défenseur seul dans l'en-tête, si la page les fournit. Repliable (déplié à l'ouverture) sans perdre l'état des cartes qu'il contient.
 *@
 
 <MudPaper Elevation="3" Class="pa-4 wh-section wh-defender" data-test="defender-panel">
     <SectionHeader Icon="@Icons.Material.Filled.Shield" Title="@L["Defender_Title"]">
-        @if (OnOpen.HasDelegate)
-        {
-            <PartFileActions OpenHelp="@L["Defender_OpenHelp"]" SaveHelp="@L["Defender_SaveHelp"]" Disabled="FileActionsDisabled"
-                             OnOpen="OnOpen" OnSave="OnSave" Part="defender" />
-        }
+        <Leading>
+            <CollapseToggle @bind-Expanded="_expanded" data-test="toggle-defender" />
+        </Leading>
+        <ChildContent>
+            @if (OnOpen.HasDelegate)
+            {
+                <PartFileActions OpenHelp="@L["Defender_OpenHelp"]" SaveHelp="@L["Defender_SaveHelp"]" Disabled="FileActionsDisabled"
+                                 OnOpen="OnOpen" OnSave="OnSave" Part="defender" />
+            }
+        </ChildContent>
     </SectionHeader>
-    <MudTextField T="string" Label="@L["Defender_Name"]" @bind-Value="Defender.Name" @bind-Value:after="NotifyChanged" />
+    @* Contenu masqué plutôt que retiré : les cartes d'arme et de groupe gardent leur état replié ou déplié *@
+    <div hidden="@(!_expanded)" data-test="defender-content">
+        <MudTextField T="string" Label="@L["Defender_Name"]" @bind-Value="Defender.Name" @bind-Value:after="NotifyChanged" />
 
-    <DefenderBoostsEditor Boosts="Defender.Boosts" Changed="NotifyChanged" />
+        <DefenderBoostsEditor Boosts="Defender.Boosts" Changed="NotifyChanged" />
 
-    <div class="wh-subsection-title mt-4">
-        <MudText Typo="Typo.subtitle1">@L["Defender_Groups"]</MudText>
-        <HelpBubble Lines="@([L["Defender_GroupsHelp"]])" />
+        <div class="wh-subsection-title mt-4">
+            <MudText Typo="Typo.subtitle1">@L["Defender_Groups"]</MudText>
+            <HelpBubble Lines="@([L["Defender_GroupsHelp"]])" />
+        </div>
+
+        @for (int i = 0; i < Defender.Groups.Count; i++)
+        {
+            int index = i;
+            var group = Defender.Groups[index];
+            <ModelGroupEditor @key="group" Group="group" Number="index + 1" Changed="NotifyChanged"
+                              CanMoveUp="CanMove(index, -1)" CanMoveDown="CanMove(index, 1)"
+                              OnMoveUp="() => Move(index, -1)" OnMoveDown="() => Move(index, 1)"
+                              OnDuplicate="() => Duplicate(group)" OnRemove="() => Remove(group)"
+                              PrecisionTarget="PrecisionTargetOf(group)" PrecisionTargetIsDefault="PrecisionTarget is null"
+                              OnPrecisionTargetClick="() => TogglePrecisionTarget(group)" Renamed="OnGroupRenamed" />
+        }
+
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Text" Color="Color.Primary" OnClick="Add"
+                   data-test="add-group">@L["Defender_AddGroup"]</MudButton>
     </div>
-
-    @for (int i = 0; i < Defender.Groups.Count; i++)
-    {
-        int index = i;
-        var group = Defender.Groups[index];
-        <ModelGroupEditor @key="group" Group="group" Number="index + 1" Changed="NotifyChanged"
-                          CanMoveUp="CanMove(index, -1)" CanMoveDown="CanMove(index, 1)"
-                          OnMoveUp="() => Move(index, -1)" OnMoveDown="() => Move(index, 1)"
-                          OnDuplicate="() => Duplicate(group)" OnRemove="() => Remove(group)" />
-    }
-
-    <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Text" Color="Color.Primary" OnClick="Add"
-               data-test="add-group">@L["Defender_AddGroup"]</MudButton>
 </MudPaper>
 
 @code {
+    private bool _expanded = true;
+
     [Parameter, EditorRequired]
     public DefenderForm Defender { get; set; } = null!;
 
@@ -52,6 +64,43 @@
     /// <summary>Ouvrir et enregistrer indisponibles (simulation en cours).</summary>
     [Parameter]
     public bool FileActionsDisabled { get; set; }
+
+    /// <summary>
+    /// Cibles de Precision affichées sur les PERSONNAGES : dès qu'une arme Precision peut en viser un (Core :
+    /// Scenario.PrecisionTargetGroup), même s'il est seul (choix impossible, mais on voit qui est visé).
+    /// </summary>
+    [Parameter]
+    public bool ShowPrecisionTargets { get; set; }
+
+    /// <summary>PERSONNAGE choisi comme cible de Precision (même champ que la liste de la Situation), null = le premier.</summary>
+    [Parameter]
+    public string? PrecisionTarget { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> PrecisionTargetChanged { get; set; }
+
+    /// <summary>PERSONNAGE visé : celui qui est choisi, sinon le premier dans l'ordre d'allocation (choix par défaut).</summary>
+    private string? CurrentPrecisionTarget =>
+        PrecisionTarget ?? Defender.Groups.FirstOrDefault(g => g.IsCharacter)?.Name;
+
+    private bool? PrecisionTargetOf(ModelGroupForm group) =>
+        ShowPrecisionTargets && group.IsCharacter ? group.Name == CurrentPrecisionTarget : null;
+
+    /// <summary>Clic sur une cible grise : ce PERSONNAGE devient la cible ; sur la cible choisie : retour au choix par défaut.</summary>
+    private Task TogglePrecisionTarget(ModelGroupForm group)
+    {
+        if (group.Name != CurrentPrecisionTarget)
+        {
+            return PrecisionTargetChanged.InvokeAsync(group.Name);
+        }
+        return PrecisionTarget is not null ? PrecisionTargetChanged.InvokeAsync(null) : Task.CompletedTask;
+    }
+
+    /// <summary>La cible choisie suit le PERSONNAGE renommé.</summary>
+    private Task OnGroupRenamed((string OldName, string NewName) rename) =>
+        PrecisionTarget is not null && PrecisionTarget == rename.OldName
+            ? PrecisionTargetChanged.InvokeAsync(rename.NewName)
+            : Task.CompletedTask;
 
     /// <summary>
     /// Après chaque modification, les PERSONNAGES sont remis après les gardes du corps (règle 05.03, portée par le Core) :

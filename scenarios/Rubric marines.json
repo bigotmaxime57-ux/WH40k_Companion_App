@@ -1,0 +1,48 @@
+{
+  "defender": {
+    "name": "Rubric marines",
+    "boosts": {
+      "inCover": false,
+      "skill": 0,
+      "hitRoll": 0,
+      "woundRoll": 0,
+      "ap": 0,
+      "damage": 0
+    },
+    "groups": [
+      {
+        "name": "rubrics",
+        "count": 9,
+        "isCharacter": false,
+        "toughness": 4,
+        "wounds": 2,
+        "save": 3,
+        "invulnerableSave": 5,
+        "feelNoPain": null,
+        "damageReduction": 0
+      },
+      {
+        "name": "Sergent",
+        "count": 1,
+        "isCharacter": false,
+        "toughness": 4,
+        "wounds": 3,
+        "save": 3,
+        "invulnerableSave": 5,
+        "feelNoPain": null,
+        "damageReduction": 0
+      },
+      {
+        "name": "Sorcier",
+        "count": 1,
+        "isCharacter": true,
+        "toughness": 4,
+        "wounds": 5,
+        "save": 3,
+        "invulnerableSave": 5,
+        "feelNoPain": null,
+        "damageReduction": 0
+      }
+    ]
+  }
+}

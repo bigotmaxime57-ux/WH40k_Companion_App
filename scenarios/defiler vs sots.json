@@ -1,0 +1,154 @@
+{
+  "attacker": {
+    "name": "Defiler",
+    "boosts": {
+      "skill": 0,
+      "hitRoll": 0,
+      "hitReroll": "None",
+      "strength": 0,
+      "woundRoll": 0,
+      "woundReroll": "None",
+      "attacks": 0,
+      "ap": 0,
+      "damage": 0
+    },
+    "weapons": [
+      {
+        "modelCount": 2,
+        "weapon": {
+          "name": "Excruciator Cannon",
+          "type": "Ranged",
+          "attacks": 6,
+          "skill": 3,
+          "strength": 6,
+          "ap": -2,
+          "damage": 2,
+          "abilities": {
+            "torrent": false,
+            "lethalHits": false,
+            "sustainedHits": 0,
+            "devastatingWounds": false,
+            "twinLinked": false,
+            "blast": false,
+            "rapidFire": 0,
+            "melta": 0,
+            "heavy": false,
+            "lance": false,
+            "ignoresCover": false,
+            "precision": false,
+            "criticalHitOn": 6,
+            "criticalWoundOn": 6
+          }
+        }
+      },
+      {
+        "modelCount": 1,
+        "weapon": {
+          "name": "Ectoplasma Destructor",
+          "type": "Ranged",
+          "attacks": "D6",
+          "skill": 3,
+          "strength": 12,
+          "ap": -3,
+          "damage": 3,
+          "abilities": {
+            "torrent": false,
+            "lethalHits": false,
+            "sustainedHits": 0,
+            "devastatingWounds": false,
+            "twinLinked": false,
+            "blast": true,
+            "rapidFire": 0,
+            "melta": 0,
+            "heavy": false,
+            "lance": false,
+            "ignoresCover": false,
+            "precision": false,
+            "criticalHitOn": 6,
+            "criticalWoundOn": 6
+          }
+        }
+      },
+      {
+        "modelCount": 2,
+        "weapon": {
+          "name": "Heavy Reaper Autocannon",
+          "type": "Ranged",
+          "attacks": 4,
+          "skill": 3,
+          "strength": 9,
+          "ap": -2,
+          "damage": 3,
+          "abilities": {
+            "torrent": false,
+            "lethalHits": false,
+            "sustainedHits": 1,
+            "devastatingWounds": true,
+            "twinLinked": false,
+            "blast": false,
+            "rapidFire": 0,
+            "melta": 0,
+            "heavy": false,
+            "lance": false,
+            "ignoresCover": false,
+            "precision": false,
+            "criticalHitOn": 6,
+            "criticalWoundOn": 6
+          }
+        }
+      }
+    ]
+  },
+  "defender": {
+    "name": "SoTs",
+    "boosts": {
+      "inCover": false,
+      "skill": 0,
+      "hitRoll": 0,
+      "woundRoll": 0,
+      "ap": 0,
+      "damage": 0
+    },
+    "groups": [
+      {
+        "name": "Scarab occult Terminators",
+        "count": 9,
+        "isCharacter": false,
+        "toughness": 6,
+        "wounds": 3,
+        "save": 2,
+        "invulnerableSave": 4,
+        "feelNoPain": null,
+        "damageReduction": 0
+      },
+      {
+        "name": "Scarab occult TSorcerer",
+        "count": 1,
+        "isCharacter": false,
+        "toughness": 6,
+        "wounds": 4,
+        "save": 2,
+        "invulnerableSave": 4,
+        "feelNoPain": null,
+        "damageReduction": 0
+      },
+      {
+        "name": "Sorcerer in Terminator Armour",
+        "count": 1,
+        "isCharacter": true,
+        "toughness": 6,
+        "wounds": 5,
+        "save": 2,
+        "invulnerableSave": 4,
+        "feelNoPain": null,
+        "damageReduction": 0
+      }
+    ]
+  },
+  "context": {
+    "halfRange": false,
+    "remainedStationary": false,
+    "charged": false,
+    "precisionTarget": null
+  }
+}

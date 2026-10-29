@@ -1,6 +1,7 @@
 @*
     Un profil d'arme et le nombre de figurines qui l'utilisent. Bandeau à gauche, fond plein couleur du camp, avec le
-    pictogramme du type (viseur : tir, épées : mêlée). En-tête : nom, type, nombre de porteurs ; puis la ligne
+    pictogramme du type (viseur : tir, épées : mêlée). En-tête : nom, type, nombre de porteurs, boutons monter /
+    descendre (ordre de résolution) / dupliquer / supprimer ; puis la ligne
     « Profil » (A, CT/CC, F, PA, D de même largeur, comme sur une fiche) et la ligne « Mots-clés », libellés alignés.
     Repliable : une fois replié, une ligne de résumé (Describe du Core). Les mots-clés actifs sont des étiquettes ; le
     bouton « Mots-clés » ouvre le sélecteur (panneau latéral).
@@ -17,8 +18,7 @@
     </div>
     <div class="wh-weapon-body pa-3">
         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-            <MudIconButton Icon="@(_expanded ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)" Size="Size.Small"
-                           OnClick="() => _expanded = !_expanded" data-test="toggle-weapon" />
+            <CollapseToggle @bind-Expanded="_expanded" data-test="toggle-weapon" />
             @if (_expanded)
             {
                 @* Identité de l'arme : nom, type et nombre de porteurs *@
@@ -39,6 +39,13 @@
             {
                 <MudText Typo="Typo.body1" Class="wh-summary" data-test="weapon-summary">@Summary</MudText>
             }
+            @* Ordre de résolution des armes : monter = résolue plus tôt, comme les groupes du défenseur *@
+            <MudTooltip Text="@L["Weapon_MoveUp"]">
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Disabled="@(!CanMoveUp)" OnClick="OnMoveUp" data-test="move-weapon-up" />
+            </MudTooltip>
+            <MudTooltip Text="@L["Weapon_MoveDown"]">
+                <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Disabled="@(!CanMoveDown)" OnClick="OnMoveDown" data-test="move-weapon-down" />
+            </MudTooltip>
             <MudTooltip Text="@L["Weapon_Duplicate"]">
                 <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" OnClick="OnDuplicate" data-test="duplicate-weapon" />
             </MudTooltip>
@@ -100,6 +107,18 @@
 
     [Parameter]
     public EventCallback OnDuplicate { get; set; }
+
+    [Parameter]
+    public bool CanMoveUp { get; set; }
+
+    [Parameter]
+    public bool CanMoveDown { get; set; }
+
+    [Parameter]
+    public EventCallback OnMoveUp { get; set; }
+
+    [Parameter]
+    public EventCallback OnMoveDown { get; set; }
 
     [Parameter]
     public EventCallback OnRemove { get; set; }

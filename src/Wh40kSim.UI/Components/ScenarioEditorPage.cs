@@ -85,6 +85,9 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
     /// <summary>Les dés ne se saisissent que dans les armes : une erreur de dés rend l'attaquant (seul) illisible.</summary>
     protected bool CanSaveAttacker => !Running && !HasDiceErrors;
 
+    /// <summary>Le dernier résultat de ce mode correspond à un ancien scénario (voir <see cref="ScenarioSession.IsStale"/>).</summary>
+    protected bool ResultIsStale => Session.IsStale(Run);
+
     /// <summary>Nom du fichier (ou « Nouveau scénario »), suivi de « * » s'il y a des modifications non enregistrées.</summary>
     protected string FileLabel => (Session.FileName ?? L["Toolbar_Untitled"]) + (Session.IsDirty ? " *" : "");
 
@@ -161,10 +164,25 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
         OnFormChanged();
     }
 
-    /// <summary>Modification du défenseur (groupes, boosts) : le scénario et le défenseur sont modifiés.</summary>
+    /// <summary>
+    /// Modification du défenseur (groupes, boosts) : le scénario et le défenseur sont modifiés. Une cible de Precision
+    /// qui n'est plus un PERSONNAGE du défenseur (supprimé, décoché) revient au choix par défaut (le premier PERSONNAGE) ;
+    /// un renommage est suivi avant (OnPrecisionTargetChanged).
+    /// </summary>
     protected void OnDefenderChanged()
     {
         Session.DefenderDirty = true;
+        if (Form.Context.PrecisionTarget is string target && !Form.Defender.Groups.Any(g => g.IsCharacter && g.Name == target))
+        {
+            Form.Context.PrecisionTarget = null;
+        }
+        OnFormChanged();
+    }
+
+    /// <summary>Cible de Precision choisie sur une carte du défenseur : même champ que la liste de la Situation.</summary>
+    protected void OnPrecisionTargetChanged(string? target)
+    {
+        Form.Context.PrecisionTarget = target;
         OnFormChanged();
     }
 

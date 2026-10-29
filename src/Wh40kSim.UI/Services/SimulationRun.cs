@@ -8,8 +8,30 @@ namespace Wh40kSim.UI.Services;
 /// </summary>
 public sealed class SimulationRun
 {
-    /// <summary>Résultat de la dernière simulation de ce mode, effacé quand un autre scénario est chargé.</summary>
-    public SimulationResult? Result { get; set; }
+    private SimulationResult? _result;
+
+    /// <summary>
+    /// Résultat de la dernière simulation de ce mode, effacé quand un autre scénario est chargé. Un nouveau résultat
+    /// rouvre le premier onglet (<see cref="ResultsTab"/>).
+    /// </summary>
+    public SimulationResult? Result
+    {
+        get => _result;
+        set
+        {
+            if (!ReferenceEquals(_result, value))
+            {
+                _result = value;
+                ResultsTab = 0;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Onglet des résultats affiché en dernier pour ce résultat (Full sim), retrouvé en revenant aux résultats ; remis
+    /// au premier (Distributions) à chaque nouveau résultat.
+    /// </summary>
+    public int ResultsTab { get; set; }
 
     public int Iterations { get; set; } = 1_000_000;
 

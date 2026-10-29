@@ -23,8 +23,9 @@ if ($img) {
 ```
 
 - `<scratchpad>` : le dossier scratchpad de la session (jamais le dépôt : une capture n'est pas versionnée).
-- **Numéroter** les fichiers (`sc1.png`, `sc2.png`…) au fil de la session : ne pas écraser une capture précédente,
-  l'utilisateur peut y faire référence.
+- **Numéroter** les fichiers (`sc1.png`, `sc2.png`…) au fil de la session, pour ne pas confondre deux captures.
+- **Supprimer** la capture (et ses recadrages) une fois la remarque traitée (consigne de CLAUDE.md : pas
+  d'accumulation d'images).
 - `NO_IMAGE` : le presse-papiers contient du texte ou rien. Le dire à l'utilisateur (la capture a peut-être été
   remplacée par un copier-coller) et lui demander de la refaire ; ne pas deviner ce qu'elle montrait.
 

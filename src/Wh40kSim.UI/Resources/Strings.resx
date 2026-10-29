@@ -41,7 +41,7 @@
     <value>Armement</value>
   </data>
   <data name="Attacker_WeaponsHelp" xml:space="preserve">
-    <value>Les profils d'armes de l'unité, résolus dans l'ordre de la liste. Les boosts saisis au-dessus s'appliquent à toutes les armes.</value>
+    <value>Les profils d'armes de l'unité, résolus dans l'ordre de la liste (flèches pour le changer). Les armes aux attaques identiques sont lancées ensemble, à la place de la première. Les boosts saisis au-dessus s'appliquent à toutes les armes.</value>
   </data>
   <data name="Boosts_Active" xml:space="preserve">
     <value>{0} actif(s)</value>
@@ -619,6 +619,96 @@
   <data name="FullSim_TabDistributions" xml:space="preserve">
     <value>Distributions</value>
   </data>
+  <data name="FullSim_TabGroups" xml:space="preserve">
+    <value>Groupes</value>
+  </data>
+  <data name="Groups_LossesTitle" xml:space="preserve">
+    <value>Pertes par groupe</value>
+  </data>
+  <data name="Help_GroupLosses" xml:space="preserve">
+    <value>Pertes de chaque groupe d'allocation, dans l'ordre où il encaisse les sauvegardes ratées. Pertes réelles seulement, sans la marge. Le tableau résume tous les groupes, puis chaque carte détaille un groupe : histogrammes des figurines tuées et des PV retirés, ou des seuls PV retirés pour un groupe d'une seule figurine. Pour un PERSONNAGE, « Groupe détruit » est la probabilité de le tuer.</value>
+  </data>
+  <data name="Groups_Group" xml:space="preserve">
+    <value>Groupe</value>
+  </data>
+  <data name="Section_Collapse" xml:space="preserve">
+    <value>Replier</value>
+  </data>
+  <data name="Section_Expand" xml:space="preserve">
+    <value>Déplier</value>
+  </data>
+  <data name="Groups_Killed" xml:space="preserve">
+    <value>Figurines tuées</value>
+  </data>
+  <data name="Groups_OutOf" xml:space="preserve">
+    <value>{0} / {1}</value>
+  </data>
+  <data name="Groups_Wiped" xml:space="preserve">
+    <value>Groupe détruit</value>
+  </data>
+  <data name="Groups_CharacterKilled" xml:space="preserve">
+    <value>PERSONNAGE tué</value>
+  </data>
+  <data name="Groups_Damage" xml:space="preserve">
+    <value>PV retirés</value>
+  </data>
+  <data name="Groups_BodyguardsTitle" xml:space="preserve">
+    <value>Gardes du corps</value>
+  </data>
+  <data name="Help_Bodyguards" xml:space="preserve">
+    <value>Tous les groupes qui ne sont pas des PERSONNAGES, pris ensemble. Tant qu'il reste un garde du corps, les PERSONNAGES ne prennent les sauvegardes ratées que grâce à Precision ; une fois tous les gardes tués, ils sont exposés.</value>
+  </data>
+  <data name="Groups_BodyguardsWiped" xml:space="preserve">
+    <value>Tous les gardes tués</value>
+  </data>
+  <data name="Groups_BodyguardsKilled" xml:space="preserve">
+    <value>Gardes tués</value>
+  </data>
+  <data name="Groups_PrecisionTitle" xml:space="preserve">
+    <value>Frappe Precision</value>
+  </data>
+  <data name="Help_PrecisionStrike" xml:space="preserve">
+    <value>Le PERSONNAGE que visent les armes Precision : la cible choisie (Situation ou cible rouge sur la carte du défenseur), sinon le premier PERSONNAGE dans l'ordre d'allocation. Une fois la cible morte, le reste du pool suit l'ordre d'allocation normal.</value>
+  </data>
+  <data name="Groups_PrecisionAlone" xml:space="preserve">
+    <value>Armes Precision seules</value>
+  </data>
+  <data name="Groups_WithOtherWeapons" xml:space="preserve">
+    <value>Avec l'aide des autres armes</value>
+  </data>
+  <data name="Groups_PrecisionWeapons" xml:space="preserve">
+    <value>Armes Precision</value>
+  </data>
+  <data name="Groups_OtherWeapons" xml:space="preserve">
+    <value>Autres armes</value>
+  </data>
+  <data name="Groups_KilledWhileGuardsAlive" xml:space="preserve">
+    <value>Tué, gardes encore en vie</value>
+  </data>
+  <data name="Groups_PrecisionShort" xml:space="preserve">
+    <value>Quand Precision ne suffit pas</value>
+  </data>
+  <data name="Groups_WoundsLeft" xml:space="preserve">
+    <value>{0} PV restants</value>
+  </data>
+  <data name="Groups_PrecisionShortChance" xml:space="preserve">
+    <value>des cas</value>
+  </data>
+  <data name="Groups_DamageBySource" xml:space="preserve">
+    <value>PV retirés, selon les armes</value>
+  </data>
+  <data name="Help_PrecisionKillBar" xml:space="preserve">
+    <value>Probabilité de tuer ce PERSONNAGE, en deux parties : tué par les seules armes Precision (tous ses PV perdus viennent d'elles), ou avec l'aide des autres armes (au moins un PV vient d'une arme sans Precision, par exemple une fois les gardes du corps tombés). Toute la largeur = 100 %.</value>
+  </data>
+  <data name="Help_PrecisionDamageBar" xml:space="preserve">
+    <value>PV retirés à ce PERSONNAGE en moyenne, selon les armes qui les ont retirés : armes Precision ou autres armes. Toute la largeur = tous ses PV.</value>
+  </data>
+  <data name="Help_KilledWhileGuardsAlive" xml:space="preserve">
+    <value>« Tué, gardes encore en vie » : le PERSONNAGE meurt alors qu'au moins un garde du corps est encore en vie à la fin du tir. Sans Precision, ce kill serait impossible.</value>
+  </data>
+  <data name="Help_PrecisionShort" xml:space="preserve">
+    <value>Simulations où les armes Precision ne tuent pas ce PERSONNAGE à elles seules : la valeur donne les PV qu'elles lui laissent en moyenne, c'est-à-dire ce qu'il faudrait de plus pour finir le travail (les autres armes peuvent s'en charger).</value>
+  </data>
   <data name="Help_MarginChart" xml:space="preserve">
     <value>Sur les graphiques, au-delà du pointillé, les barres atténuées sont la marge : « 5 + 2 » signifie l'unité entière (5), plus 2 au-delà.</value>
   </data>
@@ -657,5 +747,47 @@
   </data>
   <data name="Results_DamageShort" xml:space="preserve">
     <value>PV</value>
+  </data>
+  <data name="Weapon_MoveUp" xml:space="preserve">
+    <value>Monter (résolue plus tôt)</value>
+  </data>
+  <data name="Weapon_MoveDown" xml:space="preserve">
+    <value>Descendre (résolue plus tard)</value>
+  </data>
+  <data name="Group_PrecisionChoose" xml:space="preserve">
+    <value>Viser ce PERSONNAGE avec les armes Precision</value>
+  </data>
+  <data name="Group_PrecisionChosen" xml:space="preserve">
+    <value>Cible des armes Precision (cliquer pour revenir au premier PERSONNAGE en jeu)</value>
+  </data>
+  <data name="Group_PrecisionDefault" xml:space="preserve">
+    <value>Cible des armes Precision : premier PERSONNAGE en jeu (choix par défaut)</value>
+  </data>
+  <data name="StaleResults_Title" xml:space="preserve">
+    <value>Résultats d'un ancien scénario</value>
+  </data>
+  <data name="StaleResults_Message" xml:space="preserve">
+    <value>Le scénario a été modifié depuis la dernière simulation : les résultats correspondent à l'ancien scénario, pas à celui saisi.</value>
+  </data>
+  <data name="StaleResults_CannotRerun" xml:space="preserve">
+    <value>Le scénario saisi n'est pas valide : corrigez-le pour relancer la simulation.</value>
+  </data>
+  <data name="StaleResults_Remember" xml:space="preserve">
+    <value>Retenir ce choix jusqu'à la fermeture de l'application</value>
+  </data>
+  <data name="Help_StaleResultsRemember" xml:space="preserve">
+    <value>« Voir les résultats » appliquera ensuite directement le même choix, sans poser la question. Exception : si « Relancer » a été retenu mais que le scénario saisi n'est pas valide, la question est reposée. Le choix est oublié à la fermeture de l'application.</value>
+  </data>
+  <data name="StaleResults_Cancel" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+  <data name="StaleResults_Banner" xml:space="preserve">
+    <value>Le scénario a été modifié depuis la dernière simulation : ces résultats correspondent à l'ancien scénario.</value>
+  </data>
+  <data name="StaleResults_ShowOld" xml:space="preserve">
+    <value>Voir les anciens résultats</value>
+  </data>
+  <data name="StaleResults_Rerun" xml:space="preserve">
+    <value>Relancer la simulation</value>
   </data>
 </root>

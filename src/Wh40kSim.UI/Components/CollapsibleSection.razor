@@ -1,0 +1,36 @@
+@*
+    Section repliable d'un rapport : l'en-tête de section habituel, précédé du bouton de repli commun (à gauche, comme
+    partout). Dépliée à chaque affichage (état non mémorisé, choix de l'utilisateur). Titre plus grand et espacé du
+    contenu et des sections voisines (classe wh-report-section).
+*@
+
+<div class="wh-report-section" @attributes="Attributes">
+    <SectionHeader Icon="@Icon" Title="@Title" Help="Help">
+        <Leading>
+            <CollapseToggle @bind-Expanded="_expanded" data-test="toggle-section" />
+        </Leading>
+    </SectionHeader>
+    @if (_expanded)
+    {
+        <div data-test="section-content">@ChildContent</div>
+    }
+</div>
+
+@code {
+    private bool _expanded = true;
+
+    [Parameter, EditorRequired]
+    public string Icon { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public IReadOnlyList<string>? Help { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? Attributes { get; set; }
+}

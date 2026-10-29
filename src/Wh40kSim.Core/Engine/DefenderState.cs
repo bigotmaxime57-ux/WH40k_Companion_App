@@ -16,6 +16,9 @@ public sealed class DefenderState
     private readonly IReadOnlyList<ModelGroup> _groups;
     private readonly int[] _alive;
     private readonly int[] _frontWounds;
+    private readonly int[] _precisionKilled; // figurines achevées par une attaque « grâce à Precision », par groupe
+    private readonly int[] _precisionDamage; // PV retirés par ces attaques, par groupe
+    private readonly int[] _precisionWeaponDamage; // PV retirés par des armes Precision (quelle que soit l'allocation), par groupe
     private readonly int _damageModifier; // boost de dégâts du défenseur (DefenderBoosts.Damage)
     private int _excessFrontWounds;
 
@@ -25,6 +28,9 @@ public sealed class DefenderState
         _damageModifier = unit.Boosts.Damage;
         _alive = new int[_groups.Count];
         _frontWounds = new int[_groups.Count];
+        _precisionKilled = new int[_groups.Count];
+        _precisionDamage = new int[_groups.Count];
+        _precisionWeaponDamage = new int[_groups.Count];
         TotalModels = unit.TotalModels;
         ExcessProfile = unit.ExcessProfile ?? new ModelGroup();
         Reset();
@@ -75,6 +81,21 @@ public sealed class DefenderState
     public int DamageInGroup(int group) =>
         KilledInGroup(group) * _groups[group].Wounds + (_groups[group].Wounds - _frontWounds[group]);
 
+    /// <summary>
+    /// Figurines du groupe achevées par une attaque « grâce à Precision » : allouée au groupe visé par Precision alors
+    /// que, sans Precision, elle serait allée sur un autre groupe (garde du corps en vie, ou PERSONNAGE placé devant).
+    /// </summary>
+    public int PrecisionKilledInGroup(int group) => _precisionKilled[group];
+
+    /// <summary>PV retirés au groupe par les attaques « grâce à Precision » (voir <see cref="PrecisionKilledInGroup"/>).</summary>
+    public int PrecisionDamageInGroup(int group) => _precisionDamage[group];
+
+    /// <summary>
+    /// PV retirés au groupe par des armes Precision (pools dont le profil a le mot-clé), où que l'attaque ait été
+    /// allouée ; le reste de <see cref="DamageInGroup"/> vient des autres armes.
+    /// </summary>
+    public int PrecisionWeaponDamageInGroup(int group) => _precisionWeaponDamage[group];
+
     public int WoundsLeftOnFrontModel(int group) => _frontWounds[group];
 
     /// <summary>Profil d'un groupe, y compris le pseudo-groupe <see cref="ExcessGroup"/>.</summary>
@@ -122,6 +143,9 @@ public sealed class DefenderState
         {
             _alive[g] = _groups[g].Count;
             _frontWounds[g] = _groups[g].Wounds;
+            _precisionKilled[g] = 0;
+            _precisionDamage[g] = 0;
+            _precisionWeaponDamage[g] = 0;
         }
         ModelsAlive = TotalModels;
         DamageDealt = 0;
@@ -144,9 +168,11 @@ public sealed class DefenderState
     /// Applique les dégâts d'UNE attaque (ou les blessures mortelles d'UNE blessure critique Devastating Wounds)
     /// à la figurine en tête du groupe : boost de dégâts du défenseur et réduction de dégâts du groupe (attaques
     /// uniquement, minimum 1), puis Feel No Pain point par point. Une seule figurine peut être affectée : l'excédent est
-    /// perdu. Le groupe peut être <see cref="ExcessGroup"/>.
+    /// perdu. Le groupe peut être <see cref="ExcessGroup"/>. <paramref name="viaPrecision"/> : attaque « grâce à
+    /// Precision » (voir <see cref="PrecisionKilledInGroup"/>), comptée à part ; <paramref name="precisionWeapon"/> :
+    /// attaque d'une arme Precision (voir <see cref="PrecisionWeaponDamageInGroup"/>) ; aucun dé de plus.
     /// </summary>
-    internal void ApplyDamage(int group, int damage, bool mortalWounds, IDiceRoller dice)
+    internal void ApplyDamage(int group, int damage, bool mortalWounds, IDiceRoller dice, bool viaPrecision = false, bool precisionWeapon = false)
     {
         bool excess = group == ExcessGroup;
         if (damage <= 0 || (!excess && _alive[group] == 0))
@@ -193,12 +219,24 @@ public sealed class DefenderState
         int applied = Math.Min(lost, _frontWounds[group]);
         _frontWounds[group] -= applied;
         DamageDealt += applied;
+        if (viaPrecision)
+        {
+            _precisionDamage[group] += applied;
+        }
+        if (precisionWeapon)
+        {
+            _precisionWeaponDamage[group] += applied;
+        }
 
         if (_frontWounds[group] == 0)
         {
             _alive[group]--;
             ModelsAlive--;
             _frontWounds[group] = profile.Wounds;
+            if (viaPrecision)
+            {
+                _precisionKilled[group]++;
+            }
         }
     }
 }

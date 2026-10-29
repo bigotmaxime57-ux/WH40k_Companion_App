@@ -100,6 +100,20 @@ public class DiscreteDistributionTests
     }
 
     [Fact]
+    public void Negligible_rows_inside_can_be_skipped_but_the_last_row_stays()
+    {
+        // Dégâts de 3 sur 10 000 simulations : 1, 2, 4, 5 PV quasi impossibles (2 cas pour 4). La queue 7-8 (0,05 % au
+        // moins 7) s'arrête à 7, gardé comme dernière ligne bien que « exactement 7 » soit négligeable (0,03 %)
+        long[] counts = [2_000, 0, 0, 5_000, 2, 0, 2_993, 3, 2];
+        var distribution = new DiscreteDistribution(counts);
+
+        Assert.Equal([0, 1, 2, 3, 4, 5, 6, 7], distribution.Rows().Select(r => r.Value));
+        var rows = distribution.Rows(skipNegligibleInside: true);
+        Assert.Equal([0, 3, 6, 7], rows.Select(r => r.Value));
+        Assert.Equal(0.2998, rows[2].AtLeast, precision: 10);   // « au moins » inchangé : les lignes retirées ne comptent pas
+    }
+
+    [Fact]
     public void Rows_always_keep_at_least_one_value()
     {
         var rows = new DiscreteDistribution([0, 0, 1]).Rows(minProbability: 2);

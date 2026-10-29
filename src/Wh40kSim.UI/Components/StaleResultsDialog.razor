@@ -1,0 +1,55 @@
+@*
+    Avertissement du Full sim : le scénario a changé depuis le dernier calcul, les résultats correspondent à l'ancien.
+    Choix : revoir les anciens résultats, ou relancer la simulation avec le scénario saisi (impossible s'il est
+    invalide) ; « Retenir ce choix » le réapplique sans redemander jusqu'à la fermeture de l'application. Annuler (ou
+    Échap) ferme sans rien faire.
+*@
+
+<MudDialog data-test="stale-results-dialog">
+    <TitleContent>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <MudIcon Icon="@Icons.Material.Filled.WarningAmber" Color="Color.Warning" />
+            <MudText Typo="Typo.h6">@L["StaleResults_Title"]</MudText>
+        </MudStack>
+    </TitleContent>
+    <DialogContent>
+        <MudText>@L["StaleResults_Message"]</MudText>
+        @if (!CanRerun)
+        {
+            <MudText Typo="Typo.body2" Color="Color.Warning" Class="mt-2" data-test="stale-cannot-rerun">@L["StaleResults_CannotRerun"]</MudText>
+        }
+        <div class="wh-subsection-title mt-2">
+            <MudCheckBox T="bool" @bind-Value="_remember" Label="@L["StaleResults_Remember"]" data-test="stale-remember" />
+            <HelpBubble Lines="@([L["Help_StaleResultsRemember"]])" />
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="() => Dialog.Cancel()" data-test="stale-cancel">@L["StaleResults_Cancel"]</MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => Close(StaleResultsChoice.ShowOld)" data-test="stale-show-old">
+            @L["StaleResults_ShowOld"]
+        </MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PlayArrow" Disabled="!CanRerun"
+                   OnClick="() => Close(StaleResultsChoice.Rerun)" data-test="stale-rerun">
+            @L["StaleResults_Rerun"]
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private bool _remember;
+
+    /// <summary>Options d'ouverture : Échap ferme la boîte comme Annuler.</summary>
+    public static readonly DialogOptions Options = new() { CloseOnEscapeKey = true };
+
+    [CascadingParameter]
+    private IMudDialogInstance Dialog { get; set; } = null!;
+
+    /// <summary>Le scénario saisi est valide : la simulation peut être relancée.</summary>
+    [Parameter]
+    public bool CanRerun { get; set; }
+
+    private void Close(StaleResultsChoice choice) => Dialog.Close(DialogResult.Ok(new Answer(choice, _remember)));
+
+    /// <summary>Choix de l'utilisateur, et s'il faut le retenir pour la session.</summary>
+    public sealed record Answer(StaleResultsChoice Choice, bool Remember);
+}

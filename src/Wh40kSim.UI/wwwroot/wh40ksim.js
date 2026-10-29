@@ -1,6 +1,6 @@
 // Raccourcis clavier des écrans de saisie (Quick sim, Full sim), à l'échelle du document : Ctrl+Entrée (lancer),
 // Ctrl+S (enregistrer), Ctrl+O (ouvrir). L'action par défaut du navigateur (enregistrer la page…) est empêchée. Module
-// chargé par ScenarioEditorPage.
+// chargé par ScenarioEditorPage, et par FullSimResultsPage pour sa barre d'onglets collante (watchSticky).
 
 const shortcuts = { Enter: "enter", s: "s", S: "s", o: "o", O: "o" };
 
@@ -24,4 +24,15 @@ export function registerShortcuts(dotNet) {
 
     document.addEventListener("keydown", handler);
     return { dispose: () => document.removeEventListener("keydown", handler) };
+}
+
+// Barre collante (écran des résultats du Full sim) : pose la classe « wh-stuck » sur `host` tant que `sentinel`, un
+// repère vide placé juste au-dessus de la barre, est passé sous la barre de titre (hauteur `offset` en pixels), c'est-à-
+// dire tant que la barre est collée en haut. Le CSS s'en sert pour afficher le bouton de retour compact.
+export function watchSticky(sentinel, host, offset) {
+    const observer = new IntersectionObserver(([entry]) => {
+        host.classList.toggle("wh-stuck", !entry.isIntersecting && entry.boundingClientRect.top < offset);
+    }, { rootMargin: `-${offset}px 0px 0px 0px`, threshold: 0 });
+    observer.observe(sentinel);
+    return { dispose: () => observer.disconnect() };
 }

@@ -5,8 +5,7 @@
 
 <MudPaper Outlined="true" Class="pa-3 my-3 wh-subcard wh-boosts" @attributes="Attributes">
     <div class="wh-subsection-title">
-        <MudIconButton Icon="@(_expanded ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)" Size="Size.Small"
-                       OnClick="() => _expanded = !_expanded" data-test="toggle-boosts" />
+        <CollapseToggle @bind-Expanded="_expanded" data-test="toggle-boosts" />
         <MudIcon Icon="@Icons.Material.Filled.Bolt" Size="Size.Small" Color="Color.Primary" />
         <MudText Typo="Typo.subtitle2">@L["Boosts_Title"]</MudText>
         <HelpBubble Lines="Help" />

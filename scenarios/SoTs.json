@@ -1,0 +1,74 @@
+{
+  "attacker": {
+    "name": "SoTs",
+    "boosts": {
+      "skill": 0,
+      "hitRoll": 1,
+      "hitReroll": "Ones",
+      "strength": 0,
+      "woundRoll": 0,
+      "woundReroll": "None",
+      "attacks": 0,
+      "ap": 0,
+      "damage": 0
+    },
+    "weapons": [
+      {
+        "modelCount": 8,
+        "weapon": {
+          "name": "Heavy bolters",
+          "type": "Ranged",
+          "attacks": 2,
+          "skill": 3,
+          "strength": 5,
+          "ap": -2,
+          "damage": 1,
+          "abilities": {
+            "torrent": false,
+            "lethalHits": false,
+            "sustainedHits": 0,
+            "devastatingWounds": false,
+            "twinLinked": false,
+            "blast": false,
+            "rapidFire": 2,
+            "melta": 0,
+            "heavy": false,
+            "lance": false,
+            "ignoresCover": false,
+            "precision": false,
+            "criticalHitOn": 6,
+            "criticalWoundOn": 6
+          }
+        }
+      },
+      {
+        "modelCount": 8,
+        "weapon": {
+          "name": "Arme",
+          "type": "Melee",
+          "attacks": 4,
+          "skill": 3,
+          "strength": 4,
+          "ap": -1,
+          "damage": 2,
+          "abilities": {
+            "torrent": false,
+            "lethalHits": false,
+            "sustainedHits": 0,
+            "devastatingWounds": false,
+            "twinLinked": false,
+            "blast": false,
+            "rapidFire": 0,
+            "melta": 0,
+            "heavy": false,
+            "lance": false,
+            "ignoresCover": false,
+            "precision": false,
+            "criticalHitOn": 6,
+            "criticalWoundOn": 6
+          }
+        }
+      }
+    ]
+  }
+}

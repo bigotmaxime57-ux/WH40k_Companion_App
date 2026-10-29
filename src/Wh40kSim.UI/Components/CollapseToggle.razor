@@ -1,0 +1,21 @@
+@*
+    Bouton de repli commun à toute l'interface (cartes d'arme et de groupe, Boosts, sections des rapports) : toujours
+    placé à gauche du titre, cerclé et teinté de la couleur de la zone pour bien ressortir.
+*@
+
+<MudIconButton Icon="@(Expanded ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)" Size="Size.Small"
+               Class="wh-collapse-toggle" OnClick="Toggle" aria-label="@(Expanded ? L["Section_Collapse"] : L["Section_Expand"])"
+               aria-expanded="@(Expanded ? "true" : "false")" @attributes="Attributes" />
+
+@code {
+    [Parameter]
+    public bool Expanded { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> ExpandedChanged { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? Attributes { get; set; }
+
+    private Task Toggle() => ExpandedChanged.InvokeAsync(!Expanded);
+}

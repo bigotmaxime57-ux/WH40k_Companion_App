@@ -33,7 +33,10 @@
     [Parameter]
     public bool Extended { get; set; }
 
-    private StatTile.TileTone WipeTone => Result.ProbabilityWipe switch
+    private StatTile.TileTone WipeTone => WipeToneFor(Result.ProbabilityWipe);
+
+    /// <summary>Fiabilité d'une probabilité de destruction (unité ou groupe) : rouge, neutre ou vert selon les seuils.</summary>
+    public static StatTile.TileTone WipeToneFor(double probability) => probability switch
     {
         < WipeUnreliableBelow => StatTile.TileTone.Bad,
         > WipeReliableAbove => StatTile.TileTone.Good,

@@ -1,6 +1,7 @@
 @*
-    Tableau d'une distribution : probabilité d'obtenir exactement k, puis au moins k, sans les lignes négligeables aux
-    extrémités, avec une barre proportionnelle à « exactement » (la plus probable fait toute la largeur).
+    Tableau d'une distribution : probabilité d'obtenir exactement k, puis au moins k, sans les lignes négligeables (aux
+    extrémités et entre deux lignes : valeurs quasi impossibles), avec une barre proportionnelle à « exactement » (la
+    plus probable fait toute la largeur).
 *@
 
 <MudText Typo="Typo.subtitle2" Class="mt-3">@Title</MudText>
@@ -56,7 +57,7 @@
 
     protected override void OnParametersSet()
     {
-        _rows = Distribution.Rows();
+        _rows = Distribution.Rows(skipNegligibleInside: true);
         _max = _rows.Max(r => r.Exactly);
         _firstBeyond = _rows.Select(r => (int?)r.Value).FirstOrDefault(v => v > UnitSize);
     }

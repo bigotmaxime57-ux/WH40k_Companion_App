@@ -494,12 +494,32 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
        réordonnables (flèches) ; panneaux Attaquant / Défenseur repliables sans perdre l'état des cartes ; bouton de
        repli commun (`CollapseToggle`) à gauche partout ; panneau des mots-clés fermé au clic en dehors.
      - Quick sim : lignes à 0,0 % masquées dans les tableaux (`DiscreteDistribution.Rows(skipNegligibleInside)`).
-8. **Rapport par arme** (avec les dégâts bruts).
-   - Dégâts bruts et gaspillage de l'étape 5 (distribution des bruts comparée aux PV retirés).
-   - PV retirés, figurines tuées, dégâts bruts (donc gaspillage) en moyenne et en part du total, **par pool** (armes
-     aux attaques identiques lancées ensemble, dés indiscernables), nommé d'après ses armes. Figurine attribuée à
-     l'attaque qui l'achève ; pertes réelles seulement (pas la marge).
-   - Tests : dés imposés (attribution au pool, attaque qui achève), sommes par arme = totaux.
+8. **Rapport par arme** (avec les dégâts bruts). Précisée avec l'utilisateur le 2026-10-29, en partant de l'onglet
+   voulu : nouvel onglet **« Armes »** des résultats du Full sim, à la couleur du thème, en sections repliables sans cadre
+   (comme l'onglet Groupes). Découpage **par pool** (armes aux attaques identiques lancées ensemble : dés
+   indiscernables), nommé d'après ses armes (« Bolter + Pistolet bolter »), dans l'ordre de résolution ; figurine
+   attribuée à l'attaque qui l'achève ; pertes réelles seulement (pas la marge).
+   - **1. Récapitulatif par arme** : **barre multicolore** de la répartition des PV retirés entre les pools (une bande,
+     une couleur par pool, légende), puis un tableau, une ligne par pool : PV retirés (moyenne, part du total),
+     figurines tuées (moyenne, part du total), dégâts bruts (moyenne), gaspillage (part des dégâts bruts perdus).
+   - **2. Une section par pool** (sous-titre comme les groupes) : tuiles figurines tuées, PV retirés, dégâts bruts /
+     gaspillage, et **« Tire sur une unité déjà détruite »** = P(unité détruite avant que ce pool ne tire) (utile pour
+     l'ordre des armes, prépare l'optimiseur de l'étape 12) ; histogramme des PV retirés par ce pool.
+   - **3. Dégâts bruts, toutes armes confondues** (étape 5, jamais affichée jusqu'ici) : tuiles dégâts bruts moyens,
+     gaspillage et sa part ; histogramme des dégâts bruts superposé aux PV retirés. Dans cet onglet pour l'instant
+     (décision de l'utilisateur : à déplacer dans Distributions si elle s'y insère mieux).
+   - **Gaspillage par pool** (décision de l'utilisateur) : les dégâts bruts d'un pool ne comptent que jusqu'à la
+     destruction de l'unité ; gaspillage = bruts − PV retirés par ce pool (perte par figurine). Les attaques tirées
+     sur une unité déjà détruite ne sont pas du gaspillage : l'indicateur « tire sur une unité déjà détruite » les
+     mesure. (Le gaspillage global de l'étape 5, lui, compte aussi la marge : il reste tel quel.)
+   - Core : `DefenderState` compte par pool (indice dans `AttackResolver.Pools`) les PV retirés, les figurines
+     achevées et les dégâts bruts de la séquence réelle ; le résolveur note si l'unité était déjà détruite au début de
+     chaque pool. Aucun dé en plus (non-régression au bit près). Simulation : distribution des PV retirés par pool,
+     moyennes des figurines, des bruts et du gaspillage, P(unité détruite avant le pool), en records simples ; temps
+     mesuré. Quick sim et console inchangés.
+   - Tests : dés imposés (attribution au pool, attaque qui achève, bruts arrêtés à la destruction, pool tiré sur une
+     unité détruite) ; cohérence (sommes par pool = totaux réels, parts = 100 %) ; bUnit (onglet, tableau, barre,
+     sections par pool, dégâts bruts).
 9. **Rapport en points** (#2).
    - Saisie des points dans l'écran de saisie du Full sim (attaquant, chaque groupe du défenseur) ; points détruits
      et rendement de l'étape 4.
@@ -729,6 +749,8 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
 - Roadmap complétée le 2026-10-29 (branche `docs/roadmap-optimiseur-overwatch`) : optimiseur du séquencement des
   armes en étape 12 (#3, commenté), overwatch en étape 13 (interrupteur de la Situation, ticket #11 créé) ; fin de phase 3 déplacée à l'étape 13.
   Prochaine étape inchangée : 8 (rapport par arme), à préciser.
+- Phase 3, étape 8 (rapport par arme) : précisée avec l'utilisateur le 2026-10-29 (voir « Phase 3 : étapes »), à coder
+  sur la branche `phase3/etape8-rapport-armes`.
 
 Points notés pour la suite :
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

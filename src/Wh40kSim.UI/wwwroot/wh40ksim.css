@@ -404,6 +404,22 @@
 .wh-share-4 { background: var(--wh-share-4); }
 .wh-share-5 { background: var(--wh-share-5); }
 
+/* Mêmes couleurs pour les barres empilées des histogrammes (Stack de HistogramChart) */
+rect.wh-share-0 { fill: var(--wh-share-0); }
+rect.wh-share-1 { fill: var(--wh-share-1); }
+rect.wh-share-2 { fill: var(--wh-share-2); }
+rect.wh-share-3 { fill: var(--wh-share-3); }
+rect.wh-share-4 { fill: var(--wh-share-4); }
+rect.wh-share-5 { fill: var(--wh-share-5); }
+
+.wh-chart-swatch-stack {
+    border-radius: 2px;
+    display: inline-block;
+    height: 10px;
+    margin-right: .35rem;
+    width: 10px;
+}
+
 .wh-share-bar-track {
     background: color-mix(in srgb, var(--mud-palette-text-primary) 12%, transparent);
     border-radius: 5px;

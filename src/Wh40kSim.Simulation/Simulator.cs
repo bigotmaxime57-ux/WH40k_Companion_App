@@ -158,6 +158,9 @@ public static class Simulator
         private long _wasteWhenSurvived;
         private long _survived;
 
+        // Gaspillage de chaque pool, cumulé par gaspillage total de la simulation (histogramme empilé par arme)
+        private readonly long[][] _poolWasteByTotal = Enumerable.Range(0, poolCount).Select(_ => new long[1]).ToArray();
+
         public void Record(DefenderState state)
         {
             _kills[state.ModelsKilled]++;
@@ -206,6 +209,14 @@ public static class Simulator
 
             int waste = state.RawDamage - state.DamageDealt - state.ExcessDamage;
             Increment(ref _waste, waste);
+            for (int p = 0; p < _poolWasteByTotal.Length; p++)
+            {
+                if (waste >= _poolWasteByTotal[p].Length)
+                {
+                    Array.Resize(ref _poolWasteByTotal[p], Math.Max(waste + 1, _poolWasteByTotal[p].Length * 2));
+                }
+                _poolWasteByTotal[p][waste] += state.WasteByPool(p);
+            }
             if (!state.IsDestroyed)
             {
                 _wasteWhenSurvived += waste;
@@ -279,6 +290,7 @@ public static class Simulator
             Add(ref _extendedDamage, other._extendedDamage);
             Add(ref _rawDamage, other._rawDamage);
             Add(ref _waste, other._waste);
+            for (int p = 0; p < _poolWasteByTotal.Length; p++) Add(ref _poolWasteByTotal[p], other._poolWasteByTotal[p]);
             _wasteWhenSurvived += other._wasteWhenSurvived;
             _survived += other._survived;
         }
@@ -293,6 +305,7 @@ public static class Simulator
                     tracksPrecisionWeapons && group.IsCharacter ? PrecisionWeapons(g, iterations) : null))
                 .ToList();
             double totalKills = _killedPerGroup.Sum(), totalDamage = _damagePerGroup.Sum();
+            var waste = TrimTrailingZeros(_waste, 1);
             var pools = AttackPool.Build(scenario.Attacker.Weapons)
                 .Select((pool, p) =>
                 {
@@ -302,7 +315,8 @@ public static class Simulator
                     return new WeaponPoolLosses(
                         p, pool.Members, damage, kills, (double)_poolRawDamage[p] / iterations,
                         (double)_poolOnDestroyedUnit[p] / iterations,
-                        totalDamage > 0 ? damageSum / totalDamage : 0, totalKills > 0 ? killSum / totalKills : 0);
+                        totalDamage > 0 ? damageSum / totalDamage : 0, totalKills > 0 ? killSum / totalKills : 0,
+                        WasteShares(_poolWasteByTotal[p], waste));
                 })
                 .ToList();
             return new(scenario, seed, elapsed,
@@ -311,7 +325,7 @@ public static class Simulator
                 new DiscreteDistribution(TrimTrailingZeros(_extendedDamage, _damage.Length)),
                 new DiscreteDistribution(TrimTrailingZeros(_rawDamage, _damage.Length)),
                 groups, new DiscreteDistribution(_bodyguardKills), new DiscreteDistribution(_bodyguardDamage), pools,
-                new DiscreteDistribution(TrimTrailingZeros(_waste, 1)),
+                new DiscreteDistribution(waste),
                 _survived > 0 ? (double)_wasteWhenSurvived / _survived : null);
         }
 
@@ -334,6 +348,20 @@ public static class Simulator
                 (double)_precisionFallsShort[g] / iterations,
                 _precisionFallsShort[g] > 0 ? (double)_woundsLeftWhenShort[g] / _precisionFallsShort[g] : 0,
                 shares);
+        }
+
+        /// <summary>
+        /// Part moyenne d'un pool dans le gaspillage total k de la simulation, pour chaque k (0 si k = 0 ou jamais atteint).
+        /// </summary>
+        private static double[] WasteShares(long[] poolWasteByTotal, long[] waste)
+        {
+            var shares = new double[waste.Length];
+            for (int k = 1; k < shares.Length; k++)
+            {
+                long poolWaste = k < poolWasteByTotal.Length ? poolWasteByTotal[k] : 0;
+                shares[k] = waste[k] > 0 ? (double)poolWaste / (k * waste[k]) : 0;
+            }
+            return shares;
         }
 
         private static void Increment(ref long[] histogram, int value)

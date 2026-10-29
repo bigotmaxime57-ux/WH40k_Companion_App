@@ -61,6 +61,16 @@ public class WeaponPoolLossesTests
         Assert.InRange(result.Waste.ProbabilityExactly(0), 0.01, 0.99);   // canon D3 : parfois rien, parfois des pertes
         Assert.NotNull(result.MeanWasteWhenUnitSurvives);
         Assert.True(result.MeanWasteWhenUnitSurvives > 0);
+
+        // Part de chaque arme dans les PV perdus : 100 % au total pour chaque valeur atteinte, tout vient du canon (D3)
+        for (int k = 1; k <= result.Waste.MaxValue; k++)
+        {
+            if (result.Waste.ProbabilityExactly(k) > 0)
+            {
+                Assert.Equal(1, result.Pools.Sum(p => p.WasteShareByTotal[k]), 10);
+                Assert.Equal(1, result.Pools[0].WasteShareByTotal[k], 10);
+            }
+        }
     }
 
     [Fact]

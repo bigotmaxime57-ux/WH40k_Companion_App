@@ -677,7 +677,7 @@
     <value>« Tire sur une unité déjà détruite » : probabilité que l'unité soit déjà morte quand cette arme commence à tirer ; ses attaques ne servent alors à rien. Une valeur élevée suggère de la faire tirer plus tôt, ou de la garder pour une autre cible.</value>
   </data>
   <data name="Help_RawDamage" xml:space="preserve">
-    <value>Dégâts bruts : ce que chaque attaque non sauvegardée aurait retiré sans plafond par figurine (après réduction de dégâts et insensible à la douleur), y compris sur les figurines virtuelles de la marge. Ce qui dépasse les PV restants d'une figurine est perdu : la barre et le graphique montrent ces PV perdus à chaque activation.</value>
+    <value>Dégâts bruts : ce que chaque attaque non sauvegardée aurait retiré sans plafond par figurine (après réduction de dégâts et insensible à la douleur), y compris sur les figurines virtuelles de la marge. Ce qui dépasse les PV restants d'une figurine est perdu : la barre et le graphique montrent ces PV perdus à chaque activation. Chaque barre du graphique est découpée selon la part moyenne de chaque arme dans ces PV perdus (marge comprise).</value>
   </data>
   <data name="Help_NoWaste" xml:space="preserve">
     <value>« Aucune perte » : probabilité qu'aucune attaque de l'activation ne dépasse les PV restants de sa figurine.</value>

@@ -92,6 +92,10 @@ public class WeaponsReportTests : ComponentTestContext
         // Histogramme des PV perdus, plus de superposition
         Assert.NotNull(raw.QuerySelector("[data-test=histogram]"));
         Assert.Empty(raw.QuerySelectorAll("[data-test=chart-overlay]"));
+        // Empilé par arme : une partie par arme dans chaque barre non nulle, légende aux noms des armes
+        Assert.NotEmpty(raw.QuerySelectorAll("[data-test=chart-bar-stack]"));
+        Assert.Equal(0, raw.QuerySelectorAll("[data-test=chart-bar-stack]").Length % 2);
+        Assert.Contains("Bolter + Pistolet", raw.QuerySelector(".wh-chart-legend")!.TextContent);
     }
 
     [Fact]

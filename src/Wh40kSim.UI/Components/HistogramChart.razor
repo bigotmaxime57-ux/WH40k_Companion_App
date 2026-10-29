@@ -6,7 +6,8 @@
     et au-delà pour une distribution prolongée) sont hachurées à 45° ; pour une distribution prolongée (Extended), les
     colonnes au-delà de l'unité (la marge) sont aussi atténuées et séparées par un pointillé ; leur infobulle donne le
     détail « 7 (5 + 2) ». Barres empilées en option (Split) : chaque barre découpée en deux parties (ex. armes Precision
-    et autres armes), la seconde plus claire, avec les deux parts dans l'infobulle.
+    et autres armes), la seconde plus claire, avec les deux parts dans l'infobulle ; ou en N parties colorées (Stack,
+    ex. une par arme), avec chaque part dans l'infobulle.
 *@
 @using System.Globalization
 
@@ -50,6 +51,18 @@
                       width="@F(ColumnWidth * 0.76)" height="@F(height - primary)" data-test="chart-bar-secondary" />
                 <rect class="@BarClass(i)" x="@F(ColumnX(i) + ColumnWidth * 0.12)" y="@F(Bottom - primary)"
                       width="@F(ColumnWidth * 0.76)" height="@F(primary)" data-test="chart-bar" />
+            }
+            else if (Stack is { } stack && row.Value > 0)
+            {
+                @* Barre empilée en N parties, la première en bas, chacune à sa couleur *@
+                double y = Bottom;
+                @foreach (var part in stack.Parts)
+                {
+                    double partHeight = height * StackShare(part, row.Value);
+                    y -= partHeight;
+                    <rect class="@($"wh-chart-bar-stack {part.ColorClass}")" x="@F(ColumnX(i) + ColumnWidth * 0.12)" y="@F(y)"
+                          width="@F(ColumnWidth * 0.76)" height="@F(partHeight)" data-test="chart-bar-stack" />
+                }
             }
             else
             {
@@ -117,6 +130,16 @@
                 <span data-test="chart-tooltip-split"><br />@split.PrimaryLabel : @ShareOf(row.Value).ToString("P0")
                     · @split.SecondaryLabel : @((1 - ShareOf(row.Value)).ToString("P0"))</span>
             }
+            @if (Stack is { } tooltipStack && row.Value > 0)
+            {
+                <span data-test="chart-tooltip-stack">
+                    @foreach (var part in tooltipStack.Parts)
+                    {
+                        <br />
+                        <span><i class="@($"wh-chart-swatch-stack {part.ColorClass}")"></i>@part.Label : @StackShare(part, row.Value).ToString("P0")</span>
+                    }
+                </span>
+            }
             @if (IsWiped(row.Value))
             {
                 <span><br /><em>@L["Chart_WipedTooltip"]</em></span>
@@ -129,6 +152,14 @@
         {
             <span data-test="legend-split"><i class="wh-chart-swatch-bar"></i>@L["Chart_Exactly"] : @legendSplit.PrimaryLabel</span>
             <span><i class="wh-chart-swatch-bar wh-chart-swatch-secondary"></i>@legendSplit.SecondaryLabel</span>
+        }
+        else if (Stack is { } legendStack)
+        {
+            <span data-test="legend-stack">@L["Chart_Exactly"] :</span>
+            @foreach (var part in legendStack.Parts)
+            {
+                <span><i class="@($"wh-chart-swatch-stack {part.ColorClass}")"></i>@part.Label</span>
+            }
         }
         else
         {
@@ -210,6 +241,21 @@
 
     /// <summary>Découpage des barres en deux parties (voir <see cref="Split"/>).</summary>
     public sealed record BarSplit(IReadOnlyList<double> PrimaryShares, string PrimaryLabel, string SecondaryLabel);
+
+    /// <summary>
+    /// Barres empilées en N parties (ex. une par arme) : pour chaque partie, son nom, sa classe de couleur (palette
+    /// des rapports, <see cref="ShareBar.ColorClass"/>) et, pour chaque valeur k (indice), sa part de la barre (0 à 1).
+    /// Null : barres simples. Ne se combine pas avec <see cref="Split"/>.
+    /// </summary>
+    [Parameter]
+    public BarStack? Stack { get; set; }
+
+    public sealed record BarStack(IReadOnlyList<StackPart> Parts);
+
+    public sealed record StackPart(string Label, string ColorClass, IReadOnlyList<double> Shares);
+
+    private static double StackShare(StackPart part, int value) =>
+        value >= 0 && value < part.Shares.Count ? Math.Clamp(part.Shares[value], 0, 1) : 0;
 
     private double ShareOf(int value) =>
         Split is { } split && value >= 0 && value < split.PrimaryShares.Count ? Math.Clamp(split.PrimaryShares[value], 0, 1) : 1;

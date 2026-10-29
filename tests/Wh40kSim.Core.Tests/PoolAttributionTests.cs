@@ -44,6 +44,8 @@ public class PoolAttributionTests
         Assert.Equal(target.ModelsKilled, target.KillsByPool(0) + target.KillsByPool(1));
         Assert.False(target.PoolFiredOnDestroyedUnit(0));
         Assert.False(target.PoolFiredOnDestroyedUnit(1));
+        // Gaspillage : 1 PV perdu par attaque du canon, rien pour le fusil (D1)
+        Assert.Equal((2, 0), (target.WasteByPool(0), target.WasteByPool(1)));
         Assert.Equal(0, dice.Remaining);
     }
 
@@ -73,5 +75,8 @@ public class PoolAttributionTests
         Assert.Equal(3, resolver.Target.RawDamageByPool(0));   // séquence réelle seulement
         Assert.Equal(9, resolver.Target.RawDamage);            // le total de l'étape 5 compte aussi l'excédent
         Assert.Equal(2, resolver.Target.DamageByPool(0));
+        // Gaspillage du pool, excédent compris : 1 PV perdu sur le garde, puis 1 sur chaque figurine virtuelle à 2 PV
+        Assert.Equal(3, resolver.Target.WasteByPool(0));
+        Assert.Equal(resolver.Target.RawDamage - resolver.Target.DamageDealt - resolver.Target.ExcessDamage, resolver.Target.WasteByPool(0));
     }
 }

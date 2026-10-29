@@ -27,6 +27,7 @@ public sealed class DefenderState
     private int[] _poolDamage = [];
     private int[] _poolKills = [];
     private int[] _poolRawDamage = [];
+    private int[] _poolWaste = [];
     private bool[] _poolOnDestroyedUnit = [];
     private int _currentPool = -1;
 
@@ -124,6 +125,13 @@ public sealed class DefenderState
     /// <summary>L'unité était déjà détruite quand le pool a commencé à tirer : ses attaques ne pouvaient plus rien.</summary>
     public bool PoolFiredOnDestroyedUnit(int pool) => _poolOnDestroyedUnit[pool];
 
+    /// <summary>
+    /// PV perdus par les attaques du pool parce qu'elles dépassent les PV restants de leur figurine, y compris contre les
+    /// figurines virtuelles de l'excédent : la somme sur les pools est le gaspillage de la séquence (<see cref="RawDamage"/>
+    /// − <see cref="DamageDealt"/> − <see cref="ExcessDamage"/>).
+    /// </summary>
+    public int WasteByPool(int pool) => _poolWaste[pool];
+
     /// <summary>Profil d'un groupe, y compris le pseudo-groupe <see cref="ExcessGroup"/>.</summary>
     public ModelGroup Profile(int group) => group == ExcessGroup ? ExcessProfile : _groups[group];
 
@@ -176,6 +184,7 @@ public sealed class DefenderState
         Array.Clear(_poolDamage);
         Array.Clear(_poolKills);
         Array.Clear(_poolRawDamage);
+        Array.Clear(_poolWaste);
         Array.Clear(_poolOnDestroyedUnit);
         _currentPool = -1;
         ModelsAlive = TotalModels;
@@ -192,6 +201,7 @@ public sealed class DefenderState
         _poolDamage = new int[count];
         _poolKills = new int[count];
         _poolRawDamage = new int[count];
+        _poolWaste = new int[count];
         _poolOnDestroyedUnit = new bool[count];
     }
 
@@ -255,6 +265,10 @@ public sealed class DefenderState
             int excessApplied = Math.Min(lost, _excessFrontWounds);
             _excessFrontWounds -= excessApplied;
             ExcessDamage += excessApplied;
+            if (_currentPool >= 0)
+            {
+                _poolWaste[_currentPool] += lost - excessApplied;
+            }
             if (_excessFrontWounds == 0)
             {
                 ExcessModelsKilled++;
@@ -270,6 +284,7 @@ public sealed class DefenderState
         {
             _poolRawDamage[_currentPool] += lost;
             _poolDamage[_currentPool] += applied;
+            _poolWaste[_currentPool] += lost - applied;
         }
         if (viaPrecision)
         {

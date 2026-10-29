@@ -19,6 +19,10 @@ namespace Wh40kSim.Simulation;
 /// <param name="ProbabilityUnitAlreadyDestroyed">L'unité est déjà détruite quand le pool commence à tirer.</param>
 /// <param name="DamageShare">Part des PV retirés à l'unité qui viennent de ce pool (0 à 1).</param>
 /// <param name="KillShare">Part des figurines tuées qui l'ont été par ce pool (0 à 1).</param>
+/// <param name="WasteShareByTotal">
+/// Pour chaque gaspillage total k d'une simulation (indice, voir <see cref="SimulationResult.Waste"/>), part moyenne de
+/// ce pool dans ces k PV perdus, marge comprise (0 à 1 ; la somme sur les pools vaut 1 pour tout k atteint, k > 0).
+/// </param>
 public sealed record WeaponPoolLosses(
     int Index,
     IReadOnlyList<WeaponGroup> Weapons,
@@ -27,7 +31,8 @@ public sealed record WeaponPoolLosses(
     double MeanRawDamage,
     double ProbabilityUnitAlreadyDestroyed,
     double DamageShare,
-    double KillShare)
+    double KillShare,
+    IReadOnlyList<double> WasteShareByTotal)
 {
     /// <summary>Figurines achevées par le pool, en moyenne par simulation.</summary>
     public double MeanKills => Kills.Mean;

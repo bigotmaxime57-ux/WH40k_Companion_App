@@ -103,7 +103,8 @@
         <MudGrid Spacing="3">
             <MudItem xs="12" md="6">
                 <MudText Typo="Typo.subtitle2" Class="wh-muted">@L["Weapons_WasteChart"]</MudText>
-                <HistogramChart Distribution="Result.Waste" Title="@L["Weapons_WasteChart"]" ValueTitle="@L["Chart_WasteValue"]" />
+                <HistogramChart Distribution="Result.Waste" Title="@L["Weapons_WasteChart"]" ValueTitle="@L["Chart_WasteValue"]"
+                                Stack="@WasteByWeapon" />
             </MudItem>
         </MudGrid>
     </CollapsibleSection>
@@ -134,6 +135,10 @@
         double max = Result.Pools.Max(p => Math.Round(value(p), 2));
         return Math.Round(value(pool), 2) == max ? $"wh-number {topClass}" : "wh-number";
     }
+
+    /// <summary>Histogramme des PV perdus empilé par arme, aux couleurs de la barre de répartition (une seule arme : barres simples).</summary>
+    private HistogramChart.BarStack? WasteByWeapon => Result.Pools.Count < 2 ? null
+        : new(Result.Pools.Select(p => new HistogramChart.StackPart(PoolName(p), ShareBar.ColorClass(p.Index), p.WasteShareByTotal)).ToList());
 
     /// <summary>Part d'une barre (0 si le total est nul : aucun dégât brut).</summary>
     private static double Fraction(double part, double total) => total > 0 ? part / total : 0;

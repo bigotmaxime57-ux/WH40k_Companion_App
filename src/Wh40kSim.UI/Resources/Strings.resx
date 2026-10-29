@@ -622,6 +622,57 @@
   <data name="FullSim_TabGroups" xml:space="preserve">
     <value>Groupes</value>
   </data>
+  <data name="FullSim_TabWeapons" xml:space="preserve">
+    <value>Armes</value>
+  </data>
+  <data name="Weapons_SummaryTitle" xml:space="preserve">
+    <value>Répartition par arme</value>
+  </data>
+  <data name="Weapons_Pool" xml:space="preserve">
+    <value>Arme</value>
+  </data>
+  <data name="Weapons_RawDamage" xml:space="preserve">
+    <value>Dégâts bruts</value>
+  </data>
+  <data name="Weapons_Waste" xml:space="preserve">
+    <value>Gaspillage</value>
+  </data>
+  <data name="Weapons_MeanAndShare" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="Weapons_AlreadyDestroyed" xml:space="preserve">
+    <value>Tire sur une unité déjà détruite</value>
+  </data>
+  <data name="Weapons_RawTitle" xml:space="preserve">
+    <value>Dégâts bruts, toutes armes</value>
+  </data>
+  <data name="Weapons_WasteShareLabel" xml:space="preserve">
+    <value>des dégâts bruts</value>
+  </data>
+  <data name="Weapons_RawVersusDamage" xml:space="preserve">
+    <value>Dégâts bruts et PV retirés</value>
+  </data>
+  <data name="Weapons_RawValue" xml:space="preserve">
+    <value>Dégâts bruts : {0}</value>
+  </data>
+  <data name="Weapons_DamageWithMargin" xml:space="preserve">
+    <value>PV retirés (marge comprise)</value>
+  </data>
+  <data name="Help_WeaponsSummary" xml:space="preserve">
+    <value>Ce que fait chaque arme, dans l'ordre de résolution. Les armes aux attaques identiques sont lancées ensemble (leurs dés ne se distinguent pas) : elles forment une seule ligne, nommée d'après elles. Une figurine compte pour l'attaque qui l'achève ; pertes réelles seulement, sans la marge. La barre montre la part des PV retirés de chaque arme.</value>
+  </data>
+  <data name="Help_PoolWaste" xml:space="preserve">
+    <value>Gaspillage d'une arme : dégâts bruts perdus parce qu'une attaque dépasse les PV restants de sa figurine (ex. 3 dégâts sur une figurine à 2 PV), jusqu'à la destruction de l'unité. Les tirs sur une unité déjà détruite n'en font pas partie.</value>
+  </data>
+  <data name="Help_AlreadyDestroyed" xml:space="preserve">
+    <value>« Tire sur une unité déjà détruite » : probabilité que l'unité soit déjà morte quand cette arme commence à tirer ; ses attaques ne servent alors à rien. Une valeur élevée suggère de la faire tirer plus tôt, ou de la garder pour une autre cible.</value>
+  </data>
+  <data name="Help_RawDamage" xml:space="preserve">
+    <value>Dégâts bruts : ce que chaque attaque non sauvegardée aurait retiré sans plafond par figurine (après réduction de dégâts et insensible à la douleur), y compris sur les figurines virtuelles de la marge. Le graphique les compare aux PV retirés marge comprise (contour en pointillé) : l'écart est le gaspillage.</value>
+  </data>
+  <data name="Help_WasteShare" xml:space="preserve">
+    <value>Part des dégâts bruts perdue parce qu'une attaque dépasse les PV restants de sa figurine. Ce qui dépasse la destruction de l'unité n'en fait pas partie : c'est la marge.</value>
+  </data>
   <data name="Groups_LossesTitle" xml:space="preserve">
     <value>Pertes par groupe</value>
   </data>

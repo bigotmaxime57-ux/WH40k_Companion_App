@@ -67,6 +67,17 @@
             }
         }
 
+        @* Distribution superposée (Overlay) : barres en contour seulement, sur les mêmes valeurs et le même axe *@
+        @for (int i = 0; i < _overlayExactly.Length; i++)
+        {
+            double overlay = Bottom - Y(_overlayExactly[i] / _maxExactly);
+            @if (overlay > 0)
+            {
+                <rect class="wh-chart-overlay" x="@F(ColumnX(i) + ColumnWidth * 0.06)" y="@F(Bottom - overlay)"
+                      width="@F(ColumnWidth * 0.88)" height="@F(overlay)" data-test="chart-overlay" />
+            }
+        }
+
         @if (_firstBeyond >= 0)
         {
             <line class="wh-chart-limit" x1="@F(ColumnX(_firstBeyond))" y1="@F(Top)" x2="@F(ColumnX(_firstBeyond))" y2="@F(Bottom)" />
@@ -97,6 +108,10 @@
             <strong>@string.Format(ValueTitle, TooltipLabel(row.Value))</strong><br />
             @L["Chart_Exactly"] : @row.Exactly.ToString("P1")<br />
             @L["Chart_AtLeast"] : @row.AtLeast.ToString("P1")
+            @if (Overlay is not null)
+            {
+                <span data-test="chart-tooltip-overlay"><br />@OverlayLabel : @_overlayExactly[hovered].ToString("P1")</span>
+            }
             @if (Split is { } split && row.Value > 0)
             {
                 <span data-test="chart-tooltip-split"><br />@split.PrimaryLabel : @ShareOf(row.Value).ToString("P0")
@@ -122,6 +137,10 @@
         @if (_rows.Any(r => IsWiped(r.Value)))
         {
             <span data-test="legend-wiped"><i class="wh-chart-swatch-hatch"></i>@L["Chart_WipedTooltip"]</span>
+        }
+        @if (Overlay is not null)
+        {
+            <span data-test="legend-overlay"><i class="wh-chart-swatch-overlay"></i>@OverlayLabel</span>
         }
         <span><i class="wh-chart-swatch-curve"></i>@L["Chart_AtLeastAxis"]</span>
         <span data-test="legend-mean">
@@ -195,10 +214,39 @@
     private double ShareOf(int value) =>
         Split is { } split && value >= 0 && value < split.PrimaryShares.Count ? Math.Clamp(split.PrimaryShares[value], 0, 1) : 1;
 
+    /// <summary>
+    /// Seconde distribution dessinée par-dessus en contour (ex. PV retirés sur les dégâts bruts), sur le même axe ; les
+    /// colonnes couvrent les valeurs utiles des deux. Null : aucune.
+    /// </summary>
+    [Parameter]
+    public DiscreteDistribution? Overlay { get; set; }
+
+    /// <summary>Nom de la distribution superposée (légende, infobulle).</summary>
+    [Parameter]
+    public string OverlayLabel { get; set; } = "";
+
+    private double[] _overlayExactly = [];
+
+    /// <summary>Lignes du graphique : celles de la distribution, élargies aux valeurs utiles de la superposée.</summary>
+    private IReadOnlyList<DistributionRow> BuildRows()
+    {
+        var rows = Distribution.Rows();
+        if (Overlay is null)
+        {
+            return rows;
+        }
+        var overlayRows = Overlay.Rows();
+        int first = Math.Min(rows[0].Value, overlayRows[0].Value), last = Math.Max(rows[^1].Value, overlayRows[^1].Value);
+        return Enumerable.Range(first, last - first + 1)
+            .Select(v => new DistributionRow(v, Distribution.ProbabilityExactly(v), Distribution.ProbabilityAtLeast(v)))
+            .ToList();
+    }
+
     protected override void OnParametersSet()
     {
-        _rows = Distribution.Rows();
-        double max = _rows.Max(r => r.Exactly);
+        _rows = BuildRows();
+        _overlayExactly = Overlay is { } overlay ? _rows.Select(r => overlay.ProbabilityExactly(r.Value)).ToArray() : [];
+        double max = Math.Max(_rows.Max(r => r.Exactly), _overlayExactly.DefaultIfEmpty(0).Max());
         double step = NiceStep(max / 4);
         _maxExactly = Math.Max(step, Math.Ceiling(max / step - 1e-9) * step);
         _leftTicks = Enumerable.Range(0, (int)Math.Round(_maxExactly / step) + 1).Select(i => i * step).ToArray();

@@ -25,9 +25,11 @@ public sealed class SimulationResult
         DiscreteDistribution rawDamage,
         IReadOnlyList<GroupLosses> groups,
         DiscreteDistribution bodyguardKills,
-        DiscreteDistribution bodyguardDamage)
+        DiscreteDistribution bodyguardDamage,
+        IReadOnlyList<WeaponPoolLosses> pools)
     {
         Groups = groups;
+        Pools = pools;
         // Gardes du corps : seulement s'il y en a et qu'ils protègent au moins un PERSONNAGE
         var defenderGroups = scenario.Defender.Groups;
         bool bodyguards = defenderGroups.Any(g => g.IsCharacter) && defenderGroups.Any(g => !g.IsCharacter);
@@ -132,6 +134,9 @@ public sealed class SimulationResult
     /// la destruction de l'unité n'en fait pas partie : c'est la marge (<see cref="DamageMarginWhenWiped"/>).
     /// </summary>
     public double MeanWastedDamage => RawDamage.Mean - ExtendedDamage.Mean;
+
+    /// <summary>Pertes par pool d'attaques, dans l'ordre de résolution (rapport par arme).</summary>
+    public IReadOnlyList<WeaponPoolLosses> Pools { get; }
 
     /// <summary>Part des dégâts bruts gaspillée (entre 0 et 1 ; 0 si aucun dégât brut).</summary>
     public double WastedShare => RawDamage.Mean > 0 ? MeanWastedDamage / RawDamage.Mean : 0;

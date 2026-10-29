@@ -1,0 +1,42 @@
+@*
+    Barre de répartition multicolore : une bande sur toute la largeur (= 100 %), une couleur par part (palette des
+    rapports, wh-share-0 à wh-share-5, reprise ensuite), légende des parts dessous. Mise en forme seulement : les parts
+    et les textes viennent de l'appelant.
+*@
+@using System.Globalization
+
+<div class="wh-share-bar" @attributes="Attributes">
+    <div class="wh-share-bar-track">
+        @foreach (var (part, i) in Parts.Select((p, i) => (p, i)))
+        {
+            <div class="@($"wh-share-bar-part {ColorClass(i)}")" style="width: @Percent(part.Fraction)" title="@($"{part.Label} : {part.Value}")"
+                 data-test="share-part"></div>
+        }
+    </div>
+    <div class="wh-share-bar-legend">
+        @foreach (var (part, i) in Parts.Select((p, i) => (p, i)))
+        {
+            <span><i class="@ColorClass(i)"></i>@part.Label <strong>@part.Value</strong></span>
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>Nombre de couleurs de la palette des rapports (au-delà, elles sont reprises dans l'ordre).</summary>
+    public const int PaletteSize = 6;
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<Part> Parts { get; set; } = [];
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public IReadOnlyDictionary<string, object>? Attributes { get; set; }
+
+    /// <summary>Une part : nom, fraction de la largeur (0 à 1) et valeur affichée dans la légende.</summary>
+    public sealed record Part(string Label, double Fraction, string Value);
+
+    /// <summary>Classe CSS de la couleur de la part <paramref name="index"/> (aussi utilisée hors de la barre).</summary>
+    public static string ColorClass(int index) => $"wh-share-{index % PaletteSize}";
+
+    private static string Percent(double fraction) =>
+        (Math.Clamp(fraction, 0, 1) * 100).ToString("0.##", CultureInfo.InvariantCulture) + "%";
+}

@@ -57,6 +57,23 @@ public class HistogramChartTests : ComponentTestContext
     }
 
     [Fact]
+    public void An_overlay_is_drawn_in_outline_over_the_union_of_both_value_ranges()
+    {
+        // Bruts de 0 à 3 ; superposée de 0 à 5 : les colonnes vont jusqu'à 5
+        var chart = Render<HistogramChart>(p => p
+            .Add(c => c.Distribution, Sample)
+            .Add(c => c.ValueTitle, "Dégâts bruts : {0}")
+            .Add(c => c.Overlay, new DiscreteDistribution(new long[] { 100, 100, 100, 100, 300, 300 }))
+            .Add(c => c.OverlayLabel, "PV retirés"));
+
+        Assert.Equal(6, chart.FindAll("[data-test=chart-column]").Count);
+        Assert.Equal(6, chart.FindAll("[data-test=chart-overlay]").Count);
+        chart.FindAll("[data-test=chart-column]")[4].MouseOver();
+        Assert.Contains("PV retirés : 30,0", chart.Find("[data-test=chart-tooltip-overlay]").TextContent);
+        Assert.Contains("PV retirés", chart.Find("[data-test=legend-overlay]").TextContent);
+    }
+
+    [Fact]
     public void Each_interval_between_two_gridlines_is_split_in_five_by_dotted_lines()
     {
         var chart = RenderChart();

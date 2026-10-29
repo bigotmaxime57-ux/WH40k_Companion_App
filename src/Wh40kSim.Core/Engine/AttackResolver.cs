@@ -41,6 +41,7 @@ public sealed class AttackResolver
         _scenario = scenario;
         _target = new DefenderState(scenario.Defender);
         _pools = AttackPool.Build(scenario.Attacker.Weapons);
+        _target.TrackPools(_pools.Count);
     }
 
     /// <summary>État du défenseur après le dernier appel à <see cref="Run"/>.</summary>
@@ -75,13 +76,15 @@ public sealed class AttackResolver
         _target.Reset();
         int initialModels = _target.ModelsAlive;
 
-        foreach (var pool in _pools)
+        for (int p = 0; p < _pools.Count; p++)
         {
+            // Pertes attribuées au pool en cours ; unité déjà détruite : le pool tire « dans le vide » (noté)
+            _target.BeginPool(p);
             if (_target.IsDestroyed && !TracksExcess)
             {
-                return;
+                continue; // sans excédent, plus rien à résoudre (aucun dé consommé)
             }
-            ResolvePool(pool, initialModels);
+            ResolvePool(_pools[p], initialModels);
         }
     }
 

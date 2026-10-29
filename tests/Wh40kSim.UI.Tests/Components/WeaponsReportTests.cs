@@ -1,0 +1,77 @@
+using Bunit;
+using Wh40kSim.Core.Dice;
+using Wh40kSim.Core.Model;
+using Wh40kSim.Simulation;
+using Wh40kSim.UI.Components;
+
+namespace Wh40kSim.UI.Tests.Components;
+
+/// <summary>Onglet « Armes » : répartition par pool, une section par pool, dégâts bruts toutes armes.</summary>
+public class WeaponsReportTests : ComponentTestContext
+{
+    /// <summary>Canon, puis bolters et pistolets (lancés ensemble : un seul pool) contre 10 figurines à 2 PV.</summary>
+    private static Scenario Squad() => new()
+    {
+        Attacker = new AttackerUnit
+        {
+            Weapons =
+            [
+                new WeaponGroup
+                {
+                    Weapon = new WeaponProfile { Name = "Canon", Attacks = DiceExpression.Parse("D6"), Skill = 3, Strength = 9, Damage = DiceExpression.Parse("D3") },
+                },
+                new WeaponGroup { ModelCount = 10, Weapon = new WeaponProfile { Name = "Bolter", Attacks = 2, Skill = 3, Strength = 4 } },
+                new WeaponGroup { ModelCount = 2, Weapon = new WeaponProfile { Name = "Pistolet", Attacks = 1, Skill = 3, Strength = 4 } },
+            ],
+        },
+        Defender = new DefenderUnit { Groups = [new ModelGroup { Name = "Cibles", Count = 10, Wounds = 2, Save = 4 }] },
+    };
+
+    private (IRenderedComponent<WeaponsReport> Report, SimulationResult Result) Render()
+    {
+        var result = Simulator.Run(Squad(), 5_000, seed: 4);
+        return (Render<WeaponsReport>(p => p.Add(c => c.Result, result)), result);
+    }
+
+    [Fact]
+    public void The_summary_has_a_share_bar_and_one_row_per_pool_named_after_its_weapons()
+    {
+        var (report, result) = Render();
+
+        Assert.Equal(2, report.FindAll("[data-test=weapons-share-bar] [data-test=share-part]").Count);
+        var rows = report.FindAll("[data-test=weapons-table] [data-test^=weapons-row-]");
+        Assert.Equal(2, rows.Count);
+        Assert.Contains("Canon", rows[0].TextContent);
+        Assert.Contains("Bolter + Pistolet", rows[1].TextContent);
+        Assert.Contains(result.Pools[1].DamageShare.ToString("P0"), rows[1].TextContent);
+        Assert.Contains(result.Pools[0].WastedShare.ToString("P0"), rows[0].TextContent);
+    }
+
+    [Fact]
+    public void Each_pool_has_its_own_section_with_tiles_and_a_histogram()
+    {
+        var (report, result) = Render();
+
+        var sections = report.FindAll("[data-test^=weapon-pool-]");
+        Assert.Equal(2, sections.Count);
+        var canon = sections[0];
+        Assert.Contains("Canon", canon.QuerySelector("[data-test=group-title]")!.TextContent);
+        Assert.Contains(result.Pools[0].MeanKills.ToString("F2"), canon.QuerySelector("[data-test=pool-killed]")!.TextContent);
+        Assert.Contains(result.Pools[0].MeanRawDamage.ToString("F2"), canon.QuerySelector("[data-test=pool-raw]")!.TextContent);
+        Assert.Contains(result.Pools[1].ProbabilityUnitAlreadyDestroyed.ToString("P1"),
+            sections[1].QuerySelector("[data-test=pool-already-destroyed]")!.TextContent);
+        Assert.NotNull(canon.QuerySelector("[data-test=histogram]"));
+    }
+
+    [Fact]
+    public void Raw_damage_is_compared_to_the_damage_dealt_on_the_same_chart()
+    {
+        var (report, result) = Render();
+
+        var raw = report.Find("[data-test=raw-damage]");
+        Assert.Contains(result.RawDamage.Mean.ToString("F2"), raw.QuerySelector("[data-test=raw-mean]")!.TextContent);
+        Assert.Contains(result.WastedShare.ToString("P1"), raw.QuerySelector("[data-test=raw-waste]")!.TextContent);
+        Assert.NotEmpty(raw.QuerySelectorAll("[data-test=chart-overlay]"));
+        Assert.NotNull(raw.QuerySelector("[data-test=legend-overlay]"));
+    }
+}

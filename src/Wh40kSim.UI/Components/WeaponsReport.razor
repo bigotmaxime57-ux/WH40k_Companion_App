@@ -1,0 +1,103 @@
+@*
+    Onglet « Armes » du Full sim, en trois sections repliables sans cadre, lues dans le résultat sans aucun calcul
+    (pertes réelles, sans la marge ; découpage par pool : armes aux attaques identiques lancées ensemble, dans l'ordre
+    de résolution) :
+    1. récapitulatif : barre multicolore de la répartition des PV retirés, puis un tableau, une ligne par pool ;
+    2. une section par pool : tuiles (figurines tuées, PV retirés, dégâts bruts et gaspillage, tir sur une unité déjà
+       détruite) et histogramme des PV retirés par le pool ;
+    3. dégâts bruts toutes armes confondues (étape 5) : tuiles et histogramme des bruts, PV retirés superposés.
+*@
+
+<div data-test="weapons-report">
+    <CollapsibleSection Icon="@Icons.Material.Filled.PieChart" Title="@L["Weapons_SummaryTitle"]"
+                        Help="@([L["Help_WeaponsSummary"], L["Help_PoolWaste"], L["Help_AlreadyDestroyed"]])" data-test="weapons-summary">
+        <div class="mb-4"><ShareBar Parts="@SharesOfDamage" data-test="weapons-share-bar" /></div>
+        <MudSimpleTable Dense="true" Striped="true" data-test="weapons-table">
+            <thead>
+                <tr>
+                    <th>@L["Weapons_Pool"]</th>
+                    <th class="wh-number">@L["Groups_Damage"]</th>
+                    <th class="wh-number">@L["Groups_Killed"]</th>
+                    <th class="wh-number">@L["Weapons_RawDamage"]</th>
+                    <th class="wh-number">@L["Weapons_Waste"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var pool in Result.Pools)
+                {
+                    <tr data-test="@($"weapons-row-{pool.Index}")">
+                        <td><i class="@($"wh-share-swatch {ShareBar.ColorClass(pool.Index)}")"></i>@PoolName(pool)</td>
+                        <td class="wh-number">@L["Weapons_MeanAndShare", pool.Damage.Mean.ToString("F2"), pool.DamageShare.ToString("P0")]</td>
+                        <td class="wh-number">@L["Weapons_MeanAndShare", pool.MeanKills.ToString("F2"), pool.KillShare.ToString("P0")]</td>
+                        <td class="wh-number">@pool.MeanRawDamage.ToString("F2")</td>
+                        <td class="wh-number">@pool.WastedShare.ToString("P0")</td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+
+        @foreach (var pool in Result.Pools)
+        {
+            <section class="wh-group-section" data-test="@($"weapon-pool-{pool.Index}")">
+                <div class="wh-group-title" data-test="group-title">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                        <span class="wh-group-number">@(pool.Index + 1)</span>
+                        <i class="@($"wh-share-swatch {ShareBar.ColorClass(pool.Index)}")"></i>
+                        <MudText Typo="Typo.subtitle1">@PoolName(pool)</MudText>
+                    </MudStack>
+                </div>
+                <div class="wh-tiles my-3">
+                    <StatTile Label="@L["Groups_Killed"]" Value="@pool.MeanKills.ToString("F2")" data-test="pool-killed" />
+                    <StatTile Label="@L["Groups_Damage"]" Value="@pool.Damage.Mean.ToString("F2")" data-test="pool-damage" />
+                    <StatTile Label="@L["Weapons_RawDamage"]" Value="@pool.MeanRawDamage.ToString("F2")" Stats="@WasteStats(pool)"
+                              data-test="pool-raw" />
+                    <StatTile Label="@L["Weapons_AlreadyDestroyed"]" Value="@pool.ProbabilityUnitAlreadyDestroyed.ToString("P1")"
+                              data-test="pool-already-destroyed" />
+                </div>
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" md="6">
+                        <MudText Typo="Typo.subtitle2" Class="wh-muted">@L["Groups_Damage"]</MudText>
+                        <HistogramChart Distribution="pool.Damage" Title="@PoolName(pool)" ValueTitle="@L["Chart_DamageValue"]"
+                                        UnitSize="Result.TotalWounds" />
+                    </MudItem>
+                </MudGrid>
+            </section>
+        }
+    </CollapsibleSection>
+
+    <CollapsibleSection Icon="@Icons.Material.Filled.Whatshot" Title="@L["Weapons_RawTitle"]" Help="@([L["Help_RawDamage"]])"
+                        data-test="raw-damage">
+        <div class="wh-tiles mb-3">
+            <StatTile Label="@L["Weapons_RawDamage"]" Value="@Result.RawDamage.Mean.ToString("F2")" data-test="raw-mean" />
+            <StatTile Label="@L["Weapons_Waste"]" Value="@Result.MeanWastedDamage.ToString("F2")"
+                      Stats="@([new StatTile.Stat("%", L["Weapons_WasteShareLabel"], Result.WastedShare.ToString("P1"), L["Help_WasteShare"])])"
+                      data-test="raw-waste" />
+        </div>
+        <MudGrid Spacing="3">
+            <MudItem xs="12" md="6">
+                <MudText Typo="Typo.subtitle2" Class="wh-muted">@L["Weapons_RawVersusDamage"]</MudText>
+                <HistogramChart Distribution="Result.RawDamage" Title="@L["Weapons_RawTitle"]" ValueTitle="@L["Weapons_RawValue"]"
+                                Overlay="Result.ExtendedDamage" OverlayLabel="@L["Weapons_DamageWithMargin"]" />
+            </MudItem>
+        </MudGrid>
+    </CollapsibleSection>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public SimulationResult Result { get; set; } = null!;
+
+    /// <summary>Nom d'un pool : les noms de ses armes, dans l'ordre de saisie (« Bolter + Pistolet bolter »).</summary>
+    private static string PoolName(WeaponPoolLosses pool) => string.Join(" + ", pool.Weapons.Select(w => w.Weapon.Name));
+
+    /// <summary>Barre multicolore : part des PV retirés de chaque pool, avec sa moyenne en légende.</summary>
+    private IReadOnlyList<ShareBar.Part> SharesOfDamage =>
+        Result.Pools.Select(p => new ShareBar.Part(PoolName(p), p.DamageShare,
+            L["Weapons_MeanAndShare", p.Damage.Mean.ToString("F2"), p.DamageShare.ToString("P0")])).ToList();
+
+    private List<StatTile.Stat> WasteStats(WeaponPoolLosses pool) =>
+    [
+        new("↯", L["Weapons_Waste"], L["Weapons_MeanAndShare", pool.MeanWastedDamage.ToString("F2"), pool.WastedShare.ToString("P0")],
+            L["Help_PoolWaste"]),
+    ];
+}

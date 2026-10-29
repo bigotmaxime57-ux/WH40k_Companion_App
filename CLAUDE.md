@@ -749,8 +749,12 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
 - Roadmap complétée le 2026-10-29 (branche `docs/roadmap-optimiseur-overwatch`) : optimiseur du séquencement des
   armes en étape 12 (#3, commenté), overwatch en étape 13 (interrupteur de la Situation, ticket #11 créé) ; fin de phase 3 déplacée à l'étape 13.
   Prochaine étape inchangée : 8 (rapport par arme), à préciser.
-- Phase 3, étape 8 (rapport par arme) : précisée avec l'utilisateur le 2026-10-29 (voir « Phase 3 : étapes »), à coder
-  sur la branche `phase3/etape8-rapport-armes`.
+- Phase 3, étape 8 (rapport par arme) : branche `phase3/etape8-rapport-armes`, **en attente de validation**.
+  Onglet « Armes » (`WeaponsReport`) ; `ShareBar` (barre multicolore) ; superposition d'une distribution dans
+  `HistogramChart` (`Overlay`) ; `WeaponPoolLosses` (`SimulationResult.Pools`) ; `DefenderState.DamageByPool` /
+  `KillsByPool` / `RawDamageByPool` / `PoolFiredOnDestroyedUnit`. 450 tests verts (192 Core, 66 Simulation, 192 UI) ;
+  `NonRegressionTests` inchangés. Temps mesuré (10 M simulations, scénario d'exemple) : médianes 3,57 s sur `main`,
+  3,41 s sur la branche, dans le bruit de mesure, donc pas d'option. Pas encore vue à l'écran.
 
 Points notés pour la suite :
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

@@ -378,6 +378,61 @@
     box-shadow: 0 0 8px color-mix(in srgb, var(--wh-split-color) 80%, transparent);
 }
 
+/*
+   Barre de répartition multicolore (ShareBar, onglet Armes) : palette des rapports, six couleurs bien distinctes
+   (couleur du thème d'abord), lisibles en clair comme en sombre ; reprises ensuite.
+*/
+.wh-shell {
+    --wh-share-0: var(--mud-palette-primary);
+    --wh-share-1: #4f9dd8;
+    --wh-share-2: #c8504a;
+    --wh-share-3: #4fa86a;
+    --wh-share-4: #9b72cf;
+    --wh-share-5: #e08a3c;
+}
+
+.wh-share-0 { background: var(--wh-share-0); }
+.wh-share-1 { background: var(--wh-share-1); }
+.wh-share-2 { background: var(--wh-share-2); }
+.wh-share-3 { background: var(--wh-share-3); }
+.wh-share-4 { background: var(--wh-share-4); }
+.wh-share-5 { background: var(--wh-share-5); }
+
+.wh-share-bar-track {
+    background: color-mix(in srgb, var(--mud-palette-text-primary) 12%, transparent);
+    border-radius: 5px;
+    display: flex;
+    height: 18px;
+    overflow: hidden;
+}
+
+.wh-share-bar-part + .wh-share-bar-part {
+    border-left: 2px solid var(--mud-palette-surface);
+}
+
+.wh-share-bar-legend {
+    color: var(--mud-palette-text-secondary);
+    display: flex;
+    flex-wrap: wrap;
+    font-size: .85rem;
+    gap: .25rem 1.25rem;
+    margin-top: .45rem;
+}
+
+.wh-share-bar-legend strong {
+    color: var(--mud-palette-text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.wh-share-bar-legend i,
+.wh-share-swatch {
+    border-radius: 2px;
+    display: inline-block;
+    height: 10px;
+    margin-right: .4rem;
+    width: 10px;
+}
+
 /* Sous-titre d'un groupe (rapports) : numéro et nom plus grands, couleur du camp, filet dessous */
 .wh-group-title {
     border-bottom: 1px solid rgba(var(--wh-accent-rgb), .45);
@@ -830,6 +885,20 @@
 
 .wh-chart-bar-beyond {
     fill: color-mix(in srgb, var(--wh-accent) 45%, transparent);
+}
+
+/* Distribution superposée (Overlay) : contour seulement, couleur du texte, pour se lire par-dessus les barres */
+.wh-chart-overlay {
+    fill: none;
+    pointer-events: none;
+    stroke: var(--mud-palette-text-primary);
+    stroke-dasharray: 3 2;
+    stroke-width: 1.5;
+}
+
+.wh-chart-swatch-overlay {
+    background: transparent;
+    border: 1.5px dashed var(--mud-palette-text-primary);
 }
 
 /* Barres empilées : seconde partie (au-dessus) plus claire, comme dans les barres en deux parties */

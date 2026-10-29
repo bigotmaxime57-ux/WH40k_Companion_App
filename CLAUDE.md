@@ -102,12 +102,18 @@ sur les statistiques avant le web), traduction en 4, l'ancienne 2b (API + client
 comparaison de plusieurs profils côte à côte » (qui tue le mieux l'adversaire).
 
 Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que les dessiner, dans Wh40kSim.UI
-(desktop maintenant, web en phase 7). Trois modes, ouverts depuis un écran d'accueil (décision du 2026-10-27) :
+(desktop maintenant, web en phase 7). Quatre modes, ouverts depuis un écran d'accueil (décision du 2026-10-27,
+optimiseur ajouté le 2026-10-29) :
 
 - **Quick sim** : l'écran actuel, gardé tel quel (une page, A contre B, les grandes lignes, pas de graphique en plus).
 - **Full sim** : A contre B, même scénario que le Quick sim (partagé), avec beaucoup plus de stats, graphiques et
   analyses (tableau de bord).
 - **Comparaison** : distributions superposées, N attaquants contre une cible ou un attaquant contre N cibles (#1).
+- **Optimiseur** : meilleurs ordres de résolution des armes d'un même loadout (#3), écran à part pour ne pas alourdir
+  les simulations.
+
+Le tir en **overwatch** n'est pas un mode : c'est un interrupteur de la Situation (Quick sim et Full sim), qui fait
+tirer selon ses règles (étape 13, #11).
 
 Étapes détaillées dans « Phase 3 : étapes ». **Le choix des technologies doit tenir compte de la phase 7** : tout ce
 qu'on ajoute à Wh40kSim.UI (bibliothèque de graphiques, navigation) doit fonctionner aussi bien dans le
@@ -510,7 +516,27 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
    différentes) ; meilleure entrée pour chaque indicateur, ex æquo compris. JSON d'une comparaison ; console.
 11. **Comparaison, côté UI.** Entrées prises dans le scénario courant ou dans des fichiers (partiels ou complets),
    dupliquées, renommées ; distributions superposées ; tableau côte à côte, meilleure entrée mise en évidence ;
-   ouvrir / enregistrer. Fin de phase : README, tag (`v0.3.1` si `v0.3` a été posé à l'étape 9).
+   ouvrir / enregistrer.
+12. **Optimiseur du séquencement des armes** (#3, ajouté le 2026-10-29). Mode à part (tuile sur l'accueil) : à partir
+   du scénario courant (ou d'un fichier), toutes les permutations des **pools** (pas des armes : celles d'un même pool
+   sont lancées ensemble), avec les statistiques du Full sim. Décisions de l'utilisateur :
+   - **Rondes éliminatoires** façon Raidbots : tous les ordres avec peu d'itérations (~10 000), puis les meilleurs avec
+     ~100 000, puis les derniers en lice avec ~1 000 000 ; nombres à calibrer d'après le temps mesuré, progression
+     affichée par ronde. Proposé (à confirmer en précisant l'étape) : élimination selon l'intervalle de confiance
+     (garder tout ordre qui chevauche le meilleur, avec un plafond) plutôt qu'une proportion fixe, et sur les trois
+     métriques (un ordre reste s'il est parmi les meilleurs sur l'une d'elles) ; même graine pour tous les ordres
+     (écarts plus fiables, comme la comparaison) ; avertissement ou plafond au-delà de ~6 pools (720 ordres).
+   - **Tableau des 10 meilleurs ordres**, trié par défaut par P(unité détruite), triable par % de kill, PV retirés,
+     figurines tuées ; meilleur de chaque colonne mis en évidence.
+   - **Export JSON** de l'ordre choisi, réutilisable au Quick sim et au Full sim : le format « attaquant seul » (ou
+     scénario complet), qui garde l'ordre des armes, suffit (pas de nouveau format).
+   - Fin de l'étape : ticket #3 fermé.
+13. **Overwatch** (#11, ajouté le 2026-10-29). Interrupteur « Tir en overwatch » dans la **Situation** (Quick sim et Full sim,
+   décision de l'utilisateur) : le Core résout l'attaque avec les restrictions de l'overwatch, les écrans et les
+   statistiques restent les mêmes, résultats marqués « Overwatch » ; mode enregistré dans le JSON du scénario. Les
+   règles de l'overwatch ont changé en 11e édition : à détailler avec l'utilisateur en précisant l'étape (quand et
+   contre quoi, jet de touche, mots-clés applicables, limites, effets autres que les pertes). Fin de phase : README,
+   tag (`v0.3.1` si `v0.3` a été posé à l'étape 9).
 
 ## Décisions techniques
 
@@ -700,6 +726,9 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
   Precision, dans le bruit de mesure, donc pas d'option. Prochaine étape : 8 (rapport par arme), à préciser.
 - `gh` (installé depuis le zip officiel, sans droits administrateur), charge de travail MAUI et Inno Setup sont
   maintenant installés sur les deux machines (2026-10-29).
+- Roadmap complétée le 2026-10-29 (branche `docs/roadmap-optimiseur-overwatch`) : optimiseur du séquencement des
+  armes en étape 12 (#3, commenté), overwatch en étape 13 (interrupteur de la Situation, ticket #11 créé) ; fin de phase 3 déplacée à l'étape 13.
+  Prochaine étape inchangée : 8 (rapport par arme), à préciser.
 
 Points notés pour la suite :
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

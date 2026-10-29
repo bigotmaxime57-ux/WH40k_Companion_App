@@ -611,7 +611,10 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
 - CLI GitHub (tickets) : `winget install --id GitHub.cli -e --source winget --accept-source-agreements
   --accept-package-agreements` (sans ces options, winget bloque sur les conditions du Microsoft Store), puis
   `gh auth login` dans un terminal séparé (questions interactives : GitHub.com, HTTPS, navigateur). Une session ouverte
-  avant l'installation n'a pas `gh` dans son PATH : `C:\Program Files\GitHub CLI\gh.exe`.
+  avant l'installation n'a pas `gh` dans son PATH : `C:\Program Files\GitHub CLI\gh.exe`. Sans droits
+  administrateur (le paquet winget est un MSI pour toute la machine) : zip officiel des Releases de `cli/cli`
+  (empreinte SHA256 vérifiée avec le fichier `checksums.txt`), dézippé dans `%LOCALAPPDATA%\Programs\GitHub CLI`, et
+  son dossier `bin` ajouté au PATH de l'utilisateur ; pas de mise à jour automatique.
 - Pas de `.gitattributes` (ticket #8) : avec `core.autocrlf=true`, la copie de travail est en CRLF et l'index en LF. La règle
   « fins de ligne LF » du `.sln` porte sur le contenu versionné (vérifier avec `git ls-files --eol`).
 
@@ -688,15 +691,16 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
   l'autre machine (`winget`, voir README).
 - Dépôt déplacé sur cette machine vers `E:\Dev\WH40k_Companion_App` (disque C plein) le 2026-10-28 : sans effet sur
   le dépôt ni sur l'autre machine.
-- Phase 3, étape 7 (rapport par groupe) : branche `phase3/etape7-rapport-groupes`, **en attente de validation**.
-  Onglet « Groupes » (`GroupsReport`) ; `GroupLosses` et `BodyguardKills` dans `SimulationResult`,
-  `DefenderState.PrecisionKilledInGroup` / `PrecisionDamageInGroup`, `Scenario.UsesPrecision` / `PrecisionTargetGroup`.
-  401 tests verts (187 Core, 58 Simulation, 156 UI) ; `NonRegressionTests` inchangés, sortie de la console identique ;
-  temps mesuré (10 M simulations, scénario d'exemple) : 1,77 s sur `main`, 1,87 s sur la branche, dans le bruit de
-  mesure, donc pas d'option. Pas encore vue à l'écran.
+- Phase 3, étape 7 (rapport par groupe) : fusionnée dans `main`, validée par l'utilisateur à l'écran le 2026-10-29
+  après de nombreux retours (voir l'étape 7 dans « Phase 3 : étapes »). Onglet « Groupes » (`GroupsReport`) ;
+  `GroupLosses`, `BodyguardKills` / `BodyguardDamage`, `PrecisionWeaponLosses` dans `SimulationResult` ;
+  `DefenderState.PrecisionWeaponDamageInGroup` ; `Scenario.PrecisionTargetGroup`. 439 tests verts (189 Core,
+  63 Simulation, 187 UI) ; `NonRegressionTests` inchangés. Temps mesuré (10 M simulations) : 1,77 s sur `main`, 1,87 s
+  sur la branche (scénario d'exemple) ; suivi des armes Precision : médianes 3,76 s → 4,02 s sur un scénario avec
+  Precision, dans le bruit de mesure, donc pas d'option. Prochaine étape : 8 (rapport par arme), à préciser.
+- `gh` (installé depuis le zip officiel, sans droits administrateur), charge de travail MAUI et Inno Setup sont
+  maintenant installés sur les deux machines (2026-10-29).
 
 Points notés pour la suite :
-- Charge de travail MAUI : installée sur la deuxième machine ; **à installer sur l'autre machine** (puis
-  `dotnet restore`).
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier
   dans un vrai navigateur en phase 7.

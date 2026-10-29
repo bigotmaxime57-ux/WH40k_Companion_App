@@ -88,6 +88,9 @@
             <MudTabPanel Text="@L["FullSim_TabGroups"]" Icon="@Icons.Material.Filled.Shield" data-test="tab-groups">
                 <GroupsReport Result="Result" />
             </MudTabPanel>
+            <MudTabPanel Text="@L["FullSim_TabWeapons"]" Icon="@WeaponIcons.For(WeaponType.Ranged)" data-test="tab-weapons">
+                <WeaponsReport Result="Result" />
+            </MudTabPanel>
                 </ChildContent>
             </MudTabs>
         </div>

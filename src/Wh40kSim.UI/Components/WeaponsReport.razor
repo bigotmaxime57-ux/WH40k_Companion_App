@@ -1,0 +1,210 @@
+@*
+    Onglet « Armes » du Full sim, en quatre sections repliables sans cadre, lues dans le résultat sans aucun calcul
+    (pertes réelles, sans la marge ; découpage par pool : armes aux attaques identiques lancées ensemble, dans l'ordre
+    de résolution) :
+    1. récapitulatif : barre multicolore de la répartition des PV retirés, puis un tableau, une ligne par pool ;
+    2. une section par pool : tuiles (figurines tuées, PV retirés, dégâts bruts, tir sur une unité déjà détruite), barre
+       des dégâts bruts retirés / perdus, histogrammes des figurines tuées et des PV retirés par le pool ;
+    3. conversion des attaques : tableau attaques → touches → blessures → sauvegardes ratées par pool, avec la part des
+       mots-clés (Blast, Rapid Fire, Sustained Hits, Lethal Hits, Devastating Wounds) en sous-ligne ;
+    4. gaspillage toutes armes confondues (étape 5) : tuiles, barre retirés / perdus, histogramme des PV perdus par
+       activation.
+*@
+
+<div data-test="weapons-report">
+    <CollapsibleSection Icon="@Icons.Material.Filled.PieChart" Title="@L["Weapons_SummaryTitle"]"
+                        Help="@([L["Help_WeaponsSummary"], L["Help_PoolWaste"], L["Help_AlreadyDestroyed"]])" data-test="weapons-summary">
+        <div class="mb-4"><ShareBar Parts="@SharesOfDamage" data-test="weapons-share-bar" /></div>
+        <MudSimpleTable Dense="true" Striped="true" data-test="weapons-table">
+            <thead>
+                <tr>
+                    <th>@L["Weapons_Pool"]</th>
+                    <th class="wh-number">@L["Groups_Damage"]</th>
+                    <th class="wh-number">@L["Groups_Killed"]</th>
+                    <th class="wh-number">@L["Weapons_RawDamage"]</th>
+                    <th class="wh-number">@L["Weapons_Waste"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var pool in Result.Pools)
+                {
+                    <tr data-test="@($"weapons-row-{pool.Index}")">
+                        <td><i class="@($"wh-share-swatch {ShareBar.ColorClass(pool.Index)}")"></i>@PoolName(pool)</td>
+                        <td class="@Highlight(pool, p => p.Damage.Mean, "wh-top")" data-test="weapons-damage">@L["Weapons_MeanAndShare", pool.Damage.Mean.ToString("F2"), pool.DamageShare.ToString("P0")]</td>
+                        <td class="@Highlight(pool, p => p.MeanKills, "wh-top")" data-test="weapons-kills">@L["Weapons_MeanAndShare", pool.MeanKills.ToString("F2"), pool.KillShare.ToString("P0")]</td>
+                        <td class="@Highlight(pool, p => p.MeanRawDamage, "wh-top")" data-test="weapons-raw">@pool.MeanRawDamage.ToString("F2")</td>
+                        <td class="@Highlight(pool, p => Math.Round(p.WastedShare, 2) * 100, "wh-top-bad")" data-test="weapons-waste">@pool.WastedShare.ToString("P0")</td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+
+        @foreach (var pool in Result.Pools)
+        {
+            <section class="wh-group-section" data-test="@($"weapon-pool-{pool.Index}")">
+                <div class="wh-group-title" data-test="group-title">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                        <span class="wh-group-number">@(pool.Index + 1)</span>
+                        <i class="@($"wh-share-swatch {ShareBar.ColorClass(pool.Index)}")"></i>
+                        <MudText Typo="Typo.subtitle1">@PoolName(pool)</MudText>
+                    </MudStack>
+                </div>
+                <div class="wh-tiles my-3">
+                    <StatTile Label="@L["Groups_Killed"]" Value="@pool.MeanKills.ToString("F2")" data-test="pool-killed" />
+                    <StatTile Label="@L["Groups_Damage"]" Value="@pool.Damage.Mean.ToString("F2")" data-test="pool-damage" />
+                    <StatTile Label="@L["Weapons_RawDamage"]" Value="@pool.MeanRawDamage.ToString("F2")" data-test="pool-raw" />
+                    <StatTile Label="@L["Weapons_AlreadyDestroyed"]" Value="@pool.ProbabilityUnitAlreadyDestroyed.ToString("P1")"
+                              data-test="pool-already-destroyed" />
+                </div>
+                <div class="wh-waste-bar mb-3">
+                    <SplitBar Title="@L["Weapons_RawDamage"]" Total="@pool.MeanRawDamage.ToString("F2")"
+                              Primary="@Fraction(pool.Damage.Mean, pool.MeanRawDamage)" Secondary="@Fraction(pool.MeanWastedDamage, pool.MeanRawDamage)"
+                              PrimaryLabel="@L["Groups_Damage"]"
+                              PrimaryValue="@L["Weapons_MeanAndShare", pool.Damage.Mean.ToString("F2"), (1 - pool.WastedShare).ToString("P0")]"
+                              SecondaryLabel="@L["Weapons_Lost"]"
+                              SecondaryValue="@L["Weapons_MeanAndShare", pool.MeanWastedDamage.ToString("F2"), pool.WastedShare.ToString("P0")]"
+                              Help="@([L["Help_PoolWaste"]])" data-test="pool-waste-bar" />
+                </div>
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" md="6">
+                        <MudText Typo="Typo.subtitle2" Class="wh-muted">@L["Groups_Killed"]</MudText>
+                        <HistogramChart Distribution="pool.Kills" Title="@PoolName(pool)" ValueTitle="@L["Chart_KillsValue"]"
+                                        UnitSize="Result.TotalModels" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudText Typo="Typo.subtitle2" Class="wh-muted">@L["Groups_Damage"]</MudText>
+                        <HistogramChart Distribution="pool.Damage" Title="@PoolName(pool)" ValueTitle="@L["Chart_DamageValue"]"
+                                        UnitSize="Result.TotalWounds" />
+                    </MudItem>
+                </MudGrid>
+            </section>
+        }
+    </CollapsibleSection>
+
+    <CollapsibleSection Icon="@Icons.Material.Filled.FilterAlt" Title="@L["Weapons_ConversionTitle"]"
+                        Help="@([L["Help_Conversion"], L["Help_ConversionKeywords"]])" data-test="weapons-conversion">
+        <MudSimpleTable Dense="true" Striped="true" data-test="conversion-table">
+            <thead>
+                <tr>
+                    <th>@L["Weapons_Pool"]</th>
+                    <th class="wh-number">@L["Weapons_Attacks"]</th>
+                    <th class="wh-number">@L["Weapons_Hits"]</th>
+                    <th class="wh-number">@L["Weapons_Wounds"]</th>
+                    <th class="wh-number">@L["Weapons_FailedSaves"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var pool in Result.Pools)
+                {
+                    <tr data-test="@($"conversion-row-{pool.Index}")">
+                        <td><i class="@($"wh-share-swatch {ShareBar.ColorClass(pool.Index)}")"></i>@PoolName(pool)</td>
+                        @if (pool.Conversion is { } c)
+                        {
+                            <td class="wh-number" data-test="conversion-attacks">
+                                @c.MeanAttacks.ToString("F2")
+                                @Sub(c.MeanBlastAttacks, L["Weapons_FromBlast", c.MeanBlastAttacks.ToString("F2")])
+                                @Sub(c.MeanRapidFireAttacks, L["Weapons_FromRapidFire", c.MeanRapidFireAttacks.ToString("F2")])
+                            </td>
+                            <td class="wh-number" data-test="conversion-hits">
+                                @Rates(c.MeanHits, c.HitRate, null)
+                                @Sub(c.MeanSustainedHits, L["Weapons_FromSustained", c.MeanSustainedHits.ToString("F2")])
+                            </td>
+                            <td class="wh-number" data-test="conversion-wounds">
+                                @Rates(c.MeanWounds, c.WoundRate, c.WoundsPerAttack)
+                                @Sub(c.MeanLethalHits, L["Weapons_FromLethal", c.MeanLethalHits.ToString("F2"), c.LethalHitsGain.ToString("F2")])
+                                @Sub(c.MeanDevastatingWounds, L["Weapons_FromDevastating", c.MeanDevastatingWounds.ToString("F2")])
+                            </td>
+                            <td class="wh-number" data-test="conversion-failed-saves">
+                                @Rates(c.MeanFailedSaves, c.FailedSaveRate, c.FailedSavesPerAttack)
+                                @Sub(c.MeanDevastatingWounds, L["Weapons_FromDevastatingSaves", c.MeanDevastatingWounds.ToString("F2"), c.DevastatingWoundsGain.ToString("F2")])
+                            </td>
+                        }
+                        else
+                        {
+                            <td class="wh-number" colspan="4">@L["Weapons_NeverFired"]</td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+        <MudText Typo="Typo.caption" Class="wh-muted d-block mt-2" data-test="conversion-legend">@L["Weapons_ConversionLegend"]</MudText>
+    </CollapsibleSection>
+
+    <CollapsibleSection Icon="@Icons.Material.Filled.Whatshot" Title="@L["Weapons_RawTitle"]" Help="@([L["Help_RawDamage"], L["Help_NoWaste"], L["Help_WasteWhenSurvives"]])"
+                        data-test="raw-damage">
+        <div class="wh-tiles mb-3">
+            <StatTile Label="@L["Weapons_RawDamage"]" Value="@Result.RawDamage.Mean.ToString("F2")" data-test="raw-mean" />
+            <StatTile Label="@L["Weapons_Waste"]" Value="@Result.MeanWastedDamage.ToString("F2")"
+                      Stats="@([new StatTile.Stat("%", L["Weapons_WasteShareLabel"], Result.WastedShare.ToString("P1"), L["Help_WasteShare"])])"
+                      data-test="raw-waste" />
+            <StatTile Label="@L["Weapons_NoWaste"]" Value="@Result.Waste.ProbabilityExactly(0).ToString("P1")" data-test="raw-no-waste" />
+            <StatTile Label="@L["Weapons_WasteWhenSurvives"]" Value="@(Result.MeanWasteWhenUnitSurvives?.ToString("F2") ?? "—")"
+                      data-test="raw-waste-survives" />
+        </div>
+        <div class="wh-waste-bar mb-3">
+            <SplitBar Title="@L["Weapons_RawDamage"]" Total="@Result.RawDamage.Mean.ToString("F2")"
+                      Primary="@Fraction(Result.ExtendedDamage.Mean, Result.RawDamage.Mean)"
+                      Secondary="@Fraction(Result.MeanWastedDamage, Result.RawDamage.Mean)"
+                      PrimaryLabel="@L["Weapons_DamageWithMargin"]"
+                      PrimaryValue="@L["Weapons_MeanAndShare", Result.ExtendedDamage.Mean.ToString("F2"), (1 - Result.WastedShare).ToString("P0")]"
+                      SecondaryLabel="@L["Weapons_Lost"]"
+                      SecondaryValue="@L["Weapons_MeanAndShare", Result.MeanWastedDamage.ToString("F2"), Result.WastedShare.ToString("P0")]"
+                      data-test="raw-waste-bar" />
+        </div>
+        <MudGrid Spacing="3">
+            <MudItem xs="12" md="6">
+                <MudText Typo="Typo.subtitle2" Class="wh-muted">@L["Weapons_WasteChart"]</MudText>
+                <HistogramChart Distribution="Result.Waste" Title="@L["Weapons_WasteChart"]" ValueTitle="@L["Chart_WasteValue"]"
+                                Stack="@WasteByWeapon" />
+            </MudItem>
+        </MudGrid>
+    </CollapsibleSection>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public SimulationResult Result { get; set; } = null!;
+
+    /// <summary>Nom d'un pool : les noms de ses armes, dans l'ordre de saisie (« Bolter + Pistolet bolter »).</summary>
+    private static string PoolName(WeaponPoolLosses pool) => string.Join(" + ", pool.Weapons.Select(w => w.Weapon.Name));
+
+    /// <summary>Barre multicolore : part des PV retirés de chaque pool, avec sa moyenne en légende.</summary>
+    private IReadOnlyList<ShareBar.Part> SharesOfDamage =>
+        Result.Pools.Select(p => new ShareBar.Part(PoolName(p), p.DamageShare,
+            L["Weapons_MeanAndShare", p.Damage.Mean.ToString("F2"), p.DamageShare.ToString("P0")])).ToList();
+
+    /// <summary>
+    /// Classes d'une cellule du tableau : la plus haute valeur de la colonne est mise en avant (ex æquo compris, à la
+    /// précision affichée), seulement s'il y a plusieurs pools. Le gaspillage le plus haut est un défaut : autre teinte.
+    /// </summary>
+    private string Highlight(WeaponPoolLosses pool, Func<WeaponPoolLosses, double> value, string topClass)
+    {
+        if (Result.Pools.Count < 2)
+        {
+            return "wh-number";
+        }
+        double max = Result.Pools.Max(p => Math.Round(value(p), 2));
+        return Math.Round(value(pool), 2) == max ? $"wh-number {topClass}" : "wh-number";
+    }
+
+    /// <summary>Histogramme des PV perdus empilé par arme, aux couleurs de la barre de répartition (une seule arme : barres simples).</summary>
+    private HistogramChart.BarStack? WasteByWeapon => Result.Pools.Count < 2 ? null
+        : new(Result.Pools.Select(p => new HistogramChart.StackPart(PoolName(p), ShareBar.ColorClass(p.Index), p.WasteShareByTotal)).ToList());
+
+    /// <summary>
+    /// Valeur d'une étape, puis entre parenthèses son taux par rapport à l'étape précédente et, en atténué, la part des
+    /// attaques de base qui y arrive (« 3,10 (70 %, 51 %) ») : on voit d'où l'on vient. Pas de second taux pour les
+    /// touches, l'étape précédente étant déjà les attaques.
+    /// </summary>
+    private static RenderFragment Rates(double mean, double stepRate, double? perAttack) => perAttack is double origin
+        ? @<span>@mean.ToString("F2") (@stepRate.ToString("P0"), <span class="wh-conversion-origin" data-test="conversion-origin">@origin.ToString("P0")</span>)</span>
+        : @<span>@mean.ToString("F2") (@stepRate.ToString("P0"))</span>;
+
+    /// <summary>Sous-ligne d'une cellule (part d'un mot-clé), seulement si le mot-clé a joué (moyenne non nulle).</summary>
+    private static RenderFragment? Sub(double mean, string text) => mean > 0
+        ? @<span class="wh-conversion-sub" data-test="conversion-sub">@text</span>
+        : null;
+
+    /// <summary>Part d'une barre (0 si le total est nul : aucun dégât brut).</summary>
+    private static double Fraction(double part, double total) => total > 0 ? part / total : 0;
+}

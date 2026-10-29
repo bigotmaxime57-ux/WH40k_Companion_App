@@ -622,6 +622,117 @@
   <data name="FullSim_TabGroups" xml:space="preserve">
     <value>Groupes</value>
   </data>
+  <data name="FullSim_TabWeapons" xml:space="preserve">
+    <value>Armes</value>
+  </data>
+  <data name="Weapons_SummaryTitle" xml:space="preserve">
+    <value>Répartition par arme</value>
+  </data>
+  <data name="Weapons_Pool" xml:space="preserve">
+    <value>Arme</value>
+  </data>
+  <data name="Weapons_RawDamage" xml:space="preserve">
+    <value>Dégâts bruts</value>
+  </data>
+  <data name="Weapons_Waste" xml:space="preserve">
+    <value>Gaspillage</value>
+  </data>
+  <data name="Weapons_MeanAndShare" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="Weapons_AlreadyDestroyed" xml:space="preserve">
+    <value>Tire sur une unité déjà détruite</value>
+  </data>
+  <data name="Weapons_RawTitle" xml:space="preserve">
+    <value>Gaspillage, toutes armes</value>
+  </data>
+  <data name="Weapons_WasteShareLabel" xml:space="preserve">
+    <value>des dégâts bruts</value>
+  </data>
+  <data name="Weapons_ConversionTitle" xml:space="preserve">
+    <value>Conversion des attaques</value>
+  </data>
+  <data name="Weapons_Attacks" xml:space="preserve">
+    <value>Attaques</value>
+  </data>
+  <data name="Weapons_Hits" xml:space="preserve">
+    <value>Touches</value>
+  </data>
+  <data name="Weapons_Wounds" xml:space="preserve">
+    <value>Blessures</value>
+  </data>
+  <data name="Weapons_FailedSaves" xml:space="preserve">
+    <value>Sauvegardes ratées</value>
+  </data>
+  <data name="Weapons_ConversionLegend" xml:space="preserve">
+    <value>Entre parenthèses : part de l'étape précédente, puis, en plus discret, part des attaques de base qui arrive jusque-là.</value>
+  </data>
+  <data name="Weapons_FromBlast" xml:space="preserve">
+    <value>dont +{0} Blast</value>
+  </data>
+  <data name="Weapons_FromRapidFire" xml:space="preserve">
+    <value>dont +{0} Rapid Fire</value>
+  </data>
+  <data name="Weapons_FromSustained" xml:space="preserve">
+    <value>dont +{0} Sustained</value>
+  </data>
+  <data name="Weapons_FromLethal" xml:space="preserve">
+    <value>dont {0} Lethal (≈ +{1} gagnées)</value>
+  </data>
+  <data name="Weapons_FromDevastating" xml:space="preserve">
+    <value>dont {0} Devastating</value>
+  </data>
+  <data name="Weapons_FromDevastatingSaves" xml:space="preserve">
+    <value>dont {0} mortelles (≈ {1} sauvegardes évitées)</value>
+  </data>
+  <data name="Weapons_NeverFired" xml:space="preserve">
+    <value>Ne tire jamais sur une unité en jeu</value>
+  </data>
+  <data name="Help_Conversion" xml:space="preserve">
+    <value>Ce que deviennent les attaques de chaque arme, en moyenne par activation : touches (part des attaques), blessures (part des touches), sauvegardes ratées (part des blessures). Le second pourcentage, en plus discret, rapporte l'étape aux attaques de base (« 3,10 (70 %, 51 %) » : 51 % des attaques deviennent des blessures). Une arme n'est comptée que quand elle commence à tirer sur une unité encore en jeu ; si l'unité meurt pendant qu'elle tire, ses dés restent comptés jusqu'au bout, pour que les taux décrivent l'arme.</value>
+  </data>
+  <data name="Help_ConversionKeywords" xml:space="preserve">
+    <value>Sous-lignes : attaques ajoutées par Blast et Rapid Fire, touches ajoutées par Sustained Hits, blessures sans jet de Lethal Hits, blessures critiques de Devastating Wounds (mortelles, sans sauvegarde). Les gains sont estimés avec les taux de l'arme : blessures gagnées = touches Lethal qui auraient raté le jet de blessure ; sauvegardes évitées = blessures Devastating qui auraient été sauvegardées.</value>
+  </data>
+  <data name="Weapons_WasteChart" xml:space="preserve">
+    <value>PV perdus par activation</value>
+  </data>
+  <data name="Chart_WasteValue" xml:space="preserve">
+    <value>PV perdus : {0}</value>
+  </data>
+  <data name="Weapons_Lost" xml:space="preserve">
+    <value>Perdus</value>
+  </data>
+  <data name="Weapons_NoWaste" xml:space="preserve">
+    <value>Aucune perte</value>
+  </data>
+  <data name="Weapons_WasteWhenSurvives" xml:space="preserve">
+    <value>Perdu quand l'unité survit</value>
+  </data>
+  <data name="Weapons_DamageWithMargin" xml:space="preserve">
+    <value>PV retirés (marge comprise)</value>
+  </data>
+  <data name="Help_WeaponsSummary" xml:space="preserve">
+    <value>Ce que fait chaque arme, dans l'ordre de résolution. Les armes aux attaques identiques sont lancées ensemble (leurs dés ne se distinguent pas) : elles forment une seule ligne, nommée d'après elles. Une figurine compte pour l'attaque qui l'achève ; pertes réelles seulement, sans la marge. La barre montre la part des PV retirés de chaque arme.</value>
+  </data>
+  <data name="Help_PoolWaste" xml:space="preserve">
+    <value>Gaspillage d'une arme : dégâts bruts perdus parce qu'une attaque dépasse les PV restants de sa figurine (ex. 3 dégâts sur une figurine à 2 PV), jusqu'à la destruction de l'unité. Les tirs sur une unité déjà détruite n'en font pas partie.</value>
+  </data>
+  <data name="Help_AlreadyDestroyed" xml:space="preserve">
+    <value>« Tire sur une unité déjà détruite » : probabilité que l'unité soit déjà morte quand cette arme commence à tirer ; ses attaques ne servent alors à rien. Une valeur élevée suggère de la faire tirer plus tôt, ou de la garder pour une autre cible.</value>
+  </data>
+  <data name="Help_RawDamage" xml:space="preserve">
+    <value>Dégâts bruts : ce que chaque attaque non sauvegardée aurait retiré sans plafond par figurine (après réduction de dégâts et insensible à la douleur), y compris sur les figurines virtuelles de la marge. Ce qui dépasse les PV restants d'une figurine est perdu : la barre et le graphique montrent ces PV perdus à chaque activation. Chaque barre du graphique est découpée selon la part moyenne de chaque arme dans ces PV perdus (marge comprise).</value>
+  </data>
+  <data name="Help_NoWaste" xml:space="preserve">
+    <value>« Aucune perte » : probabilité qu'aucune attaque de l'activation ne dépasse les PV restants de sa figurine.</value>
+  </data>
+  <data name="Help_WasteWhenSurvives" xml:space="preserve">
+    <value>« Perdu quand l'unité survit » : PV perdus en moyenne dans les activations où l'unité n'est pas détruite. Ce sont eux qui coûtent : mieux répartis, ces dégâts auraient pu tuer une figurine de plus. Quand l'unité est détruite de toute façon, le gaspillage n'a rien coûté. Tiret si l'unité est toujours détruite.</value>
+  </data>
+  <data name="Help_WasteShare" xml:space="preserve">
+    <value>Part des dégâts bruts perdue parce qu'une attaque dépasse les PV restants de sa figurine. Ce qui dépasse la destruction de l'unité n'en fait pas partie : c'est la marge.</value>
+  </data>
   <data name="Groups_LossesTitle" xml:space="preserve">
     <value>Pertes par groupe</value>
   </data>

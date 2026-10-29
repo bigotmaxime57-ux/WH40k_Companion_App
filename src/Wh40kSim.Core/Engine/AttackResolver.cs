@@ -33,6 +33,9 @@ public sealed class AttackResolver
     private readonly int[] _saveRollCounts = new int[7]; // index 1..6 = nombre de dés ayant fait cette valeur
     private IDiceRoller _dice = null!;
     private IDiceRoller? _excessDice;
+    private readonly PoolConversion[] _conversions;
+    private readonly PoolConversion _discarded = new(); // pool tiré sur une unité déjà détruite : rien n'est retenu
+    private PoolConversion _conversion = null!;        // compteurs du pool en cours
 
     public AttackResolver(Scenario scenario)
     {
@@ -41,6 +44,8 @@ public sealed class AttackResolver
         _scenario = scenario;
         _target = new DefenderState(scenario.Defender);
         _pools = AttackPool.Build(scenario.Attacker.Weapons);
+        _target.TrackPools(_pools.Count);
+        _conversions = _pools.Select(_ => new PoolConversion()).ToArray();
     }
 
     /// <summary>État du défenseur après le dernier appel à <see cref="Run"/>.</summary>
@@ -48,6 +53,9 @@ public sealed class AttackResolver
 
     /// <summary>Pools d'attaques identiques, dans l'ordre de résolution.</summary>
     public IReadOnlyList<AttackPool> Pools => _pools;
+
+    /// <summary>Conversion des attaques du pool <paramref name="pool"/> pendant le dernier appel à <see cref="Run"/>.</summary>
+    public PoolConversion ConversionOf(int pool) => _conversions[pool];
 
     /// <summary>Excédent calculé pendant le run en cours (dés d'excédent fournis).</summary>
     private bool TracksExcess => _excessDice is not null;
@@ -75,13 +83,18 @@ public sealed class AttackResolver
         _target.Reset();
         int initialModels = _target.ModelsAlive;
 
-        foreach (var pool in _pools)
+        for (int p = 0; p < _pools.Count; p++)
         {
+            // Pertes attribuées au pool en cours ; unité déjà détruite : le pool tire « dans le vide » (noté)
+            _target.BeginPool(p);
+            _conversion = _target.IsDestroyed ? _discarded : _conversions[p];
+            _conversion.Reset();
+            _conversion.Fired = !_target.IsDestroyed;
             if (_target.IsDestroyed && !TracksExcess)
             {
-                return;
+                continue; // sans excédent, plus rien à résoudre (aucun dé consommé)
             }
-            ResolvePool(pool, initialModels);
+            ResolvePool(_pools[p], initialModels);
         }
     }
 
@@ -91,6 +104,10 @@ public sealed class AttackResolver
         int attacks = CountAttacks(pool, initialModels);
         ResolveHits(weapon, attacks, out int hits, out int autoWounds);
         ResolveWounds(weapon, hits, out int normalWounds, out int devastatingWounds);
+        _conversion.Hits += hits + autoWounds;
+        _conversion.LethalHits += autoWounds;
+        _conversion.Wounds += normalWounds + devastatingWounds + autoWounds;
+        _conversion.DevastatingWounds += devastatingWounds;
 
         // Precision : le choix se fait au début de l'étape d'allocation (05.03), une fois par pool
         int precisionGroup = weapon.Abilities.Precision ? SelectPrecisionGroup() : -1;
@@ -143,10 +160,12 @@ public sealed class AttackResolver
             if (abilities.Blast)
             {
                 bonusPerModel += initialModels / 5;
+                _conversion.BlastAttacks += initialModels / 5 * member.ModelCount;
             }
             if (abilities.RapidFire > 0 && _scenario.Context.HalfRange)
             {
                 bonusPerModel += abilities.RapidFire;
+                _conversion.RapidFireAttacks += abilities.RapidFire * member.ModelCount;
             }
 
             for (int model = 0; model < member.ModelCount; model++)
@@ -155,6 +174,7 @@ public sealed class AttackResolver
                 attacks += Math.Max(1, member.Weapon.Attacks.Roll(Dice) + Attack.Attacks) + bonusPerModel;
             }
         }
+        _conversion.Attacks += attacks;
         return attacks;
     }
 
@@ -201,7 +221,9 @@ public sealed class AttackResolver
             {
                 if (!abilities.SustainedHits.IsZero)
                 {
-                    hits += abilities.SustainedHits.Roll(Dice);
+                    int extra = abilities.SustainedHits.Roll(Dice);
+                    hits += extra;
+                    _conversion.SustainedHits += extra;
                 }
                 if (abilities.LethalHits)
                 {
@@ -296,6 +318,7 @@ public sealed class AttackResolver
                              && ((group.InvulnerableSave is int invuln && face >= invuln) || face + ap >= group.Save);
                 if (!saved)
                 {
+                    _conversion.FailedSaves++;
                     _target.ApplyDamage(g, RollDamage(weapon), mortalWounds: false, Dice, IsViaPrecision(g, precisionGroup),
                         weapon.Abilities.Precision);
                 }
@@ -319,6 +342,7 @@ public sealed class AttackResolver
             {
                 return;
             }
+            _conversion.FailedSaves++;
             _target.ApplyDamage(g, RollDamage(weapon), mortalWounds: true, Dice, IsViaPrecision(g, precisionGroup),
                 weapon.Abilities.Precision);
         }

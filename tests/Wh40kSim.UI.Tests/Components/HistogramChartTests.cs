@@ -57,6 +57,49 @@ public class HistogramChartTests : ComponentTestContext
     }
 
     [Fact]
+    public void Stacked_bars_have_one_coloured_part_per_series_with_each_share_in_the_tooltip()
+    {
+        var chart = Render<HistogramChart>(p => p
+            .Add(c => c.Distribution, Sample)
+            .Add(c => c.ValueTitle, "PV perdus : {0}")
+            .Add(c => c.Stack, new HistogramChart.BarStack([
+                new HistogramChart.StackPart("Canon", "wh-share-0", [0, 1, 0.75, 0.5]),
+                new HistogramChart.StackPart("Fusil", "wh-share-1", [0, 0, 0.25, 0.5]),
+            ])));
+
+        // Valeur 0 : barre simple, neutre (d'aucune série) ; valeurs 1 à 3 : deux parties chacune
+        Assert.Contains("wh-chart-bar-neutral", Assert.Single(chart.FindAll("[data-test=chart-bar]")).ClassList);
+        var parts = chart.FindAll("[data-test=chart-bar-stack]");
+        Assert.Equal(6, parts.Count);
+        double Height(AngleSharp.Dom.IElement e) => double.Parse(e.GetAttribute("height")!, System.Globalization.CultureInfo.InvariantCulture);
+        Assert.Equal(3 * Height(parts[3]), Height(parts[2]), 1);   // valeur 2 : 75 % / 25 %
+        Assert.Contains("wh-share-1", parts[3].ClassList);
+
+        chart.FindAll("[data-test=chart-column]")[2].MouseOver();
+        var tooltip = chart.Find("[data-test=chart-tooltip-stack]").TextContent;
+        Assert.Contains("Canon : 75", tooltip);
+        Assert.Contains("Fusil : 25", tooltip);
+        Assert.Contains("Fusil", chart.Find(".wh-chart-legend").TextContent);
+    }
+
+    [Fact]
+    public void An_overlay_is_drawn_in_outline_over_the_union_of_both_value_ranges()
+    {
+        // Bruts de 0 à 3 ; superposée de 0 à 5 : les colonnes vont jusqu'à 5
+        var chart = Render<HistogramChart>(p => p
+            .Add(c => c.Distribution, Sample)
+            .Add(c => c.ValueTitle, "Dégâts bruts : {0}")
+            .Add(c => c.Overlay, new DiscreteDistribution(new long[] { 100, 100, 100, 100, 300, 300 }))
+            .Add(c => c.OverlayLabel, "PV retirés"));
+
+        Assert.Equal(6, chart.FindAll("[data-test=chart-column]").Count);
+        Assert.Equal(6, chart.FindAll("[data-test=chart-overlay]").Count);
+        chart.FindAll("[data-test=chart-column]")[4].MouseOver();
+        Assert.Contains("PV retirés : 30,0", chart.Find("[data-test=chart-tooltip-overlay]").TextContent);
+        Assert.Contains("PV retirés", chart.Find("[data-test=legend-overlay]").TextContent);
+    }
+
+    [Fact]
     public void Each_interval_between_two_gridlines_is_split_in_five_by_dotted_lines()
     {
         var chart = RenderChart();

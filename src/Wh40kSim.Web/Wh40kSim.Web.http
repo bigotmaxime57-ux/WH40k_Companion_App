@@ -22,7 +22,7 @@ Content-Type: application/json
   "seed": 42
 }
 
-### Demande invalide : 400 ProblemDetails (défenseur sans groupe, trop de simulations)
+### Demande refusée : 400 ProblemDetails « Demande refusée », avec toutes les erreurs (défenseur sans groupe, trop de simulations)
 POST {{host}}/api/simulations
 Content-Type: application/json
 

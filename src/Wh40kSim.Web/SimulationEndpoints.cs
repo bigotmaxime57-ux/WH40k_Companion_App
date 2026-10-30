@@ -62,15 +62,24 @@ public static class SimulationEndpoints
             return Problem("Demande illisible", ["La demande est vide."]);
         }
 
-        var errors = simulation.Scenario.Validate();
-        if (errors.Count > 0)
-        {
-            return Problem("Scénario invalide", errors);
-        }
+        // Tout ce qui est refusé est signalé en une fois : erreurs du scénario et nombre de simulations
+        var scenarioErrors = simulation.Scenario.Validate();
         int max = options.Value.MaxIterations;
-        if (simulation.Iterations < 1 || simulation.Iterations > max)
+        bool iterationsRefused = simulation.Iterations < 1 || simulation.Iterations > max;
+        if (scenarioErrors.Count > 0 || iterationsRefused)
         {
-            return Problem("Nombre de simulations refusé", [$"Entre 1 et {max.ToString("N0", CultureInfo.GetCultureInfo("fr-FR"))} simulations par lancement."]);
+            var errors = scenarioErrors.ToList();
+            if (iterationsRefused)
+            {
+                errors.Add($"Nombre de simulations : entre 1 et {max.ToString("N0", CultureInfo.GetCultureInfo("fr-FR"))} par lancement.");
+            }
+            string title = (scenarioErrors.Count > 0, iterationsRefused) switch
+            {
+                (true, true) => "Demande refusée",
+                (true, false) => "Scénario invalide",
+                _ => "Nombre de simulations refusé",
+            };
+            return Problem(title, errors);
         }
 
         // Les événements sont produits par le calcul (autre thread) et envoyés au fil de l'eau

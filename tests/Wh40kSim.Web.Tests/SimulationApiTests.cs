@@ -89,6 +89,34 @@ public class SimulationApiTests
     }
 
     [Fact]
+    public async Task Scenario_errors_and_too_many_iterations_are_reported_together()
+    {
+        await using var factory = Api.Create();
+        var scenario = Api.Scenario() with { Defender = new() };
+
+        using var response = await Api.PostAsync(factory.CreateClient(), Api.Body(scenario, 5_000_000));
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var (title, errors) = await Api.ProblemAsync(response);
+        Assert.Equal("Demande refusée", title);
+        Assert.Contains(errors, e => e.Contains("au moins un groupe"));
+        Assert.Contains(errors, e => e.StartsWith("Nombre de simulations"));
+    }
+
+    [Fact]
+    public async Task The_result_event_is_sent_on_a_single_data_line()
+    {
+        await using var factory = Api.Create();
+
+        using var response = await Api.PostAsync(factory.CreateClient(), Api.Body(Api.Scenario(), 1_000, seed: 3));
+        string[] lines = (await response.Content.ReadAsStringAsync()).Split('\n');
+
+        int result = Array.IndexOf(lines, $"event: {SimulationEndpoints.ResultEvent}");
+        Assert.StartsWith("data: {", lines[result + 1]);
+        Assert.Equal("", lines[result + 2]);
+    }
+
+    [Fact]
     public async Task Launches_beyond_the_limit_per_minute_are_rejected()
     {
         await using var factory = Api.Create(launchesPerMinute: 2);

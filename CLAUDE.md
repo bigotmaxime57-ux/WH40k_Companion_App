@@ -227,10 +227,27 @@ Chaque étape sera précisée et validée avant d'être codée :
    - Badge « CI » dans le README ; CLAUDE.md et `/valider-etape` : CI verte de la branche vérifiée (`gh run list`,
      `gh run view`) avant de présenter et de fusionner une étape. Ticket #7 fermé par le commit (`Closes #7`).
    - **Publication AOT reportée à l'étape 5** (décision de l'utilisateur), avec Docker et le déploiement.
-5. **Docker et mise en ligne** : image Docker (Linux, construction en plusieurs étapes), réglages de production
-   (limites, HTTPS par l'hébergeur ou un proxy, point de santé) ; publication de l'image et déploiement par GitHub
-   Actions ; choix de l'hébergeur et du nom de domaine avec l'utilisateur ; README (lancement local, déploiement) ; tag
-   de fin de phase `v0.4`.
+5. **Docker et mise en ligne**. Précisée et validée par l'utilisateur le 2026-10-30 :
+   - Décisions de l'utilisateur : hébergeur **Fly.io** ; **déploiement à chaque tag de version** (`v*`, et à la main
+     depuis l'onglet « Actions ») ; **sous-domaine de Fly** (`<nom>.fly.dev`, domaine à soi plus tard) ; **veille
+     automatique** (machine arrêtée au repos, redémarrage à la première visite).
+   - `Dockerfile` en deux temps (compilation : SDK .NET 10 + `wasm-tools` + Python, publication avec
+     `-p:RunAOTCompilation=true` ; exécution : ASP.NET Core 10, utilisateur sans privilèges, port 8080) et
+     `.dockerignore` (bin, obj, dist, scénarios personnels, desktop).
+   - Production dans `Wh40kSim.Web` : vraie adresse IP lue dans `X-Forwarded-For` derrière le proxy de Fly (activé par
+     la configuration seulement, désactivé en local) pour la limite par IP ; point de santé `/health` ; HTTPS assuré
+     par Fly (redirection du HTTP).
+   - `fly.toml` : région Paris (`cdg`), veille automatique, zéro machine au repos, machine partagée 1 processeur, 1 Go
+     (ajustable), vérification de santé sur `/health`.
+   - `.github/workflows/deploy.yml` : déclenché par un tag `v*` ou à la main ; réutilise `ci.yml` (déploiement seulement
+     si la CI est verte) ; `flyctl deploy` (image construite par Fly, AOT comprise) ; jeton dans le secret GitHub
+     `FLY_API_TOKEN`.
+   - À faire par l'utilisateur (compte et jeton) : compte fly.io, `flyctl`, `fly apps create <nom>`,
+     `fly tokens create deploy` puis `gh secret set FLY_API_TOKEN`.
+   - Vérifications : image construite et lancée en local si Docker est installé, sinon au premier déploiement manuel ;
+     tests d'intégration (`/health`, adresse IP lue seulement quand c'est activé) ; README (adresse, déploiement,
+     commandes Fly). Premier déploiement manuel vérifié par l'utilisateur, puis tag **`v0.4`** (avec son accord), qui
+     déploie et clôt la phase 4.
 
 ### Phase 5 : comparaison
 
@@ -1006,7 +1023,9 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
 - Phase 4, étape 4 (intégration continue, #7) : fusionnée dans `main`, validée par l'utilisateur le 2026-10-30
   (ticket #7 fermé). CI verte : Linux 1,1 min (565 tests : 223 Core, 84 Simulation, 218 UI, 21 Web, 19 client web),
   Windows 7,9 min (desktop compris). Prochaine étape : 5 (Docker et mise en ligne), à préciser (hébergeur, nom de
-  domaine, déploiement automatique). `.github/workflows/ci.yml` (tâches Linux et
+  domaine, déploiement automatique).
+- Phase 4, étape 5 (Docker et mise en ligne) : précisée et validée le 2026-10-30, à coder sur la branche
+  `phase4/etape5-docker-mise-en-ligne`. `.github/workflows/ci.yml` (tâches Linux et
   Windows), `Wh40kSim.CI.slnf` (solution sans le desktop), badge dans le README, vérification de la CI ajoutée aux
   règles de travail et à `/valider-etape`. Corrigé grâce au premier passage de la CI : l'AOT dans le `.csproj`
   exigeait `wasm-tools` dès le build (elle est maintenant demandée dans la commande de publication, voir « Décisions

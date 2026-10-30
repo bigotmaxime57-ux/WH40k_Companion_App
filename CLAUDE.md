@@ -874,8 +874,9 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
 - Phase 3, étape 9 (overwatch, #11) : précisée avec l'utilisateur le 2026-10-30 (snap shooting V11), fusionnée dans
   `main`, validée par l'utilisateur à l'écran le 2026-10-30 (ticket #11 fermé). Prochaine étape : 10 (relances par
   arme, « pêche aux critiques »), précisée, à coder sur sa propre branche ; tag `v0.3` à sa fin.
-- Phase 3, étape 10 (relances par arme, « pêche aux critiques ») : codée sur la branche `phase3/etape10-relances-par-arme`,
-  **en attente de validation** (à tester à l'écran par l'utilisateur). `RerollPolicy` sans `NonCritical` (refusé par
+- Phase 3, étape 10 (relances par arme, « pêche aux critiques ») : fusionnée dans `main`, validée par l'utilisateur
+  le 2026-10-30. Dernière étape de la phase 3 : tag `v0.3` proposé (à poser avec son accord). Prochaine phase : 4
+  (intégration web), à préciser. `RerollPolicy` sans `NonCritical` (refusé par
   `RerollPolicyJsonConverter`, message clair) ; `WeaponProfile.FishForCriticalHits` / `FishForCriticalWounds` (écrits
   seulement s'ils sont cochés), `CanFishForCriticalHits` / `CanFishForCriticalWounds` ; choix compris dans
   l'identité du pool ; interrupteurs sur la carte d'arme (`WeaponEditor`, ligne « Relances »), liste de relance à trois

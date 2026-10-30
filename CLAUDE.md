@@ -880,8 +880,8 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   mot-clé (la case et le champ de valeur gardent leurs clics). 487 tests verts (210 Core, 72 Simulation, 205 UI ; UI
   stables sur 3 exécutions) ; `NonRegressionTests` inchangés. Étape 10 (relances par arme, « pêche aux 6 ») ajoutée
   à la roadmap le 2026-10-30 ; tag `v0.3` reporté à sa fin. À coder après la validation de l'étape 9.
-- Correctif du gel pendant une longue simulation (#12, branche `correctif/simulation-gel`, **en attente de
-  validation** à l'écran) : `Simulator.Run` accepte `SimulationThreads` (nombre de threads, ordonnanceur ; résultats
+- Correctif du gel pendant une longue simulation (#12) : fusionné dans `main`, validé à l'écran par l'utilisateur le
+  2026-10-30 (ticket #12 fermé) : `Simulator.Run` accepte `SimulationThreads` (nombre de threads, ordonnanceur ; résultats
   identiques au bit près) ; `LocalSimulationService` calcule sur tous les cœurs sauf un, sur des threads en priorité
   basse (`LowPriorityTaskScheduler`, indisponible dans le navigateur : ancien chemin) ; barre de progression redessinée
   à chaque point de pourcentage seulement. Temps mesuré (10 M simulations, 12 cœurs, scénario d'exemple) : ~1,3 s

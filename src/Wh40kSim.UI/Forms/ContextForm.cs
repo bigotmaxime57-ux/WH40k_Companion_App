@@ -15,6 +15,7 @@ public sealed class ContextForm
         HalfRange = context.HalfRange;
         RemainedStationary = context.RemainedStationary;
         Charged = context.Charged;
+        SnapShooting = context.SnapShooting;
         PrecisionTarget = context.PrecisionTarget;
     }
 
@@ -24,6 +25,9 @@ public sealed class ContextForm
 
     public bool Charged { get; set; }
 
+    /// <summary>Tir en overwatch (snap shooting dans le Core).</summary>
+    public bool SnapShooting { get; set; }
+
     /// <summary>Nom du PERSONNAGE visé par Precision (null = le premier encore en jeu).</summary>
     public string? PrecisionTarget { get; set; }
 
@@ -32,6 +36,7 @@ public sealed class ContextForm
         HalfRange = HalfRange,
         RemainedStationary = RemainedStationary,
         Charged = Charged,
+        SnapShooting = SnapShooting,
         PrecisionTarget = PrecisionTarget,
     };
 }

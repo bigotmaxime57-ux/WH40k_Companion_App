@@ -112,13 +112,15 @@ internal static class ScenarioWizard
         WriteTitle("Situation");
 
         // On ne pose les questions de situation que si une arme est concernée (règles portées par le Core)
-        bool halfRange = attacker.UsesHalfRange && ReadBool("À demi-portée", false);
-        bool stationary = attacker.UsesRemainedStationary && ReadBool("Restée immobile", false);
-        bool charged = attacker.UsesCharged && ReadBool("A chargé ce tour", false);
+        bool snapShooting = ReadBool("Tir en overwatch", false);
+        var scenario = new Scenario { Attacker = attacker, Defender = defender, Context = new AttackContext { SnapShooting = snapShooting } };
+        bool halfRange = scenario.HalfRangeMatters && ReadBool("À demi-portée", false);
+        bool stationary = scenario.RemainedStationaryMatters && ReadBool("Restée immobile", false);
+        bool charged = scenario.ChargedMatters && ReadBool("A chargé ce tour", false);
 
         var characters = defender.Groups.Where(g => g.IsCharacter).Select(g => g.Name).ToList();
         string? precisionTarget = null;
-        if (new Scenario { Attacker = attacker, Defender = defender }.PrecisionTargetMatters)
+        if (scenario.PrecisionTargetMatters)
         {
             precisionTarget = ReadParsedName("PERSONNAGE visé par Precision (" + string.Join(" / ", characters) + ")", characters);
         }
@@ -128,6 +130,7 @@ internal static class ScenarioWizard
             HalfRange = halfRange,
             RemainedStationary = stationary,
             Charged = charged,
+            SnapShooting = snapShooting,
             PrecisionTarget = precisionTarget,
         };
     }

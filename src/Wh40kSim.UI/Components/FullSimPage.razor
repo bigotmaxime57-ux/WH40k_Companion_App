@@ -28,7 +28,7 @@
     {
         <MudAlert Severity="MessageSeverity" ShowCloseIcon="true" CloseIconClicked="ClearMessage" data-test="message">@Message</MudAlert>
     }
-    <ScenarioErrors Errors="Errors" HasDiceErrors="HasDiceErrors" />
+    <ScenarioErrors Errors="Errors" Warnings="Warnings" HasDiceErrors="HasDiceErrors" />
 
     <MudGrid Spacing="3">
         @* Situation en tête (plus visible qu'en bas, choix de l'utilisateur), puis Attaquant et Défenseur côte à côte *@
@@ -37,10 +37,11 @@
         </MudItem>
         <MudItem xs="12" md="6">
             <AttackerPanel Attacker="Form.Attacker" Changed="OnAttackerChanged" EditKeywords="EditKeywords"
-                           OnOpen="OpenAttackerAsync" OnSave="SaveAttackerAsync" FileActionsDisabled="Running" SaveDisabled="!CanSaveAttacker" />
+                           OnOpen="OpenAttackerAsync" OnSave="SaveAttackerAsync" FileActionsDisabled="Running" SaveDisabled="!CanSaveAttacker"
+                           SnapShooting="Form.Context.SnapShooting" />
         </MudItem>
         <MudItem xs="12" md="6">
-            <DefenderPanel Defender="Form.Defender" Changed="OnDefenderChanged"
+            <DefenderPanel Defender="Form.Defender" Changed="OnDefenderChanged" SnapShooting="Form.Context.SnapShooting"
                            OnOpen="OpenDefenderAsync" OnSave="SaveDefenderAsync" FileActionsDisabled="Running"
                            ShowPrecisionTargets="Reference.PrecisionTargetGroup is not null" PrecisionTarget="@Form.Context.PrecisionTarget"
                            PrecisionTargetChanged="OnPrecisionTargetChanged" />

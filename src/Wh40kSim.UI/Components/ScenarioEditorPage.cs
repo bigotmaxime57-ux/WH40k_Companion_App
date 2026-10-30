@@ -64,6 +64,9 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
 
     protected IReadOnlyList<string> Errors { get; private set; } = [];
 
+    /// <summary>Avertissements du Core (ce qui ne jouera pas), qui n'empêchent pas de lancer.</summary>
+    protected IReadOnlyList<string> Warnings { get; private set; } = [];
+
     protected bool HasDiceErrors { get; private set; }
 
     /// <summary>Arme dont les mots-clés sont ouverts dans le panneau latéral.</summary>
@@ -193,12 +196,14 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
             _scenario = Form.ToScenario();
             Reference = _scenario;
             Errors = _scenario.Validate();
+            Warnings = _scenario.Warnings();
             HasDiceErrors = false;
         }
         catch (FormatException)
         {
             _scenario = null;
             Errors = [];
+            Warnings = [];
             HasDiceErrors = true;
         }
 

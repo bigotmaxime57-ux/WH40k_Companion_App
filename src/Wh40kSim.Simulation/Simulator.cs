@@ -35,7 +35,7 @@ public static class Simulator
         scenario.EnsureValid();
 
         int baseSeed = seed ?? Random.Shared.Next();
-        var total = new Accumulator(scenario.Defender, scenario.UsesPrecision, AttackPool.Build(scenario.Attacker.Weapons).Count);
+        var total = new Accumulator(scenario.Defender, scenario.UsesPrecision, AttackPool.Build(scenario.FiringWeapons).Count);
         var mergeLock = new object();
         var progressLock = new object();
         int completedChunks = 0;
@@ -105,7 +105,7 @@ public static class Simulator
     {
         public AttackResolver Resolver { get; } = new(scenario);
 
-        public Accumulator Accumulator { get; } = new(scenario.Defender, scenario.UsesPrecision, AttackPool.Build(scenario.Attacker.Weapons).Count);
+        public Accumulator Accumulator { get; } = new(scenario.Defender, scenario.UsesPrecision, AttackPool.Build(scenario.FiringWeapons).Count);
     }
 
     /// <summary>
@@ -343,7 +343,7 @@ public static class Simulator
                 .ToList();
             double totalKills = _killedPerGroup.Sum(), totalDamage = _damagePerGroup.Sum();
             var waste = TrimTrailingZeros(_waste, 1);
-            var pools = AttackPool.Build(scenario.Attacker.Weapons)
+            var pools = AttackPool.Build(scenario.FiringWeapons)
                 .Select((pool, p) =>
                 {
                     var damage = new DiscreteDistribution(_poolDamage[p]);

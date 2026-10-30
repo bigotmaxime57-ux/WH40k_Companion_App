@@ -2,6 +2,7 @@ using Bunit;
 using Wh40kSim.Core.Model;
 using Wh40kSim.Core.Serialization;
 using Wh40kSim.UI.Components;
+using Wh40kSim.UI.Forms;
 using Wh40kSim.UI.Services;
 
 namespace Wh40kSim.UI.Tests.Components;
@@ -92,6 +93,27 @@ public class SimulatorPageTests : ComponentTestContext
         Assert.NotEmpty(page.FindAll("[data-test=half-range]"));
         Assert.Empty(page.FindAll("[data-test=charged]"));
         Assert.Empty(page.FindAll("[data-test=remained-stationary]"));
+    }
+
+    [Fact]
+    public void Overwatch_warns_about_melee_weapons_without_blocking_and_blocks_without_ranged_weapons()
+    {
+        var page = Render<SimulatorPage>();
+        page.Instance.Form.Attacker.Weapons.Add(new WeaponForm { Name = "Épée", Type = WeaponType.Melee });
+
+        page.Find("input[data-test=snap-shooting]").Change(true);
+
+        Assert.Contains("'Épée'", page.Find("[data-test=scenario-warnings]").TextContent);
+        Assert.Empty(page.FindAll("[data-test=scenario-errors]"));
+        Assert.False(IsDisabled(page, "run"));
+
+        // Plus aucune arme de tir : erreur, Lancer désactivé
+        page.Instance.Form.Attacker.Weapons[0].Type = WeaponType.Melee;
+        page.Find("input[data-test=snap-shooting]").Change(false);
+        page.Find("input[data-test=snap-shooting]").Change(true);
+
+        Assert.Contains("aucune arme de tir", page.Find("[data-test=scenario-errors]").TextContent);
+        Assert.True(IsDisabled(page, "run"));
     }
 
     [Fact]

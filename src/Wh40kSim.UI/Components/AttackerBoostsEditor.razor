@@ -1,21 +1,24 @@
 @*
     Boosts de l'attaquant (auras, stratagèmes…), pour toutes ses armes : caractéristiques (sans plafond) et modificateurs
     aux jets (±1 au total), rangés par étape de la séquence d'attaque. Stockés dans AttackerUnit.Boosts (JSON : « attacker.boosts »).
+    En overwatch (snap shooting), la rangée Touche est grisée : le moteur l'ignore, les valeurs sont gardées.
 *@
 
 <BoostSection ActiveCount="Boosts.ActiveCount" Help="@([L["Help_AttackerBoosts"], L["Help_Skill"], L["Help_Strength"], L["Help_Roll"], L["Help_Profile"]])"
               data-test="attacker-boosts">
-    <MudText Typo="Typo.caption" Class="wh-boost-row-title">@L["Boosts_Hit"]</MudText>
+    <BoostRowTitle Title="@L["Boosts_Hit"]" SnapShooting="SnapShooting" />
     <MudGrid Spacing="3">
         <MudItem xs="12" sm="4">
             <MudNumericField T="int" Label="@L["Modifier_Skill"]" Min="-6" Max="6" @bind-Value="Boosts.Skill" @bind-Value:after="NotifyChanged"
-                             data-test="skill-modifier" />
+                             Disabled="SnapShooting" data-test="skill-modifier" />
         </MudItem>
         <MudItem xs="12" sm="4">
-            <MudNumericField T="int" Label="@L["Context_HitModifier"]" Min="-3" Max="3" @bind-Value="Boosts.HitRoll" @bind-Value:after="NotifyChanged" />
+            <MudNumericField T="int" Label="@L["Context_HitModifier"]" Min="-3" Max="3" @bind-Value="Boosts.HitRoll" @bind-Value:after="NotifyChanged"
+                             Disabled="SnapShooting" data-test="hit-modifier" />
         </MudItem>
         <MudItem xs="12" sm="4">
-            <MudSelect T="RerollPolicy" Label="@L["Context_HitReroll"]" @bind-Value="Boosts.HitReroll" @bind-Value:after="NotifyChanged">
+            <MudSelect T="RerollPolicy" Label="@L["Context_HitReroll"]" @bind-Value="Boosts.HitReroll" @bind-Value:after="NotifyChanged"
+                       Disabled="SnapShooting">
                 <RerollItems />
             </MudSelect>
         </MudItem>
@@ -53,6 +56,10 @@
 @code {
     [Parameter, EditorRequired]
     public AttackerBoostsForm Boosts { get; set; } = null!;
+
+    /// <summary>Tir en overwatch : boosts de touche sans effet (grisés).</summary>
+    [Parameter]
+    public bool SnapShooting { get; set; }
 
     [Parameter]
     public EventCallback Changed { get; set; }

@@ -839,8 +839,12 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   mots-clés et règles (8), unités (9, rapport en points en étape 5). Après le web, chaque phase livre sa partie web.
   Objectif de la phase 3 raccourci avec l'accord de l'utilisateur (comparaison passée en phase 5). Commentaires du
   code et README alignés. Prochaine étape : phase 3, étape 9 (overwatch, #11), à préciser.
-- Phase 3, étape 9 (overwatch, #11) : précisée avec l'utilisateur le 2026-10-30 (snap shooting V11), à coder sur la
-  branche `phase3/etape9-overwatch`.
+- Phase 3, étape 9 (overwatch, #11) : précisée avec l'utilisateur le 2026-10-30 (snap shooting V11), codée sur la
+  branche `phase3/etape9-overwatch`, **en attente de validation** (à tester à l'écran par l'utilisateur).
+  `AttackContext.SnapShooting`, `Scenario.FiringWeapons` / `Warnings()` / `HalfRangeMatters` / `RemainedStationaryMatters`
+  / `ChargedMatters` ; interrupteur dans `ContextPanel`, boosts de touche grisés (`BoostRowTitle`), avertissements dans
+  `ScenarioErrors`, étiquette `OverwatchChip` sur les résultats. 484 tests verts (210 Core, 72 Simulation, 202 UI ;
+  UI stables sur 3 exécutions) ; `NonRegressionTests` inchangés.
 
 Points notés pour la suite :
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

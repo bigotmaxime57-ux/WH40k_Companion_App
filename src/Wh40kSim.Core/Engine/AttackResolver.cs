@@ -12,6 +12,8 @@ namespace Wh40kSim.Core.Engine;
 /// <item>Les sauvegardes d'un pool sont jetées ensemble et résolues du plus petit au plus grand résultat,
 /// sur le groupe d'allocation courant, jusqu'à sa destruction.</item>
 /// <item>L'Endurance est recalculée avant chaque pool (05.02.01).</item>
+/// <item>En snap shooting (<see cref="AttackContext.SnapShooting"/>), seules les armes de tir tirent et chaque attaque
+/// touche sur un 6 non modifié (touche ordinaire, sans relance).</item>
 /// </list>
 /// <para>Excédent (optionnel) : avec des dés d'excédent, la séquence continue après la destruction de l'unité contre
 /// des figurines virtuelles (<see cref="DefenderState.ExcessProfile"/>). Tout ce qui suit la destruction est tiré sur
@@ -43,7 +45,7 @@ public sealed class AttackResolver
         scenario.EnsureValid();
         _scenario = scenario;
         _target = new DefenderState(scenario.Defender);
-        _pools = AttackPool.Build(scenario.Attacker.Weapons);
+        _pools = AttackPool.Build(scenario.FiringWeapons);
         _target.TrackPools(_pools.Count);
         _conversions = _pools.Select(_ => new PoolConversion()).ToArray();
     }
@@ -193,6 +195,19 @@ public sealed class AttackResolver
         }
 
         var context = _scenario.Context;
+        if (context.SnapShooting)
+        {
+            // 15.09 : 6 non modifié seulement, sans relance ; touche ordinaire (ni Lethal Hits, ni Sustained Hits)
+            for (int i = 0; i < attacks; i++)
+            {
+                if (Dice.D6() == 6)
+                {
+                    hits++;
+                }
+            }
+            return;
+        }
+
         int skill = EffectiveSkill(weapon);
 
         int modifier = Attack.HitRoll + Defense.HitRoll;
@@ -248,7 +263,7 @@ public sealed class AttackResolver
         int target = WoundTable.RequiredRoll(EffectiveStrength(weapon), _target.EffectiveToughness());
 
         int modifier = Attack.WoundRoll + Defense.WoundRoll;
-        if (weapon.UsesCharged && context.Charged)
+        if (weapon.UsesCharged && context.Charged && !context.SnapShooting)
         {
             modifier += 1;
         }

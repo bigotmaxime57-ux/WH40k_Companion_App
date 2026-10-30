@@ -1,22 +1,25 @@
 @*
     Boosts du défenseur contre les attaques qui le visent : couvert, caractéristiques des attaques (sans plafond) et
     modificateurs aux jets des attaquants (±1 au total). Valeurs du point de vue de l'attaquant (négatif = moins bon pour
-    lui) ; le moteur les cumule avec les boosts de l'attaquant.
+    lui) ; le moteur les cumule avec les boosts de l'attaquant. En overwatch (snap shooting), la rangée Touche est
+    grisée : le moteur l'ignore, les valeurs sont gardées.
 *@
 
 <BoostSection ActiveCount="Boosts.ActiveCount" Help="@([L["Help_DefenderBoosts"], L["Help_Cover"], L["Help_Roll"], L["Help_DefenderDamage"]])"
               data-test="defender-boosts">
-    <MudText Typo="Typo.caption" Class="wh-boost-row-title">@L["Boosts_Hit"]</MudText>
+    <BoostRowTitle Title="@L["Boosts_Hit"]" SnapShooting="SnapShooting" />
     <MudGrid Spacing="3">
         <MudItem xs="12" sm="4">
-            <MudCheckBox T="bool" Label="@L["Defender_InCover"]" @bind-Value="Boosts.InCover" @bind-Value:after="NotifyChanged" data-test="in-cover" />
+            <MudCheckBox T="bool" Label="@L["Defender_InCover"]" @bind-Value="Boosts.InCover" @bind-Value:after="NotifyChanged"
+                         Disabled="SnapShooting" data-test="in-cover" />
         </MudItem>
         <MudItem xs="12" sm="4">
             <MudNumericField T="int" Label="@L["Modifier_DefenderSkill"]" Min="-6" Max="6" @bind-Value="Boosts.Skill" @bind-Value:after="NotifyChanged"
-                             data-test="defender-skill-modifier" />
+                             Disabled="SnapShooting" data-test="defender-skill-modifier" />
         </MudItem>
         <MudItem xs="12" sm="4">
-            <MudNumericField T="int" Label="@L["Defender_HitModifier"]" Min="-3" Max="3" @bind-Value="Boosts.HitRoll" @bind-Value:after="NotifyChanged" />
+            <MudNumericField T="int" Label="@L["Defender_HitModifier"]" Min="-3" Max="3" @bind-Value="Boosts.HitRoll" @bind-Value:after="NotifyChanged"
+                             Disabled="SnapShooting" data-test="defender-hit-modifier" />
         </MudItem>
     </MudGrid>
 
@@ -38,6 +41,10 @@
 @code {
     [Parameter, EditorRequired]
     public DefenderBoostsForm Boosts { get; set; } = null!;
+
+    /// <summary>Tir en overwatch : boosts de touche sans effet (grisés).</summary>
+    [Parameter]
+    public bool SnapShooting { get; set; }
 
     [Parameter]
     public EventCallback Changed { get; set; }

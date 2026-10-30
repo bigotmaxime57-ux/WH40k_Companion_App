@@ -49,6 +49,9 @@
   <data name="Boosts_Hit" xml:space="preserve">
     <value>Touche</value>
   </data>
+  <data name="Boosts_HitSnapShooting" xml:space="preserve">
+    <value>Sans effet en overwatch : chaque attaque ne touche que sur un 6 non modifié, sans relance, quels que soient la CT et les modificateurs. Les valeurs sont gardées pour un tir normal.</value>
+  </data>
   <data name="Boosts_Profile" xml:space="preserve">
     <value>Attaques, PA et dégâts</value>
   </data>
@@ -86,7 +89,7 @@
     <value>Relance des touches</value>
   </data>
   <data name="Context_None" xml:space="preserve">
-    <value>Aucune condition ne concerne ces armes (demi-portée, immobile, charge, Precision).</value>
+    <value>Aucune autre condition ne concerne ces armes (demi-portée, immobile, charge, Precision).</value>
   </data>
   <data name="Context_PrecisionFirst" xml:space="preserve">
     <value>Premier PERSONNAGE en jeu</value>
@@ -96,6 +99,9 @@
   </data>
   <data name="Context_RemainedStationary" xml:space="preserve">
     <value>Restée immobile</value>
+  </data>
+  <data name="Context_SnapShooting" xml:space="preserve">
+    <value>Tir en overwatch</value>
   </data>
   <data name="Context_Title" xml:space="preserve">
     <value>Situation</value>
@@ -159,6 +165,9 @@
   </data>
   <data name="Errors_Title" xml:space="preserve">
     <value>Le scénario ne peut pas être simulé :</value>
+  </data>
+  <data name="Warnings_Title" xml:space="preserve">
+    <value>À noter (la simulation reste possible) :</value>
   </data>
   <data name="File_AttackerLoaded" xml:space="preserve">
     <value>Attaquant chargé depuis {0}.</value>
@@ -255,6 +264,12 @@
   </data>
   <data name="Help_Simulation" xml:space="preserve">
     <value>Graine : laisser vide pour la tirer au hasard ; la même graine redonne exactement le même résultat. Ctrl+Entrée lance la simulation.</value>
+  </data>
+  <data name="Help_SnapShooting" xml:space="preserve">
+    <value>Overwatch (11e édition) : le tir se fait en snap shooting. Seules les armes de tir tirent ; chaque attaque ne touche que sur un 6 non modifié, quels que soient la CT et les modificateurs, sans relance, et ces touches ne sont pas critiques (ni Lethal Hits, ni Sustained Hits). Torrent touche toujours automatiquement ; la suite (blessure, Devastating Wounds, sauvegardes, dégâts) est inchangée.</value>
+  </data>
+  <data name="Help_SnapShootingLimits" xml:space="preserve">
+    <value>Le simulateur ne vérifie pas si le tir est permis : cible visible à 24" ou moins, unité qui tire non engagée et non TITANIC, coût en PC. C'est au joueur de s'en assurer.</value>
   </data>
   <data name="Help_Skill" xml:space="preserve">
     <value>CT / CC : modification de caractéristique, sans plafond, cumulée entre attaquant, défenseur et couvert ; le résultat reste entre 2+ et 6+.</value>
@@ -480,6 +495,9 @@
   </data>
   <data name="Help_CentralRange" xml:space="preserve">
     <value>80 % des cas : la fourchette où tombent 8 simulations sur 10. Les 10 % les plus malchanceuses font moins, les 10 % les plus chanceuses font plus.</value>
+  </data>
+  <data name="Results_Overwatch" xml:space="preserve">
+    <value>Overwatch</value>
   </data>
   <data name="Results_Title" xml:space="preserve">
     <value>Résultats</value>

@@ -231,6 +231,39 @@ public class ContextPanelTests : ComponentTestContext
         Assert.NotEmpty(panel.FindAll("[data-test=remained-stationary]"));
         Assert.NotEmpty(panel.FindAll("[data-test=charged]"));
     }
+
+    [Fact]
+    public void Overwatch_hides_the_conditions_it_makes_useless()
+    {
+        var weapons = new AttackerUnit
+        {
+            Weapons = [new WeaponGroup { Weapon = new WeaponProfile { Abilities = new WeaponAbilities { Heavy = true, Lance = true, RapidFire = 1 } } }],
+        };
+        var reference = new Scenario { Attacker = weapons, Context = new AttackContext { SnapShooting = true } };
+
+        var panel = RenderPanel(reference, new ContextForm { SnapShooting = true });
+
+        Assert.NotEmpty(panel.FindAll("[data-test=half-range]"));
+        Assert.Empty(panel.FindAll("[data-test=remained-stationary]"));
+        Assert.Empty(panel.FindAll("[data-test=charged]"));
+    }
+
+    [Fact]
+    public void Overwatch_switch_is_always_offered_and_updates_the_situation()
+    {
+        var context = new ContextForm();
+        int changes = 0;
+        var panel = Render<ContextPanel>(p => p
+            .Add(c => c.Context, context)
+            .Add(c => c.Reference, new Scenario())
+            .Add(c => c.Changed, () => changes++));
+
+        panel.Find("input[data-test=snap-shooting]").Change(true);
+
+        Assert.True(context.SnapShooting);
+        Assert.True(context.ToAttackContext().SnapShooting);
+        Assert.Equal(1, changes);
+    }
 }
 
 public class BoostTests : ComponentTestContext
@@ -265,6 +298,34 @@ public class BoostTests : ComponentTestContext
         Assert.Contains("2", boosts.Find("[data-test=boosts-count]").TextContent);
         boosts.Find("input[data-test=defender-damage-modifier]").Change("-2");
         Assert.Equal(-2, form.Damage);
+    }
+
+    [Fact]
+    public void Hit_boosts_are_greyed_in_overwatch_and_keep_their_values()
+    {
+        var attacker = new AttackerBoostsForm(new AttackerBoosts { Skill = 1, Strength = 1 });
+        var defender = new DefenderBoostsForm(new DefenderBoosts { InCover = true, Ap = -1 });
+
+        var attackerBoosts = Render<AttackerBoostsEditor>(p => p.Add(c => c.Boosts, attacker).Add(c => c.SnapShooting, true));
+        var defenderBoosts = Render<DefenderBoostsEditor>(p => p.Add(c => c.Boosts, defender).Add(c => c.SnapShooting, true));
+
+        Assert.True(attackerBoosts.Find("input[data-test=skill-modifier]").HasAttribute("disabled"));
+        Assert.True(attackerBoosts.Find("input[data-test=hit-modifier]").HasAttribute("disabled"));
+        Assert.True(defenderBoosts.Find("input[data-test=in-cover]").HasAttribute("disabled"));
+        Assert.True(defenderBoosts.Find("input[data-test=defender-hit-modifier]").HasAttribute("disabled"));
+        Assert.False(defenderBoosts.Find("input[data-test=defender-damage-modifier]").HasAttribute("disabled"));
+        Assert.NotNull(attackerBoosts.Find("[data-test=boosts-snap-shooting]"));
+        Assert.Equal(1, attacker.Skill);
+        Assert.True(defender.InCover);
+    }
+
+    [Fact]
+    public void Hit_boosts_are_editable_without_overwatch()
+    {
+        var boosts = Render<AttackerBoostsEditor>(p => p.Add(c => c.Boosts, new AttackerBoostsForm(new AttackerBoosts { Skill = 1 })));
+
+        Assert.False(boosts.Find("input[data-test=skill-modifier]").HasAttribute("disabled"));
+        Assert.Empty(boosts.FindAll("[data-test=boosts-snap-shooting]"));
     }
 
     [Fact]
@@ -335,6 +396,22 @@ public class ResultsViewTests : ComponentTestContext
         var view = Render<ResultsView>(p => p.Add(c => c.Result, OneShot(strength, toughness, twinLinked)));
 
         Assert.Contains(tone, view.Find("[data-test=wipe]").ClassList);
+    }
+
+    [Fact]
+    public void Overwatch_results_are_labelled()
+    {
+        var scenario = new Scenario
+        {
+            Attacker = new AttackerUnit { Weapons = [new WeaponGroup { ModelCount = 10, Weapon = new WeaponProfile { Attacks = 2 } }] },
+            Defender = new DefenderUnit { Groups = [new ModelGroup { Name = "Gardes", Count = 2 }] },
+            Context = new AttackContext { SnapShooting = true },
+        };
+
+        var view = Render<ResultsView>(p => p.Add(c => c.Result, Simulator.Run(scenario, 2_000, seed: 1)));
+
+        Assert.Contains("Overwatch", view.Find("[data-test=overwatch-chip]").TextContent);
+        Assert.Empty(Render<ResultsView>(p => p.Add(c => c.Result, Run(defenders: 2))).FindAll("[data-test=overwatch-chip]"));
     }
 
     [Fact]

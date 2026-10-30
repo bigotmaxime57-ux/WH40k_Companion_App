@@ -1,0 +1,13 @@
+@* Étiquette « Overwatch » à côté de l'en-tête des résultats d'un tir en snap shooting (Quick sim et Full sim). *@
+
+@if (Result.Scenario.Context.SnapShooting)
+{
+    <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="Variant.Outlined" Class="ml-2" data-test="overwatch-chip">
+        @L["Results_Overwatch"]
+    </MudChip>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public SimulationResult Result { get; set; } = null!;
+}

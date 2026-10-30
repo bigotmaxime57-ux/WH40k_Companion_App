@@ -16,6 +16,14 @@ public sealed record AttackContext
     public bool Charged { get; init; }
 
     /// <summary>
+    /// Tir en snap shooting (15.09), utilisé par l'Overwatch (15.08) : seules les armes de tir tirent ; chaque attaque ne
+    /// touche que sur un 6 non modifié, quels que soient la CT et les modificateurs, sans relance, et ces touches ne
+    /// sont pas critiques (Torrent touche toujours automatiquement). Demi-portée seule utile : « immobile » et
+    /// « a chargé » sont sans effet.
+    /// </summary>
+    public bool SnapShooting { get; init; }
+
+    /// <summary>
     /// Nom du groupe PERSONNAGE visé par les armes Precision (null = le premier PERSONNAGE encore en jeu,
     /// dans l'ordre d'allocation).
     /// </summary>

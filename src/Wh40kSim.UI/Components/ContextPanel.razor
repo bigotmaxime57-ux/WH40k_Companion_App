@@ -1,26 +1,32 @@
 @*
-    Situation de l'attaque : seulement les conditions qui changent quelque chose pour les armes saisies (demi-portée,
-    immobile, a chargé, cible de Precision). Ce choix vient du Core (UsesHalfRange, UsesRemainedStationary, UsesCharged,
-    PrecisionTargetMatters), aucune règle n'est écrite ici. Les boosts sont dans les cartes de l'attaquant et du défenseur.
+    Situation de l'attaque : le tir en overwatch (toujours proposé), puis seulement les conditions qui changent quelque
+    chose pour les armes qui tirent (demi-portée, immobile, a chargé, cible de Precision). Ce choix vient du Core
+    (HalfRangeMatters, RemainedStationaryMatters, ChargedMatters, PrecisionTargetMatters), aucune règle n'est écrite ici.
+    Les boosts sont dans les cartes de l'attaquant et du défenseur.
 *@
 
 <MudPaper Elevation="3" Class="pa-4 wh-section" data-test="context">
     <SectionHeader Icon="@Icons.Material.Filled.Terrain" Title="@L["Context_Title"]" Help="@([L["Help_Context"]])" />
 
+    <div class="wh-subsection-title">
+        <MudSwitch T="bool" Label="@L["Context_SnapShooting"]" Color="Color.Primary" @bind-Value="Context.SnapShooting" @bind-Value:after="NotifyChanged"
+                   data-test="snap-shooting" />
+        <HelpBubble Lines="@([L["Help_SnapShooting"], L["Help_SnapShootingLimits"]])" />
+    </div>
     @if (!HasConditions)
     {
         <MudText Typo="Typo.body2" Class="wh-muted" data-test="context-none">@L["Context_None"]</MudText>
     }
-    @if (Reference.Attacker.UsesHalfRange)
+    @if (Reference.HalfRangeMatters)
     {
         <MudCheckBox T="bool" Label="@L["Context_HalfRange"]" @bind-Value="Context.HalfRange" @bind-Value:after="NotifyChanged" data-test="half-range" />
     }
-    @if (Reference.Attacker.UsesRemainedStationary)
+    @if (Reference.RemainedStationaryMatters)
     {
         <MudCheckBox T="bool" Label="@L["Context_RemainedStationary"]" @bind-Value="Context.RemainedStationary" @bind-Value:after="NotifyChanged"
                      data-test="remained-stationary" />
     }
-    @if (Reference.Attacker.UsesCharged)
+    @if (Reference.ChargedMatters)
     {
         <MudCheckBox T="bool" Label="@L["Context_Charged"]" @bind-Value="Context.Charged" @bind-Value:after="NotifyChanged" data-test="charged" />
     }
@@ -52,7 +58,7 @@
     public EventCallback Changed { get; set; }
 
     private bool HasConditions =>
-        Reference.Attacker.UsesHalfRange || Reference.Attacker.UsesRemainedStationary || Reference.Attacker.UsesCharged || ShowPrecisionTarget;
+        Reference.HalfRangeMatters || Reference.RemainedStationaryMatters || Reference.ChargedMatters || ShowPrecisionTarget;
 
     /// <summary>Affichée aussi si une cible est encore choisie, pour pouvoir la retirer si elle n'a plus lieu d'être.</summary>
     private bool ShowPrecisionTarget => Reference.PrecisionTargetMatters || Context.PrecisionTarget is not null;

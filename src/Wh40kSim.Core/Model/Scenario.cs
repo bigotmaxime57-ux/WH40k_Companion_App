@@ -12,6 +12,26 @@ public sealed record Scenario
     public AttackContext Context { get; init; } = new();
 
     /// <summary>
+    /// Armes qui tirent, dans l'ordre de résolution : toutes, sauf en snap shooting où les armes de mêlée ne font rien
+    /// (elles restent dans le scénario, <see cref="Warnings"/> le signale).
+    /// </summary>
+    [JsonIgnore]
+    public IReadOnlyList<WeaponGroup> FiringWeapons =>
+        Context.SnapShooting ? Attacker.Weapons.Where(w => w.Weapon.Type == WeaponType.Ranged).ToList() : Attacker.Weapons;
+
+    /// <summary>La situation « à demi-portée » change quelque chose pour une arme qui tire.</summary>
+    [JsonIgnore]
+    public bool HalfRangeMatters => FiringWeapons.Any(w => w.Weapon.UsesHalfRange);
+
+    /// <summary>La situation « restée immobile » change quelque chose (jamais en snap shooting : modificateur de touche).</summary>
+    [JsonIgnore]
+    public bool RemainedStationaryMatters => !Context.SnapShooting && Attacker.UsesRemainedStationary;
+
+    /// <summary>La situation « a chargé » change quelque chose (jamais en snap shooting : tir dans la phase adverse).</summary>
+    [JsonIgnore]
+    public bool ChargedMatters => !Context.SnapShooting && Attacker.UsesCharged;
+
+    /// <summary>
     /// Le choix du PERSONNAGE visé par Precision change quelque chose : au moins une arme Precision et plusieurs
     /// PERSONNAGES (avec un seul, c'est forcément lui).
     /// </summary>
@@ -19,9 +39,9 @@ public sealed record Scenario
     public bool PrecisionTargetMatters =>
         UsesPrecision && Defender.Groups.Count(g => g.IsCharacter) > 1;
 
-    /// <summary>Au moins une arme de l'attaquant a Precision.</summary>
+    /// <summary>Au moins une arme qui tire a Precision.</summary>
     [JsonIgnore]
-    public bool UsesPrecision => Attacker.Weapons.Any(w => w.Weapon.Abilities.Precision);
+    public bool UsesPrecision => FiringWeapons.Any(w => w.Weapon.Abilities.Precision);
 
     /// <summary>
     /// Groupe PERSONNAGE visé par Precision (indice dans l'ordre d'allocation) : la cible choisie si elle est nommée,
@@ -56,6 +76,10 @@ public sealed record Scenario
         if (Attacker.Weapons.Count == 0)
         {
             errors.Add("L'attaquant doit avoir au moins un profil d'arme.");
+        }
+        else if (FiringWeapons.Count == 0)
+        {
+            errors.Add("Tir en overwatch : l'attaquant n'a aucune arme de tir, il ne tire pas.");
         }
         if (Attacker.Points < 0)
         {
@@ -119,6 +143,26 @@ public sealed record Scenario
         }
 
         return errors;
+    }
+
+    /// <summary>
+    /// Points à signaler qui n'empêchent pas de simuler (vide si rien à dire) : ce que le scénario contient mais qui
+    /// ne jouera pas.
+    /// </summary>
+    public IReadOnlyList<string> Warnings()
+    {
+        var warnings = new List<string>();
+
+        if (Context.SnapShooting && FiringWeapons.Count > 0)
+        {
+            var melee = Attacker.Weapons.Where(w => w.Weapon.Type == WeaponType.Melee).Select(w => $"'{w.Weapon.Name}'").ToList();
+            if (melee.Count > 0)
+            {
+                warnings.Add($"Tir en overwatch : les armes de mêlée ({string.Join(", ", melee)}) ne tirent pas et ne sont pas prises en compte.");
+            }
+        }
+
+        return warnings;
     }
 
     public void EnsureValid()

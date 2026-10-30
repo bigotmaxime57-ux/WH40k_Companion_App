@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
@@ -26,12 +25,6 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
 
     /// <summary>Progression minimale entre deux rafraîchissements de la barre (1 %).</summary>
     private const double ProgressStep = 0.01;
-
-    /// <summary>
-    /// Délai minimal entre deux rafraîchissements de la barre : en web, la progression d'un calcul rapide arrive presque
-    /// d'un coup et chaque rafraîchissement redessine la page, plus lentement qu'en desktop (WebAssembly).
-    /// </summary>
-    private static readonly TimeSpan ProgressInterval = TimeSpan.FromMilliseconds(100);
     private const string ShortcutsModule = "./_content/Wh40kSim.UI/wh40ksim.js";
 
     private Scenario? _scenario;          // scénario saisi, null tant qu'une expression de dés est invalide
@@ -84,7 +77,8 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
     /// <summary>Arme dont les mots-clés sont ouverts dans le panneau latéral.</summary>
     protected WeaponForm? KeywordWeapon { get; private set; }
 
-    protected double Progress { get; private set; }
+    /// <summary>Progression du calcul en cours : seule la barre se redessine quand elle change, pas la page.</summary>
+    protected ProgressState Progress { get; } = new();
 
     protected string? Message { get; private set; }
 
@@ -458,23 +452,20 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
         }
 
         Session.IsRunning = true;
-        Progress = 0;
+        Progress.Report(0);
         Message = null;
         _cancellation = new CancellationTokenSource();
-        // Les rapports arrivent des threads de calcul (ou du serveur) : on redessine via le contexte de l'interface, au plus
-        // à chaque point de pourcentage gagné (un rapport par paquet de simulations : 1 000 pour 10 M, ticket #12) et
-        // tous les dixièmes de seconde ; la fin (100 %) est toujours affichée
+        // Les rapports arrivent des threads de calcul (ou du serveur) : seule la barre se redessine (ProgressState), à
+        // chaque point de pourcentage gagné (un rapport par paquet de simulations : 1 000 pour 10 M, ticket #12) ; la page
+        // n'est pas redessinée pendant le calcul
         double shown = 0;
-        var sinceShown = Stopwatch.StartNew();
         var progress = new Progress<double>(value =>
         {
-            Progress = value;
             _ = InvokeAsync(CloseQueueDialog); // le calcul a commencé : plus d'attente
-            if ((value - shown >= ProgressStep && sinceShown.Elapsed >= ProgressInterval) || value >= 1)
+            if (value - shown >= ProgressStep || value >= 1)
             {
                 shown = value;
-                sinceShown.Restart();
-                _ = InvokeAsync(StateHasChanged);
+                Progress.Report(value);
             }
         });
         // File d'attente du serveur (web seulement) : fenêtre avec la position, fermée au démarrage du calcul

@@ -71,11 +71,7 @@ else
             }
         </MudStack>;
 
-    private RenderFragment ProgressBar =>
-        @<div>
-            <MudProgressLinear Color="Color.Primary" Min="0" Max="1" Value="Progress" data-test="progress" />
-            <MudText Typo="Typo.caption">@Progress.ToString("P0")</MudText>
-        </div>;
+    private RenderFragment ProgressBar => @<SimulationProgressBar State="Progress" />;
 
     /// <summary>Bandeau sur une ligne (Full sim) au lieu d'une carte.</summary>
     [Parameter]
@@ -108,9 +104,9 @@ else
     [Parameter]
     public bool Running { get; set; }
 
-    /// <summary>Progression entre 0 et 1.</summary>
-    [Parameter]
-    public double Progress { get; set; }
+    /// <summary>Progression entre 0 et 1, suivie par la barre seule (pas de rafraîchissement du panneau).</summary>
+    [Parameter, EditorRequired]
+    public ProgressState Progress { get; set; } = null!;
 
     [Parameter]
     public EventCallback OnRun { get; set; }

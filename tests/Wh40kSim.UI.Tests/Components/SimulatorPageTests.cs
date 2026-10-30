@@ -175,6 +175,28 @@ public class SimulatorPageTests : ComponentTestContext
     }
 
     [Fact]
+    public void Progress_redraws_only_the_bar_not_the_page()
+    {
+        Simulations.ProgressReports = 100;
+        Simulations.Gate = new TaskCompletionSource();
+        var page = Render<SimulatorPage>();
+        page.Find("[data-test=run]").Click();
+        // Le compteur de bUnit inclut les rendus des enfants : on suit un panneau voisin de la barre (la Situation), qui
+        // ne se redessine que si la page entière se redessine
+        var context = page.FindComponent<ContextPanel>();
+        int pageRenders = context.RenderCount;
+        var bar = page.FindComponent<SimulationProgressBar>();
+        int barRenders = bar.RenderCount;
+
+        Simulations.Gate.SetResult();
+        page.WaitForElement("[data-test=results]", TimeSpan.FromSeconds(10));
+
+        // La barre a suivi les 100 pourcents ; la page ne s'est redessinée qu'à la fin (résultats)
+        Assert.True(bar.RenderCount - barRenders >= 50, $"Barre redessinée {bar.RenderCount - barRenders} fois.");
+        Assert.True(context.RenderCount - pageRenders <= 3, $"Page redessinée {context.RenderCount - pageRenders} fois.");
+    }
+
+    [Fact]
     public void A_refusal_from_the_service_is_shown_as_a_message()
     {
         Simulations.Error = new SimulationServiceException("Trop de lancements", ["Réessayez dans 30 s."]);

@@ -96,6 +96,9 @@ public sealed class FakeSimulationService : ISimulationService
     /// <summary>Si définie, levée au lieu de rendre un résultat (refus ou échec du service).</summary>
     public Exception? Error { get; set; }
 
+    /// <summary>Nombre de rapports de progression envoyés avant le résultat (0 = un seul, à 0 %).</summary>
+    public int ProgressReports { get; set; }
+
     public async Task<SimulationResult> RunAsync(
         Scenario scenario,
         int iterations,
@@ -119,6 +122,11 @@ public sealed class FakeSimulationService : ISimulationService
             throw Error;
         }
         progress?.Report(0);
+        for (int i = 1; i <= ProgressReports; i++)
+        {
+            progress?.Report((double)i / ProgressReports);
+            await Task.Yield();
+        }
         return Simulator.Run(scenario, TestIterations, seed ?? 1, cancellationToken: cancellationToken);
     }
 }

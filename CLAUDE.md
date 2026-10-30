@@ -993,9 +993,10 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   (clic perdu après ouverture) corrigé avec `ClickUntil`. Retours de l'utilisateur après essai : profil de lancement
   sans débogage WebAssembly (Rider exigeait alors un navigateur Chromium ; l'utilisateur est sous Firefox) ; barre de
   progression figée vers 16 % en web (calcul de 1 M en ~0,2 s sur le serveur, page redessinée à chaque pourcent, plus
-  lent en WebAssembly) : rafraîchissement au plus tous les dixièmes de seconde, barre à 100 % avant le traitement du
-  résultat. 564 tests verts (223 Core, 84 Simulation, 217 UI, 21 Web,
-  19 client web ; UI stables sur 4 exécutions). `Wh40kSim.Web` : `SimulationOptions` (section
+  lent en WebAssembly) : la barre devient un composant autonome (`SimulationProgressBar`, suivi de `ProgressState`) qui
+  se redessine seule, la page n'est plus redessinée pendant le calcul (idée de l'utilisateur) ; barre à 100 % avant le
+  traitement du résultat. 565 tests verts (223 Core, 84 Simulation, 218 UI, 21 Web, 19 client web ; UI stables sur
+  3 exécutions). `Wh40kSim.Web` : `SimulationOptions` (section
   « Simulation »), `SimulationQueue` (file sans limite, positions), `ISimulationRunner` / `SimulatorRunner`,
   `SimulationEndpoints` (`POST /api/simulations`, SSE `queued` / `progress` / `result` / `error`, `ProblemDetails`),
   limiteur par IP (fenêtre fixe), `Wh40kSim.Web.http`, profil `http` sur le port 5080 ; `Wh40kSim.Web.Tests`

@@ -1,0 +1,40 @@
+@*
+    Barre de progression de la simulation : se redessine seule à chaque changement de ProgressState, sans redessiner la
+    page qui la contient (plus léger, surtout en web, où WebAssembly redessine plus lentement).
+*@
+@implements IDisposable
+
+<div>
+    <MudProgressLinear Color="Color.Primary" Min="0" Max="1" Value="State.Value" data-test="progress" />
+    <MudText Typo="Typo.caption" data-test="progress-text">@State.Value.ToString("P0")</MudText>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public ProgressState State { get; set; } = null!;
+
+    private ProgressState? _subscribed;
+
+    protected override void OnParametersSet()
+    {
+        if (!ReferenceEquals(_subscribed, State))
+        {
+            if (_subscribed is not null)
+            {
+                _subscribed.Changed -= OnChanged;
+            }
+            _subscribed = State;
+            _subscribed.Changed += OnChanged;
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_subscribed is not null)
+        {
+            _subscribed.Changed -= OnChanged;
+        }
+    }
+
+    private void OnChanged() => InvokeAsync(StateHasChanged);
+}

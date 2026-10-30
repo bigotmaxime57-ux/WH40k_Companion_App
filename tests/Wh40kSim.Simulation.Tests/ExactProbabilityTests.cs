@@ -31,7 +31,7 @@ public class ExactProbabilityTests
     [Fact]
     public void Fishing_for_sixes_on_both_rolls_matches_the_binomial_law()
     {
-        // Lethal Hits et Devastating Wounds, pêche aux 6 aux deux jets, relance complète.
+        // Lethal Hits et Devastating Wounds, pêche aux critiques aux deux jets, relance complète.
         // Touche : critique = 6 du premier jet ou de la relance (11/36), touche ordinaire = 3 à 5 à la relance (15/36).
         // Touche critique : blessure automatique ; touche ordinaire : 6 du premier jet, sinon relance sur 4+.
         var boosts = new AttackerBoosts { HitReroll = RerollPolicy.Failed, WoundReroll = RerollPolicy.Failed };

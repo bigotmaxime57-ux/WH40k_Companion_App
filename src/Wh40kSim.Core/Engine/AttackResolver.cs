@@ -421,7 +421,7 @@ public sealed class AttackResolver
     }
 
     /// <summary>
-    /// Relance complète : les échecs, ou tout sauf les critiques en « pêche aux 6 » (<paramref name="fishing"/>, déjà
+    /// Relance complète : les échecs, ou tout sauf les critiques en « pêche aux critiques » (<paramref name="fishing"/>, déjà
     /// vérifié pour l'arme du pool).
     /// </summary>
     private static bool ShouldReroll(RerollPolicy policy, bool fishing, int roll, RollOutcome outcome) => policy switch

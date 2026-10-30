@@ -251,7 +251,7 @@
     <value>Modifications de caractéristiques, sans plafond : A et D restent au moins à 1, la PA ne dépasse jamais 0.</value>
   </data>
   <data name="Help_Fishing" xml:space="preserve">
-    <value>Pêche aux 6 : avec la relance complète, cette arme relance aussi ses réussites ordinaires pour chercher un critique (touche : Lethal Hits, Sustained Hits ; blessure : Devastating Wounds). On risque de perdre une réussite, mais on gagne des critiques. Sans pêche aux 6, la relance complète ne relance que les échecs. Proposé seulement quand l'arme a l'effet critique et que la relance complète est disponible (boosts de l'attaquant, ou Twin-linked pour la blessure).</value>
+    <value>Pêche aux critiques : avec la relance complète, cette arme relance aussi ses réussites ordinaires pour chercher un critique (touche : Lethal Hits, Sustained Hits ; blessure : Devastating Wounds). On risque de perdre une réussite, mais on gagne des critiques. Sans pêche aux critiques, la relance complète ne relance que les échecs. Proposé seulement quand l'arme a l'effet critique et que la relance complète est disponible (boosts de l'attaquant, ou Twin-linked pour la blessure).</value>
   </data>
   <data name="Help_Results" xml:space="preserve">
     <value>80 % des cas : du 1er au 9e décile. Les tuiles et les pertes par groupe sont toujours les pertes réelles, plafonnées à l'effectif de l'unité.</value>
@@ -593,10 +593,10 @@
     <value>Relances</value>
   </data>
   <data name="Weapon_FishHits" xml:space="preserve">
-    <value>Pêche aux 6 (touche)</value>
+    <value>Pêche aux critiques (touche)</value>
   </data>
   <data name="Weapon_FishWounds" xml:space="preserve">
-    <value>Pêche aux 6 (blessure)</value>
+    <value>Pêche aux critiques (blessure)</value>
   </data>
   <data name="Weapon_Melee" xml:space="preserve">
     <value>Mêlée</value>

@@ -51,10 +51,10 @@ public sealed class WeaponForm
 
     public WeaponAbilitiesForm Abilities { get; set; }
 
-    /// <summary>« Pêche aux 6 » à la touche (voir <see cref="WeaponProfile.FishForCriticalHits"/>).</summary>
+    /// <summary>« Pêche aux critiques » à la touche (voir <see cref="WeaponProfile.FishForCriticalHits"/>).</summary>
     public bool FishForCriticalHits { get; set; }
 
-    /// <summary>« Pêche aux 6 » à la blessure (voir <see cref="WeaponProfile.FishForCriticalWounds"/>).</summary>
+    /// <summary>« Pêche aux critiques » à la blessure (voir <see cref="WeaponProfile.FishForCriticalWounds"/>).</summary>
     public bool FishForCriticalWounds { get; set; }
 
     /// <exception cref="FormatException">Si <see cref="Attacks"/> ou <see cref="Damage"/> est invalide.</exception>

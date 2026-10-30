@@ -31,21 +31,21 @@ public sealed record WeaponProfile
     public WeaponAbilities Abilities { get; init; } = new();
 
     /// <summary>
-    /// « Pêche aux 6 » à la touche : avec la relance complète, relance aussi les touches ordinaires pour chercher une
+    /// « Pêche aux critiques » à la touche : avec la relance complète, relance aussi les touches ordinaires pour chercher une
     /// touche critique. Sans effet si <see cref="CanFishForCriticalHits"/> est faux (choix gardé, ignoré).
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool FishForCriticalHits { get; init; }
 
     /// <summary>
-    /// « Pêche aux 6 » à la blessure : avec la relance complète, relance aussi les blessures ordinaires pour chercher
+    /// « Pêche aux critiques » à la blessure : avec la relance complète, relance aussi les blessures ordinaires pour chercher
     /// une blessure critique. Sans effet si <see cref="CanFishForCriticalWounds"/> est faux (choix gardé, ignoré).
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool FishForCriticalWounds { get; init; }
 
     /// <summary>
-    /// La pêche aux 6 à la touche a un sens : un effet sur touche critique (Lethal Hits, Sustained Hits), la relance
+    /// La pêche aux critiques à la touche a un sens : un effet sur touche critique (Lethal Hits, Sustained Hits), la relance
     /// complète des touches, et un jet de touche relançable (pas Torrent, pas en snap shooting).
     /// </summary>
     public bool CanFishForCriticalHits(AttackerBoosts boosts, AttackContext context) =>
@@ -53,7 +53,7 @@ public sealed record WeaponProfile
         && !Abilities.Torrent && !context.SnapShooting && boosts.HitReroll == RerollPolicy.Failed;
 
     /// <summary>
-    /// La pêche aux 6 à la blessure a un sens : Devastating Wounds, et la relance complète des blessures (boosts de
+    /// La pêche aux critiques à la blessure a un sens : Devastating Wounds, et la relance complète des blessures (boosts de
     /// l'attaquant, ou Twin-linked qui permet de relancer le jet de blessure).
     /// </summary>
     public bool CanFishForCriticalWounds(AttackerBoosts boosts) =>

@@ -123,7 +123,7 @@ Valeurs du point de vue de l'attaquant (+1 = mieux pour lui). Deux sortes, à ne
    courant jusqu'à la fin du pool ou sa destruction ; les mortelles de Devastating Wounds vont d'abord sur lui.
 
 Relances disponibles (touche et blessure) : aucune, les 1, relance complète (`Failed` dans le JSON), qui relance les
-échecs. **Pêche aux 6**, arme par arme (`fishForCriticalHits`, `fishForCriticalWounds` sur l'arme) : avec la relance
+échecs. **Pêche aux critiques**, arme par arme (`fishForCriticalHits`, `fishForCriticalWounds` sur l'arme) : avec la relance
 complète, l'arme relance aussi ses réussites ordinaires pour chercher un critique. Elle n'agit que si elle a un sens :
 à la touche, une arme Lethal Hits ou Sustained Hits (ni Torrent, ni en overwatch) ; à la blessure, une arme
 Devastating Wounds, la relance complète venant des boosts ou de Twin-linked. Deux armes identiques qui font un choix

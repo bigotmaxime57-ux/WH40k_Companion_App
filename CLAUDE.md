@@ -118,7 +118,7 @@ chacun :
 - Plus tard : **Comparaison** (phase 5) et **Optimiseur** (phase 6).
 
 Le tir en **overwatch** n'est pas un mode : c'est un interrupteur de la Situation (Quick sim et Full sim), qui fait
-tirer selon ses règles (étape 9, #11). Dernière étape : relances par arme (« pêche aux 6 », étape 10).
+tirer selon ses règles (étape 9, #11). Dernière étape : relances par arme (« pêche aux critiques », étape 10).
 
 Étapes détaillées dans « Phase 3 : étapes ». **Le choix des technologies doit tenir compte de la phase 4** : tout ce
 qu'on ajoute à Wh40kSim.UI (bibliothèque de graphiques, navigation) doit fonctionner aussi bien dans le
@@ -629,15 +629,17 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
    - Tests : dés imposés (5 qui rate malgré les boosts, 6 sans Lethal ni Sustained, aucune relance, critique sur X+
      sans effet, Torrent, Devastating Wounds actif, mêlée écartée), avertissements, JSON ; bUnit (interrupteur,
      options masquées, boosts grisés, avertissement, mention sur les résultats). Ticket #11 fermé par le commit.
-10. **Relances par arme : « pêche aux 6 »** (ajoutée le 2026-10-30, idée de l'utilisateur, à coder après la validation
+10. **Relances par arme : « pêche aux critiques »** (ajoutée le 2026-10-30, idée de l'utilisateur, à coder après la validation
    de l'étape 9). Relancer aussi les réussites ordinaires pour chercher un critique n'a de sens qu'avec un effet sur
    critique, et seulement pour les armes qui en ont un : la stratégie se choisit **pool par pool**, plus au global.
+   Nommée « pêche aux critiques » plutôt que « pêche aux 6 » (décision de l'utilisateur : critiques sur 5+, 4+… à
+   venir).
    Décisions de l'utilisateur :
    - **Boosts** (relance des touches, relance des blessures) : « tout sauf critique » et « les échecs » disparaissent,
      remplacés par une **relance complète**, qui relance par défaut les échecs (comportement de l'ancien « les
      échecs »). Choix restants : aucune, les 1, relance complète. JSON : la valeur `Failed` reste et désigne la
      relance complète ; `NonCritical` est **refusé à la lecture** (JSON strict, message clair).
-   - **Sur chaque arme**, choix « pêche aux 6 », affiché seulement si les conditions sont réunies (sinon absent) :
+   - **Sur chaque arme**, choix « pêche aux critiques », affiché seulement si les conditions sont réunies (sinon absent) :
      - touche : l'arme a un effet sur touche critique (Lethal Hits, Sustained Hits) et l'attaquant a la relance
        complète des touches (jamais avec Torrent, ni en overwatch : pas de relance de touche) ;
      - blessure : l'arme a Devastating Wounds et la relance complète des blessures est disponible : boosts de
@@ -650,13 +652,13 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
      l'arme, absents = `false`) ; conditions portées par le Core (ex. `CanFishForCriticalHits(boosts, context)`),
      utilisées par le moteur, la console et l'interface ; `AttackPool.MakeIdenticalAttacks` compare les deux choix.
    - UI : liste de relance des boosts à trois choix ; sur la carte d'une arme, **deux interrupteurs indépendants**
-     « Pêche aux 6 (touche) » et « Pêche aux 6 (blessure) » (une arme avec des effets critiques à la touche et à la
+     « Pêche aux critiques (touche) » et « Pêche aux critiques (blessure) » (une arme avec des effets critiques à la touche et à la
      blessure a les deux, précisé par l'utilisateur), avec bulle « ? », chacun seulement quand il a un sens. Console :
      mêmes choix.
    - Non-régression : le scénario riche de `NonRegressionTests` relance les blessures en « tout sauf critique » pour
      toutes ses armes, dont deux sans Devastating Wounds : plus exprimable, ses références seront recapturées une fois
      (changement noté ici) ; l'autre scénario reste identique au bit près.
-   - Tests : dés imposés (pêche aux 6 sur une arme, relance des échecs sur l'autre dans le même scénario,
+   - Tests : dés imposés (pêche aux critiques sur une arme, relance des échecs sur l'autre dans le même scénario,
      Twin-linked + Devastating Wounds, choix ignoré si les conditions disparaissent, pools séparés), JSON (`NonCritical`
      refusé), bUnit (interrupteurs affichés ou non selon les mots-clés et les boosts).
    - Fin de phase : README, tag `v0.3`.
@@ -871,8 +873,8 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   code et README alignés. Prochaine étape : phase 3, étape 9 (overwatch, #11), à préciser.
 - Phase 3, étape 9 (overwatch, #11) : précisée avec l'utilisateur le 2026-10-30 (snap shooting V11), fusionnée dans
   `main`, validée par l'utilisateur à l'écran le 2026-10-30 (ticket #11 fermé). Prochaine étape : 10 (relances par
-  arme, « pêche aux 6 »), précisée, à coder sur sa propre branche ; tag `v0.3` à sa fin.
-- Phase 3, étape 10 (relances par arme, « pêche aux 6 ») : codée sur la branche `phase3/etape10-relances-par-arme`,
+  arme, « pêche aux critiques »), précisée, à coder sur sa propre branche ; tag `v0.3` à sa fin.
+- Phase 3, étape 10 (relances par arme, « pêche aux critiques ») : codée sur la branche `phase3/etape10-relances-par-arme`,
   **en attente de validation** (à tester à l'écran par l'utilisateur). `RerollPolicy` sans `NonCritical` (refusé par
   `RerollPolicyJsonConverter`, message clair) ; `WeaponProfile.FishForCriticalHits` / `FishForCriticalWounds` (écrits
   seulement s'ils sont cochés), `CanFishForCriticalHits` / `CanFishForCriticalWounds` ; choix compris dans
@@ -886,7 +888,7 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   touches automatiques » dans la conversion des attaques (onglet Armes) ; gaspillage nul pour tous les pools : colonne
   dans la teinte positive plutôt qu'en alerte ; sélecteur de mots-clés : un clic sur la tuile active / désactive le
   mot-clé (la case et le champ de valeur gardent leurs clics). 487 tests verts (210 Core, 72 Simulation, 205 UI ; UI
-  stables sur 3 exécutions) ; `NonRegressionTests` inchangés. Étape 10 (relances par arme, « pêche aux 6 ») ajoutée
+  stables sur 3 exécutions) ; `NonRegressionTests` inchangés. Étape 10 (relances par arme, « pêche aux critiques ») ajoutée
   à la roadmap le 2026-10-30 ; tag `v0.3` reporté à sa fin. À coder après la validation de l'étape 9.
 
 Points notés pour la suite :

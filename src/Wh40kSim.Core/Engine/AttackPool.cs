@@ -37,7 +37,7 @@ public sealed class AttackPool
 
     /// <summary>
     /// Deux armes font des attaques identiques si tout ce qui sert après le décompte des attaques est égal, choix de
-    /// « pêche aux 6 » compris (une seule stratégie de relance par groupe de dés). Le nom, la caractéristique A et les
+    /// « pêche aux critiques » compris (une seule stratégie de relance par groupe de dés). Le nom, la caractéristique A et les
     /// règles qui n'agissent que sur le nombre d'attaques (Blast, Rapid Fire) sont ignorés.
     /// </summary>
     public static bool MakeIdenticalAttacks(WeaponProfile a, WeaponProfile b) =>

@@ -10,7 +10,7 @@ public enum RerollPolicy
 
     /// <summary>
     /// Relance complète : on peut relancer n'importe quel jet. Relance les échecs, ou tout ce qui n'est pas critique
-    /// pour une arme en « pêche aux 6 » (<see cref="WeaponProfile.FishForCriticalHits"/>,
+    /// pour une arme en « pêche aux critiques » (<see cref="WeaponProfile.FishForCriticalHits"/>,
     /// <see cref="WeaponProfile.FishForCriticalWounds"/>).
     /// </summary>
     Failed = 2,

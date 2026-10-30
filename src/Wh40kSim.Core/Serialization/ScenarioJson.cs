@@ -76,7 +76,7 @@ public static class ScenarioJson
 
 /// <summary>
 /// Relance écrite par son nom (<c>None</c>, <c>Ones</c>, <c>Failed</c>) ; toute autre valeur est refusée, dont l'ancienne
-/// « tout sauf critique » (<c>NonCritical</c>), remplacée par la pêche aux 6 sur les armes.
+/// « tout sauf critique » (<c>NonCritical</c>), remplacée par la pêche aux critiques sur les armes.
 /// </summary>
 public sealed class RerollPolicyJsonConverter : JsonConverter<RerollPolicy>
 {
@@ -90,7 +90,7 @@ public sealed class RerollPolicyJsonConverter : JsonConverter<RerollPolicy>
         if (string.Equals(text, "NonCritical", StringComparison.OrdinalIgnoreCase))
         {
             throw new JsonException("La relance « NonCritical » (tout sauf critique) n'existe plus : choisir \"Failed\" (relance complète) "
-                                    + "et cocher la pêche aux 6 (fishForCriticalHits, fishForCriticalWounds) sur les armes concernées.");
+                                    + "et cocher la pêche aux critiques (fishForCriticalHits, fishForCriticalWounds) sur les armes concernées.");
         }
         throw new JsonException("Relance attendue : \"None\", \"Ones\" ou \"Failed\" (relance complète).");
     }

@@ -4,7 +4,7 @@
     descendre (ordre de résolution) / dupliquer / supprimer ; puis la ligne
     « Profil » (A, CT/CC, F, PA, D de même largeur, comme sur une fiche) et la ligne « Mots-clés », libellés alignés.
     Repliable : une fois replié, une ligne de résumé (Describe du Core). Les mots-clés actifs sont des étiquettes ; le
-    bouton « Mots-clés » ouvre le sélecteur (panneau latéral). Ligne « Relances » (pêche aux 6 à la touche, à la
+    bouton « Mots-clés » ouvre le sélecteur (panneau latéral). Ligne « Relances » (pêche aux critiques à la touche, à la
     blessure) seulement quand le Core la juge utile pour cette arme.
 *@
 @using Wh40kSim.UI.Keywords
@@ -92,7 +92,7 @@
                 </div>
             </div>
 
-            @* Pêche aux 6 : chaque interrupteur n'apparaît que si le Core juge qu'il a un sens pour cette arme *@
+            @* Pêche aux critiques : chaque interrupteur n'apparaît que si le Core juge qu'il a un sens pour cette arme *@
             @if (Fishing is var (hits, wounds) && (hits || wounds))
             {
                 <div class="wh-card-row" data-test="weapon-fishing">
@@ -149,15 +149,15 @@
     [Parameter]
     public EventCallback OnEditKeywords { get; set; }
 
-    /// <summary>Boosts de l'attaquant : la relance complète ouvre la pêche aux 6.</summary>
+    /// <summary>Boosts de l'attaquant : la relance complète ouvre la pêche aux critiques.</summary>
     [Parameter]
     public AttackerBoosts Boosts { get; set; } = new();
 
-    /// <summary>Situation : pas de pêche aux 6 à la touche en overwatch.</summary>
+    /// <summary>Situation : pas de pêche aux critiques à la touche en overwatch.</summary>
     [Parameter]
     public AttackContext Context { get; set; } = new();
 
-    /// <summary>Pêche aux 6 possible à la touche, à la blessure (Core) ; rien tant qu'une expression de dés est invalide.</summary>
+    /// <summary>Pêche aux critiques possible à la touche, à la blessure (Core) ; rien tant qu'une expression de dés est invalide.</summary>
     private (bool Hits, bool Wounds) Fishing
     {
         get

@@ -5,7 +5,7 @@ using Wh40kSim.UI.Forms;
 
 namespace Wh40kSim.UI.Tests.Components;
 
-/// <summary>Pêche aux 6 sur la carte d'une arme : interrupteurs affichés seulement quand ils ont un sens (Core).</summary>
+/// <summary>Pêche aux critiques sur la carte d'une arme : interrupteurs affichés seulement quand ils ont un sens (Core).</summary>
 public class FishingTests : ComponentTestContext
 {
     private static readonly AttackerBoosts FullRerolls = new() { HitReroll = RerollPolicy.Failed, WoundReroll = RerollPolicy.Failed };

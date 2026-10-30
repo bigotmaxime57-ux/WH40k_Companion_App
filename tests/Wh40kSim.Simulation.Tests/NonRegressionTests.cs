@@ -12,7 +12,7 @@ namespace Wh40kSim.Simulation.Tests;
 /// Avant de recapturer, les nouveaux résultats ont été vérifiés : conformes à la théorie sur les cas exacts et à un
 /// générateur indépendant sur ces deux scénarios (l'ancien générateur surestimait les PV retirés d'environ 0,1 %).
 /// Scénario riche recapturé le 2026-10-30 (phase 3, étape 10) : la relance « tout sauf critique » de toutes les armes
-/// n'existe plus ; relance complète des blessures et pêche aux 6 sur le plasma (Devastating Wounds) seulement, les
+/// n'existe plus ; relance complète des blessures et pêche aux critiques sur le plasma (Devastating Wounds) seulement, les
 /// autres armes relançant leurs échecs. L'exemple, sans cette relance, est resté identique.</para>
 /// </summary>
 public class NonRegressionTests

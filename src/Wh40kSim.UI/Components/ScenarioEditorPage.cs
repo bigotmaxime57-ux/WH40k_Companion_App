@@ -437,10 +437,17 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// Caractères retirés des noms de fichier proposés : ceux que Windows interdit, quel que soit le système (Linux et le
+    /// navigateur en acceptent davantage, mais les fichiers doivent pouvoir être ouverts partout).
+    /// </summary>
+    private static readonly char[] ForbiddenFileNameChars =
+        ['<', '>', ':', '"', '/', '\\', '|', '?', '*', .. Enumerable.Range(0, 32).Select(c => (char)c)];
+
     /// <summary>Nom proposé pour une partie : le nom de l'unité sans les caractères interdits, à défaut un nom générique.</summary>
     private static string SuggestedFileName(string unitName, string fallback)
     {
-        string name = string.Concat(unitName.Split(Path.GetInvalidFileNameChars())).Trim();
+        string name = string.Concat(unitName.Split(ForbiddenFileNameChars)).Trim();
         return (name.Length > 0 ? name : fallback) + ".json";
     }
 

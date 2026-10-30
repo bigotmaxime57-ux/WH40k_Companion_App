@@ -1008,7 +1008,9 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   Windows), `Wh40kSim.CI.slnf` (solution sans le desktop), badge dans le README, vérification de la CI ajoutée aux
   règles de travail et à `/valider-etape`. Corrigé grâce au premier passage de la CI : l'AOT dans le `.csproj`
   exigeait `wasm-tools` dès le build (elle est maintenant demandée dans la commande de publication, voir « Décisions
-  techniques ») ; restauration faite en configuration Release (paquet de runtime du desktop manquant sinon).
+  techniques ») ; restauration faite en configuration Release (paquet de runtime du desktop manquant sinon) ; noms de
+  fichier proposés à l'enregistrement nettoyés des caractères interdits par Windows sur tous les systèmes (Linux et le
+  navigateur gardaient « : »).
   UI commune : `ISimulationService.MaxIterations` (aucun en desktop) et suivi de la file (`IProgress<int>`),
   `SimulationServiceException` affichée en message, `QueueDialog` / `QueueStatus`, `SimulationPanel.MaxIterations`
   (choix rapides au-delà masqués, saisie bornée, bulle « ? »). `Wh40kSim.Web.Client` : `Routes` (thème lu avant

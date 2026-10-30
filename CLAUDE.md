@@ -958,8 +958,13 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   du résultat), à préciser.
 - Phase 4, étape 1 (contrat du résultat) : fusionnée dans `main`, validée par l'utilisateur le 2026-10-30.
   Prochaine étape : 2 (serveur et API), à préciser (valeurs des limites à trancher).
-- Phase 4, étape 2 (serveur et API) : précisée et validée le 2026-10-30, à coder sur la branche
-  `phase4/etape2-serveur-api`. `SimulationData` (+ `GroupData`,
+- Phase 4, étape 2 (serveur et API) : précisée et validée le 2026-10-30, codée sur la branche
+  `phase4/etape2-serveur-api`, **en attente de validation**. `Wh40kSim.Web` : `SimulationOptions` (section
+  « Simulation »), `SimulationQueue` (file sans limite, positions), `ISimulationRunner` / `SimulatorRunner`,
+  `SimulationEndpoints` (`POST /api/simulations`, SSE `queued` / `progress` / `result` / `error`, `ProblemDetails`),
+  limiteur par IP (fenêtre fixe), `Wh40kSim.Web.http`, profil `http` sur le port 5080 ; `Wh40kSim.Web.Tests`
+  (`Microsoft.AspNetCore.Mvc.Testing` 10.0.14). Vérifié aussi sur le vrai serveur (Kestrel, `curl`). 531 tests verts
+  (223 Core, 83 Simulation, 212 UI, 13 Web ; UI et Web stables sur 3 exécutions). `SimulationData` (+ `GroupData`,
   `PrecisionWeaponData`, `PoolData`, `ConversionCounts`, membres `required`) et `SimulationData.Validate()` ;
   l'accumulateur produit les données (`ToData`), `SimulationResult(SimulationData)` calcule tout, `SimulationResult.Data` ;
   `SimulationJson` (réglages de `ScenarioJson`). Rien de visible à l'écran : API de `SimulationResult` inchangée.

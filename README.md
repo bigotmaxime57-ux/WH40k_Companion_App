@@ -31,6 +31,8 @@ src/Wh40kSim.Simulation      Monte Carlo : simulateur parallèle et déterminist
   Statistics/                Distributions : moyenne, écart-type, centiles, P(= k), P(≥ k), lignes de tableau
 src/Wh40kSim.Console         Appli console de debug (saisie interactive ou fichier JSON) : affichage uniquement
 src/Wh40kSim.Desktop         Application desktop Windows (MAUI Blazor Hybrid) : hôte de Wh40kSim.UI
+src/Wh40kSim.Web             Serveur web : API de simulation (POST /api/simulations, progression en Server-Sent
+                             Events, file d'attente, limites réglables dans appsettings.json)
 src/Wh40kSim.UI              Interface Blazor + MudBlazor partagée par les hôtes (aucune règle de jeu, aucun calcul)
   Components/                AppShell (barre de titre, menu des thèmes, routeur), accueil, écrans « Quick sim » et
                              « Full sim » (saisie, résultats en onglets) : attaquant, défenseur, situation,
@@ -42,6 +44,7 @@ src/Wh40kSim.UI              Interface Blazor + MudBlazor partagée par les hôt
 tests/Wh40kSim.Core.Tests    Tests xUnit du Core (règles)
 tests/Wh40kSim.Simulation.Tests  Tests xUnit de la simulation (moyennes analytiques, statistiques, non-régression)
 tests/Wh40kSim.UI.Tests      Tests xUnit de l'interface (formulaires, services, composants avec bUnit)
+tests/Wh40kSim.Web.Tests     Tests d'intégration de l'API (WebApplicationFactory)
 scenarios/                   Scénarios d'exemple et scénarios enregistrés depuis la saisie interactive
 ```
 
@@ -62,7 +65,11 @@ dotnet test
 dotnet run --project src/Wh40kSim.Desktop                                            # application desktop
 dotnet run --project src/Wh40kSim.Console                                            # console : saisie interactive
 dotnet run --project src/Wh40kSim.Console -- scenarios/exemple-escouade-vs-leader.json -n 1000000 --seed 42
+dotnet run --project src/Wh40kSim.Web                                                # API web sur http://localhost:5080
 ```
+
+L'API web s'essaie depuis Rider avec `src/Wh40kSim.Web/Wh40kSim.Web.http` (demande valide, demande invalide). Le
+client web (navigateur) arrive à l'étape suivante de la phase 4.
 
 **Depuis Rider** : choisir la configuration d'exécution `Wh40kSim.Desktop` (profil « Windows Machine ») puis Run.
 L'application n'est pas empaquetée (pas de Microsoft Store) : le `.exe` est dans

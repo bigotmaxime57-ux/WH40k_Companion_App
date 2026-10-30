@@ -746,7 +746,11 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   l'excédent est une distribution prolongée à part, contre des copies du premier garde du corps (pas du dernier tué,
   souvent le leader, unique et plus résistant). Flux de dés séparé pour ne pas modifier les résultats réels.
 - **Web (phase 4)** : Blazor Web App, serveur `Wh40kSim.Web` (API + client) et client WebAssembly
-  `Wh40kSim.Web.Client` ; le calcul se fait sur le serveur.
+  `Wh40kSim.Web.Client` ; le calcul se fait sur le serveur. **Client compilé AOT** (`RunAOTCompilation`, décision du
+  2026-10-30 après essai : affichage interprété trop lent, ~1 s par changement d'écran ; nettement plus fluide en AOT) :
+  premier téléchargement 6,7 Mo en Brotli au lieu de 3,2 (31 Mo décompressés au lieu de 10,7), publication d'environ
+  4 min ; seulement à la publication (Debug depuis Rider : interprété). Charge de travail `wasm-tools` nécessaire pour
+  publier : sur chaque machine, dans l'image Docker et l'intégration continue.
 - **Versions** (vérifiées le 2026-10-27) : MudBlazor 9.11.0, Microsoft.AspNetCore.Components.Web 10.0.14,
   Microsoft.Extensions.Localization 10.0.14, CommunityToolkit.Maui 15.0.1, bUnit 2.13.3, Microsoft.Maui.Controls et
   Microsoft.AspNetCore.Components.WebView.Maui 10.0.120 (charge de travail MAUI 10.0.110), Microsoft.Extensions.Logging.Debug
@@ -830,6 +834,9 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
 - Si les chemins longs Windows sont désactivés (`LongPathsEnabled = 0`), le build MAUI échoue au-delà de 260
   caractères : ne pas placer le dépôt dans un dossier trop profond (dans le dépôt, le chemin le plus long fait ~180).
 - Le modèle `dotnet new maui-blazor` cible aussi Android / iOS : ne garder que la cible Windows.
+- Charge de travail `wasm-tools` (`dotnet workload install wasm-tools`, terminal administrateur pour
+  `C:\Program Files\dotnet`) : nécessaire pour **publier** la version web (compilation AOT du client) ; build, tests et
+  lancement depuis Rider fonctionnent sans elle.
 - CLI GitHub (tickets) : `winget install --id GitHub.cli -e --source winget --accept-source-agreements
   --accept-package-agreements` (sans ces options, winget bloque sur les conditions du Microsoft Store), puis
   `gh auth login` dans un terminal séparé (questions interactives : GitHub.com, HTTPS, navigateur). Une session ouverte
@@ -996,7 +1003,10 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   lent en WebAssembly) : la barre devient un composant autonome (`SimulationProgressBar`, suivi de `ProgressState`) qui
   se redessine seule, la page n'est plus redessinée pendant le calcul (idée de l'utilisateur) ; barre à 100 % avant le
   traitement du résultat ; fond de la page aux couleurs du thème pendant le chargement (blanc auparavant ; sans thème
-  mémorisé, selon le mode clair / sombre du système), puis celui de MudBlazor une fois la barre retirée. 565 tests verts (223 Core, 84 Simulation, 218 UI, 21 Web, 19 client web ; UI stables sur
+  mémorisé, selon le mode clair / sombre du système), puis celui de MudBlazor une fois la barre retirée ; affichage
+  lent (~1 s par changement d'écran, même en Release) : client compilé AOT après un essai comparatif (branche
+  `essai/aot`, reprise dans l'étape), voir « Décisions techniques » ; `wasm-tools` installé sur cette machine, **à
+  installer sur l'autre**. 565 tests verts (223 Core, 84 Simulation, 218 UI, 21 Web, 19 client web ; UI stables sur
   3 exécutions). `Wh40kSim.Web` : `SimulationOptions` (section
   « Simulation »), `SimulationQueue` (file sans limite, positions), `ISimulationRunner` / `SimulatorRunner`,
   `SimulationEndpoints` (`POST /api/simulations`, SSE `queued` / `progress` / `result` / `error`, `ProblemDetails`),

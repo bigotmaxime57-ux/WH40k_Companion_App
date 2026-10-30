@@ -77,7 +77,18 @@ navigateur. Le calcul se fait sur le serveur : 1 000 000 de simulations au plus 
 `src/Wh40kSim.Web/appsettings.json`). Les scénarios s'ouvrent avec le sélecteur de fichier du navigateur et s'enregistrent
 par un téléchargement ; le thème est mémorisé par le navigateur. L'API seule s'essaie depuis Rider avec
 `src/Wh40kSim.Web/Wh40kSim.Web.http`. Hors de l'environnement Development, le site se lance depuis une version publiée
-(`dotnet publish`) : c'est là que les fichiers du client et de MudBlazor sont rassemblés.
+(`dotnet publish`) : c'est là que les fichiers du client et de MudBlazor sont rassemblés. La publication compile le
+client à l'avance (AOT, bien plus fluide dans le navigateur, quelques minutes de compilation) et demande la charge de
+travail `wasm-tools` (`dotnet workload install wasm-tools`, terminal administrateur si .NET est dans
+`C:\Program Files\dotnet`). Pour lancer une version publiée :
+
+```bash
+dotnet publish src/Wh40kSim.Web -c Release -o dist/web
+```
+
+```bash
+Set-Location dist/web; dotnet Wh40kSim.Web.dll --urls http://localhost:5080
+```
 
 **Depuis Rider** : choisir la configuration d'exécution `Wh40kSim.Desktop` (profil « Windows Machine ») puis Run.
 L'application n'est pas empaquetée (pas de Microsoft Store) : le `.exe` est dans

@@ -649,8 +649,10 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
    - Core : `RerollPolicy` sans `NonCritical` ; `WeaponProfile.FishForCriticalHits` / `FishForCriticalWounds` (JSON de
      l'arme, absents = `false`) ; conditions portées par le Core (ex. `CanFishForCriticalHits(boosts, context)`),
      utilisées par le moteur, la console et l'interface ; `AttackPool.MakeIdenticalAttacks` compare les deux choix.
-   - UI : liste de relance des boosts à trois choix ; sur la carte d'une arme, interrupteurs « Pêche aux 6 (touche) » /
-     « (blessure) » avec bulle « ? », seulement quand ils ont un sens. Console : mêmes choix.
+   - UI : liste de relance des boosts à trois choix ; sur la carte d'une arme, **deux interrupteurs indépendants**
+     « Pêche aux 6 (touche) » et « Pêche aux 6 (blessure) » (une arme avec des effets critiques à la touche et à la
+     blessure a les deux, précisé par l'utilisateur), avec bulle « ? », chacun seulement quand il a un sens. Console :
+     mêmes choix.
    - Non-régression : le scénario riche de `NonRegressionTests` relance les blessures en « tout sauf critique » pour
      toutes ses armes, dont deux sans Devastating Wounds : plus exprimable, ses références seront recapturées une fois
      (changement noté ici) ; l'autre scénario reste identique au bit près.

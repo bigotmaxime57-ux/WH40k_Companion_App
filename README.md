@@ -8,13 +8,14 @@ résultats, et une console de debug.
 
 1. Moteur de simulation (11e édition) et console : **terminé**.
 2. Interface graphique : application desktop Windows (MAUI Blazor Hybrid + MudBlazor) : **terminée** (`v0.2a`).
-3. Graphiques et comparaison : écran d'accueil, Quick sim, Full sim (écran de saisie, puis résultats en onglets :
-   histogrammes, puis rapports par groupe et par arme), comparaison de plusieurs attaquants ou de plusieurs cibles,
-   optimiseur de l'ordre des armes, overwatch. En cours.
-4. Traduction : anglais, choix de la langue, messages du Core.
-5. Mots-clés du défenseur (vrai Anti-X…), règles d'armée et détachements, stockage des règles.
-6. Gestion et sauvegarde des unités : bibliothèque, choix du loadout et des leaders, rapport en points.
-7. Intégration web : API serveur + client web.
+3. Graphiques et Full sim : écran d'accueil, Quick sim, Full sim (écran de saisie, puis résultats en onglets :
+   histogrammes, puis rapports par groupe et par arme), overwatch. En cours.
+4. Intégration web : API serveur + client web. Les phases suivantes livrent aussi leur partie web.
+5. Comparaison de plusieurs attaquants ou de plusieurs cibles.
+6. Optimiseur de l'ordre des armes.
+7. Traduction : anglais, choix de la langue, messages du Core.
+8. Mots-clés du défenseur (vrai Anti-X…), règles d'armée et détachements, stockage des règles.
+9. Gestion et sauvegarde des unités : bibliothèque, choix du loadout et des leaders, rapport en points.
 
 Détail des étapes et décisions : `CLAUDE.md`. Idées non planifiées : tickets GitHub du dépôt.
 
@@ -152,7 +153,7 @@ l'unité n'en fait pas partie : c'est la marge. Aucun dé supplémentaire n'est 
 - **Réduction de dégâts** : non appliquée aux blessures mortelles (elles ne sont pas une attaque allouée).
 - **Precision** : le PERSONNAGE visé est supposé visible.
 - **Ordre des pools** : celui de la saisie ; l'attaquant pourrait choisir un ordre plus favorable.
-- **Anti-X** : en attendant les mots-clés du défenseur (phase 5), « Anti-Infantry 4+ » suppose que la cible est concernée.
+- **Anti-X** : en attendant les mots-clés du défenseur (phase 8), « Anti-Infantry 4+ » suppose que la cible est concernée.
 
 ## Format JSON d'un scénario
 
@@ -172,7 +173,7 @@ Un boost absent vaut 0 (ou `"None"` pour une relance, `false` pour le couvert).
 Points (facultatifs) : `"points"` sur l'attaquant (coût de l'unité) et sur chaque groupe du défenseur (coût du groupe
 entier : un leader a son propre coût). Les points détruits se comptent au prorata des PV retirés (la moitié des PV d'un
 char vaut la moitié de ses points), seulement si chaque groupe a ses points ; le rendement les rapporte aux points de
-l'attaquant. Saisie et affichage dans l'interface prévus avec la gestion des unités (phase 6) ; en attendant, à écrire
+l'attaquant. Saisie et affichage dans l'interface prévus avec la gestion des unités (phase 9) ; en attendant, à écrire
 dans le fichier (l'interface les garde à l'enregistrement), résultats affichés par la console.
 
 Un scénario complet contient `"attacker"` et `"defender"` (`"context"` facultatif). Un fichier peut aussi ne contenir

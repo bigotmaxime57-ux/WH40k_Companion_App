@@ -5,7 +5,7 @@ namespace Wh40kSim.UI.Services;
 
 /// <summary>
 /// Lance une simulation sans bloquer l'interface. L'implémentation dépend de l'hôte :
-/// calcul local (desktop) ou appel à une API (client web, phase 7).
+/// calcul local (desktop) ou appel à une API (client web, phase 4).
 /// </summary>
 public interface ISimulationService
 {

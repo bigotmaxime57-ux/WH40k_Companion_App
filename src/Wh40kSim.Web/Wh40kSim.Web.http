@@ -1,0 +1,35 @@
+### Essais de l'API depuis Rider (lancer d'abord le profil « http » de Wh40kSim.Web)
+@host = http://localhost:5080
+
+### Demande valide : la réponse arrive en Server-Sent Events (progress…, puis result)
+POST {{host}}/api/simulations
+Content-Type: application/json
+
+{
+  "scenario": {
+    "attacker": {
+      "name": "Escouade",
+      "weapons": [
+        { "modelCount": 10, "weapon": { "name": "Bolter", "attacks": 2, "skill": 3, "strength": 4 } }
+      ]
+    },
+    "defender": {
+      "name": "Cibles",
+      "groups": [ { "name": "Gardes", "count": 10, "toughness": 4, "wounds": 1, "save": 4 } ]
+    }
+  },
+  "iterations": 100000,
+  "seed": 42
+}
+
+### Demande refusée : 400 ProblemDetails « Demande refusée », avec toutes les erreurs (défenseur sans groupe, trop de simulations)
+POST {{host}}/api/simulations
+Content-Type: application/json
+
+{
+  "scenario": {
+    "attacker": { "weapons": [ { "weapon": { "name": "Bolter" } } ] },
+    "defender": { "groups": [] }
+  },
+  "iterations": 5000000
+}

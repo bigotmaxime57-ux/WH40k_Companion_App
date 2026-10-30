@@ -42,6 +42,15 @@ public class SimulationJsonTests
     }
 
     [Fact]
+    public void The_contract_is_written_on_a_single_line()
+    {
+        string json = SimulationJson.Serialize(Rich.Data);
+
+        Assert.DoesNotContain('\n', json);
+        Assert.DoesNotContain('\r', json);
+    }
+
+    [Fact]
     public void The_contract_holds_only_raw_counters()
     {
         var root = JsonNode.Parse(SimulationJson.Serialize(Rich.Data))!.AsObject();

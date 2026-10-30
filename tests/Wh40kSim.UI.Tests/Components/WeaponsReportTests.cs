@@ -117,6 +117,30 @@ public class WeaponsReportTests : ComponentTestContext
     }
 
     [Fact]
+    public void Without_any_waste_the_waste_column_is_highlighted_in_the_positive_tint()
+    {
+        // Armes D1 contre des figurines à 1 PV : aucun dégât perdu, quel que soit le pool
+        var scenario = new Scenario
+        {
+            Attacker = new AttackerUnit
+            {
+                Weapons =
+                [
+                    new WeaponGroup { ModelCount = 5, Weapon = new WeaponProfile { Name = "Fusil", Attacks = 2, Strength = 4 } },
+                    new WeaponGroup { ModelCount = 5, Weapon = new WeaponProfile { Name = "Lance-grenades", Attacks = 1, Strength = 6 } },
+                ],
+            },
+            Defender = new DefenderUnit { Groups = [new ModelGroup { Name = "Cibles", Count = 20 }] },
+        };
+        var report = Render<WeaponsReport>(p => p.Add(c => c.Result, Simulator.Run(scenario, 2_000, seed: 7)));
+
+        var waste = report.FindAll("[data-test=weapons-table] [data-test=weapons-waste]");
+        Assert.Equal(2, waste.Count);
+        Assert.All(waste, cell => Assert.Contains("wh-top", cell.ClassList));
+        Assert.Empty(report.FindAll("[data-test=weapons-table] td.wh-top-bad"));
+    }
+
+    [Fact]
     public void Each_pool_has_its_own_section_with_tiles_and_a_histogram()
     {
         var (report, result) = Render();

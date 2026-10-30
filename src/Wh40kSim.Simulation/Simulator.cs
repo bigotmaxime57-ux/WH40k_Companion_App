@@ -23,12 +23,17 @@ public static class Simulator
     /// Reçoit la progression (entre 0 et 1) à la fin de chaque paquet : valeurs strictement croissantes, la dernière vaut 1.
     /// Appelé depuis les threads de calcul ; elle n'influe pas sur les dés, le résultat reste identique à graine égale.
     /// </param>
+    /// <param name="threads">
+    /// Limite du nombre de threads de calcul et ordonnanceur à utiliser (par défaut : tous les cœurs, pool de threads).
+    /// Sans effet sur les dés : le résultat reste identique à graine égale.
+    /// </param>
     public static SimulationResult Run(
         Scenario scenario,
         int iterations,
         int? seed = null,
         IProgress<double>? progress = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        SimulationThreads? threads = null)
     {
         ArgumentNullException.ThrowIfNull(scenario);
         ArgumentOutOfRangeException.ThrowIfLessThan(iterations, 1);
@@ -45,7 +50,12 @@ public static class Simulator
         Parallel.For(
             0,
             chunkCount,
-            new ParallelOptions { CancellationToken = cancellationToken },
+            new ParallelOptions
+            {
+                CancellationToken = cancellationToken,
+                MaxDegreeOfParallelism = threads?.MaxThreads ?? -1,
+                TaskScheduler = threads?.Scheduler ?? TaskScheduler.Default,
+            },
             () => new Worker(scenario),
             (chunk, _, worker) =>
             {

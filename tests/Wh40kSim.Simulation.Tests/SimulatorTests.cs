@@ -78,6 +78,51 @@ public class SimulatorTests
         Assert.Equal(first.Damage.Counts, second.Damage.Counts);
     }
 
+    [Theory]
+    [InlineData(1)]
+    [InlineData(3)]
+    public void Limiting_the_threads_does_not_change_the_results(int threads)
+    {
+        var scenario = Build.Scenario(BaseWeapon with { Damage = DiceExpression.Parse("D3") }, Build.Horde(), models: 10);
+
+        var all = Simulator.Run(scenario, 50_000, seed: 7);
+        var limited = Simulator.Run(scenario, 50_000, seed: 7, threads: new SimulationThreads(threads));
+
+        Assert.Equal(all.Kills.Counts, limited.Kills.Counts);
+        Assert.Equal(all.Damage.Counts, limited.Damage.Counts);
+        Assert.Equal(all.MeanKilledInGroup(0), limited.MeanKilledInGroup(0));
+    }
+
+    [Fact]
+    public void A_custom_scheduler_runs_the_computation_with_the_same_results()
+    {
+        var scenario = Build.Scenario(BaseWeapon, Build.Horde(), models: 10);
+        var scheduler = new CountingScheduler();
+
+        var custom = Simulator.Run(scenario, 5 * Simulator.ChunkSize, seed: 3, threads: new SimulationThreads(2, scheduler));
+
+        Assert.True(scheduler.Queued > 0);
+        Assert.Equal(Simulator.Run(scenario, 5 * Simulator.ChunkSize, seed: 3).Kills.Counts, custom.Kills.Counts);
+    }
+
+    /// <summary>Ordonnanceur du pool de threads qui compte les tâches reçues.</summary>
+    private sealed class CountingScheduler : TaskScheduler
+    {
+        private int _queued;
+
+        public int Queued => _queued;
+
+        protected override void QueueTask(Task task)
+        {
+            Interlocked.Increment(ref _queued);
+            ThreadPool.QueueUserWorkItem(_ => TryExecuteTask(task));
+        }
+
+        protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued) => TryExecuteTask(task);
+
+        protected override IEnumerable<Task> GetScheduledTasks() => [];
+    }
+
     [Fact]
     public void Iteration_count_is_exact_even_when_not_a_multiple_of_the_chunk_size()
     {

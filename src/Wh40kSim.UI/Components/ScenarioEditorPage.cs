@@ -22,6 +22,9 @@ namespace Wh40kSim.UI.Components;
 public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
 {
     private const string DefaultFileName = "scenario.json";
+
+    /// <summary>Progression minimale entre deux rafraîchissements de la barre (1 %).</summary>
+    private const double ProgressStep = 0.01;
     private const string ShortcutsModule = "./_content/Wh40kSim.UI/wh40ksim.js";
 
     private Scenario? _scenario;          // scénario saisi, null tant qu'une expression de dés est invalide
@@ -444,11 +447,17 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
         Progress = 0;
         Message = null;
         _cancellation = new CancellationTokenSource();
-        // Les rapports arrivent des threads de calcul : on redessine via le contexte de l'interface
+        // Les rapports arrivent des threads de calcul : on redessine via le contexte de l'interface, seulement à chaque
+        // point de pourcentage gagné (un rapport par paquet de simulations : 1 000 pour 10 M, ticket #12)
+        double shown = 0;
         var progress = new Progress<double>(value =>
         {
             Progress = value;
-            _ = InvokeAsync(StateHasChanged);
+            if (value - shown >= ProgressStep || value >= 1)
+            {
+                shown = value;
+                _ = InvokeAsync(StateHasChanged);
+            }
         });
 
         bool completed = false;

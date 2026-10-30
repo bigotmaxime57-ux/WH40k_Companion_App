@@ -167,11 +167,27 @@ Chaque étape sera précisée et validée avant d'être codée :
      erreur claire sinon. Pas de numéro de version (serveur et client déployés ensemble).
    - Tests : aller-retour JSON sur le scénario riche (Precision, pools, marge, gaspillage) qui redonne exactement les
      mêmes statistiques ; données incohérentes refusées ; `NonRegressionTests` inchangés ; temps mesuré.
-2. **Serveur et API** (`Wh40kSim.Web`, Minimal API). `POST /api/simulations` (scénario au format de `ScenarioJson`,
-   nombre de simulations, graine) ; JSON illisible, `Scenario.Validate` ou plafond dépassé → `ProblemDetails` (liste des
-   erreurs) ; réponse en SSE : attente, progression (par point de pourcentage), résultat, erreur ; annulation à la
-   déconnexion ; calculs simultanés limités, limite par adresse IP, threads par calcul limités (`SimulationThreads`) ;
-   réglages dans la configuration. Tests d'intégration (`WebApplicationFactory`). Valeurs des limites à trancher.
+2. **Serveur et API** (`Wh40kSim.Web`, Minimal API). Précisée et validée par l'utilisateur le 2026-10-30 :
+   - Projets `Wh40kSim.Web` (ASP.NET Core, référence Wh40kSim.Simulation ; servira le client à l'étape 3) et
+     `Wh40kSim.Web.Tests` (`WebApplicationFactory`, version de `Microsoft.AspNetCore.Mvc.Testing` vérifiée sur NuGet),
+     ajoutés au `.sln` à la main ; desktop et console inchangés.
+   - `POST /api/simulations` : `{ "scenario": …, "iterations": …, "seed": … }` (scénario au format des fichiers
+     complets, lecture stricte ; graine facultative). Refus avant calcul en `ProblemDetails` (titre en français, liste
+     des erreurs) : 400 pour un JSON illisible, un scénario invalide (`Scenario.Validate`) ou un nombre de simulations
+     hors de 1 à 1 000 000 ; 429 au-delà de 10 lancements par minute et par adresse IP (`Retry-After`).
+   - Réponse en **Server-Sent Events** (.NET 10) : `queued` (position dans la file, renvoyée quand elle change),
+     `progress` (0 à 1, par point de pourcentage), `result` (`SimulationData` au format de `SimulationJson`), `error`
+     (échec inattendu, sans planter le serveur).
+   - Décisions de l'utilisateur : **un seul calcul à la fois** (tous les cœurs), **file d'attente sans limite** (ordre
+     d'arrivée), **10 lancements par minute et par IP**, valeurs **réglables** (`appsettings.json`, variables
+     d'environnement). Annulation : requête fermée → sortie de la file ou arrêt du calcul. Calcul derrière une
+     interface interne (`ISimulationRunner`, `Simulator.Run` par défaut) pour tester attente, annulation et erreurs.
+   - Fichier `.http` d'exemple (demande valide, demande invalide) pour essayer l'API depuis Rider.
+   - Tests : bout en bout (progression puis résultat, identique au bit près à `Simulator.Run` à graine égale) ;
+     refus (JSON illisible, propriété inconnue, scénario invalide avec ses erreurs, 0 et 1 000 001 simulations,
+     11e lancement de la minute) ; file (`queued` position 1, puis résultat) ; annulation (place libérée) ; erreur
+     inattendue (événement `error`).
+   - Reporté à l'étape 5 : Docker, HTTPS, vraie adresse IP derrière un proxy (`X-Forwarded-For`), point de santé.
 3. **Client WebAssembly** (`Wh40kSim.Web.Client`, Blazor Web App en rendu WebAssembly interactif, sans prérendu) :
    `AppShell` et ses écrans ; `ApiSimulationService` (lecture du flux SSE, progression, annulation, erreurs du
    serveur affichées) ; fichiers dans le navigateur (`InputFile` pour ouvrir, téléchargement pour enregistrer,
@@ -941,7 +957,9 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   serveur et API, client WebAssembly, intégration continue #7, Docker et mise en ligne). Prochaine étape : 1 (contrat
   du résultat), à préciser.
 - Phase 4, étape 1 (contrat du résultat) : fusionnée dans `main`, validée par l'utilisateur le 2026-10-30.
-  Prochaine étape : 2 (serveur et API), à préciser (valeurs des limites à trancher). `SimulationData` (+ `GroupData`,
+  Prochaine étape : 2 (serveur et API), à préciser (valeurs des limites à trancher).
+- Phase 4, étape 2 (serveur et API) : précisée et validée le 2026-10-30, à coder sur la branche
+  `phase4/etape2-serveur-api`. `SimulationData` (+ `GroupData`,
   `PrecisionWeaponData`, `PoolData`, `ConversionCounts`, membres `required`) et `SimulationData.Validate()` ;
   l'accumulateur produit les données (`ToData`), `SimulationResult(SimulationData)` calcule tout, `SimulationResult.Data` ;
   `SimulationJson` (réglages de `ScenarioJson`). Rien de visible à l'écran : API de `SimulationResult` inchangée.

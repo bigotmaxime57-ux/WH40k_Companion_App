@@ -4,7 +4,7 @@ namespace Wh40kSim.UI;
 
 /// <summary>
 /// Culture de l'interface : textes et format des nombres (« 12,5 % »). Fixée, et non prise sur la machine, en attendant
-/// le choix de la langue (phase 4).
+/// le choix de la langue (phase 7).
 /// </summary>
 public static class UiCulture
 {

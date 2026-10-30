@@ -69,7 +69,13 @@ Les idées non planifiées, bugs et points d'outillage sont des **tickets GitHub
 Chaque phase garde une ligne **Objectif** : sa formulation d'origine, qui ne se modifie qu'avec l'accord de
 l'utilisateur. Le découpage en étapes peut évoluer ; celui des phases futures est indicatif et sera précisé au début
 de chaque phase. Numérotation revue le 2026-10-27, après la phase 2a : graphiques et comparaison en 3 (pour avancer
-sur les statistiques avant le web), traduction en 4, l'ancienne 2b (API + client web) devient la phase 7.
+sur les statistiques avant le web), traduction en 4, l'ancienne 2b (API + client web) devient la phase 7. Revue à
+nouveau le 2026-10-30 (décisions de l'utilisateur) : la phase 3 se termine avec l'overwatch, le web remonte en 4, la
+comparaison (5) et l'optimiseur (6) deviennent des phases à part, puis traduction (7), mots-clés et règles (8),
+unités (9, avec le rapport en points).
+
+**Après la phase 4 (web)**, chaque phase livre aussi sa partie web : ce qu'elle ajoute au Core, à Simulation et à
+Wh40kSim.UI est couvert par l'API et le client WebAssembly dans la même phase (décision du 2026-10-30).
 
 ### État de l'existant (2026-10-27)
 
@@ -94,46 +100,102 @@ sur les statistiques avant le web), traduction en 4, l'ancienne 2b (API + client
 
 - **2a : desktop** (MAUI Blazor Hybrid + MudBlazor) : étapes détaillées dans « Phase 2a : étapes ». Tags `v0.2a`,
   `v0.2a.1`, `v0.2a.2`.
-- L'ancienne **2b** (API + client web) est devenue la phase 7 (2026-10-27).
+- L'ancienne **2b** (API + client web) est devenue la phase 7 (2026-10-27), puis la phase 4 (2026-10-30).
 
-### Phase 3 : graphiques et comparaison
+### Phase 3 : graphiques et Full sim
 
-**Objectif** : « Affichage des distributions façon WarpHammer Math : histogrammes, probabilités cumulées P(≥ k) et
-comparaison de plusieurs profils côte à côte » (qui tue le mieux l'adversaire).
+**Objectif** : « Affichage des distributions façon WarpHammer Math : histogrammes, probabilités cumulées P(≥ k) ».
+(La fin de la formulation d'origine, la comparaison de plusieurs profils côte à côte, est passée en phase 5 le
+2026-10-30, avec l'accord de l'utilisateur.)
 
 Tous les chiffres viennent de `Wh40kSim.Simulation` ; les graphiques ne font que les dessiner, dans Wh40kSim.UI
-(desktop maintenant, web en phase 7). Quatre modes, ouverts depuis un écran d'accueil (décision du 2026-10-27,
-optimiseur ajouté le 2026-10-29) :
+(desktop maintenant, web en phase 4). Modes ouverts depuis un écran d'accueil (décision du 2026-10-27), une tuile
+chacun :
 
 - **Quick sim** : l'écran actuel, gardé tel quel (une page, A contre B, les grandes lignes, pas de graphique en plus).
 - **Full sim** : A contre B, même scénario que le Quick sim (partagé), avec beaucoup plus de stats, graphiques et
   analyses (tableau de bord).
-- **Comparaison** : distributions superposées, N attaquants contre une cible ou un attaquant contre N cibles (#1).
-- **Optimiseur** : meilleurs ordres de résolution des armes d'un même loadout (#3), écran à part pour ne pas alourdir
-  les simulations.
+- Plus tard : **Comparaison** (phase 5) et **Optimiseur** (phase 6).
 
 Le tir en **overwatch** n'est pas un mode : c'est un interrupteur de la Situation (Quick sim et Full sim), qui fait
-tirer selon ses règles (étape 12, #11).
+tirer selon ses règles (étape 9, #11).
 
-Étapes détaillées dans « Phase 3 : étapes ». **Le choix des technologies doit tenir compte de la phase 7** : tout ce
+Étapes détaillées dans « Phase 3 : étapes ». **Le choix des technologies doit tenir compte de la phase 4** : tout ce
 qu'on ajoute à Wh40kSim.UI (bibliothèque de graphiques, navigation) doit fonctionner aussi bien dans le
 `BlazorWebView` du desktop que dans le client Blazor WebAssembly, sans API propre au desktop, avec un poids raisonnable
-à télécharger dans le navigateur. Les résultats (simple, détaillé, comparaison) doivent rester sérialisables : ils
-formeront le contrat JSON de l'API.
+à télécharger dans le navigateur. Les résultats (simple, détaillé) doivent rester sérialisables : ils formeront le
+contrat JSON de l'API.
 
-### Phase 4 : traduction
+### Phase 4 : intégration web
+
+**Objectif** : API serveur + client web (ancienne phase 2b, déplacée le 2026-10-27, remontée en 4 le 2026-10-30).
+
+Le « web local » prévu à l'origine est abandonné (2026-10-27) : le desktop couvre l'usage local, et ce qu'il devait
+apporter (fichiers côté navigateur, Wh40kSim.UI dans un hôte web) est repris ici. Structure Blazor Web App :
+`Wh40kSim.Web` (serveur ASP.NET Core : API + service du client) et `Wh40kSim.Web.Client` (WebAssembly). Le calcul se
+fait sur le serveur. Ce qu'a apporté la phase 3 (Quick sim, Full sim et ses rapports, fichiers partiels, thèmes,
+overwatch) est à couvrir par l'API et le client ; les phases suivantes livrent leur propre partie web. Le découpage
+sera revu en début de phase.
+
+1. **Contrat et API** (Minimal API) : contrat JSON du résultat, `POST` d'un scénario validé par
+   `Scenario.Validate` (erreurs en `ProblemDetails`), plafond d'itérations, tests d'intégration
+   (`WebApplicationFactory`).
+2. **Progression et annulation** : progression envoyée au client (Server-Sent Events), annulation si le client se
+   déconnecte.
+3. **Client WebAssembly** : `ApiSimulationService` implémente `ISimulationService` ; `IScenarioFileService` et
+   `IPreferenceService` côté navigateur (`InputFile`, téléchargement, stockage du navigateur) ; composants de
+   Wh40kSim.UI inchangés.
+4. **Finitions** : configuration, README, tag de fin de phase. Hébergement public hors périmètre sauf décision
+   contraire.
+
+### Phase 5 : comparaison
+
+**Objectif** : « comparaison de plusieurs profils côte à côte » (qui tue le mieux l'adversaire) ; formulation reprise
+de l'Objectif d'origine de la phase 3 (2026-10-30). Mode à part, avec sa tuile sur l'accueil.
+
+1. **Comparaison, côté Simulation.** Deux sens (#1) : N attaquants contre une cible, ou un attaquant contre N cibles ;
+   situation commune. Même graine pour toutes les entrées (tirages partagés : écarts plus fiables). Indicateurs :
+   moyennes, P(détruire l'unité), P(≥ k), % de l'unité détruite et points détruits (comparables entre cibles
+   différentes) ; meilleure entrée pour chaque indicateur, ex æquo compris. JSON d'une comparaison (sérialisable :
+   contrat de l'API) ; console.
+2. **Comparaison, côté UI.** Entrées prises dans le scénario courant ou dans des fichiers (partiels ou complets),
+   dupliquées, renommées ; distributions superposées ; tableau côte à côte, meilleure entrée mise en évidence ;
+   ouvrir / enregistrer.
+3. **Partie web** : comparaison dans l'API et le client.
+
+### Phase 6 : optimiseur du séquencement des armes
+
+**Objectif** : meilleurs ordres de résolution des armes d'un même loadout (#3, ajouté le 2026-10-29 ; phase à part
+depuis le 2026-10-30). Mode à part (tuile sur l'accueil), pour ne pas alourdir les simulations.
+
+À partir du scénario courant (ou d'un fichier), toutes les permutations des **pools** (pas des armes : celles d'un même
+pool sont lancées ensemble), avec les statistiques du Full sim. Décisions de l'utilisateur :
+- **Rondes éliminatoires** façon Raidbots : tous les ordres avec peu d'itérations (~10 000), puis les meilleurs avec
+  ~100 000, puis les derniers en lice avec ~1 000 000 ; nombres à calibrer d'après le temps mesuré, progression
+  affichée par ronde. Proposé (à confirmer en début de phase) : élimination selon l'intervalle de confiance
+  (garder tout ordre qui chevauche le meilleur, avec un plafond) plutôt qu'une proportion fixe, et sur les trois
+  métriques (un ordre reste s'il est parmi les meilleurs sur l'une d'elles) ; même graine pour tous les ordres
+  (écarts plus fiables, comme la comparaison) ; avertissement ou plafond au-delà de ~6 pools (720 ordres).
+- **Tableau des 10 meilleurs ordres**, trié par défaut par P(unité détruite), triable par % de kill, PV retirés,
+  figurines tuées ; meilleur de chaque colonne mis en évidence.
+- **Export JSON** de l'ordre choisi, réutilisable au Quick sim et au Full sim : le format « attaquant seul » (ou
+  scénario complet), qui garde l'ordre des armes, suffit (pas de nouveau format).
+- Partie web (API et client) ; découpage en étapes au début de la phase. Fin de phase : ticket #3 fermé.
+
+### Phase 7 : traduction
 
 **Objectif** : anglais, choix de la langue, messages du Core.
 
-Placée avant les mots-clés : la phase 5 ajoutera beaucoup de messages au Core, autant qu'ils soient déjà sous forme
+Placée avant les mots-clés : la phase 8 ajoutera beaucoup de messages au Core, autant qu'ils soient déjà sous forme
 de codes.
 
 1. **Messages du Core sous forme de codes** : `Validate()` renvoie des erreurs typées (code + paramètres) traduites par
-   l'UI ; idem pour les erreurs de lecture JSON et de dés (et celles de la comparaison, phase 3).
+   l'UI ; idem pour les erreurs de lecture JSON et de dés (et celles de la comparaison, phase 5) ; erreurs de l'API
+   (`ProblemDetails`) comprises.
 2. **Anglais** : `.resx` anglais, choix de la langue dans l'interface (mémorisé), nombres formatés selon la langue
-   (graphiques compris).
+   (graphiques compris), desktop et client web.
 
-### Phase 5 : mots-clés, règles d'armée, détachements
+### Phase 8 : mots-clés, règles d'armée, détachements
 
 **Objectif** : mots-clés du défenseur (vrai Anti-X…), règles d'armée et détachements, avec un stockage des règles.
 
@@ -149,14 +211,14 @@ de codes.
 
 À trancher en début de phase : traduction du contenu (noms de règles, de factions).
 
-### Phase 6 : gestion et sauvegarde des unités
+### Phase 9 : gestion et sauvegarde des unités
 
 **Objectif** : bibliothèque d'unités, choix du loadout et des leaders.
 
 1. **Modèle « fiche d'unité »** : caractéristiques, armes et options, mots-clés, composition (min / max), leaders
-   compatibles, règles d'unité (effets de la phase 5).
-2. **Bibliothèque d'unités** : `IUnitRepository`, d'abord en fichiers JSON locaux (stockage serveur pour le web en
-   phase 7).
+   compatibles, règles d'unité (effets de la phase 8).
+2. **Bibliothèque d'unités** : `IUnitRepository`, en fichiers JSON locaux pour le desktop et stockage serveur pour le
+   web.
 3. **Éditeur d'unités** (UI) : créer, modifier, dupliquer, supprimer.
 4. **Composition d'un scénario** : choix du loadout et du leader attaché → génération du `Scenario` (groupes d'armes de
    l'attaquant, groupes d'allocation et ordre du défenseur).
@@ -171,28 +233,6 @@ de codes.
      survivent, en moyenne ; P(garder au moins la moitié de sa valeur), comptée exactement) et coût pour détruire
      (points de l'attaquant × PV de l'unité / moyenne des PV retirés **excédent compris**, approximation linéaire).
    - Tests : valeurs exactes en points.
-
-### Phase 7 : intégration web
-
-**Objectif** : API serveur + client web (ancienne phase 2b, déplacée le 2026-10-27).
-
-Le « web local » prévu à l'origine est abandonné (2026-10-27) : le desktop couvre l'usage local, et ce qu'il devait
-apporter (fichiers côté navigateur, Wh40kSim.UI dans un hôte web) est repris ici. Structure Blazor Web App :
-`Wh40kSim.Web` (serveur ASP.NET Core : API + service du client) et `Wh40kSim.Web.Client` (WebAssembly). Le calcul se
-fait sur le serveur. Ce qu'auront apporté les phases 3 à 6 (Full sim, comparaison, fichiers partiels, langue, règles,
-bibliothèque d'unités) est à
-couvrir par l'API et le client ; le découpage sera revu en début de phase.
-
-1. **Contrat et API** (Minimal API) : contrat JSON du résultat (et de la comparaison), `POST` d'un scénario validé par
-   `Scenario.Validate` (erreurs en `ProblemDetails`), plafond d'itérations, tests d'intégration
-   (`WebApplicationFactory`).
-2. **Progression et annulation** : progression envoyée au client (Server-Sent Events), annulation si le client se
-   déconnecte.
-3. **Client WebAssembly** : `ApiSimulationService` implémente `ISimulationService` ; `IScenarioFileService` et
-   `IPreferenceService` côté navigateur (`InputFile`, téléchargement, stockage du navigateur) ; composants de
-   Wh40kSim.UI inchangés.
-4. **Finitions** : configuration, README, tag de fin de phase. Hébergement public hors périmètre sauf décision
-   contraire.
 
 ## Phase 2a : étapes
 
@@ -243,7 +283,7 @@ couvrir par l'API et le client ; le découpage sera revu en début de phase.
      relances ; cible de Precision s'il y a plusieurs PERSONNAGES et au moins une arme Precision.
      Pour ne pas mettre de règle dans l'UI, ajouter au Core des propriétés en lecture seule sur `WeaponProfile` :
      `UsesHalfRange` (Rapid Fire, Melta), `UsesRemainedStationary` (Heavy sur arme de tir), `UsesCharged` (Lance),
-     utilisées par le moteur, la console et l'UI. Version minimale : la vraie gestion des mots-clés reste en phase 5.
+     utilisées par le moteur, la console et l'UI. Version minimale : la vraie gestion des mots-clés reste en phase 8.
    - Erreurs de `Scenario.Validate()` affichées clairement ; erreur de saisie de dés affichée sous le champ concerné ;
      bouton Lancer désactivé tant que le scénario est invalide.
    - Panneau de simulation : nombre de simulations (défaut 1 000 000), graine optionnelle, Lancer, barre de
@@ -289,7 +329,7 @@ couvrir par l'API et le client ; le découpage sera revu en début de phase.
      actifs en étiquettes (rappel de règle au survol, croix pour retirer) et un bouton « Mots-clés » qui ouvre un
      **panneau latéral** : recherche (Entrée ajoute), filtre par catégorie, valeur modifiable sur place. Composant
      générique `KeywordPicker<TTarget>` + catalogue `KeywordDefinition` (dans l'UI : accès aux champs du formulaire
-     seulement), réutilisable en phase 5 avec une portée (arme, unité…).
+     seulement), réutilisable en phase 8 avec une portée (arme, unité…).
    - Raccourcis clavier : Ctrl+Entrée lancer, Ctrl+S enregistrer, Ctrl+O ouvrir.
    - Confirmation avant de perdre une saisie modifiée (Nouveau / Ouvrir) ; « * » après le nom du fichier si modifié.
    - Nombre de simulations en choix rapides (10 000 / 100 000 / 1 000 000 / 10 000 000) ; rappel de règle en une
@@ -341,7 +381,7 @@ couvrir par l'API et le client ; le découpage sera revu en début de phase.
    - **Premier lancement** : Parchemin si le système est clair, Grimdark s'il est sombre ; ensuite, le dernier thème
      choisi, quel que soit le système (pas d'option « automatique »).
    - **Mémorisation par l'hôte** : `IPreferenceService` (Wh40kSim.UI), implémenté par `DesktopPreferenceService`
-     (préférences MAUI) ; en web (phase 7), stockage du navigateur. L'hôte desktop lit le thème avant le premier affichage
+     (préférences MAUI) ; en web (phase 4), stockage du navigateur. L'hôte desktop lit le thème avant le premier affichage
      et le passe à `AppShell` (`InitialTheme`) : pas de flash, fond de la fenêtre et barre de chargement aux couleurs
      du thème.
    - Retour de l'utilisateur : poubelles (armes, groupes) de la couleur du camp, qui passent au rouge au survol.
@@ -365,7 +405,7 @@ avant d'être codée.
    - Test statistique contre une valeur théorique exacte (cas binomial du ticket, recréé dans le test), tolérance de
      quelques écarts-types.
 2. **Écran d'accueil et navigation.** Tuiles vers les modes existants seulement (Quick sim, puis Full sim et
-   Comparaison quand ils arrivent ; unités en phase 6). Routeur Blazor (`/`, `/quick-sim`…), utilisable tel quel par le
+   Comparaison quand ils arrivent ; unités en phase 9). Routeur Blazor (`/`, `/quick-sim`…), utilisable tel quel par le
    client web ; barre de titre commune (thèmes, retour à l'accueil). `SimulatorPage` devient le Quick sim sans
    changement. Scénario courant tenu par un service (et non par la page) : conservé en changeant d'écran, partagé avec
    le Full sim. Décisions de l'utilisateur : noms « Quick sim » / « Full sim » gardés dans l'interface française ;
@@ -374,7 +414,7 @@ avant d'être codée.
    (fichier défenseur), les trois sections (scénario, inchangé). Boosts inclus dans leur partie. Lecture stricte (rien
    d'utile, ou une situation seule, est refusé). On peut reprendre l'attaquant ou le défenseur de n'importe quel
    fichier, scénario complet compris. Quick sim : Ouvrir / Enregistrer dans les cartes Attaquant et Défenseur (le
-   scénario complet garde ses boutons) ; `IScenarioFileService` étendu, hôte desktop adapté. Premier pas vers la phase 6,
+   scénario complet garde ses boutons) ; `IScenarioFileService` étendu, hôte desktop adapté. Premier pas vers la phase 9,
    sans figer la fiche d'unité. Décisions de l'utilisateur : « Ouvrir » de la barre accepte un fichier partiel et ne
    remplace que cette partie ; confirmation avant de remplacer une partie seulement si la saisie est modifiée (précisé
    le 2026-10-28 : si **cette partie** a été modifiée à la main depuis son dernier chargement ou enregistrement ;
@@ -402,12 +442,12 @@ avant d'être codée.
    - Console : section « Dégâts bruts » (moyenne, gaspillage et sa part). Pas d'affichage dans l'interface (Full sim).
    - Tests : dés imposés (D3 contre 1 PV, réduction, FNP, Devastating Wounds), bruts ≥ PV retirés, égalité avec des
      armes D1, valeur exacte ; ticket #6 fermé par le commit (`Closes #6`).
-Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour le rapport en points de la phase 6) :
+Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour le rapport en points de la phase 9) :
 - Aucun dé supplémentaire : non-régression au bit près. Le Core n'apporte que l'attribution nécessaire (pool qui a
   infligé chaque dégât, attaque « grâce à Precision »).
 - Temps mesuré à chaque étape ; si les suivis ralentissent la boucle, option de simulation pour garder le Quick sim
   rapide.
-- Résultats en records simples (sérialisables, contrat JSON de la phase 7).
+- Résultats en records simples (sérialisables, contrat JSON de la phase 4).
 - Indicateurs en points seulement si l'attaquant et tous les groupes ont des points (comme l'étape 4).
 - **Console** (décision de l'utilisateur, 2026-10-28) : outil de debug, alignée sur le Quick sim ; les statistiques
   du Full sim n'y sont pas ajoutées (ce qu'elle affiche déjà, marge, points, dégâts bruts, reste).
@@ -515,7 +555,7 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
      figurines tuées (moyenne, part du total), dégâts bruts (moyenne), gaspillage (part des dégâts bruts perdus).
    - **2. Une section par pool** (sous-titre comme les groupes) : tuiles figurines tuées, PV retirés, dégâts bruts /
      gaspillage, et **« Tire sur une unité déjà détruite »** = P(unité détruite avant que ce pool ne tire) (utile pour
-     l'ordre des armes, prépare l'optimiseur de l'étape 11) ; histogrammes des figurines tuées puis des PV retirés par ce pool.
+     l'ordre des armes, prépare l'optimiseur de la phase 6) ; histogrammes des figurines tuées puis des PV retirés par ce pool.
    - **3. Gaspillage, toutes armes confondues** (dégâts bruts de l'étape 5, jamais affichés jusqu'ici) : tuiles dégâts
      bruts moyens, gaspillage et sa part, « aucune perte » (P(gaspillage = 0)), « perdu quand l'unité survit » (le
      gaspillage qui coûte : quand l'unité est détruite, il n'a rien coûté) ; barre retirés / perdus ; **histogramme
@@ -548,30 +588,10 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
    - Tests : dés imposés (attribution au pool, attaque qui achève, bruts arrêtés à la destruction, pool tiré sur une
      unité détruite) ; cohérence (sommes par pool = totaux réels, parts = 100 %) ; bUnit (onglet, tableau, barre,
      sections par pool, dégâts bruts).
-   L'ancienne étape 9, **rapport en points** (#2), est passée en phase 6 le 2026-10-30 (décision de l'utilisateur :
-   traiter les points avec les fiches d'unité) ; étapes suivantes renumérotées.
-9. **Comparaison, côté Simulation.** Deux sens (#1) : N attaquants contre une cible, ou un attaquant contre N cibles ;
-   situation commune. Même graine pour toutes les entrées (tirages partagés : écarts plus fiables). Indicateurs :
-   moyennes, P(détruire l'unité), P(≥ k), % de l'unité détruite et points détruits (comparables entre cibles
-   différentes) ; meilleure entrée pour chaque indicateur, ex æquo compris. JSON d'une comparaison ; console.
-10. **Comparaison, côté UI.** Entrées prises dans le scénario courant ou dans des fichiers (partiels ou complets),
-   dupliquées, renommées ; distributions superposées ; tableau côte à côte, meilleure entrée mise en évidence ;
-   ouvrir / enregistrer.
-11. **Optimiseur du séquencement des armes** (#3, ajouté le 2026-10-29). Mode à part (tuile sur l'accueil) : à partir
-   du scénario courant (ou d'un fichier), toutes les permutations des **pools** (pas des armes : celles d'un même pool
-   sont lancées ensemble), avec les statistiques du Full sim. Décisions de l'utilisateur :
-   - **Rondes éliminatoires** façon Raidbots : tous les ordres avec peu d'itérations (~10 000), puis les meilleurs avec
-     ~100 000, puis les derniers en lice avec ~1 000 000 ; nombres à calibrer d'après le temps mesuré, progression
-     affichée par ronde. Proposé (à confirmer en précisant l'étape) : élimination selon l'intervalle de confiance
-     (garder tout ordre qui chevauche le meilleur, avec un plafond) plutôt qu'une proportion fixe, et sur les trois
-     métriques (un ordre reste s'il est parmi les meilleurs sur l'une d'elles) ; même graine pour tous les ordres
-     (écarts plus fiables, comme la comparaison) ; avertissement ou plafond au-delà de ~6 pools (720 ordres).
-   - **Tableau des 10 meilleurs ordres**, trié par défaut par P(unité détruite), triable par % de kill, PV retirés,
-     figurines tuées ; meilleur de chaque colonne mis en évidence.
-   - **Export JSON** de l'ordre choisi, réutilisable au Quick sim et au Full sim : le format « attaquant seul » (ou
-     scénario complet), qui garde l'ordre des armes, suffit (pas de nouveau format).
-   - Fin de l'étape : ticket #3 fermé.
-12. **Overwatch** (#11, ajouté le 2026-10-29). Interrupteur « Tir en overwatch » dans la **Situation** (Quick sim et Full sim,
+   Roadmap revue le 2026-10-30 (décisions de l'utilisateur) : l'ancienne étape 9, **rapport en points** (#2), est
+   passée en phase 9 (unités) ; la comparaison et l'optimiseur forment leurs propres phases, 5 et 6, après le web
+   (phase 4), chacun étant un mode à part sur l'accueil. Il ne reste que l'overwatch.
+9. **Overwatch** (#11, ajouté le 2026-10-29). Interrupteur « Tir en overwatch » dans la **Situation** (Quick sim et Full sim,
    décision de l'utilisateur) : le Core résout l'attaque avec les restrictions de l'overwatch, les écrans et les
    statistiques restent les mêmes, résultats marqués « Overwatch » ; mode enregistré dans le JSON du scénario. Les
    règles de l'overwatch ont changé en 11e édition : à détailler avec l'utilisateur en précisant l'étape (quand et
@@ -589,7 +609,7 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
 - **Excédent de dégâts** (2026-10-27) : « PV retirés » reste la mesure réelle (règles du jeu, plafonnée) ;
   l'excédent est une distribution prolongée à part, contre des copies du premier garde du corps (pas du dernier tué,
   souvent le leader, unique et plus résistant). Flux de dés séparé pour ne pas modifier les résultats réels.
-- **Web (phase 7)** : Blazor Web App, serveur `Wh40kSim.Web` (API + client) et client WebAssembly
+- **Web (phase 4)** : Blazor Web App, serveur `Wh40kSim.Web` (API + client) et client WebAssembly
   `Wh40kSim.Web.Client` ; le calcul se fait sur le serveur.
 - **Versions** (vérifiées le 2026-10-27) : MudBlazor 9.11.0, Microsoft.AspNetCore.Components.Web 10.0.14,
   Microsoft.Extensions.Localization 10.0.14, CommunityToolkit.Maui 15.0.1, bUnit 2.13.3, Microsoft.Maui.Controls et
@@ -607,8 +627,8 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   partiel, `ScenarioFile` et `Kind`), `Deserialize` (scénario complet exigé), `Serialize` (scénario, attaquant seul,
   défenseur seul).
 - **Traduction** préparée dès la phase 2 : textes de l'UI dans des `.resx` (français seulement pour l'instant), nombres
-  formatés selon la culture de l'appli, fixée à fr-FR (pas celle de la machine). Messages du Core et anglais : phase 4.
-  Traduction du contenu (règles d'armée, unités) : à trancher en phase 5.
+  formatés selon la culture de l'appli, fixée à fr-FR (pas celle de la machine). Messages du Core et anglais : phase 7.
+  Traduction du contenu (règles d'armée, unités) : à trancher en phase 8.
 - **Endurance** : portée par chaque groupe, valeur par défaut E4 conservée (un groupe JSON sans `toughness` reçoit E4).
   Les anciens fichiers avec `toughness` sur le défenseur sont refusés au chargement (JSON strict, testé).
 - **Tests aller-retour** : comparer les scénarios via `ScenarioJson.Serialize` (les records contenant des listes ne sont
@@ -647,7 +667,7 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   depuis l'accueil par `ScreenNavigator` : barre de chargement dessinée avant la construction de l'écran (première
   construction lente : compilation à la volée), retirée ensuite. Pas de `RegisterLocationChangingHandler` asynchrone :
   bUnit ne termine pas la navigation dans ce cas. Réutilisable tel quel par
-  l'hôte web (phase 7). L'hôte fournit `MauiProgram` (services), la fenêtre (`App` : titre lu dans `Strings.resx`,
+  l'hôte web (phase 4). L'hôte fournit `MauiProgram` (services), la fenêtre (`App` : titre lu dans `Strings.resx`,
   1400 × 900 centrée, minimum 900 × 600, thème au démarrage), `DesktopScenarioFileService`,
   `DesktopPreferenceService` et `wwwroot/index.html` (CSS / JS de MudBlazor). Pas de `Package.appxmanifest`
   (application non empaquetée). Démarrage sans flash : l'hôte passe le thème (mémorisé, sinon selon Windows) à
@@ -781,7 +801,12 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
 - Roadmap revue le 2026-10-30 (branche `docs/roadmap-points-phase6`) : le rapport en points (#2) passe en phase 6,
   étape 5, avec les fiches d'unité ; fin de la phase 3 renumérotée (comparaison en 9 et 10, optimiseur en 11,
   overwatch en 12, tag `v0.3` en fin de phase). Prochaine étape : 9 (comparaison, côté Simulation, #1), à préciser.
+- Phases réordonnées le 2026-10-30 (branche `docs/roadmap-web-avant-comparaison`) : phase 3 « graphiques et Full sim »
+  terminée par l'overwatch (étape 9, tag `v0.3`), puis web (4), comparaison (5), optimiseur (6), traduction (7),
+  mots-clés et règles (8), unités (9, rapport en points en étape 5). Après le web, chaque phase livre sa partie web.
+  Objectif de la phase 3 raccourci avec l'accord de l'utilisateur (comparaison passée en phase 5). Commentaires du
+  code et README alignés. Prochaine étape : phase 3, étape 9 (overwatch, #11), à préciser.
 
 Points notés pour la suite :
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier
-  dans un vrai navigateur en phase 7.
+  dans un vrai navigateur en phase 4.

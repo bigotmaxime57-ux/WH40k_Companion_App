@@ -25,7 +25,7 @@
     <ApplicationVersion>3</ApplicationVersion>
     <InformationalVersion>0.3-apercu.2</InformationalVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-    <!-- Traductions des bibliothèques (MAUI…) : français, et anglais pour la phase 4 ; pas les ~100 autres langues -->
+    <!-- Traductions des bibliothèques (MAUI…) : français, et anglais pour la phase 7 ; pas les ~100 autres langues -->
     <SatelliteResourceLanguages>fr;en</SatelliteResourceLanguages>
   </PropertyGroup>
 

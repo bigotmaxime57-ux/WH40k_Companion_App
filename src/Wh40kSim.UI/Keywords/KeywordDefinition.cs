@@ -18,7 +18,7 @@ public enum KeywordValueKind
 
 /// <summary>
 /// Description d'un mot-clé pour le sélecteur : où il se range, comment l'activer et lire / modifier sa valeur sur une
-/// cible (ici un formulaire d'arme ; en phase 5, d'autres cibles et une portée). Le nom et le rappel de règle sont dans
+/// cible (ici un formulaire d'arme ; en phase 8, d'autres cibles et une portée). Le nom et le rappel de règle sont dans
 /// Strings.resx : <c>Keyword_{Id}</c> et <c>Keyword_{Id}_Help</c> ; la catégorie : <c>KeywordCategory_{Category}</c>.
 /// Aucune règle de jeu ici : seulement l'accès aux champs du formulaire.
 /// </summary>

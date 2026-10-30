@@ -58,7 +58,7 @@ public class NonRegressionTests
     /// Twin-linked, Lance, critique sur 5+, couvert, modificateurs, relances, FNP, invulnérables, réduction de dégâts,
     /// deux PERSONNAGES avec une cible de Precision et une Endurance qui change en cours de simulation.
     /// </summary>
-    private static Scenario RichScenario() => new()
+    internal static Scenario RichScenario() => new()
     {
         Attacker = new AttackerUnit
         {

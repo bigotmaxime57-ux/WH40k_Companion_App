@@ -151,10 +151,22 @@ Découpage revu avec l'utilisateur le 2026-10-30. Décisions :
 
 Chaque étape sera précisée et validée avant d'être codée :
 
-1. **Contrat du résultat** (Simulation, sans web). `SimulationResult` construit depuis un record sérialisable des
-   données brutes (`SimulationData` : scénario, graine, itérations, durée, histogrammes et compteurs agrégés) ;
-   `Simulator.Run` passe par lui. Tests : aller-retour JSON qui redonne exactement les mêmes statistiques ;
-   non-régression au bit près.
+1. **Contrat du résultat** (Simulation, sans web). Précisée et validée par l'utilisateur le 2026-10-30 :
+   - `SimulationData` (record sérialisable) : les compteurs **bruts** de l'accumulateur, entiers seulement — scénario
+     (format de `ScenarioJson`), graine, durée (le nombre de simulations se déduit des histogrammes) ; unité :
+     histogrammes des figurines tuées, des PV retirés, prolongés (marge), des dégâts bruts, du gaspillage, gaspillage
+     cumulé quand l'unité survit ; gardes du corps : histogrammes ; par groupe : cumuls et histogrammes, pertes « grâce
+     à Precision », compteurs des armes Precision (groupes PERSONNAGE, si l'attaquant en a) ; par pool : histogrammes
+     des PV retirés et des figurines achevées, dégâts bruts, tirs sur une unité déjà détruite, gaspillage par total,
+     compteurs de conversion. Moyennes, parts et centiles recalculés à l'arrivée.
+   - L'accumulateur produit un `SimulationData` ; le passage aux statistiques (`ToResult`) devient le constructeur
+     public `SimulationResult(SimulationData)` ; `SimulationResult.Data` donne les données brutes. API de
+     `SimulationResult` inchangée : console, Quick sim et Full sim intacts ; aucun dé en plus.
+   - `SimulationJson` (Wh40kSim.Simulation) : lecture et écriture avec les réglages stricts de `ScenarioJson` ;
+     cohérence vérifiée à la lecture (tailles des histogrammes, nombre de groupes et de pools, simulations comptées),
+     erreur claire sinon. Pas de numéro de version (serveur et client déployés ensemble).
+   - Tests : aller-retour JSON sur le scénario riche (Precision, pools, marge, gaspillage) qui redonne exactement les
+     mêmes statistiques ; données incohérentes refusées ; `NonRegressionTests` inchangés ; temps mesuré.
 2. **Serveur et API** (`Wh40kSim.Web`, Minimal API). `POST /api/simulations` (scénario au format de `ScenarioJson`,
    nombre de simulations, graine) ; JSON illisible, `Scenario.Validate` ou plafond dépassé → `ProblemDetails` (liste des
    erreurs) ; réponse en SSE : attente, progression (par point de pourcentage), résultat, erreur ; annulation à la
@@ -928,6 +940,13 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   de 1 000 000 simulations, calculs simultanés et lancements par IP limités ; cinq étapes (contrat du résultat,
   serveur et API, client WebAssembly, intégration continue #7, Docker et mise en ligne). Prochaine étape : 1 (contrat
   du résultat), à préciser.
+- Phase 4, étape 1 (contrat du résultat) : fusionnée dans `main`, validée par l'utilisateur le 2026-10-30.
+  Prochaine étape : 2 (serveur et API), à préciser (valeurs des limites à trancher). `SimulationData` (+ `GroupData`,
+  `PrecisionWeaponData`, `PoolData`, `ConversionCounts`, membres `required`) et `SimulationData.Validate()` ;
+  l'accumulateur produit les données (`ToData`), `SimulationResult(SimulationData)` calcule tout, `SimulationResult.Data` ;
+  `SimulationJson` (réglages de `ScenarioJson`). Rien de visible à l'écran : API de `SimulationResult` inchangée.
+  `NonRegressionTests` inchangés ; temps inchangé (10 M simulations : 1,27 à 1,37 s). 518 tests verts (223 Core,
+  83 Simulation, 212 UI).
 
 Points notés pour la suite :
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

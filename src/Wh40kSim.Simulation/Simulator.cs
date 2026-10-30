@@ -88,7 +88,7 @@ public static class Simulator
             });
 
         stopwatch.Stop();
-        return total.ToResult(scenario, baseSeed, stopwatch.Elapsed);
+        return new SimulationResult(total.ToData(scenario, baseSeed, stopwatch.Elapsed));
     }
 
     private const int MainStream = 0;
@@ -119,7 +119,7 @@ public static class Simulator
     }
 
     /// <summary>
-    /// Histogrammes en cours de remplissage, convertis en <see cref="SimulationResult"/> à la fin. Travail des armes
+    /// Histogrammes en cours de remplissage, copiés en <see cref="SimulationData"/> à la fin. Travail des armes
     /// Precision par groupe suivi seulement si l'attaquant en a (<paramref name="tracksPrecisionWeapons"/>).
     /// </summary>
     private sealed class Accumulator(DefenderUnit defender, bool tracksPrecisionWeapons, int poolCount)
@@ -259,17 +259,6 @@ public static class Simulator
             sums[9] += conversion.FailedSaves;
         }
 
-        /// <summary>Conversion moyenne d'un pool sur les simulations où il a tiré ; null s'il n'a jamais tiré.</summary>
-        private static WeaponConversion? Conversion(long[] sums)
-        {
-            if (sums[0] == 0)
-            {
-                return null;
-            }
-            double Mean(int i) => (double)sums[i] / sums[0];
-            return new WeaponConversion(Mean(1), Mean(2), Mean(3), Mean(4), Mean(5), Mean(6), Mean(7), Mean(8), Mean(9));
-        }
-
         /// <summary>Travail des armes Precision sur un groupe PERSONNAGE (les seuls que Precision vise).</summary>
         private void RecordPrecisionWeapons(DefenderState state, int g, int killed, int damage, bool bodyguardsAlive)
         {
@@ -342,73 +331,69 @@ public static class Simulator
             _survived += other._survived;
         }
 
-        public SimulationResult ToResult(Scenario scenario, int seed, TimeSpan elapsed)
+        /// <summary>Compteurs bruts, copiés (les statistiques sont calculées par <see cref="SimulationResult"/>).</summary>
+        public SimulationData ToData(Scenario scenario, int seed, TimeSpan elapsed)
         {
-            long iterations = _kills.Sum();
-            var groups = scenario.Defender.Groups
-                .Select((group, g) => new GroupLosses(
-                    g, group, new DiscreteDistribution(_groupKills[g]), new DiscreteDistribution(_groupDamage[g]),
-                    (double)_precisionKilled[g] / iterations, (double)_precisionDamage[g] / iterations,
-                    tracksPrecisionWeapons && group.IsCharacter ? PrecisionWeapons(g, iterations) : null))
-                .ToList();
-            double totalKills = _killedPerGroup.Sum(), totalDamage = _damagePerGroup.Sum();
             var waste = TrimTrailingZeros(_waste, 1);
-            var pools = AttackPool.Build(scenario.FiringWeapons)
-                .Select((pool, p) =>
+            return new SimulationData
+            {
+                Scenario = scenario,
+                Seed = seed,
+                Elapsed = elapsed,
+                Kills = [.. _kills],
+                Damage = [.. _damage],
+                ExtendedKills = TrimTrailingZeros(_extendedKills, _kills.Length),
+                ExtendedDamage = TrimTrailingZeros(_extendedDamage, _damage.Length),
+                RawDamage = TrimTrailingZeros(_rawDamage, _damage.Length),
+                Waste = waste,
+                WasteWhenUnitSurvives = _wasteWhenSurvived,
+                UnitSurvives = _survived,
+                BodyguardKills = [.. _bodyguardKills],
+                BodyguardDamage = [.. _bodyguardDamage],
+                Groups = defender.Groups.Select((group, g) => new GroupData
                 {
-                    var damage = new DiscreteDistribution(_poolDamage[p]);
-                    var kills = new DiscreteDistribution(_poolKills[p]);
-                    double damageSum = damage.Mean * iterations, killSum = kills.Mean * iterations;
-                    return new WeaponPoolLosses(
-                        p, pool.Members, damage, kills, (double)_poolRawDamage[p] / iterations,
-                        (double)_poolOnDestroyedUnit[p] / iterations,
-                        totalDamage > 0 ? damageSum / totalDamage : 0, totalKills > 0 ? killSum / totalKills : 0,
-                        WasteShares(_poolWasteByTotal[p], waste), Conversion(_conversion[p]));
-                })
-                .ToList();
-            return new(scenario, seed, elapsed,
-                new DiscreteDistribution(_kills), new DiscreteDistribution(_damage), _killedPerGroup, _damagePerGroup,
-                new DiscreteDistribution(TrimTrailingZeros(_extendedKills, _kills.Length)),
-                new DiscreteDistribution(TrimTrailingZeros(_extendedDamage, _damage.Length)),
-                new DiscreteDistribution(TrimTrailingZeros(_rawDamage, _damage.Length)),
-                groups, new DiscreteDistribution(_bodyguardKills), new DiscreteDistribution(_bodyguardDamage), pools,
-                new DiscreteDistribution(waste),
-                _survived > 0 ? (double)_wasteWhenSurvived / _survived : null);
-        }
-
-        private PrecisionWeaponLosses PrecisionWeapons(int g, long iterations)
-        {
-            double meanDamage = (double)_damagePerGroup[g] / iterations;
-            double meanPrecision = (double)_precisionWeaponDamage[g] / iterations;
-            var shares = new double[_groupDamage[g].Length];
-            for (int k = 1; k < shares.Length; k++)
-            {
-                long simulations = _groupDamage[g][k];
-                shares[k] = simulations > 0 ? (double)_precisionWeaponDamageByTotal[g][k] / (k * simulations) : 0;
-            }
-            return new PrecisionWeaponLosses(
-                (double)_killedByPrecisionAlone[g] / iterations,
-                (double)_killedWithHelp[g] / iterations,
-                meanPrecision,
-                meanDamage - meanPrecision,
-                (double)_killedWhileBodyguardsAlive[g] / iterations,
-                (double)_precisionFallsShort[g] / iterations,
-                _precisionFallsShort[g] > 0 ? (double)_woundsLeftWhenShort[g] / _precisionFallsShort[g] : 0,
-                shares);
-        }
-
-        /// <summary>
-        /// Part moyenne d'un pool dans le gaspillage total k de la simulation, pour chaque k (0 si k = 0 ou jamais atteint).
-        /// </summary>
-        private static double[] WasteShares(long[] poolWasteByTotal, long[] waste)
-        {
-            var shares = new double[waste.Length];
-            for (int k = 1; k < shares.Length; k++)
-            {
-                long poolWaste = k < poolWasteByTotal.Length ? poolWasteByTotal[k] : 0;
-                shares[k] = waste[k] > 0 ? (double)poolWaste / (k * waste[k]) : 0;
-            }
-            return shares;
+                    KilledTotal = _killedPerGroup[g],
+                    DamageTotal = _damagePerGroup[g],
+                    Kills = [.. _groupKills[g]],
+                    Damage = [.. _groupDamage[g]],
+                    PrecisionKilled = _precisionKilled[g],
+                    PrecisionDamage = _precisionDamage[g],
+                    PrecisionWeapons = tracksPrecisionWeapons && group.IsCharacter
+                        ? new PrecisionWeaponData
+                        {
+                            Damage = _precisionWeaponDamage[g],
+                            DamageByTotal = [.. _precisionWeaponDamageByTotal[g]],
+                            KilledByPrecisionAlone = _killedByPrecisionAlone[g],
+                            KilledWithHelp = _killedWithHelp[g],
+                            KilledWhileBodyguardsAlive = _killedWhileBodyguardsAlive[g],
+                            FallsShort = _precisionFallsShort[g],
+                            WoundsLeftWhenShort = _woundsLeftWhenShort[g],
+                        }
+                        : null,
+                }).ToList(),
+                Pools = Enumerable.Range(0, _poolKills.Length).Select(p => new PoolData
+                {
+                    Damage = [.. _poolDamage[p]],
+                    Kills = [.. _poolKills[p]],
+                    RawDamage = _poolRawDamage[p],
+                    FiredOnDestroyedUnit = _poolOnDestroyedUnit[p],
+                    // Au plus aussi long que l'histogramme du gaspillage : au-delà, il n'y a que des zéros
+                    WasteByTotal = TrimTrailingZeros(_poolWasteByTotal[p][..Math.Min(_poolWasteByTotal[p].Length, waste.Length)], 1),
+                    Conversion = new ConversionCounts
+                    {
+                        Activations = _conversion[p][0],
+                        Attacks = _conversion[p][1],
+                        BlastAttacks = _conversion[p][2],
+                        RapidFireAttacks = _conversion[p][3],
+                        Hits = _conversion[p][4],
+                        SustainedHits = _conversion[p][5],
+                        LethalHits = _conversion[p][6],
+                        Wounds = _conversion[p][7],
+                        DevastatingWounds = _conversion[p][8],
+                        FailedSaves = _conversion[p][9],
+                    },
+                }).ToList(),
+            };
         }
 
         private static void Increment(ref long[] histogram, int value)

@@ -17,9 +17,10 @@
       Code compilé à l'avance en WebAssembly au lieu d'être interprété : affichage nettement plus rapide (essai validé le
       2026-10-30), contre un premier téléchargement plus lourd (6,7 Mo au lieu de 3,2 en Brotli). Ne s'applique qu'à la
       publication (dotnet publish, plusieurs minutes) et demande la charge de travail wasm-tools ; en Debug depuis Rider,
-      le client reste interprété.
+      le client reste interprété. Activée seulement pendant une publication (_IsPublishing, posé par dotnet publish) :
+      sinon .NET exigerait wasm-tools dès la restauration et le build, sur chaque machine et dans la CI.
     -->
-    <RunAOTCompilation>true</RunAOTCompilation>
+    <RunAOTCompilation Condition="'$(_IsPublishing)' == 'true'">true</RunAOTCompilation>
   </PropertyGroup>
 
   <ItemGroup>

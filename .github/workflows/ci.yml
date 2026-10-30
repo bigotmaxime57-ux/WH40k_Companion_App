@@ -40,8 +40,9 @@ jobs:
           key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj', 'Directory.Build.props') }}
           restore-keys: nuget-${{ runner.os }}-
 
+      # Restauration avec la configuration du build : certains réglages en dépendent (paquets de runtime)
       - name: Restauration
-        run: dotnet restore Wh40kSim.CI.slnf
+        run: dotnet restore Wh40kSim.CI.slnf -p:Configuration=Release
 
       - name: Build
         run: dotnet build Wh40kSim.CI.slnf --no-restore -c Release -warnaserror
@@ -79,7 +80,7 @@ jobs:
         run: dotnet workload install maui-windows
 
       - name: Restauration
-        run: dotnet restore Wh40kSim.sln
+        run: dotnet restore Wh40kSim.sln -p:Configuration=Release
 
       - name: Build
         run: dotnet build Wh40kSim.sln --no-restore -c Release -warnaserror

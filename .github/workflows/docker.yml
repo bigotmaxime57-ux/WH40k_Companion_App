@@ -1,0 +1,53 @@
+# Vérification de l'image Docker : construction (publication AOT comprise) puis démarrage du conteneur, qui doit
+# répondre sur /health et servir la page. Seulement quand l'image peut changer (Dockerfile, projets du site), ou à la
+# main : elle prend plusieurs minutes et ne ralentit pas la CI habituelle.
+name: Image Docker
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'Directory.Build.props'
+      - 'src/**/*.csproj'
+      - '.github/workflows/docker.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  image:
+    name: Construction et démarrage de l'image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Construction
+        run: docker build -t wh40ksim .
+
+      - name: Démarrage et vérifications
+        run: |
+          docker run -d --name wh40ksim -p 8080:8080 wh40ksim
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8080/health; then break; fi
+            sleep 1
+          done
+          echo
+          curl -fsS http://localhost:8080/health | grep Healthy
+          curl -fsS http://localhost:8080/ | grep -q 'blazor.web.js'
+          curl -fsS http://localhost:8080/api/simulations/limits | grep maxIterations
+          # Client compilé AOT : moteur WebAssembly bien plus gros que la version interprétée (~23 Mo contre ~3)
+          docker exec wh40ksim sh -c 'ls -l wwwroot/_framework/dotnet.native.*.wasm | awk "{ print \$5, \$9 }"'
+          size=$(docker exec wh40ksim sh -c 'stat -c %s wwwroot/_framework/dotnet.native.*.wasm')
+          test "$size" -gt 15000000
+
+      - name: Journal du conteneur (en cas d'échec)
+        if: failure()
+        run: docker logs wh40ksim || true

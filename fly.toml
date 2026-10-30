@@ -1,0 +1,31 @@
+# Déploiement de la version web sur Fly.io (image construite depuis le Dockerfile, par Fly, compilation AOT comprise).
+# Le nom de l'application donne l'adresse du site (<app>.fly.dev) : à remplacer par celui créé avec
+# « fly apps create <nom> » s'il diffère.
+app = "wh40ksim"
+primary_region = "cdg"            # Paris
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  # Adresse du visiteur lue dans X-Forwarded-For (posé par le proxy de Fly) : limite de lancements par IP
+  ForwardedHeaders__Enabled = "true"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # Veille automatique : machine arrêtée quand personne ne s'en sert, redémarrée à la première visite
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/health"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "15s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"

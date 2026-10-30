@@ -1,0 +1,17 @@
+# Ce qui n'entre pas dans l'image : sorties de compilation, publications locales, scénarios personnels, desktop, tests,
+# outils et fichiers de travail (seuls Directory.Build.props et src/ servent, voir Dockerfile)
+**/bin/
+**/obj/
+dist/
+scenarios/
+tests/
+tools/
+.git/
+.github/
+.claude/
+.idea/
+.vs/
+src/Wh40kSim.Desktop/
+src/Wh40kSim.Console/
+**/*.user
+**/TestResults/

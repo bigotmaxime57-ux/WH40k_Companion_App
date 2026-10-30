@@ -1,4 +1,5 @@
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Wh40kSim.UI.Components;
@@ -14,6 +15,23 @@ builder.Services.Configure<SimulationOptions>(builder.Configuration.GetSection(S
 builder.Services.AddSingleton<SimulationQueue>();
 builder.Services.AddSingleton<ISimulationRunner, SimulatorRunner>();
 builder.Services.AddProblemDetails();
+// Point de santé (/health) : interrogé par l'hébergeur pour savoir si le serveur est prêt
+builder.Services.AddHealthChecks();
+
+// Derrière le proxy de l'hébergeur (Fly.io), l'adresse du visiteur est dans X-Forwarded-For : seulement si la
+// configuration l'active (ForwardedHeaders:Enabled), sinon n'importe qui pourrait choisir son adresse et contourner la
+// limite par IP. Seule la dernière adresse (ajoutée par le proxy) est retenue.
+bool behindProxy = builder.Configuration.GetValue<bool>("ForwardedHeaders:Enabled");
+if (behindProxy)
+{
+    builder.Services.Configure<ForwardedHeadersOptions>(options =>
+    {
+        options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+        options.ForwardLimit = 1;
+        options.KnownIPNetworks.Clear();
+        options.KnownProxies.Clear();
+    });
+}
 
 // Lancements limités par adresse IP (fenêtre fixe d'une minute), refus en 429 avec le délai à attendre
 builder.Services.AddRateLimiter(limiter =>
@@ -46,6 +64,10 @@ builder.Services.AddRateLimiter(limiter =>
 
 var app = builder.Build();
 
+if (behindProxy)
+{
+    app.UseForwardedHeaders(); // avant tout ce qui lit l'adresse du visiteur (limite par IP)
+}
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
@@ -54,6 +76,7 @@ app.UseRateLimiter();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
+app.MapHealthChecks("/health");
 app.MapSimulationEndpoints();
 // Adresses des écrans (accueil, Quick sim, Full sim…) : composants routés de Wh40kSim.UI, affichés par le client
 app.MapRazorComponents<App>()

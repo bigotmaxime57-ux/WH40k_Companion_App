@@ -1,19 +1,23 @@
-# Intégration continue (ticket #7) : à chaque push, sur toutes les branches, et sur les pull requests.
-# - Linux : build et tous les tests, sans le desktop (Wh40kSim.CI.slnf) ; même système que le futur serveur.
+# Intégration continue (ticket #7) : à chaque push, sur toutes les branches, et sur les pull requests ; reprise aussi par
+# le déploiement (deploy.yml), qui ne déploie que si elle est verte.
+# - Linux : build et tous les tests, sans le desktop (Wh40kSim.CI.slnf) ; même système que le serveur en ligne.
 # - Windows : build de toute la solution, desktop MAUI compris (charge de travail maui-windows), sans relancer les tests.
 # Comme en local : 0 erreur et 0 avertissement (-warnaserror).
 name: CI
 
 on:
   push:
+    branches: ['**']             # les tags de version passent par le déploiement, qui lance lui-même la CI
   pull_request:
+  workflow_call:
 
 permissions:
   contents: read
 
-# Un nouveau push sur la même branche annule l'exécution en cours, devenue inutile
+# Un nouveau push sur la même branche annule l'exécution en cours, devenue inutile (groupe propre au flux appelant :
+# appelée par le déploiement, la CI ne s'annule pas avec une autre exécution)
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:

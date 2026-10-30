@@ -93,6 +93,22 @@ dotnet publish src/Wh40kSim.Web -c Release -p:RunAOTCompilation=true -o dist/web
 Set-Location dist/web; dotnet Wh40kSim.Web.dll --urls http://localhost:5080
 ```
 
+**Mise en ligne (Fly.io)** : l'image Docker (`Dockerfile`, client compilé AOT) est construite et déployée par Fly.io
+(`fly.toml` : région Paris, mise en veille quand personne ne s'en sert, redémarrage à la première visite). Le
+déploiement part tout seul quand on pose un tag de version (`v0.4`, `v0.5`…), après une CI verte, ou à la main depuis
+l'onglet « Actions » de GitHub (flux « Déploiement »). Il demande le secret `FLY_API_TOKEN` du dépôt. Commandes Fly
+utiles (outil `flyctl`) :
+
+```bash
+fly status
+```
+
+```bash
+fly logs
+```
+
+Le flux « Image Docker » vérifie que l'image se construit et démarre, quand le `Dockerfile` ou les projets changent.
+
 **Depuis Rider** : choisir la configuration d'exécution `Wh40kSim.Desktop` (profil « Windows Machine ») puis Run.
 L'application n'est pas empaquetée (pas de Microsoft Store) : le `.exe` est dans
 `src/Wh40kSim.Desktop/bin/<Configuration>/net10.0-windows10.0.19041.0/win-x64/`. Le lancer directement demande que

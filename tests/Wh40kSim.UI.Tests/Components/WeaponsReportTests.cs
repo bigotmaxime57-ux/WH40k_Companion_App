@@ -98,6 +98,25 @@ public class WeaponsReportTests : ComponentTestContext
     }
 
     [Fact]
+    public void The_conversion_table_says_when_a_pool_hits_automatically_with_torrent()
+    {
+        var scenario = Squad();
+        var cannon = scenario.Attacker.Weapons[0];
+        scenario = scenario with
+        {
+            Attacker = scenario.Attacker with
+            {
+                Weapons = [cannon with { Weapon = cannon.Weapon with { Abilities = new() { Torrent = true } } }, .. scenario.Attacker.Weapons.Skip(1)],
+            },
+        };
+        var report = Render<WeaponsReport>(p => p.Add(c => c.Result, Simulator.Run(scenario, 2_000, seed: 6)));
+
+        var rows = report.FindAll("[data-test=conversion-table] [data-test^=conversion-row-]");
+        Assert.Contains("Torrent", rows[0].QuerySelector("[data-test=conversion-hits] [data-test=conversion-torrent]")!.TextContent);
+        Assert.Empty(rows[1].QuerySelectorAll("[data-test=conversion-torrent]"));
+    }
+
+    [Fact]
     public void Each_pool_has_its_own_section_with_tiles_and_a_histogram()
     {
         var (report, result) = Render();

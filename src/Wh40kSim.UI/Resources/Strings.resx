@@ -694,6 +694,9 @@
   <data name="Weapons_FromSustained" xml:space="preserve">
     <value>dont +{0} Sustained</value>
   </data>
+  <data name="Weapons_Torrent" xml:space="preserve">
+    <value>Torrent : touches automatiques</value>
+  </data>
   <data name="Weapons_FromLethal" xml:space="preserve">
     <value>dont {0} Lethal (≈ +{1} gagnées)</value>
   </data>
@@ -710,7 +713,7 @@
     <value>Ce que deviennent les attaques de chaque arme, en moyenne par activation : touches (part des attaques), blessures (part des touches), sauvegardes ratées (part des blessures). Le second pourcentage, en plus discret, rapporte l'étape aux attaques de base (« 3,10 (70 %, 51 %) » : 51 % des attaques deviennent des blessures). Une arme n'est comptée que quand elle commence à tirer sur une unité encore en jeu ; si l'unité meurt pendant qu'elle tire, ses dés restent comptés jusqu'au bout, pour que les taux décrivent l'arme.</value>
   </data>
   <data name="Help_ConversionKeywords" xml:space="preserve">
-    <value>Sous-lignes : attaques ajoutées par Blast et Rapid Fire, touches ajoutées par Sustained Hits, blessures sans jet de Lethal Hits, blessures critiques de Devastating Wounds (mortelles, sans sauvegarde). Les gains sont estimés avec les taux de l'arme : blessures gagnées = touches Lethal qui auraient raté le jet de blessure ; sauvegardes évitées = blessures Devastating qui auraient été sauvegardées.</value>
+    <value>Sous-lignes : attaques ajoutées par Blast et Rapid Fire, touches automatiques de Torrent (aucun jet de touche), touches ajoutées par Sustained Hits, blessures sans jet de Lethal Hits, blessures critiques de Devastating Wounds (mortelles, sans sauvegarde). Les gains sont estimés avec les taux de l'arme : blessures gagnées = touches Lethal qui auraient raté le jet de blessure ; sauvegardes évitées = blessures Devastating qui auraient été sauvegardées.</value>
   </data>
   <data name="Weapons_WasteChart" xml:space="preserve">
     <value>PV perdus par activation</value>

@@ -188,12 +188,30 @@ Chaque étape sera précisée et validée avant d'être codée :
      11e lancement de la minute) ; file (`queued` position 1, puis résultat) ; annulation (place libérée) ; erreur
      inattendue (événement `error`).
    - Reporté à l'étape 5 : Docker, HTTPS, vraie adresse IP derrière un proxy (`X-Forwarded-For`), point de santé.
-3. **Client WebAssembly** (`Wh40kSim.Web.Client`, Blazor Web App en rendu WebAssembly interactif, sans prérendu) :
-   `AppShell` et ses écrans ; `ApiSimulationService` (lecture du flux SSE, progression, annulation, erreurs du
-   serveur affichées) ; fichiers dans le navigateur (`InputFile` pour ouvrir, téléchargement pour enregistrer,
-   fichiers partiels compris) ; préférences dans le stockage du navigateur, thème sans flash au démarrage ; plafond
-   connu de l'interface (choix rapide 10 M indisponible en web) ; raccourcis clavier vérifiés dans un vrai navigateur.
-   Wh40kSim.UI reste commun au desktop et au web.
+3. **Client WebAssembly** (`Wh40kSim.Web.Client`). Précisée et validée par l'utilisateur le 2026-10-30 :
+   - Blazor Web App : `Wh40kSim.Web` sert la page et le client ; `Wh40kSim.Web.Client` (WebAssembly, référence
+     Wh40kSim.UI), rendu WebAssembly interactif **sans prérendu**. Écrans de Wh40kSim.UI inchangés, seuls les
+     services changent. `dotnet run --project src/Wh40kSim.Web` ouvre le site sur `http://localhost:5080`.
+   - `ApiSimulationService` (`ISimulationService`) : `POST /api/simulations`, flux SSE lu au fil de l'eau, progression,
+     résultat brut reconstruit en `SimulationResult`, Annuler ferme la requête.
+   - **Attente dans la file** (décision de l'utilisateur) : **fenêtre** « En attente : N calculs avant vous », mise à
+     jour, avec Annuler, fermée au démarrage du calcul ; `ISimulationService` reçoit un suivi facultatif de la file
+     (`IProgress<int>`), jamais utilisé par le desktop.
+   - Erreurs du serveur dans le bandeau de message (refus 400 avec ses erreurs, 429 avec le délai, événement `error`,
+     serveur injoignable).
+   - Fichiers : ouvrir par le sélecteur du navigateur (bouton ou Ctrl+O, fichiers partiels compris) ; **enregistrer =
+     toujours un téléchargement** sous le nom proposé (décision de l'utilisateur).
+   - Préférences dans `localStorage` ; thème sans flash (script de la page pour la barre de chargement, thème lu avant
+     d'afficher `AppShell`) ; version affichée sur l'accueil.
+   - **Plafond demandé au serveur** (`GET /api/simulations/limits`, décision de l'utilisateur), exposé par
+     `ISimulationService` (aucun en desktop) ; **choix rapide 10 M masqué** en web, saisie au-delà refusée, Lancer
+     désactivé, bulle « ? » explicative.
+   - À vérifier par l'utilisateur dans un vrai navigateur : raccourcis (Ctrl+Entrée, Ctrl+S, Ctrl+O), quatre thèmes,
+     parcours complet (ouvrir, modifier, lancer, attente avec deux onglets, annuler, enregistrer).
+   - Tests : nouveau `Wh40kSim.Web.Client.Tests` (`ApiSimulationService` face à un faux flux SSE : progression, file,
+     résultat, 400, 429, `error`, annulation ; fichiers et préférences avec le JavaScript simulé par bUnit) ;
+     Wh40kSim.UI.Tests (choix 10 M masqué et saisie refusée avec un plafond, fenêtre d'attente, desktop inchangé) ;
+     Wh40kSim.Web.Tests (page servie avec le client, `GET /api/simulations/limits`).
 4. **Intégration continue** (#7) : GitHub Actions, build et tests à chaque push et pull request (le desktop MAUI
    demande Windows : runner Windows ou solution sans le desktop, à trancher).
 5. **Docker et mise en ligne** : image Docker (Linux, construction en plusieurs étapes), réglages de production
@@ -728,7 +746,11 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   l'excédent est une distribution prolongée à part, contre des copies du premier garde du corps (pas du dernier tué,
   souvent le leader, unique et plus résistant). Flux de dés séparé pour ne pas modifier les résultats réels.
 - **Web (phase 4)** : Blazor Web App, serveur `Wh40kSim.Web` (API + client) et client WebAssembly
-  `Wh40kSim.Web.Client` ; le calcul se fait sur le serveur.
+  `Wh40kSim.Web.Client` ; le calcul se fait sur le serveur. **Client compilé AOT** (`RunAOTCompilation`, décision du
+  2026-10-30 après essai : affichage interprété trop lent, ~1 s par changement d'écran ; nettement plus fluide en AOT) :
+  premier téléchargement 6,7 Mo en Brotli au lieu de 3,2 (31 Mo décompressés au lieu de 10,7), publication d'environ
+  4 min ; seulement à la publication (Debug depuis Rider : interprété). Charge de travail `wasm-tools` nécessaire pour
+  publier : sur chaque machine, dans l'image Docker et l'intégration continue.
 - **Versions** (vérifiées le 2026-10-27) : MudBlazor 9.11.0, Microsoft.AspNetCore.Components.Web 10.0.14,
   Microsoft.Extensions.Localization 10.0.14, CommunityToolkit.Maui 15.0.1, bUnit 2.13.3, Microsoft.Maui.Controls et
   Microsoft.AspNetCore.Components.WebView.Maui 10.0.120 (charge de travail MAUI 10.0.110), Microsoft.Extensions.Logging.Debug
@@ -812,6 +834,9 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
 - Si les chemins longs Windows sont désactivés (`LongPathsEnabled = 0`), le build MAUI échoue au-delà de 260
   caractères : ne pas placer le dépôt dans un dossier trop profond (dans le dépôt, le chemin le plus long fait ~180).
 - Le modèle `dotnet new maui-blazor` cible aussi Android / iOS : ne garder que la cible Windows.
+- Charge de travail `wasm-tools` (`dotnet workload install wasm-tools`, terminal administrateur pour
+  `C:\Program Files\dotnet`) : nécessaire pour **publier** la version web (compilation AOT du client) ; build, tests et
+  lancement depuis Rider fonctionnent sans elle.
 - CLI GitHub (tickets) : `winget install --id GitHub.cli -e --source winget --accept-source-agreements
   --accept-package-agreements` (sans ces options, winget bloque sur les conditions du Microsoft Store), puis
   `gh auth login` dans un terminal séparé (questions interactives : GitHub.com, HTTPS, navigateur). Une session ouverte
@@ -959,7 +984,30 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
 - Phase 4, étape 1 (contrat du résultat) : fusionnée dans `main`, validée par l'utilisateur le 2026-10-30.
   Prochaine étape : 2 (serveur et API), à préciser (valeurs des limites à trancher).
 - Phase 4, étape 2 (serveur et API) : fusionnée dans `main`, validée par l'utilisateur après essai le 2026-10-30.
-  Prochaine étape : 3 (client WebAssembly), à préciser. `Wh40kSim.Web` : `SimulationOptions` (section
+  Prochaine étape : 3 (client WebAssembly), à préciser.
+- Phase 4, étape 3 (client WebAssembly) : fusionnée dans `main`, validée par l'utilisateur après essai dans Firefox
+  le 2026-10-30. Prochaine étape : 4 (intégration continue, #7), à préciser.
+  UI commune : `ISimulationService.MaxIterations` (aucun en desktop) et suivi de la file (`IProgress<int>`),
+  `SimulationServiceException` affichée en message, `QueueDialog` / `QueueStatus`, `SimulationPanel.MaxIterations`
+  (choix rapides au-delà masqués, saisie bornée, bulle « ? »). `Wh40kSim.Web.Client` : `Routes` (thème lu avant
+  `AppShell`, barre de chargement retirée ensuite), `ApiSimulationService` (flux SSE, refus, pannes, annulation,
+  plafond par `GET /api/simulations/limits`), `ServerSentEvents`, `BrowserScripts` (module `wh40ksim-web.js` :
+  ouvrir, télécharger, mode sombre, barre de chargement), `BrowserScenarioFileService`, `BrowserPreferenceService`
+  (`localStorage`, clé `wh40ksim.theme`) ; culture fr-FR (données de globalisation complètes). Serveur : page
+  `Components/App.razor` (rendu WebAssembly sans prérendu, adresses des écrans de Wh40kSim.UI), `app.css` (barre de
+  chargement), profil « http » qui ouvre le navigateur. En dehors de Development, le site demande une version publiée
+  (fichiers statiques des projets référencés) : prévu à l'étape 5 (Docker). Test UI instable `PartialFileTests`
+  (clic perdu après ouverture) corrigé avec `ClickUntil`. Retours de l'utilisateur après essai : profil de lancement
+  sans débogage WebAssembly (Rider exigeait alors un navigateur Chromium ; l'utilisateur est sous Firefox) ; barre de
+  progression figée vers 16 % en web (calcul de 1 M en ~0,2 s sur le serveur, page redessinée à chaque pourcent, plus
+  lent en WebAssembly) : la barre devient un composant autonome (`SimulationProgressBar`, suivi de `ProgressState`) qui
+  se redessine seule, la page n'est plus redessinée pendant le calcul (idée de l'utilisateur) ; barre à 100 % avant le
+  traitement du résultat ; fond de la page aux couleurs du thème pendant le chargement (blanc auparavant ; sans thème
+  mémorisé, selon le mode clair / sombre du système), puis celui de MudBlazor une fois la barre retirée ; affichage
+  lent (~1 s par changement d'écran, même en Release) : client compilé AOT après un essai comparatif (branche
+  `essai/aot`, reprise dans l'étape), voir « Décisions techniques » ; `wasm-tools` installé sur cette machine, **à
+  installer sur l'autre**. 565 tests verts (223 Core, 84 Simulation, 218 UI, 21 Web, 19 client web ; UI stables sur
+  3 exécutions). `Wh40kSim.Web` : `SimulationOptions` (section
   « Simulation »), `SimulationQueue` (file sans limite, positions), `ISimulationRunner` / `SimulatorRunner`,
   `SimulationEndpoints` (`POST /api/simulations`, SSE `queued` / `progress` / `result` / `error`, `ProblemDetails`),
   limiteur par IP (fenêtre fixe), `Wh40kSim.Web.http`, profil `http` sur le port 5080 ; `Wh40kSim.Web.Tests`

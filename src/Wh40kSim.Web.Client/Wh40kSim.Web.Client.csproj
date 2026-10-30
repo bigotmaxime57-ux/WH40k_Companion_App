@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <!--
+    Client web (WebAssembly), servi par Wh40kSim.Web : l'interface de Wh40kSim.UI dans le navigateur, avec les services
+    propres au navigateur (simulation par l'API du serveur, fichiers, préférences). Aucune règle de jeu ici.
+  -->
+  <PropertyGroup>
+    <RootNamespace>Wh40kSim.Web.Client</RootNamespace>
+    <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
+    <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
+    <!-- Version affichée sur l'accueil -->
+    <InformationalVersion>0.4-dev</InformationalVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <!-- Culture de l'appli fixée à fr-FR (nombres, dates), quelle que soit la langue du navigateur -->
+    <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+    <!--
+      Code compilé à l'avance en WebAssembly au lieu d'être interprété : affichage nettement plus rapide (essai validé le
+      2026-10-30), contre un premier téléchargement plus lourd (6,7 Mo au lieu de 3,2 en Brotli). Ne s'applique qu'à la
+      publication (dotnet publish, plusieurs minutes) et demande la charge de travail wasm-tools ; en Debug depuis Rider,
+      le client reste interprété.
+    -->
+    <RunAOTCompilation>true</RunAOTCompilation>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.14" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Wh40kSim.UI\Wh40kSim.UI.csproj" />
+  </ItemGroup>
+
+</Project>

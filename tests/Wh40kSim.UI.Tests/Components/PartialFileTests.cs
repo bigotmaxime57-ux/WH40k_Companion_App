@@ -124,7 +124,8 @@ public class PartialFileTests : ComponentTestContext
         var page = Render<SimulatorPage>();
         page.Find("[data-test=open]").Click();
 
-        page.Find("[data-test=save-attacker]").Click();
+        // Juste après l'ouverture, les infobulles des cartes finissent leur rendu : clic parfois perdu (voir ClickUntil)
+        page.ClickUntil("[data-test=save-attacker]", () => Files.Saved.Count == 1);
 
         var (content, fileName) = Assert.Single(Files.Saved);
         var file = ScenarioJson.ReadFile(content);

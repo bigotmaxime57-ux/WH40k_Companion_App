@@ -29,6 +29,8 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
 
     private Scenario? _scenario;          // scénario saisi, null tant qu'une expression de dés est invalide
     private CancellationTokenSource? _cancellation;
+    private QueueStatus? _queue;          // attente du lancement en cours dans la file du serveur
+    private IDialogReference? _queueDialog;
 
     private IJSObjectReference? _shortcutsModule;
     private IJSObjectReference? _shortcuts;
@@ -75,7 +77,8 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
     /// <summary>Arme dont les mots-clés sont ouverts dans le panneau latéral.</summary>
     protected WeaponForm? KeywordWeapon { get; private set; }
 
-    protected double Progress { get; private set; }
+    /// <summary>Progression du calcul en cours : seule la barre se redessine quand elle change, pas la page.</summary>
+    protected ProgressState Progress { get; } = new();
 
     protected string? Message { get; private set; }
 
@@ -83,7 +86,12 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
 
     protected bool Running => Session.IsRunning;
 
-    protected bool CanRun => !Running && _scenario is not null && Errors.Count == 0;
+    protected bool CanRun => !Running && _scenario is not null && Errors.Count == 0 && WithinMaxIterations;
+
+    /// <summary>Plafond de simulations par lancement du service (null = aucun, cas du desktop).</summary>
+    protected int? MaxIterations => SimulationService.MaxIterations;
+
+    private bool WithinMaxIterations => MaxIterations is not int max || Run.Iterations <= max;
 
     /// <summary>On peut enregistrer un scénario incohérent (à corriger plus tard), pas une saisie de dés illisible.</summary>
     protected bool CanSave => !Running && _scenario is not null;
@@ -444,34 +452,43 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
         }
 
         Session.IsRunning = true;
-        Progress = 0;
+        Progress.Report(0);
         Message = null;
         _cancellation = new CancellationTokenSource();
-        // Les rapports arrivent des threads de calcul : on redessine via le contexte de l'interface, seulement à chaque
-        // point de pourcentage gagné (un rapport par paquet de simulations : 1 000 pour 10 M, ticket #12)
+        // Les rapports arrivent des threads de calcul (ou du serveur) : seule la barre se redessine (ProgressState), à
+        // chaque point de pourcentage gagné (un rapport par paquet de simulations : 1 000 pour 10 M, ticket #12) ; la page
+        // n'est pas redessinée pendant le calcul
         double shown = 0;
         var progress = new Progress<double>(value =>
         {
-            Progress = value;
+            _ = InvokeAsync(CloseQueueDialog); // le calcul a commencé : plus d'attente
             if (value - shown >= ProgressStep || value >= 1)
             {
                 shown = value;
-                _ = InvokeAsync(StateHasChanged);
+                Progress.Report(value);
             }
         });
+        // File d'attente du serveur (web seulement) : fenêtre avec la position, fermée au démarrage du calcul
+        _queue = new QueueStatus();
+        var queuePosition = new Progress<int>(position => _ = InvokeAsync(() => ShowQueueDialogAsync(position)));
 
         bool completed = false;
         try
         {
-            Run.Result = await SimulationService.RunAsync(_scenario!, Run.Iterations, Run.Seed, progress, _cancellation.Token);
+            Run.Result = await SimulationService.RunAsync(_scenario!, Run.Iterations, Run.Seed, progress, _cancellation.Token, queuePosition);
             completed = true;
         }
         catch (OperationCanceledException)
         {
             ShowMessage(L["Simulation_Cancelled"], Severity.Info);
         }
+        catch (SimulationServiceException ex)
+        {
+            ShowMessage(ex.Message, Severity.Error);
+        }
         finally
         {
+            CloseQueueDialog();
             Session.IsRunning = false;
             _cancellation.Dispose();
             _cancellation = null;
@@ -484,6 +501,44 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
     }
 
     protected void Cancel() => _cancellation?.Cancel();
+
+    /// <summary>Nouvelle position dans la file : ouvre la fenêtre d'attente la première fois, sinon la met à jour.</summary>
+    private async Task ShowQueueDialogAsync(int position)
+    {
+        if (_queue is not { Started: false } queue)
+        {
+            return;
+        }
+        queue.Position = position;
+        if (_queueDialog is null && !queue.Opening)
+        {
+            queue.Opening = true;
+            var parameters = new DialogParameters<QueueDialog>
+            {
+                { d => d.Status, queue },
+                { d => d.OnCancel, EventCallback.Factory.Create(this, Cancel) },
+            };
+            var dialog = await DialogService.ShowAsync<QueueDialog>(L["Queue_Title"], parameters, QueueDialog.Options);
+            if (queue.Started)
+            {
+                dialog.Close(); // le calcul a commencé pendant l'ouverture
+            }
+            else
+            {
+                _queueDialog = dialog;
+            }
+        }
+    }
+
+    private void CloseQueueDialog()
+    {
+        if (_queue is not null)
+        {
+            _queue.Started = true;
+        }
+        _queueDialog?.Close();
+        _queueDialog = null;
+    }
 
     protected void EditKeywords(WeaponForm weapon) => KeywordWeapon = weapon;
 

@@ -31,8 +31,10 @@ src/Wh40kSim.Simulation      Monte Carlo : simulateur parallèle et déterminist
   Statistics/                Distributions : moyenne, écart-type, centiles, P(= k), P(≥ k), lignes de tableau
 src/Wh40kSim.Console         Appli console de debug (saisie interactive ou fichier JSON) : affichage uniquement
 src/Wh40kSim.Desktop         Application desktop Windows (MAUI Blazor Hybrid) : hôte de Wh40kSim.UI
-src/Wh40kSim.Web             Serveur web : API de simulation (POST /api/simulations, progression en Server-Sent
-                             Events, file d'attente, limites réglables dans appsettings.json)
+src/Wh40kSim.Web             Serveur web : page du client, API de simulation (POST /api/simulations, progression en
+                             Server-Sent Events, file d'attente, limites réglables dans appsettings.json)
+src/Wh40kSim.Web.Client      Client web (Blazor WebAssembly) : l'interface de Wh40kSim.UI dans le navigateur
+                             (simulation par l'API, fichiers ouverts / téléchargés, préférences du navigateur)
 src/Wh40kSim.UI              Interface Blazor + MudBlazor partagée par les hôtes (aucune règle de jeu, aucun calcul)
   Components/                AppShell (barre de titre, menu des thèmes, routeur), accueil, écrans « Quick sim » et
                              « Full sim » (saisie, résultats en onglets) : attaquant, défenseur, situation,
@@ -44,7 +46,8 @@ src/Wh40kSim.UI              Interface Blazor + MudBlazor partagée par les hôt
 tests/Wh40kSim.Core.Tests    Tests xUnit du Core (règles)
 tests/Wh40kSim.Simulation.Tests  Tests xUnit de la simulation (moyennes analytiques, statistiques, non-régression)
 tests/Wh40kSim.UI.Tests      Tests xUnit de l'interface (formulaires, services, composants avec bUnit)
-tests/Wh40kSim.Web.Tests     Tests d'intégration de l'API (WebApplicationFactory)
+tests/Wh40kSim.Web.Tests     Tests d'intégration du serveur (API et page, WebApplicationFactory)
+tests/Wh40kSim.Web.Client.Tests  Tests du client web (API face à un faux serveur, fichiers, préférences)
 scenarios/                   Scénarios d'exemple et scénarios enregistrés depuis la saisie interactive
 ```
 
@@ -65,11 +68,27 @@ dotnet test
 dotnet run --project src/Wh40kSim.Desktop                                            # application desktop
 dotnet run --project src/Wh40kSim.Console                                            # console : saisie interactive
 dotnet run --project src/Wh40kSim.Console -- scenarios/exemple-escouade-vs-leader.json -n 1000000 --seed 42
-dotnet run --project src/Wh40kSim.Web                                                # API web sur http://localhost:5080
+dotnet run --project src/Wh40kSim.Web                                                # version web sur http://localhost:5080
 ```
 
-L'API web s'essaie depuis Rider avec `src/Wh40kSim.Web/Wh40kSim.Web.http` (demande valide, demande invalide). Le
-client web (navigateur) arrive à l'étape suivante de la phase 4.
+**Version web** : lancer `Wh40kSim.Web` (profil « http » depuis Rider, ou la commande ci-dessus) ouvre le site dans le
+navigateur. Le calcul se fait sur le serveur : 1 000 000 de simulations au plus par lancement, un calcul à la fois
+(une fenêtre indique la place dans la file), 10 lancements par minute et par adresse IP (réglables dans
+`src/Wh40kSim.Web/appsettings.json`). Les scénarios s'ouvrent avec le sélecteur de fichier du navigateur et s'enregistrent
+par un téléchargement ; le thème est mémorisé par le navigateur. L'API seule s'essaie depuis Rider avec
+`src/Wh40kSim.Web/Wh40kSim.Web.http`. Hors de l'environnement Development, le site se lance depuis une version publiée
+(`dotnet publish`) : c'est là que les fichiers du client et de MudBlazor sont rassemblés. La publication compile le
+client à l'avance (AOT, bien plus fluide dans le navigateur, quelques minutes de compilation) et demande la charge de
+travail `wasm-tools` (`dotnet workload install wasm-tools`, terminal administrateur si .NET est dans
+`C:\Program Files\dotnet`). Pour lancer une version publiée :
+
+```bash
+dotnet publish src/Wh40kSim.Web -c Release -o dist/web
+```
+
+```bash
+Set-Location dist/web; dotnet Wh40kSim.Web.dll --urls http://localhost:5080
+```
 
 **Depuis Rider** : choisir la configuration d'exécution `Wh40kSim.Desktop` (profil « Windows Machine ») puis Run.
 L'application n'est pas empaquetée (pas de Microsoft Store) : le `.exe` est dans

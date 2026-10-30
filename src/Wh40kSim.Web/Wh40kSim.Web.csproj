@@ -1,15 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <!--
-    Serveur web : API de simulation (le calcul se fait ici, avec Wh40kSim.Simulation) ; servira aussi le client
-    WebAssembly (phase 4, étape 3). Aucune règle de jeu ici.
+    Serveur web : API de simulation (le calcul se fait ici, avec Wh40kSim.Simulation) et page qui charge le client
+    WebAssembly (Wh40kSim.Web.Client). Aucune règle de jeu ici.
   -->
   <PropertyGroup>
     <RootNamespace>Wh40kSim.Web</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.14" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Wh40kSim.Simulation\Wh40kSim.Simulation.csproj" />
+    <ProjectReference Include="..\Wh40kSim.Web.Client\Wh40kSim.Web.Client.csproj" />
   </ItemGroup>
 
 </Project>

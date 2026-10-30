@@ -87,18 +87,45 @@ public sealed class FakeSimulationService : ISimulationService
     /// <summary>Si définie, la simulation attend qu'elle soit ouverte (ou annulée).</summary>
     public TaskCompletionSource? Gate { get; set; }
 
+    /// <summary>Plafond annoncé (null = aucun, comme le desktop).</summary>
+    public int? MaxIterations { get; set; }
+
+    /// <summary>Positions dans la file rapportées au début, avant la porte (comme le serveur web).</summary>
+    public int[] QueuePositions { get; set; } = [];
+
+    /// <summary>Si définie, levée au lieu de rendre un résultat (refus ou échec du service).</summary>
+    public Exception? Error { get; set; }
+
+    /// <summary>Nombre de rapports de progression envoyés avant le résultat (0 = un seul, à 0 %).</summary>
+    public int ProgressReports { get; set; }
+
     public async Task<SimulationResult> RunAsync(
         Scenario scenario,
         int iterations,
         int? seed = null,
         IProgress<double>? progress = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IProgress<int>? queuePosition = null)
     {
         Calls++;
         LastIterations = iterations;
+        foreach (int position in QueuePositions)
+        {
+            queuePosition?.Report(position);
+        }
         if (Gate is not null)
         {
             await Gate.Task.WaitAsync(cancellationToken);
+        }
+        if (Error is not null)
+        {
+            throw Error;
+        }
+        progress?.Report(0);
+        for (int i = 1; i <= ProgressReports; i++)
+        {
+            progress?.Report((double)i / ProgressReports);
+            await Task.Yield();
         }
         return Simulator.Run(scenario, TestIterations, seed ?? 1, cancellationToken: cancellationToken);
     }

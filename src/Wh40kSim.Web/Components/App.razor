@@ -1,0 +1,40 @@
+@*
+    Page servie au navigateur : styles, barre de chargement aux couleurs du thème mémorisé (lu dans le stockage du
+    navigateur, même clé que BrowserPreferenceService), puis le client WebAssembly (Routes, sans prérendu) qui affiche
+    l'interface et retire la barre.
+*@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wh40kSim – Simulateur de dégâts</title>
+    <base href="/" />
+    <link rel="stylesheet" href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" />
+    <link rel="stylesheet" href="@Assets["_content/Wh40kSim.UI/wh40ksim.css"]" />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="icon" href="data:," />
+    <script>
+        // Thème mémorisé : couleurs de la barre de chargement (app.css), avant le démarrage du client
+        try { document.documentElement.dataset.theme = localStorage.getItem('wh40ksim.theme') || ''; } catch { }
+    </script>
+    <ImportMap />
+</head>
+
+<body>
+    <!-- Barre de chargement, retirée par le client une fois l'interface affichée -->
+    <div id="wh-boot" class="wh-loading"><div class="wh-loading-bar"></div></div>
+
+    <Routes @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
+
+    <div id="blazor-error-ui" data-nosnippet>
+        Une erreur inattendue s'est produite.
+        <a href="." class="reload">Recharger</a>
+        <span class="dismiss">🗙</span>
+    </div>
+
+    <script src="_framework/blazor.web.js"></script>
+    <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
+</body>
+
+</html>

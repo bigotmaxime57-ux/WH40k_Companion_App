@@ -200,7 +200,8 @@ de codes.
 **Objectif** : mots-clés du défenseur (vrai Anti-X…), règles d'armée et détachements, avec un stockage des règles.
 
 1. **Mots-clés du défenseur** (INFANTERIE, VÉHICULE, MONSTRE… ; PERSONNAGE reste sur les groupes) ; vrai Anti-X ;
-   évolution compatible du JSON et de l'UI.
+   évolution compatible du JSON et de l'UI. Avec les mots-clés de l'attaquant : avertissement non bloquant si une
+   unité TITANIC tire en overwatch (snap shooting, décision du 2026-10-30, phase 3 étape 9).
 2. **Mots-clés d'arme restants** influant sur les dégâts : liste à établir ensemble d'après les règles 11e édition.
 3. **Moteur d'effets** : catalogue d'effets typés dans le Core (relances, modificateurs, PA, critiques sur X+, FNP,
    réduction de dégâts…), chacun avec une condition (a chargé, contre tel mot-clé, demi-portée…) et une étape de la
@@ -611,11 +612,12 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
      **avertissement non bloquant** qui le dit. Nouvelle notion du Core : `Scenario.Warnings()` (messages qui
      n'empêchent pas de lancer, à côté de `Validate()`), affichés par l'interface dans une teinte d'alerte distincte
      des erreurs. Les pools de mêlée sont écartés de la résolution (absents de l'onglet Armes). Sans aucune arme de
-     tir, la simulation ne mesurerait rien : erreur de validation (proposé, à confirmer).
+     tir, la simulation ne mesurerait rien : erreur de validation qui bloque le lancement (décision de
+     l'utilisateur).
    - **Restrictions de jeu hors du moteur** (décision de l'utilisateur) : portée, visibilité, unité non engagée,
      coût en PC laissés au joueur (rappel dans la bulle « ? »). Seule exception voulue : avertissement non bloquant si
      l'unité qui tire est TITANIC (exclue par les règles) ; l'attaquant n'a pas encore de mots-clés d'unité, donc
-     **reporté à la phase 8** (mots-clés), rappel dans la bulle « ? » d'ici là.
+     **créé en phase 8** avec les mots-clés (décision de l'utilisateur), rappel dans la bulle « ? » d'ici là.
    - Core : `AttackContext.SnapShooting` (nom générique, décision de l'utilisateur : le snap shooting sert aussi au
      tir indirect et à des règles de faction, réutilisable en phase 8) ; `AttackResolver.ResolveHits` (un D6 par
      attaque, 6 = touche ordinaire, Torrent automatique) ; non-régression au bit près sans snap shooting.

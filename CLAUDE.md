@@ -212,8 +212,19 @@ Chaque étape sera précisée et validée avant d'être codée :
      résultat, 400, 429, `error`, annulation ; fichiers et préférences avec le JavaScript simulé par bUnit) ;
      Wh40kSim.UI.Tests (choix 10 M masqué et saisie refusée avec un plafond, fenêtre d'attente, desktop inchangé) ;
      Wh40kSim.Web.Tests (page servie avec le client, `GET /api/simulations/limits`).
-4. **Intégration continue** (#7) : GitHub Actions, build et tests à chaque push et pull request (le desktop MAUI
-   demande Windows : runner Windows ou solution sans le desktop, à trancher).
+4. **Intégration continue** (#7). Précisée et validée par l'utilisateur le 2026-10-30 :
+   - `.github/workflows/ci.yml`, déclenché à **chaque push sur toutes les branches** et sur les pull requests
+     (décision de l'utilisateur) ; dépôt public : minutes gratuites.
+   - **Deux tâches** (décision de l'utilisateur) : **Linux** (`ubuntu-latest`) compile et lance tous les tests sur un
+     filtre de solution sans le desktop (`Wh40kSim.CI.slnf`) ; **Windows** (`windows-latest`) installe `maui-windows`
+     et compile toute la solution, desktop compris, sans relancer les tests.
+   - 0 erreur et 0 avertissement exigés (`-warnaserror` dans la CI) ; résultats `.trx` joints en cas d'échec des
+     tests ; cache des paquets NuGet ; délai maximal par tâche.
+   - Formats de nombres fr-FR : si des tests échouent sous Linux pour une différence de données de culture (espaces
+     insécables), les rendre indépendants de ce détail, sans changer l'affichage.
+   - Badge « CI » dans le README ; CLAUDE.md et `/valider-etape` : CI verte de la branche vérifiée (`gh run list`,
+     `gh run view`) avant de présenter et de fusionner une étape. Ticket #7 fermé par le commit (`Closes #7`).
+   - **Publication AOT reportée à l'étape 5** (décision de l'utilisateur), avec Docker et le déploiement.
 5. **Docker et mise en ligne** : image Docker (Linux, construction en plusieurs étapes), réglages de production
    (limites, HTTPS par l'hébergeur ou un proxy, point de santé) ; publication de l'image et déploiement par GitHub
    Actions ; choix de l'hébergeur et du nom de domaine avec l'utilisateur ; README (lancement local, déploiement) ; tag
@@ -987,6 +998,8 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   Prochaine étape : 3 (client WebAssembly), à préciser.
 - Phase 4, étape 3 (client WebAssembly) : fusionnée dans `main`, validée par l'utilisateur après essai dans Firefox
   le 2026-10-30. Prochaine étape : 4 (intégration continue, #7), à préciser.
+- Phase 4, étape 4 (intégration continue, #7) : précisée et validée le 2026-10-30, à coder sur la branche
+  `phase4/etape4-integration-continue`.
   UI commune : `ISimulationService.MaxIterations` (aucun en desktop) et suivi de la file (`IProgress<int>`),
   `SimulationServiceException` affichée en message, `QueueDialog` / `QueueStatus`, `SimulationPanel.MaxIterations`
   (choix rapides au-delà masqués, saisie bornée, bulle « ? »). `Wh40kSim.Web.Client` : `Routes` (thème lu avant

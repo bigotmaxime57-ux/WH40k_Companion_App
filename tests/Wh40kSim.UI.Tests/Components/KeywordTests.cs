@@ -65,6 +65,27 @@ public class KeywordTests : ComponentTestContext
     }
 
     [Fact]
+    public void Clicking_a_keyword_tile_toggles_it()
+    {
+        var target = new WeaponAbilitiesForm();
+        int changes = 0;
+        var picker = RenderPicker(target, () => changes++);
+        picker.Find("input[data-test=keyword-search]").Input("rapid");
+
+        picker.Find("[data-test=keyword-row]").Click();
+        Assert.True(target.HasRapidFire);
+        Assert.NotEmpty(picker.FindAll("input[data-test=keyword-value-RapidFire]"));
+
+        picker.Find("[data-test=keyword-row]").Click();
+        Assert.False(target.HasRapidFire);
+
+        // La case seule bascule une seule fois (son clic ne remonte pas à la tuile)
+        picker.Find("input[data-test=keyword-RapidFire]").Change(true);
+        Assert.True(target.HasRapidFire);
+        Assert.Equal(3, changes);
+    }
+
+    [Fact]
     public void Checking_a_keyword_changes_the_form_and_shows_its_value()
     {
         var target = new WeaponAbilitiesForm();

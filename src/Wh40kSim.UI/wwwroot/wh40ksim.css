@@ -665,6 +665,7 @@ rect.wh-chart-bar-neutral {
 .wh-keyword-row {
     align-items: center;
     border-radius: var(--mud-default-borderradius);
+    cursor: pointer;
     display: flex;
     gap: .25rem;
     padding: .15rem .25rem;

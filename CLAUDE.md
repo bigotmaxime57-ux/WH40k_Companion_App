@@ -845,8 +845,9 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   / `ChargedMatters` ; interrupteur dans `ContextPanel`, boosts de touche grisés (`BoostRowTitle`), avertissements dans
   `ScenarioErrors`, étiquette `OverwatchChip` sur les résultats. Retour de l'utilisateur : sous-ligne « Torrent :
   touches automatiques » dans la conversion des attaques (onglet Armes) ; gaspillage nul pour tous les pools : colonne
-  dans la teinte positive plutôt qu'en alerte. 486 tests verts (210 Core, 72 Simulation, 204 UI ; UI stables sur 3
-  exécutions) ; `NonRegressionTests` inchangés.
+  dans la teinte positive plutôt qu'en alerte ; sélecteur de mots-clés : un clic sur la tuile active / désactive le
+  mot-clé (la case et le champ de valeur gardent leurs clics). 487 tests verts (210 Core, 72 Simulation, 205 UI ; UI
+  stables sur 3 exécutions) ; `NonRegressionTests` inchangés.
 
 Points notés pour la suite :
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

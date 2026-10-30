@@ -23,6 +23,9 @@ public sealed class ApiSimulationService(HttpClient http) : ISimulationService
     public const string SimulationsPath = "api/simulations";
     public const string LimitsPath = "api/simulations/limits";
 
+    /// <summary>Pause laissée au navigateur pour afficher la barre à 100 % avant de traiter le résultat.</summary>
+    private static readonly TimeSpan ResultPaintDelay = TimeSpan.FromMilliseconds(50);
+
     /// <summary>Plafond du serveur (null tant qu'il n'est pas connu : le serveur refusera alors au-delà, avec un message).</summary>
     public int? MaxIterations { get; private set; }
 
@@ -84,6 +87,10 @@ public sealed class ApiSimulationService(HttpClient http) : ISimulationService
                         progress?.Report(done);
                         break;
                     case "result":
+                        // Barre à 100 % et page redessinée avant le traitement du résultat, qui occupe un moment le
+                        // navigateur (lecture, statistiques, affichage des tableaux)
+                        progress?.Report(1);
+                        await Task.Delay(ResultPaintDelay, cancellationToken);
                         return Result(data);
                     case "error":
                         throw new SimulationServiceException("Échec du calcul", [data]);

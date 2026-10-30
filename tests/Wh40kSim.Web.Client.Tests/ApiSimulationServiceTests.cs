@@ -35,8 +35,9 @@ public class ApiSimulationServiceTests
     public async Task Queue_positions_progress_and_result_are_forwarded()
     {
         var expected = Simulator.Run(Scenario(), 5_000, seed: 4);
+        // Sans « progress 1 » du serveur : la barre passe quand même à 100 % à l'arrivée du résultat
         var (service, handler) = Create((_, _) => Task.FromResult(EventStream(Sse(
-            ("queued", "2"), ("queued", "1"), ("progress", "0"), ("progress", "0.5"), ("progress", "1"),
+            ("queued", "2"), ("queued", "1"), ("progress", "0"), ("progress", "0.5"),
             ("result", SimulationJson.Serialize(expected.Data))))));
         var positions = new List<int>();
         var progress = new List<double>();

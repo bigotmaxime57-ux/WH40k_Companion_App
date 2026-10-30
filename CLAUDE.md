@@ -990,7 +990,11 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   `Components/App.razor` (rendu WebAssembly sans prérendu, adresses des écrans de Wh40kSim.UI), `app.css` (barre de
   chargement), profil « http » qui ouvre le navigateur. En dehors de Development, le site demande une version publiée
   (fichiers statiques des projets référencés) : prévu à l'étape 5 (Docker). Test UI instable `PartialFileTests`
-  (clic perdu après ouverture) corrigé avec `ClickUntil`. 564 tests verts (223 Core, 84 Simulation, 217 UI, 21 Web,
+  (clic perdu après ouverture) corrigé avec `ClickUntil`. Retours de l'utilisateur après essai : profil de lancement
+  sans débogage WebAssembly (Rider exigeait alors un navigateur Chromium ; l'utilisateur est sous Firefox) ; barre de
+  progression figée vers 16 % en web (calcul de 1 M en ~0,2 s sur le serveur, page redessinée à chaque pourcent, plus
+  lent en WebAssembly) : rafraîchissement au plus tous les dixièmes de seconde, barre à 100 % avant le traitement du
+  résultat. 564 tests verts (223 Core, 84 Simulation, 217 UI, 21 Web,
   19 client web ; UI stables sur 4 exécutions). `Wh40kSim.Web` : `SimulationOptions` (section
   « Simulation »), `SimulationQueue` (file sans limite, positions), `ISimulationRunner` / `SimulatorRunner`,
   `SimulationEndpoints` (`POST /api/simulations`, SSE `queued` / `progress` / `result` / `error`, `ProblemDetails`),

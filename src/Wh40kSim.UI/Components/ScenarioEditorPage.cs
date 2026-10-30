@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
@@ -25,6 +26,12 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
 
     /// <summary>Progression minimale entre deux rafraîchissements de la barre (1 %).</summary>
     private const double ProgressStep = 0.01;
+
+    /// <summary>
+    /// Délai minimal entre deux rafraîchissements de la barre : en web, la progression d'un calcul rapide arrive presque
+    /// d'un coup et chaque rafraîchissement redessine la page, plus lentement qu'en desktop (WebAssembly).
+    /// </summary>
+    private static readonly TimeSpan ProgressInterval = TimeSpan.FromMilliseconds(100);
     private const string ShortcutsModule = "./_content/Wh40kSim.UI/wh40ksim.js";
 
     private Scenario? _scenario;          // scénario saisi, null tant qu'une expression de dés est invalide
@@ -454,16 +461,19 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
         Progress = 0;
         Message = null;
         _cancellation = new CancellationTokenSource();
-        // Les rapports arrivent des threads de calcul : on redessine via le contexte de l'interface, seulement à chaque
-        // point de pourcentage gagné (un rapport par paquet de simulations : 1 000 pour 10 M, ticket #12)
+        // Les rapports arrivent des threads de calcul (ou du serveur) : on redessine via le contexte de l'interface, au plus
+        // à chaque point de pourcentage gagné (un rapport par paquet de simulations : 1 000 pour 10 M, ticket #12) et
+        // tous les dixièmes de seconde ; la fin (100 %) est toujours affichée
         double shown = 0;
+        var sinceShown = Stopwatch.StartNew();
         var progress = new Progress<double>(value =>
         {
             Progress = value;
             _ = InvokeAsync(CloseQueueDialog); // le calcul a commencé : plus d'attente
-            if (value - shown >= ProgressStep || value >= 1)
+            if ((value - shown >= ProgressStep && sinceShown.Elapsed >= ProgressInterval) || value >= 1)
             {
                 shown = value;
+                sinceShown.Restart();
                 _ = InvokeAsync(StateHasChanged);
             }
         });

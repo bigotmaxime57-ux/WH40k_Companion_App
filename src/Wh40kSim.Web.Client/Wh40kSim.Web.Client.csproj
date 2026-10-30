@@ -14,12 +14,13 @@
     <!-- Culture de l'appli fixée à fr-FR (nombres, dates), quelle que soit la langue du navigateur -->
     <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
     <!--
-      Code compilé à l'avance en WebAssembly au lieu d'être interprété : affichage nettement plus rapide (essai validé le
-      2026-10-30), contre un premier téléchargement plus lourd (6,7 Mo au lieu de 3,2 en Brotli). Ne s'applique qu'à la
-      publication (dotnet publish, plusieurs minutes) et demande la charge de travail wasm-tools ; en Debug depuis Rider,
-      le client reste interprété.
+      Compilation AOT (code compilé à l'avance en WebAssembly au lieu d'être interprété) : affichage nettement plus
+      rapide (essai validé le 2026-10-30), contre un premier téléchargement plus lourd (6,7 Mo au lieu de 3,2 en Brotli).
+      Demandée à la publication seulement, dans la commande : dotnet publish src/Wh40kSim.Web -c Release
+      -p:RunAOTCompilation=true (plusieurs minutes, charge de travail wasm-tools). Pas ici : .NET exigerait alors
+      wasm-tools dès la restauration et le build, sur chaque machine et dans la CI ; et une condition sur la publication
+      n'est pas vue par le client quand le serveur le publie. Depuis Rider, le client reste interprété.
     -->
-    <RunAOTCompilation>true</RunAOTCompilation>
   </PropertyGroup>
 
   <ItemGroup>

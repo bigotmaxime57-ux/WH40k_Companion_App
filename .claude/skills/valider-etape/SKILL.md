@@ -21,6 +21,9 @@ Si une étape échoue (conflit, build ou test rouge), **s'arrêter** et l'expliq
 - `git status` : rien d'important non commité. Ne jamais faire `git add -A` : `scenarios/` contient des scénarios
   personnels non versionnés.
 - `git fetch`, puis vérifier que `main` local est à jour avec `origin/main`.
+- **Intégration continue** (GitHub Actions, `.github/workflows/ci.yml`) : la dernière exécution de la branche, sur son
+  dernier commit poussé, doit être verte (`gh run list --branch <branche> --limit 1`, détail avec `gh run view`). Si elle
+  est rouge, s'arrêter et l'expliquer ; si elle tourne encore, attendre sa fin (`gh run watch <id>`, en arrière-plan).
 
 ## 2. Mettre à jour « Avancement » (sur la branche, avant la fusion)
 
@@ -73,5 +76,5 @@ CLI : `gh` (si absent du PATH : `C:\Program Files\GitHub CLI\gh.exe`).
 
 ## 7. Compte rendu
 
-Dire en quelques lignes : fusion faite (hash), tests (nombre), push fait, branche supprimée, tickets fermés ou
-commentés. Puis proposer la suite (prochaine étape de la roadmap), sans la commencer sans feu vert.
+Dire en quelques lignes : fusion faite (hash), tests (nombre), CI de la branche verte, push fait (la CI de `main`
+démarre ; la signaler si elle échoue), branche supprimée, tickets fermés ou commentés. Puis proposer la suite (prochaine étape de la roadmap), sans la commencer sans feu vert.

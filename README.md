@@ -1,5 +1,7 @@
 # Wh40kSim : simulateur de dégâts Warhammer 40.000 (11e édition)
 
+[![CI](https://github.com/bigotmaxime57-ux/WH40k_Companion_App/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/bigotmaxime57-ux/WH40k_Companion_App/actions/workflows/ci.yml)
+
 Un moteur Monte Carlo qui simule un grand nombre de fois une séquence d'attaque (profils d'armes contre une unité
 cible) et en sort des statistiques, avec une application desktop Windows pour saisir les scénarios et lire les
 résultats, et une console de debug.
@@ -78,12 +80,13 @@ navigateur. Le calcul se fait sur le serveur : 1 000 000 de simulations au plus 
 par un téléchargement ; le thème est mémorisé par le navigateur. L'API seule s'essaie depuis Rider avec
 `src/Wh40kSim.Web/Wh40kSim.Web.http`. Hors de l'environnement Development, le site se lance depuis une version publiée
 (`dotnet publish`) : c'est là que les fichiers du client et de MudBlazor sont rassemblés. La publication compile le
-client à l'avance (AOT, bien plus fluide dans le navigateur, quelques minutes de compilation) et demande la charge de
-travail `wasm-tools` (`dotnet workload install wasm-tools`, terminal administrateur si .NET est dans
-`C:\Program Files\dotnet`). Pour lancer une version publiée :
+client à l'avance (AOT, bien plus fluide dans le navigateur, quelques minutes de compilation), demandée par
+`-p:RunAOTCompilation=true`, et demande alors la charge de travail `wasm-tools` (`dotnet workload install wasm-tools`,
+terminal administrateur si .NET est dans `C:\Program Files\dotnet`) ; build, tests et lancement depuis Rider n'en ont
+pas besoin. Pour lancer une version publiée :
 
 ```bash
-dotnet publish src/Wh40kSim.Web -c Release -o dist/web
+dotnet publish src/Wh40kSim.Web -c Release -p:RunAOTCompilation=true -o dist/web
 ```
 
 ```bash

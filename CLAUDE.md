@@ -1024,9 +1024,10 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   (ticket #7 fermé). CI verte : Linux 1,1 min (565 tests : 223 Core, 84 Simulation, 218 UI, 21 Web, 19 client web),
   Windows 7,9 min (desktop compris). Prochaine étape : 5 (Docker et mise en ligne), à préciser (hébergeur, nom de
   domaine, déploiement automatique).
-- Phase 4, étape 5 (Docker et mise en ligne) : précisée et validée le 2026-10-30, codée sur la branche
-  `phase4/etape5-docker-mise-en-ligne`, **en attente** des gestes de l'utilisateur (compte Fly.io, application,
-  jeton) et du premier déploiement. `Dockerfile`, `.dockerignore`, `fly.toml` (application « wh40ksim », à ajuster
+- Phase 4, étape 5 (Docker et mise en ligne) : fusionnée dans `main` le 2026-10-30 à la demande de l'utilisateur,
+  pour pouvoir lancer le premier déploiement depuis l'onglet « Actions » (compte Fly.io, application « wh40ksim » et
+  secret `FLY_API_TOKEN` faits par l'utilisateur). **Restent** : premier déploiement (lancé par l'utilisateur), site
+  vérifié par lui, puis tag `v0.4` (avec son accord) qui clôt la phase 4. `Dockerfile`, `.dockerignore`, `fly.toml` (application « wh40ksim », à ajuster
   au nom créé) ; `Wh40kSim.Web` : `/health`, `ForwardedHeaders:Enabled` (dernière adresse de `X-Forwarded-For`
   seulement) ; flux `deploy.yml` (tag `v*` ou à la main, CI réutilisée) et `docker.yml` (vérification de l'image :
   construction, démarrage, `/health`, page, client AOT) ; `ci.yml` réutilisable, branches seulement. Docker n'est pas

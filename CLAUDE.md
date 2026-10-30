@@ -940,8 +940,13 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   de 1 000 000 simulations, calculs simultanés et lancements par IP limités ; cinq étapes (contrat du résultat,
   serveur et API, client WebAssembly, intégration continue #7, Docker et mise en ligne). Prochaine étape : 1 (contrat
   du résultat), à préciser.
-- Phase 4, étape 1 (contrat du résultat) : précisée et validée le 2026-10-30, à coder sur la branche
-  `phase4/etape1-contrat-resultat`.
+- Phase 4, étape 1 (contrat du résultat) : précisée et validée le 2026-10-30, codée sur la branche
+  `phase4/etape1-contrat-resultat`, **en attente de validation**. `SimulationData` (+ `GroupData`,
+  `PrecisionWeaponData`, `PoolData`, `ConversionCounts`, membres `required`) et `SimulationData.Validate()` ;
+  l'accumulateur produit les données (`ToData`), `SimulationResult(SimulationData)` calcule tout, `SimulationResult.Data` ;
+  `SimulationJson` (réglages de `ScenarioJson`). Rien de visible à l'écran : API de `SimulationResult` inchangée.
+  `NonRegressionTests` inchangés ; temps inchangé (10 M simulations : 1,27 à 1,37 s). 518 tests verts (223 Core,
+  83 Simulation, 212 UI).
 
 Points notés pour la suite :
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

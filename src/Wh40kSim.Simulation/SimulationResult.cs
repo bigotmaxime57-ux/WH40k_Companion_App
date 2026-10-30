@@ -1,3 +1,4 @@
+using Wh40kSim.Core.Engine;
 using Wh40kSim.Core.Model;
 using Wh40kSim.Simulation.Statistics;
 
@@ -5,51 +6,76 @@ namespace Wh40kSim.Simulation;
 
 /// <summary>
 /// Résultat de N simulations : distributions complètes des figurines tuées et des PV retirés, pertes par groupe.
-/// Tout ce qui s'affiche se lit ici, sans calcul côté console ou interface. Immuable.
+/// Tout ce qui s'affiche se lit ici, sans calcul côté console ou interface. Immuable. Toutes les statistiques sont
+/// calculées depuis les compteurs bruts (<see cref="Data"/>), envoyés tels quels du serveur au navigateur.
 /// </summary>
 public sealed class SimulationResult
 {
     private readonly long[] _killedPerGroup; // total des figurines tuées par groupe, toutes simulations confondues
     private readonly long[] _damagePerGroup; // total des PV retirés par groupe, toutes simulations confondues
 
-    internal SimulationResult(
-        Scenario scenario,
-        int seed,
-        TimeSpan elapsed,
-        DiscreteDistribution kills,
-        DiscreteDistribution damage,
-        long[] killedPerGroup,
-        long[] damagePerGroup,
-        DiscreteDistribution extendedKills,
-        DiscreteDistribution extendedDamage,
-        DiscreteDistribution rawDamage,
-        IReadOnlyList<GroupLosses> groups,
-        DiscreteDistribution bodyguardKills,
-        DiscreteDistribution bodyguardDamage,
-        IReadOnlyList<WeaponPoolLosses> pools,
-        DiscreteDistribution waste,
-        double? meanWasteWhenUnitSurvives)
+    /// <exception cref="ArgumentException">Si les données sont incohérentes avec leur scénario (<see cref="SimulationData.Validate"/>).</exception>
+    public SimulationResult(SimulationData data)
     {
-        Waste = waste;
-        MeanWasteWhenUnitSurvives = meanWasteWhenUnitSurvives;
-        Groups = groups;
-        Pools = pools;
+        ArgumentNullException.ThrowIfNull(data);
+        var errors = data.Validate();
+        if (errors.Count > 0)
+        {
+            throw new ArgumentException("Données de simulation incohérentes :" + Environment.NewLine + string.Join(Environment.NewLine, errors));
+        }
+
+        Data = data;
+        var scenario = data.Scenario;
+        Scenario = scenario;
+        Seed = data.Seed;
+        Elapsed = data.Elapsed;
+        Kills = new DiscreteDistribution(data.Kills);
+        Damage = new DiscreteDistribution(data.Damage);
+        ExtendedKills = new DiscreteDistribution(data.ExtendedKills);
+        ExtendedDamage = new DiscreteDistribution(data.ExtendedDamage);
+        RawDamage = new DiscreteDistribution(data.RawDamage);
+        Waste = new DiscreteDistribution(data.Waste);
+        MeanWasteWhenUnitSurvives = data.UnitSurvives > 0 ? (double)data.WasteWhenUnitSurvives / data.UnitSurvives : null;
+        _killedPerGroup = data.Groups.Select(g => g.KilledTotal).ToArray();
+        _damagePerGroup = data.Groups.Select(g => g.DamageTotal).ToArray();
+        long iterations = Iterations;
+
+        Groups = scenario.Defender.Groups
+            .Select((group, g) =>
+            {
+                var groupData = data.Groups[g];
+                return new GroupLosses(
+                    g, group, new DiscreteDistribution(groupData.Kills), new DiscreteDistribution(groupData.Damage),
+                    (double)groupData.PrecisionKilled / iterations, (double)groupData.PrecisionDamage / iterations,
+                    groupData.PrecisionWeapons is { } precision ? PrecisionWeapons(groupData, precision, iterations) : null);
+            })
+            .ToList();
+
+        double totalKills = _killedPerGroup.Sum(), totalDamage = _damagePerGroup.Sum();
+        Pools = AttackPool.Build(scenario.FiringWeapons)
+            .Select((pool, p) =>
+            {
+                var poolData = data.Pools[p];
+                var damage = new DiscreteDistribution(poolData.Damage);
+                var kills = new DiscreteDistribution(poolData.Kills);
+                double damageSum = damage.Mean * iterations, killSum = kills.Mean * iterations;
+                return new WeaponPoolLosses(
+                    p, pool.Members, damage, kills, (double)poolData.RawDamage / iterations,
+                    (double)poolData.FiredOnDestroyedUnit / iterations,
+                    totalDamage > 0 ? damageSum / totalDamage : 0, totalKills > 0 ? killSum / totalKills : 0,
+                    WasteShares(poolData.WasteByTotal, data.Waste), Conversion(poolData.Conversion));
+            })
+            .ToList();
+
         // Gardes du corps : seulement s'il y en a et qu'ils protègent au moins un PERSONNAGE
         var defenderGroups = scenario.Defender.Groups;
         bool bodyguards = defenderGroups.Any(g => g.IsCharacter) && defenderGroups.Any(g => !g.IsCharacter);
-        BodyguardKills = bodyguards ? bodyguardKills : null;
-        BodyguardDamage = bodyguards ? bodyguardDamage : null;
-        Scenario = scenario;
-        Seed = seed;
-        Elapsed = elapsed;
-        Kills = kills;
-        Damage = damage;
-        _killedPerGroup = killedPerGroup;
-        _damagePerGroup = damagePerGroup;
-        ExtendedKills = extendedKills;
-        ExtendedDamage = extendedDamage;
-        RawDamage = rawDamage;
+        BodyguardKills = bodyguards ? new DiscreteDistribution(data.BodyguardKills) : null;
+        BodyguardDamage = bodyguards ? new DiscreteDistribution(data.BodyguardDamage) : null;
     }
+
+    /// <summary>Compteurs bruts d'où ce résultat est calculé : ce qui s'envoie (<see cref="SimulationJson"/>).</summary>
+    public SimulationData Data { get; }
 
     public Scenario Scenario { get; }
 
@@ -183,4 +209,53 @@ public sealed class SimulationResult
     /// premier PERSONNAGE ; null sans arme Precision ou sans PERSONNAGE.
     /// </summary>
     public GroupLosses? PrecisionTarget => Scenario.PrecisionTargetGroup is int g ? Groups[g] : null;
+
+    private static PrecisionWeaponLosses PrecisionWeapons(GroupData group, PrecisionWeaponData precision, long iterations)
+    {
+        double meanDamage = (double)group.DamageTotal / iterations;
+        double meanPrecision = (double)precision.Damage / iterations;
+        var shares = new double[group.Damage.Length];
+        for (int k = 1; k < shares.Length; k++)
+        {
+            long simulations = group.Damage[k];
+            shares[k] = simulations > 0 ? (double)precision.DamageByTotal[k] / (k * simulations) : 0;
+        }
+        return new PrecisionWeaponLosses(
+            (double)precision.KilledByPrecisionAlone / iterations,
+            (double)precision.KilledWithHelp / iterations,
+            meanPrecision,
+            meanDamage - meanPrecision,
+            (double)precision.KilledWhileBodyguardsAlive / iterations,
+            (double)precision.FallsShort / iterations,
+            precision.FallsShort > 0 ? (double)precision.WoundsLeftWhenShort / precision.FallsShort : 0,
+            shares);
+    }
+
+    /// <summary>
+    /// Part moyenne d'un pool dans le gaspillage total k de la simulation, pour chaque k (0 si k = 0 ou jamais atteint).
+    /// </summary>
+    private static double[] WasteShares(long[] poolWasteByTotal, long[] waste)
+    {
+        var shares = new double[waste.Length];
+        for (int k = 1; k < shares.Length; k++)
+        {
+            long poolWaste = k < poolWasteByTotal.Length ? poolWasteByTotal[k] : 0;
+            shares[k] = waste[k] > 0 ? (double)poolWaste / (k * waste[k]) : 0;
+        }
+        return shares;
+    }
+
+    /// <summary>Conversion moyenne d'un pool sur les simulations où il a tiré ; null s'il n'a jamais tiré.</summary>
+    private static WeaponConversion? Conversion(ConversionCounts counts)
+    {
+        if (counts.Activations == 0)
+        {
+            return null;
+        }
+        double Mean(long sum) => (double)sum / counts.Activations;
+        return new WeaponConversion(
+            Mean(counts.Attacks), Mean(counts.BlastAttacks), Mean(counts.RapidFireAttacks), Mean(counts.Hits),
+            Mean(counts.SustainedHits), Mean(counts.LethalHits), Mean(counts.Wounds), Mean(counts.DevastatingWounds),
+            Mean(counts.FailedSaves));
+    }
 }

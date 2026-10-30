@@ -57,6 +57,19 @@ public class LocalSimulationServiceTests
     }
 
     [Fact]
+    public async Task Computation_runs_on_low_priority_threads()
+    {
+        var priorities = new System.Collections.Concurrent.ConcurrentBag<ThreadPriority>();
+        // Rapports appelés depuis les threads de calcul eux-mêmes
+        var progress = new CallbackProgress(_ => priorities.Add(Thread.CurrentThread.Priority));
+
+        await _service.RunAsync(Scenario, 20 * Simulator.ChunkSize, seed: 1, progress);
+
+        Assert.Equal(20, priorities.Count);
+        Assert.All(priorities, p => Assert.Equal(ThreadPriority.BelowNormal, p));
+    }
+
+    [Fact]
     public async Task Invalid_scenario_is_reported()
     {
         var invalid = Scenario with { Defender = new DefenderUnit() };

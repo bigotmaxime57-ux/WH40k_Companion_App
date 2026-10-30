@@ -1,9 +1,14 @@
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
+using Wh40kSim.UI.Components;
 using Wh40kSim.Web;
+using Wh40kSim.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Page du client web (rendu WebAssembly, sans prérendu : voir Components/App.razor)
+builder.Services.AddRazorComponents().AddInteractiveWebAssemblyComponents();
 
 builder.Services.Configure<SimulationOptions>(builder.Configuration.GetSection(SimulationOptions.Section));
 builder.Services.AddSingleton<SimulationQueue>();
@@ -41,8 +46,19 @@ builder.Services.AddRateLimiter(limiter =>
 
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseWebAssemblyDebugging();
+}
 app.UseRateLimiter();
+app.UseAntiforgery();
+
+app.MapStaticAssets();
 app.MapSimulationEndpoints();
+// Adresses des écrans (accueil, Quick sim, Full sim…) : composants routés de Wh40kSim.UI, affichés par le client
+app.MapRazorComponents<App>()
+    .AddInteractiveWebAssemblyRenderMode()
+    .AddAdditionalAssemblies(typeof(AppShell).Assembly);
 
 app.Run();
 

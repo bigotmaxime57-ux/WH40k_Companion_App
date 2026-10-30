@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <!--
+    Client web (WebAssembly), servi par Wh40kSim.Web : l'interface de Wh40kSim.UI dans le navigateur, avec les services
+    propres au navigateur (simulation par l'API du serveur, fichiers, préférences). Aucune règle de jeu ici.
+  -->
+  <PropertyGroup>
+    <RootNamespace>Wh40kSim.Web.Client</RootNamespace>
+    <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
+    <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
+    <!-- Version affichée sur l'accueil -->
+    <InformationalVersion>0.4-dev</InformationalVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <!-- Culture de l'appli fixée à fr-FR (nombres, dates), quelle que soit la langue du navigateur -->
+    <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.14" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Wh40kSim.UI\Wh40kSim.UI.csproj" />
+  </ItemGroup>
+
+</Project>

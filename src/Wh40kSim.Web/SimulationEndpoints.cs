@@ -19,6 +19,9 @@ public sealed record SimulationRequest
     public int? Seed { get; init; }
 }
 
+/// <summary>Limites du serveur utiles au client (<c>GET /api/simulations/limits</c>).</summary>
+public sealed record SimulationLimits(int MaxIterations);
+
 /// <summary>
 /// <c>POST /api/simulations</c> : refus en <c>ProblemDetails</c> avant tout calcul (demande illisible, scénario invalide,
 /// nombre de simulations hors limites), sinon réponse en Server-Sent Events : <c>queued</c> (position dans la file),
@@ -37,8 +40,13 @@ public static class SimulationEndpoints
     /// <summary>Progression minimale entre deux événements (1 %).</summary>
     private const double ProgressStep = 0.01;
 
-    public static void MapSimulationEndpoints(this IEndpointRouteBuilder app) =>
+    public static void MapSimulationEndpoints(this IEndpointRouteBuilder app)
+    {
         app.MapPost("/api/simulations", RunAsync).RequireRateLimiting(RateLimitPolicy);
+        // Plafond connu du client web au démarrage (choix rapides, saisie bornée)
+        app.MapGet("/api/simulations/limits", (IOptions<SimulationOptions> options) =>
+            TypedResults.Ok(new SimulationLimits(options.Value.MaxIterations)));
+    }
 
     private static async Task<IResult> RunAsync(
         HttpRequest request,

@@ -1,0 +1,36 @@
+@*
+    Fenêtre d'attente (version web) : un autre calcul occupe le serveur, la demande attend son tour. Affiche la position,
+    mise à jour à chaque changement ; Annuler retire la demande de la file. Fermée par la page au démarrage du calcul.
+*@
+@implements IDisposable
+
+<MudDialog data-test="queue-dialog">
+    <DialogContent>
+        <MudStack Spacing="2">
+            <MudText data-test="queue-position">@L["Queue_Position", Status.Position]</MudText>
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+            <MudText Typo="Typo.caption" Class="wh-muted">@L["Queue_Help"]</MudText>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Stop" OnClick="OnCancel"
+                   data-test="queue-cancel">@L["Simulation_Cancel"]</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    /// <summary>Ni croix, ni fermeture par Échap ou clic à côté : on attend, ou on annule.</summary>
+    public static readonly DialogOptions Options = new() { CloseButton = false, BackdropClick = false, CloseOnEscapeKey = false };
+
+    [Parameter, EditorRequired]
+    public QueueStatus Status { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    protected override void OnInitialized() => Status.Changed += OnChanged;
+
+    public void Dispose() => Status.Changed -= OnChanged;
+
+    private void OnChanged() => InvokeAsync(StateHasChanged);
+}

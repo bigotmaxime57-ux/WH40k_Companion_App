@@ -1,0 +1,77 @@
+/*
+   Le style de l'interface vient de MudBlazor et de wh40ksim.css : ici, seulement ce qui s'affiche avant le démarrage du
+   client (barre de chargement aux couleurs du thème mémorisé, attribut data-theme posé par App.razor ; à défaut, or de
+   Grimdark) et le bandeau d'erreur de Blazor. Couleurs reprises de Wh40kTheme (comme l'hôte desktop).
+*/
+
+:root {
+    --wh-loading-track: rgba(176, 141, 60, 0.2);
+    --wh-loading-bar: #b08d3c;
+}
+
+:root[data-theme="parchment"] {
+    --wh-loading-track: rgba(140, 106, 28, 0.2);
+    --wh-loading-bar: #8c6a1c;
+}
+
+:root[data-theme="steel"] {
+    --wh-loading-track: rgba(201, 160, 60, 0.2);
+    --wh-loading-bar: #c9a03c;
+}
+
+:root[data-theme="neon"] {
+    --wh-loading-track: rgba(143, 123, 255, 0.2);
+    --wh-loading-bar: linear-gradient(90deg, #c04dff 0%, #29b6ff 100%);
+}
+
+html, body {
+    margin: 0;
+}
+
+/* Barre indéterminée centrée dans la fenêtre */
+.wh-loading {
+    background: var(--wh-loading-track);
+    height: 4px;
+    left: 50%;
+    overflow: hidden;
+    position: fixed;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(320px, 60vw);
+}
+
+.wh-loading-bar {
+    animation: wh-loading 1.2s ease-in-out infinite;
+    background: var(--wh-loading-bar);
+    height: 100%;
+    width: 40%;
+}
+
+@keyframes wh-loading {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(250%);
+    }
+}
+
+#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 2000;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}

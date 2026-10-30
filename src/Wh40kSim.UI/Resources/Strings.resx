@@ -511,6 +511,18 @@
   <data name="Simulation_Cancelled" xml:space="preserve">
     <value>Simulation annulée.</value>
   </data>
+  <data name="Simulation_MaxHelp" xml:space="preserve">
+    <value>Version web : {0} simulations au plus par lancement (limite du serveur, partagé entre tous les visiteurs). L'application desktop n'a pas de limite.</value>
+  </data>
+  <data name="Queue_Title" xml:space="preserve">
+    <value>En attente</value>
+  </data>
+  <data name="Queue_Position" xml:space="preserve">
+    <value>Le serveur calcule pour d'autres visiteurs : {0} calcul(s) avant le vôtre.</value>
+  </data>
+  <data name="Queue_Help" xml:space="preserve">
+    <value>Votre simulation démarrera automatiquement à son tour. Annuler retire la demande de la file.</value>
+  </data>
   <data name="Simulation_Iterations" xml:space="preserve">
     <value>Nombre de simulations</value>
   </data>

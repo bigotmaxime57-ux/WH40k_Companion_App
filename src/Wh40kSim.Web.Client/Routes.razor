@@ -1,0 +1,35 @@
+@*
+    Composant racine du client web, placé par la page du serveur (rendu WebAssembly, sans prérendu). Lit d'abord le
+    thème mémorisé (à défaut, celui qui correspond au mode clair / sombre du navigateur) pour afficher AppShell
+    directement dans le bon thème, puis retire la barre de chargement de la page.
+*@
+@using System.Reflection
+@inject IPreferenceService Preferences
+@inject BrowserScripts Scripts
+
+@if (_theme is ThemeChoice theme)
+{
+    <AppShell InitialTheme="theme" Version="@Version" />
+}
+
+@code {
+    private ThemeChoice? _theme;
+    private bool _bootHidden;
+
+    /// <summary>Version du client (ex. « 0.4-dev »), sans le suffixe « +commit » que le SDK peut y ajouter.</summary>
+    private static string? Version =>
+        typeof(Routes).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0];
+
+    protected override async Task OnInitializedAsync() =>
+        _theme = await Preferences.GetThemeAsync() ?? Wh40kTheme.Default(await Scripts.PrefersDarkAsync());
+
+    /// <summary>Barre de chargement retirée au premier rendu d'AppShell (le premier rendu de Routes est vide).</summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (_theme is not null && !_bootHidden)
+        {
+            _bootHidden = true;
+            await Scripts.HideBootAsync();
+        }
+    }
+}

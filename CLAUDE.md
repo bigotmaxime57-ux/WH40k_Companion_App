@@ -978,8 +978,20 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   Prochaine étape : 2 (serveur et API), à préciser (valeurs des limites à trancher).
 - Phase 4, étape 2 (serveur et API) : fusionnée dans `main`, validée par l'utilisateur après essai le 2026-10-30.
   Prochaine étape : 3 (client WebAssembly), à préciser.
-- Phase 4, étape 3 (client WebAssembly) : précisée et validée le 2026-10-30, à coder sur la branche
-  `phase4/etape3-client-web`. `Wh40kSim.Web` : `SimulationOptions` (section
+- Phase 4, étape 3 (client WebAssembly) : précisée et validée le 2026-10-30, codée sur la branche
+  `phase4/etape3-client-web`, **en attente de validation** (à tester dans un navigateur par l'utilisateur).
+  UI commune : `ISimulationService.MaxIterations` (aucun en desktop) et suivi de la file (`IProgress<int>`),
+  `SimulationServiceException` affichée en message, `QueueDialog` / `QueueStatus`, `SimulationPanel.MaxIterations`
+  (choix rapides au-delà masqués, saisie bornée, bulle « ? »). `Wh40kSim.Web.Client` : `Routes` (thème lu avant
+  `AppShell`, barre de chargement retirée ensuite), `ApiSimulationService` (flux SSE, refus, pannes, annulation,
+  plafond par `GET /api/simulations/limits`), `ServerSentEvents`, `BrowserScripts` (module `wh40ksim-web.js` :
+  ouvrir, télécharger, mode sombre, barre de chargement), `BrowserScenarioFileService`, `BrowserPreferenceService`
+  (`localStorage`, clé `wh40ksim.theme`) ; culture fr-FR (données de globalisation complètes). Serveur : page
+  `Components/App.razor` (rendu WebAssembly sans prérendu, adresses des écrans de Wh40kSim.UI), `app.css` (barre de
+  chargement), profil « http » qui ouvre le navigateur. En dehors de Development, le site demande une version publiée
+  (fichiers statiques des projets référencés) : prévu à l'étape 5 (Docker). Test UI instable `PartialFileTests`
+  (clic perdu après ouverture) corrigé avec `ClickUntil`. 564 tests verts (223 Core, 84 Simulation, 217 UI, 21 Web,
+  19 client web ; UI stables sur 4 exécutions). `Wh40kSim.Web` : `SimulationOptions` (section
   « Simulation »), `SimulationQueue` (file sans limite, positions), `ISimulationRunner` / `SimulatorRunner`,
   `SimulationEndpoints` (`POST /api/simulations`, SSE `queued` / `progress` / `result` / `error`, `ProblemDetails`),
   limiteur par IP (fenêtre fixe), `Wh40kSim.Web.http`, profil `http` sur le port 5080 ; `Wh40kSim.Web.Tests`

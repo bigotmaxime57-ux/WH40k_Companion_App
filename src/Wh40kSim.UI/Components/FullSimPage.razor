@@ -20,7 +20,7 @@
             }
         </MudStack>
         <MudDivider Class="my-2" />
-        <SimulationPanel Banner="true" @bind-Iterations="Run.Iterations" @bind-Seed="Run.Seed" CanRun="CanRun" Running="Running"
+        <SimulationPanel Banner="true" @bind-Iterations="Run.Iterations" @bind-Seed="Run.Seed" MaxIterations="MaxIterations" CanRun="CanRun" Running="Running"
                          Progress="Progress" OnRun="RunAsync" OnCancel="Cancel" />
     </MudPaper>
 

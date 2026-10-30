@@ -1,6 +1,6 @@
 @*
     Lancement de la simulation : nombre d'itérations, graine, progression et annulation. En carte (Quick sim) ou en
-    bandeau sur une ligne (Banner, Full sim).
+    bandeau sur une ligne (Banner, Full sim). Avec un plafond (version web), les choix rapides au-delà sont masqués.
 *@
 
 @if (Banner)
@@ -36,15 +36,21 @@ else
 
 @code {
     private RenderFragment IterationsField =>
-        @<MudNumericField T="int" Label="@L["Simulation_Iterations"]" Min="1" Max="100_000_000" Step="100_000" Disabled="Running"
-                          Value="Iterations" ValueChanged="IterationsChanged" />;
+        @<div class="wh-subsection-title">
+            <MudNumericField T="int" Label="@L["Simulation_Iterations"]" Min="1" Max="@(MaxIterations ?? 100_000_000)" Step="100_000"
+                             Disabled="Running" Value="Iterations" ValueChanged="IterationsChanged" data-test="iterations" />
+            @if (MaxIterations is int max)
+            {
+                <span data-test="max-iterations-help"><HelpBubble Lines="@([L["Simulation_MaxHelp", max.ToString("N0")]])" /></span>
+            }
+        </div>;
 
     private RenderFragment SeedField =>
         @<MudNumericField T="int?" Label="@L["Simulation_Seed"]" Clearable="true" Disabled="Running" Value="Seed" ValueChanged="SeedChanged" />;
 
     private RenderFragment PresetButtons =>
         @<MudButtonGroup Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined">
-            @foreach (int preset in Presets)
+            @foreach (int preset in Presets.Where(p => MaxIterations is not int max || p <= max))
             {
                 @* Le groupe impose son style « contour » à ses boutons : le choix courant est rempli par une classe CSS *@
                 <MudButton Class="@(preset == Iterations ? "wh-preset-active" : null)" Disabled="Running"
@@ -80,6 +86,10 @@ else
 
     [Parameter]
     public int Iterations { get; set; }
+
+    /// <summary>Plafond par lancement (version web) : choix rapides au-delà masqués, saisie bornée ; null = aucun.</summary>
+    [Parameter]
+    public int? MaxIterations { get; set; }
 
     [Parameter]
     public EventCallback<int> IterationsChanged { get; set; }

@@ -33,7 +33,7 @@
             <div class="wh-sticky-column">
                 <MudStack Spacing="3">
                     <ScenarioErrors Errors="Errors" Warnings="Warnings" HasDiceErrors="HasDiceErrors" />
-                    <SimulationPanel @bind-Iterations="Run.Iterations" @bind-Seed="Run.Seed" CanRun="CanRun" Running="Running" Progress="Progress"
+                    <SimulationPanel @bind-Iterations="Run.Iterations" @bind-Seed="Run.Seed" MaxIterations="MaxIterations" CanRun="CanRun" Running="Running" Progress="Progress"
                                      OnRun="RunAsync" OnCancel="Cancel" />
                     @if (Run.Result is not null)
                     {

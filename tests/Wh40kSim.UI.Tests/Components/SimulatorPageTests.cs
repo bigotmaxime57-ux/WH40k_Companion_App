@@ -1,4 +1,5 @@
 using Bunit;
+using Microsoft.Extensions.DependencyInjection;
 using Wh40kSim.Core.Model;
 using Wh40kSim.Core.Serialization;
 using Wh40kSim.UI.Components;
@@ -114,6 +115,75 @@ public class SimulatorPageTests : ComponentTestContext
 
         Assert.Contains("aucune arme de tir", page.Find("[data-test=scenario-errors]").TextContent);
         Assert.True(IsDisabled(page, "run"));
+    }
+
+    [Fact]
+    public void With_a_server_limit_the_larger_preset_is_hidden_and_input_is_capped()
+    {
+        Simulations.MaxIterations = 1_000_000;
+        var page = Render<SimulatorPage>();
+
+        Assert.Empty(page.FindAll("[data-test=preset-10000000]"));
+        Assert.NotEmpty(page.FindAll("[data-test=preset-1000000]"));
+        Assert.NotNull(page.Find("[data-test=max-iterations-help]"));
+
+        page.Find("input[data-test=iterations]").Change("5000000");
+
+        Assert.Equal(1_000_000, Services.GetRequiredService<ScenarioSession>().QuickSim.Iterations);
+        Assert.False(IsDisabled(page, "run"));
+    }
+
+    [Fact]
+    public void Without_a_limit_every_preset_is_offered()
+    {
+        var page = Render<SimulatorPage>();
+
+        Assert.NotEmpty(page.FindAll("[data-test=preset-10000000]"));
+        Assert.Empty(page.FindAll("[data-test=max-iterations-help]"));
+    }
+
+    [Fact]
+    public void Waiting_in_the_server_queue_opens_a_window_with_the_position_until_the_computation_starts()
+    {
+        Simulations.QueuePositions = [2, 1];
+        Simulations.Gate = new TaskCompletionSource();
+        var page = Render<SimulatorPage>();
+
+        var dialogs = Dialogs!;
+        page.Find("[data-test=run]").Click();
+
+        dialogs.WaitForAssertion(() => Assert.Contains("1 calcul(s)", dialogs.Find("[data-test=queue-position]").TextContent));
+        Simulations.Gate.SetResult();
+        page.WaitForElement("[data-test=results]");
+        dialogs.WaitForAssertion(() => Assert.Empty(dialogs.FindAll("[data-test=queue-dialog]")));
+    }
+
+    [Fact]
+    public void Cancelling_from_the_queue_window_cancels_the_launch()
+    {
+        Simulations.QueuePositions = [3];
+        Simulations.Gate = new TaskCompletionSource();
+        var dialogs = Dialogs!;
+        var page = Render<SimulatorPage>();
+        page.Find("[data-test=run]").Click();
+
+        dialogs.WaitForElement("[data-test=queue-cancel]").Click();
+
+        page.WaitForAssertion(() => Assert.Contains("annulée", page.Find("[data-test=message]").TextContent));
+        dialogs.WaitForAssertion(() => Assert.Empty(dialogs.FindAll("[data-test=queue-dialog]")));
+        Assert.False(IsDisabled(page, "run"));
+    }
+
+    [Fact]
+    public void A_refusal_from_the_service_is_shown_as_a_message()
+    {
+        Simulations.Error = new SimulationServiceException("Trop de lancements", ["Réessayez dans 30 s."]);
+        var page = Render<SimulatorPage>();
+
+        page.Find("[data-test=run]").Click();
+
+        page.WaitForAssertion(() => Assert.Contains("Trop de lancements : Réessayez dans 30 s.", page.Find("[data-test=message]").TextContent));
+        Assert.Empty(page.FindAll("[data-test=results]"));
     }
 
     [Fact]

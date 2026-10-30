@@ -759,11 +759,14 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   l'excédent est une distribution prolongée à part, contre des copies du premier garde du corps (pas du dernier tué,
   souvent le leader, unique et plus résistant). Flux de dés séparé pour ne pas modifier les résultats réels.
 - **Web (phase 4)** : Blazor Web App, serveur `Wh40kSim.Web` (API + client) et client WebAssembly
-  `Wh40kSim.Web.Client` ; le calcul se fait sur le serveur. **Client compilé AOT** (`RunAOTCompilation`, décision du
-  2026-10-30 après essai : affichage interprété trop lent, ~1 s par changement d'écran ; nettement plus fluide en AOT) :
-  premier téléchargement 6,7 Mo en Brotli au lieu de 3,2 (31 Mo décompressés au lieu de 10,7), publication d'environ
-  4 min ; seulement à la publication (Debug depuis Rider : interprété). Charge de travail `wasm-tools` nécessaire pour
-  publier : sur chaque machine, dans l'image Docker et l'intégration continue.
+  `Wh40kSim.Web.Client` ; le calcul se fait sur le serveur. **Client compilé AOT** (décision du 2026-10-30 après essai :
+  affichage interprété trop lent, ~1 s par changement d'écran ; nettement plus fluide en AOT) : premier téléchargement
+  6,7 Mo en Brotli au lieu de 3,2 (31 Mo décompressés au lieu de 10,7), publication d'environ 4 min. **Demandée dans
+  la commande de publication** : `dotnet publish src/Wh40kSim.Web -c Release -p:RunAOTCompilation=true` (vérifier :
+  `dotnet.native*.wasm` d'environ 23 Mo au lieu de 2,8). Pas dans le `.csproj` : .NET exigerait alors `wasm-tools`
+  dès la restauration et le build (CI Linux en échec, constaté) ; et une condition sur `_IsPublishing` n'est pas vue
+  par le client quand le serveur le publie (constaté : publication sans AOT). Depuis Rider : interprété.
+  `wasm-tools` nécessaire seulement pour publier : machines qui publient, image Docker.
 - **Versions** (vérifiées le 2026-10-27) : MudBlazor 9.11.0, Microsoft.AspNetCore.Components.Web 10.0.14,
   Microsoft.Extensions.Localization 10.0.14, CommunityToolkit.Maui 15.0.1, bUnit 2.13.3, Microsoft.Maui.Controls et
   Microsoft.AspNetCore.Components.WebView.Maui 10.0.120 (charge de travail MAUI 10.0.110), Microsoft.Extensions.Logging.Debug
@@ -1003,7 +1006,9 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
 - Phase 4, étape 4 (intégration continue, #7) : précisée et validée le 2026-10-30, codée sur la branche
   `phase4/etape4-integration-continue`, **en attente de validation**. `.github/workflows/ci.yml` (tâches Linux et
   Windows), `Wh40kSim.CI.slnf` (solution sans le desktop), badge dans le README, vérification de la CI ajoutée aux
-  règles de travail et à `/valider-etape`.
+  règles de travail et à `/valider-etape`. Corrigé grâce au premier passage de la CI : l'AOT dans le `.csproj`
+  exigeait `wasm-tools` dès le build (elle est maintenant demandée dans la commande de publication, voir « Décisions
+  techniques ») ; restauration faite en configuration Release (paquet de runtime du desktop manquant sinon).
   UI commune : `ISimulationService.MaxIterations` (aucun en desktop) et suivi de la file (`IProgress<int>`),
   `SimulationServiceException` affichée en message, `QueueDialog` / `QueueStatus`, `SimulationPanel.MaxIterations`
   (choix rapides au-delà masqués, saisie bornée, bulle « ? »). `Wh40kSim.Web.Client` : `Routes` (thème lu avant

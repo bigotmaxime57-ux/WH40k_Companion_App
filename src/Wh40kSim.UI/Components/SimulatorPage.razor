@@ -21,8 +21,9 @@
                 @* Situation en tête (plus visible qu'en bas, choix de l'utilisateur) *@
                 <ContextPanel Context="Form.Context" Reference="Reference" Changed="OnFormChanged" />
                 <AttackerPanel Attacker="Form.Attacker" Changed="OnAttackerChanged" EditKeywords="EditKeywords"
-                               OnOpen="OpenAttackerAsync" OnSave="SaveAttackerAsync" FileActionsDisabled="Running" SaveDisabled="!CanSaveAttacker" />
-                <DefenderPanel Defender="Form.Defender" Changed="OnDefenderChanged"
+                               OnOpen="OpenAttackerAsync" OnSave="SaveAttackerAsync" FileActionsDisabled="Running" SaveDisabled="!CanSaveAttacker"
+                               SnapShooting="Form.Context.SnapShooting" />
+                <DefenderPanel Defender="Form.Defender" Changed="OnDefenderChanged" SnapShooting="Form.Context.SnapShooting"
                                OnOpen="OpenDefenderAsync" OnSave="SaveDefenderAsync" FileActionsDisabled="Running"
                                ShowPrecisionTargets="Reference.PrecisionTargetGroup is not null" PrecisionTarget="@Form.Context.PrecisionTarget"
                                PrecisionTargetChanged="OnPrecisionTargetChanged" />
@@ -31,7 +32,7 @@
         <MudItem xs="12" lg="5">
             <div class="wh-sticky-column">
                 <MudStack Spacing="3">
-                    <ScenarioErrors Errors="Errors" HasDiceErrors="HasDiceErrors" />
+                    <ScenarioErrors Errors="Errors" Warnings="Warnings" HasDiceErrors="HasDiceErrors" />
                     <SimulationPanel @bind-Iterations="Run.Iterations" @bind-Seed="Run.Seed" CanRun="CanRun" Running="Running" Progress="Progress"
                                      OnRun="RunAsync" OnCancel="Cancel" />
                     @if (Run.Result is not null)

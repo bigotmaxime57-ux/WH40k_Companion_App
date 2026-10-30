@@ -8,6 +8,7 @@
                    Help="@([L["Help_Wipe", SummaryTiles.WipeUnreliableBelow.ToString("P0"), SummaryTiles.WipeReliableAbove.ToString("P0")], L["Help_Results"]])" />
     <MudText Typo="Typo.caption" GutterBottom="true" data-test="results-header">
         @L["Results_Header", Result.Iterations.ToString("N0"), Result.Elapsed.TotalSeconds.ToString("F2"), Result.Seed]
+        <OverwatchChip Result="Result" />
     </MudText>
 
     <SummaryTiles Result="Result" Extended="_extended" />

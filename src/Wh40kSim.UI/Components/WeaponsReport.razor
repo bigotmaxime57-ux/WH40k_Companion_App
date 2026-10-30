@@ -107,6 +107,10 @@
                             </td>
                             <td class="wh-number" data-test="conversion-hits">
                                 @Rates(c.MeanHits, c.HitRate, null)
+                                @if (pool.Weapons[0].Weapon.Abilities.Torrent)
+                                {
+                                    <span class="wh-conversion-sub" data-test="conversion-torrent">@L["Weapons_Torrent"]</span>
+                                }
                                 @Sub(c.MeanSustainedHits, L["Weapons_FromSustained", c.MeanSustainedHits.ToString("F2")])
                             </td>
                             <td class="wh-number" data-test="conversion-wounds">
@@ -175,7 +179,8 @@
 
     /// <summary>
     /// Classes d'une cellule du tableau : la plus haute valeur de la colonne est mise en avant (ex æquo compris, à la
-    /// précision affichée), seulement s'il y a plusieurs pools. Le gaspillage le plus haut est un défaut : autre teinte.
+    /// précision affichée), seulement s'il y a plusieurs pools. Le gaspillage le plus haut est un défaut : autre teinte ;
+    /// mais s'il est nul partout, aucun pool ne gaspille : toutes les cellules passent dans la teinte positive.
     /// </summary>
     private string Highlight(WeaponPoolLosses pool, Func<WeaponPoolLosses, double> value, string topClass)
     {
@@ -184,6 +189,10 @@
             return "wh-number";
         }
         double max = Result.Pools.Max(p => Math.Round(value(p), 2));
+        if (topClass == "wh-top-bad" && max == 0)
+        {
+            topClass = "wh-top";
+        }
         return Math.Round(value(pool), 2) == max ? $"wh-number {topClass}" : "wh-number";
     }
 

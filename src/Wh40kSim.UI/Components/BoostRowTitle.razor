@@ -1,0 +1,21 @@
+@*
+    Titre d'une rangée de boosts. Rangée Touche en overwatch (snap shooting) : bulle « ? » qui explique pourquoi les
+    champs sont grisés.
+*@
+
+<MudText Typo="Typo.caption" Class="wh-boost-row-title">
+    @Title
+    @if (SnapShooting)
+    {
+        <span data-test="boosts-snap-shooting"><HelpBubble Lines="@([L["Boosts_HitSnapShooting"]])" /></span>
+    }
+</MudText>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = "";
+
+    /// <summary>Tir en overwatch : les boosts de la rangée sont sans effet.</summary>
+    [Parameter]
+    public bool SnapShooting { get; set; }
+}

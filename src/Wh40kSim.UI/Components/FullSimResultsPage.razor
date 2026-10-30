@@ -21,6 +21,7 @@
             <MudText Typo="Typo.body2" data-test="results-header">
                 @L["FullSim_ResultsHeader", Result.Scenario.Attacker.Name, Result.Scenario.Defender.Name,
                     Result.Iterations.ToString("N0"), Result.Seed, Result.Elapsed.TotalSeconds.ToString("F2")]
+                <OverwatchChip Result="Result" />
             </MudText>
         }
     </MudStack>

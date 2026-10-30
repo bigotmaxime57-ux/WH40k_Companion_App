@@ -49,6 +49,9 @@
   <data name="Boosts_Hit" xml:space="preserve">
     <value>Touche</value>
   </data>
+  <data name="Boosts_HitSnapShooting" xml:space="preserve">
+    <value>Sans effet en overwatch : chaque attaque ne touche que sur un 6 non modifié, sans relance, quels que soient la CT et les modificateurs. Les valeurs sont gardées pour un tir normal.</value>
+  </data>
   <data name="Boosts_Profile" xml:space="preserve">
     <value>Attaques, PA et dégâts</value>
   </data>
@@ -86,7 +89,7 @@
     <value>Relance des touches</value>
   </data>
   <data name="Context_None" xml:space="preserve">
-    <value>Aucune condition ne concerne ces armes (demi-portée, immobile, charge, Precision).</value>
+    <value>Aucune autre condition ne concerne ces armes (demi-portée, immobile, charge, Precision).</value>
   </data>
   <data name="Context_PrecisionFirst" xml:space="preserve">
     <value>Premier PERSONNAGE en jeu</value>
@@ -96,6 +99,9 @@
   </data>
   <data name="Context_RemainedStationary" xml:space="preserve">
     <value>Restée immobile</value>
+  </data>
+  <data name="Context_SnapShooting" xml:space="preserve">
+    <value>Tir en overwatch</value>
   </data>
   <data name="Context_Title" xml:space="preserve">
     <value>Situation</value>
@@ -159,6 +165,9 @@
   </data>
   <data name="Errors_Title" xml:space="preserve">
     <value>Le scénario ne peut pas être simulé :</value>
+  </data>
+  <data name="Warnings_Title" xml:space="preserve">
+    <value>À noter (la simulation reste possible) :</value>
   </data>
   <data name="File_AttackerLoaded" xml:space="preserve">
     <value>Attaquant chargé depuis {0}.</value>
@@ -255,6 +264,12 @@
   </data>
   <data name="Help_Simulation" xml:space="preserve">
     <value>Graine : laisser vide pour la tirer au hasard ; la même graine redonne exactement le même résultat. Ctrl+Entrée lance la simulation.</value>
+  </data>
+  <data name="Help_SnapShooting" xml:space="preserve">
+    <value>Overwatch (11e édition) : le tir se fait en snap shooting. Seules les armes de tir tirent ; chaque attaque ne touche que sur un 6 non modifié, quels que soient la CT et les modificateurs, sans relance, et ces touches ne sont pas critiques (ni Lethal Hits, ni Sustained Hits). Torrent touche toujours automatiquement ; la suite (blessure, Devastating Wounds, sauvegardes, dégâts) est inchangée.</value>
+  </data>
+  <data name="Help_SnapShootingLimits" xml:space="preserve">
+    <value>Le simulateur ne vérifie pas si le tir est permis : cible visible à 24" ou moins, unité qui tire non engagée et non TITANIC, coût en PC. C'est au joueur de s'en assurer.</value>
   </data>
   <data name="Help_Skill" xml:space="preserve">
     <value>CT / CC : modification de caractéristique, sans plafond, cumulée entre attaquant, défenseur et couvert ; le résultat reste entre 2+ et 6+.</value>
@@ -481,6 +496,9 @@
   <data name="Help_CentralRange" xml:space="preserve">
     <value>80 % des cas : la fourchette où tombent 8 simulations sur 10. Les 10 % les plus malchanceuses font moins, les 10 % les plus chanceuses font plus.</value>
   </data>
+  <data name="Results_Overwatch" xml:space="preserve">
+    <value>Overwatch</value>
+  </data>
   <data name="Results_Title" xml:space="preserve">
     <value>Résultats</value>
   </data>
@@ -676,6 +694,9 @@
   <data name="Weapons_FromSustained" xml:space="preserve">
     <value>dont +{0} Sustained</value>
   </data>
+  <data name="Weapons_Torrent" xml:space="preserve">
+    <value>Torrent : touches automatiques</value>
+  </data>
   <data name="Weapons_FromLethal" xml:space="preserve">
     <value>dont {0} Lethal (≈ +{1} gagnées)</value>
   </data>
@@ -692,7 +713,7 @@
     <value>Ce que deviennent les attaques de chaque arme, en moyenne par activation : touches (part des attaques), blessures (part des touches), sauvegardes ratées (part des blessures). Le second pourcentage, en plus discret, rapporte l'étape aux attaques de base (« 3,10 (70 %, 51 %) » : 51 % des attaques deviennent des blessures). Une arme n'est comptée que quand elle commence à tirer sur une unité encore en jeu ; si l'unité meurt pendant qu'elle tire, ses dés restent comptés jusqu'au bout, pour que les taux décrivent l'arme.</value>
   </data>
   <data name="Help_ConversionKeywords" xml:space="preserve">
-    <value>Sous-lignes : attaques ajoutées par Blast et Rapid Fire, touches ajoutées par Sustained Hits, blessures sans jet de Lethal Hits, blessures critiques de Devastating Wounds (mortelles, sans sauvegarde). Les gains sont estimés avec les taux de l'arme : blessures gagnées = touches Lethal qui auraient raté le jet de blessure ; sauvegardes évitées = blessures Devastating qui auraient été sauvegardées.</value>
+    <value>Sous-lignes : attaques ajoutées par Blast et Rapid Fire, touches automatiques de Torrent (aucun jet de touche), touches ajoutées par Sustained Hits, blessures sans jet de Lethal Hits, blessures critiques de Devastating Wounds (mortelles, sans sauvegarde). Les gains sont estimés avec les taux de l'arme : blessures gagnées = touches Lethal qui auraient raté le jet de blessure ; sauvegardes évitées = blessures Devastating qui auraient été sauvegardées.</value>
   </data>
   <data name="Weapons_WasteChart" xml:space="preserve">
     <value>PV perdus par activation</value>

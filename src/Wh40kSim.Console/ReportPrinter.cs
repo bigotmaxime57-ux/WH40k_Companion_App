@@ -17,7 +17,12 @@ internal static class ReportPrinter
         var scenario = result.Scenario;
         var defender = scenario.Defender;
 
-        WriteTitle($"Résultats : {result.Iterations:N0} simulations en {result.Elapsed.TotalSeconds:F2} s (seed {result.Seed})");
+        WriteTitle($"Résultats : {result.Iterations:N0} simulations en {result.Elapsed.TotalSeconds:F2} s (seed {result.Seed})"
+                   + (scenario.Context.SnapShooting ? " — Overwatch" : ""));
+        foreach (string warning in scenario.Warnings())
+        {
+            Console.WriteLine("Attention : " + warning);
+        }
 
         Console.WriteLine($"Attaquant : {scenario.Attacker.Name}");
         foreach (var group in scenario.Attacker.Weapons)

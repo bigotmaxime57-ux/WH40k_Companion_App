@@ -124,6 +124,14 @@ Valeurs du point de vue de l'attaquant (+1 = mieux pour lui). Deux sortes, à ne
 
 Relances disponibles (touche et blessure) : aucune, les 1, les échecs, tout sauf critique (« pêche aux 6 »).
 
+**Tir en overwatch** (interrupteur de la Situation, `snapShooting` dans le JSON) : l'Overwatch de la 11e édition (15.08)
+tire en snap shooting (15.09). Seules les armes de tir tirent (les armes de mêlée restent dans le scénario, un
+avertissement le signale) ; chaque attaque ne touche que sur un 6 non modifié, quels que soient la CT et tous les
+modificateurs (couvert et boosts de touche compris), sans relance, et ces touches ne sont pas critiques (ni Lethal Hits,
+ni Sustained Hits, « touche critique sur X+ » sans effet). Torrent touche toujours ; la suite de la séquence est
+inchangée (Devastating Wounds compris). « Immobile » et « a chargé » sont sans effet. Le simulateur ne vérifie pas si le
+tir est permis (cible visible à 24" ou moins, unité non engagée et non TITANIC) : c'est au joueur de s'en assurer.
+
 ## Excédent (au-delà de la destruction de l'unité)
 
 Les figurines tuées et les PV retirés suivent les règles : ils s'arrêtent à l'effectif et aux PV de l'unité, et la
@@ -166,7 +174,7 @@ Le fichier suit l'interface :
 - `"attacker"` : `"name"`, `"boosts"` (`skill`, `hitRoll`, `hitReroll`, `strength`, `woundRoll`, `woundReroll`,
   `attacks`, `ap`, `damage`) et `"weapons"` ;
 - `"defender"` : `"name"`, `"boosts"` (`inCover`, `skill`, `hitRoll`, `woundRoll`, `ap`, `damage`) et `"groups"` ;
-- `"context"` : la situation seulement (`halfRange`, `remainedStationary`, `charged`, `precisionTarget`).
+- `"context"` : la situation seulement (`halfRange`, `remainedStationary`, `charged`, `snapShooting`, `precisionTarget`).
 
 Un boost absent vaut 0 (ou `"None"` pour une relance, `false` pour le couvert).
 

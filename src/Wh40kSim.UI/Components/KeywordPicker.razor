@@ -26,16 +26,19 @@
     @foreach (var keyword in group)
     {
         bool active = keyword.IsActive(Target);
-        <div class="wh-keyword-row @(active ? "wh-keyword-active" : "")" data-test="keyword-row">
-            <MudCheckBox T="bool" Value="active" ValueChanged="value => SetActive(keyword, value)" Color="Color.Primary"
-                         data-test="@($"keyword-{keyword.Id}")" />
+        @* Toute la tuile active / désactive le mot-clé ; la case et la valeur gardent leurs propres clics *@
+        <div class="wh-keyword-row @(active ? "wh-keyword-active" : "")" @onclick="() => SetActive(keyword, !active)" data-test="keyword-row">
+            <div @onclick:stopPropagation="true">
+                <MudCheckBox T="bool" Value="active" ValueChanged="value => SetActive(keyword, value)" Color="Color.Primary"
+                             data-test="@($"keyword-{keyword.Id}")" />
+            </div>
             <div class="wh-keyword-text">
                 <MudText Typo="Typo.body1"><b>@L[keyword.NameKey]</b></MudText>
                 <MudText Typo="Typo.caption">@L[keyword.HelpKey]</MudText>
             </div>
             @if (active && keyword.ValueKind != KeywordValueKind.None)
             {
-                <div class="wh-keyword-value">
+                <div class="wh-keyword-value" @onclick:stopPropagation="true">
                     @switch (keyword.ValueKind)
                     {
                         case KeywordValueKind.Number:

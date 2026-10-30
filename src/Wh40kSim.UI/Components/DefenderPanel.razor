@@ -20,7 +20,7 @@
     <div hidden="@(!_expanded)" data-test="defender-content">
         <MudTextField T="string" Label="@L["Defender_Name"]" @bind-Value="Defender.Name" @bind-Value:after="NotifyChanged" />
 
-        <DefenderBoostsEditor Boosts="Defender.Boosts" Changed="NotifyChanged" />
+        <DefenderBoostsEditor Boosts="Defender.Boosts" SnapShooting="SnapShooting" Changed="NotifyChanged" />
 
         <div class="wh-subsection-title mt-4">
             <MudText Typo="Typo.subtitle1">@L["Defender_Groups"]</MudText>
@@ -64,6 +64,10 @@
     /// <summary>Ouvrir et enregistrer indisponibles (simulation en cours).</summary>
     [Parameter]
     public bool FileActionsDisabled { get; set; }
+
+    /// <summary>Tir en overwatch (situation) : boosts de touche grisés.</summary>
+    [Parameter]
+    public bool SnapShooting { get; set; }
 
     /// <summary>
     /// Cibles de Precision affichées sur les PERSONNAGES : dès qu'une arme Precision peut en viser un (Core :

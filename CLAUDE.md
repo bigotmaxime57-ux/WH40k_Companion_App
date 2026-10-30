@@ -118,7 +118,7 @@ chacun :
 - Plus tard : **Comparaison** (phase 5) et **Optimiseur** (phase 6).
 
 Le tir en **overwatch** n'est pas un mode : c'est un interrupteur de la Situation (Quick sim et Full sim), qui fait
-tirer selon ses règles (étape 9, #11).
+tirer selon ses règles (étape 9, #11). Dernière étape : relances par arme (« pêche aux 6 », étape 10).
 
 Étapes détaillées dans « Phase 3 : étapes ». **Le choix des technologies doit tenir compte de la phase 4** : tout ce
 qu'on ajoute à Wh40kSim.UI (bibliothèque de graphiques, navigation) doit fonctionner aussi bien dans le
@@ -200,7 +200,8 @@ de codes.
 **Objectif** : mots-clés du défenseur (vrai Anti-X…), règles d'armée et détachements, avec un stockage des règles.
 
 1. **Mots-clés du défenseur** (INFANTERIE, VÉHICULE, MONSTRE… ; PERSONNAGE reste sur les groupes) ; vrai Anti-X ;
-   évolution compatible du JSON et de l'UI.
+   évolution compatible du JSON et de l'UI. Avec les mots-clés de l'attaquant : avertissement non bloquant si une
+   unité TITANIC tire en overwatch (snap shooting, décision du 2026-10-30, phase 3 étape 9).
 2. **Mots-clés d'arme restants** influant sur les dégâts : liste à établir ensemble d'après les règles 11e édition.
 3. **Moteur d'effets** : catalogue d'effets typés dans le Core (relances, modificateurs, PA, critiques sur X+, FNP,
    réduction de dégâts…), chacun avec une condition (a chargé, contre tel mot-clé, demi-portée…) et une étape de la
@@ -593,10 +594,72 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
    (phase 4), chacun étant un mode à part sur l'accueil. Il ne reste que l'overwatch.
 9. **Overwatch** (#11, ajouté le 2026-10-29). Interrupteur « Tir en overwatch » dans la **Situation** (Quick sim et Full sim,
    décision de l'utilisateur) : le Core résout l'attaque avec les restrictions de l'overwatch, les écrans et les
-   statistiques restent les mêmes, résultats marqués « Overwatch » ; mode enregistré dans le JSON du scénario. Les
-   règles de l'overwatch ont changé en 11e édition : à détailler avec l'utilisateur en précisant l'étape (quand et
-   contre quoi, jet de touche, mots-clés applicables, limites, effets autres que les pertes). Fin de phase : README,
-   tag `v0.3`.
+   statistiques restent les mêmes, résultats marqués « Overwatch » ; mode enregistré dans le JSON du scénario.
+   Précisée avec l'utilisateur le 2026-10-30, d'après une analyse des règles V11 qu'il a fournie (dataslates jusqu'au
+   30/09/2026). L'Overwatch (stratagème 15.08, fin de la phase de Mouvement adverse) tire selon la règle générique
+   **Snap Shooting (15.09)**, seule utile au moteur :
+   - **Jet de touche** (seul changé) : touche sur un 6 non modifié seulement, quelle que soit la CT ; tous les
+     modificateurs ignorés (couvert, boosts de CT / CC et de jet de touche des deux camps, Heavy) ; aucune relance de
+     touche ; ces 6 **ne sont pas des touches critiques** (dataslate du 30/09/2026, texte de l'application ; cité par
+     Wahapedia) : ni Lethal Hits, ni Sustained Hits, « touche critique sur X+ » sans effet (FAQ d'août 2026). Torrent
+     touche toujours automatiquement.
+   - **Inchangé** : nombre d'attaques (A, Blast, Rapid Fire à demi-portée), jet de blessure (modificateurs, relances,
+     Twin-linked, blessure critique sur X+, Anti-X, Devastating Wounds), PA, sauvegardes, dégâts, Melta, FNP,
+     réduction de dégâts, allocation, Precision.
+   - **Situation** : « A chargé » et « Immobile » sans objet (Lance ne joue jamais, Heavy est un modificateur de
+     touche) : masqués quand l'interrupteur est actif ; « demi-portée » gardée (cible à 24" ou moins).
+   - **Armes de mêlée** (décision de l'utilisateur) : gardées dans le scénario, mais ne tirent pas en snap shooting ;
+     **avertissement non bloquant** qui le dit. Nouvelle notion du Core : `Scenario.Warnings()` (messages qui
+     n'empêchent pas de lancer, à côté de `Validate()`), affichés par l'interface dans une teinte d'alerte distincte
+     des erreurs. Les pools de mêlée sont écartés de la résolution (absents de l'onglet Armes). Sans aucune arme de
+     tir, la simulation ne mesurerait rien : erreur de validation qui bloque le lancement (décision de
+     l'utilisateur).
+   - **Restrictions de jeu hors du moteur** (décision de l'utilisateur) : portée, visibilité, unité non engagée,
+     coût en PC laissés au joueur (rappel dans la bulle « ? »). Seule exception voulue : avertissement non bloquant si
+     l'unité qui tire est TITANIC (exclue par les règles) ; l'attaquant n'a pas encore de mots-clés d'unité, donc
+     **créé en phase 8** avec les mots-clés (décision de l'utilisateur), rappel dans la bulle « ? » d'ici là.
+   - Core : `AttackContext.SnapShooting` (nom générique, décision de l'utilisateur : le snap shooting sert aussi au
+     tir indirect et à des règles de faction, réutilisable en phase 8) ; `AttackResolver.ResolveHits` (un D6 par
+     attaque, 6 = touche ordinaire, Torrent automatique) ; non-régression au bit près sans snap shooting.
+   - JSON : `context.snapShooting` (absent = `false`), lecture stricte.
+   - UI : interrupteur « Tir en overwatch » dans la Situation, avec bulle « ? » (règle résumée, restrictions laissées au
+     joueur) ; boosts sans effet **grisés** quand il est actif (CT / CC, jet de touche, relance des touches de
+     l'attaquant ; couvert, CT / CC, jet de touche du défenseur), valeurs conservées ; mention « Overwatch » sur les
+     résultats du Quick sim et du Full sim. Console : mention « Overwatch » dans le rapport.
+   - Tests : dés imposés (5 qui rate malgré les boosts, 6 sans Lethal ni Sustained, aucune relance, critique sur X+
+     sans effet, Torrent, Devastating Wounds actif, mêlée écartée), avertissements, JSON ; bUnit (interrupteur,
+     options masquées, boosts grisés, avertissement, mention sur les résultats). Ticket #11 fermé par le commit.
+10. **Relances par arme : « pêche aux 6 »** (ajoutée le 2026-10-30, idée de l'utilisateur, à coder après la validation
+   de l'étape 9). Relancer aussi les réussites ordinaires pour chercher un critique n'a de sens qu'avec un effet sur
+   critique, et seulement pour les armes qui en ont un : la stratégie se choisit **pool par pool**, plus au global.
+   Décisions de l'utilisateur :
+   - **Boosts** (relance des touches, relance des blessures) : « tout sauf critique » et « les échecs » disparaissent,
+     remplacés par une **relance complète**, qui relance par défaut les échecs (comportement de l'ancien « les
+     échecs »). Choix restants : aucune, les 1, relance complète. JSON : la valeur `Failed` reste et désigne la
+     relance complète ; `NonCritical` est **refusé à la lecture** (JSON strict, message clair).
+   - **Sur chaque arme**, choix « pêche aux 6 », affiché seulement si les conditions sont réunies (sinon absent) :
+     - touche : l'arme a un effet sur touche critique (Lethal Hits, Sustained Hits) et l'attaquant a la relance
+       complète des touches (jamais avec Torrent, ni en overwatch : pas de relance de touche) ;
+     - blessure : l'arme a Devastating Wounds et la relance complète des blessures est disponible : boosts de
+       l'attaquant, ou **Twin-linked** (qui permet de relancer le jet de blessure, décision de l'utilisateur).
+     Le moteur relance tout sauf les critiques pour cette arme seulement, et seulement si les conditions sont encore
+     réunies (un choix resté coché après le retrait du mot-clé ou de la relance est ignoré).
+   - **Pools** (décision de l'utilisateur) : le choix fait partie de l'identité du pool ; deux armes identiques avec un
+     choix différent forment deux pools (une seule stratégie par groupe de dés), visibles séparément dans l'onglet Armes.
+   - Core : `RerollPolicy` sans `NonCritical` ; `WeaponProfile.FishForCriticalHits` / `FishForCriticalWounds` (JSON de
+     l'arme, absents = `false`) ; conditions portées par le Core (ex. `CanFishForCriticalHits(boosts, context)`),
+     utilisées par le moteur, la console et l'interface ; `AttackPool.MakeIdenticalAttacks` compare les deux choix.
+   - UI : liste de relance des boosts à trois choix ; sur la carte d'une arme, **deux interrupteurs indépendants**
+     « Pêche aux 6 (touche) » et « Pêche aux 6 (blessure) » (une arme avec des effets critiques à la touche et à la
+     blessure a les deux, précisé par l'utilisateur), avec bulle « ? », chacun seulement quand il a un sens. Console :
+     mêmes choix.
+   - Non-régression : le scénario riche de `NonRegressionTests` relance les blessures en « tout sauf critique » pour
+     toutes ses armes, dont deux sans Devastating Wounds : plus exprimable, ses références seront recapturées une fois
+     (changement noté ici) ; l'autre scénario reste identique au bit près.
+   - Tests : dés imposés (pêche aux 6 sur une arme, relance des échecs sur l'autre dans le même scénario,
+     Twin-linked + Devastating Wounds, choix ignoré si les conditions disparaissent, pools séparés), JSON (`NonCritical`
+     refusé), bUnit (interrupteurs affichés ou non selon les mots-clés et les boosts).
+   - Fin de phase : README, tag `v0.3`.
 
 ## Décisions techniques
 
@@ -806,6 +869,17 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   mots-clés et règles (8), unités (9, rapport en points en étape 5). Après le web, chaque phase livre sa partie web.
   Objectif de la phase 3 raccourci avec l'accord de l'utilisateur (comparaison passée en phase 5). Commentaires du
   code et README alignés. Prochaine étape : phase 3, étape 9 (overwatch, #11), à préciser.
+- Phase 3, étape 9 (overwatch, #11) : précisée avec l'utilisateur le 2026-10-30 (snap shooting V11), fusionnée dans
+  `main`, validée par l'utilisateur à l'écran le 2026-10-30 (ticket #11 fermé). Prochaine étape : 10 (relances par
+  arme, « pêche aux 6 »), précisée, à coder sur sa propre branche ; tag `v0.3` à sa fin.
+  `AttackContext.SnapShooting`, `Scenario.FiringWeapons` / `Warnings()` / `HalfRangeMatters` / `RemainedStationaryMatters`
+  / `ChargedMatters` ; interrupteur dans `ContextPanel`, boosts de touche grisés (`BoostRowTitle`), avertissements dans
+  `ScenarioErrors`, étiquette `OverwatchChip` sur les résultats. Retour de l'utilisateur : sous-ligne « Torrent :
+  touches automatiques » dans la conversion des attaques (onglet Armes) ; gaspillage nul pour tous les pools : colonne
+  dans la teinte positive plutôt qu'en alerte ; sélecteur de mots-clés : un clic sur la tuile active / désactive le
+  mot-clé (la case et le champ de valeur gardent leurs clics). 487 tests verts (210 Core, 72 Simulation, 205 UI ; UI
+  stables sur 3 exécutions) ; `NonRegressionTests` inchangés. Étape 10 (relances par arme, « pêche aux 6 ») ajoutée
+  à la roadmap le 2026-10-30 ; tag `v0.3` reporté à sa fin. À coder après la validation de l'étape 9.
 
 Points notés pour la suite :
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

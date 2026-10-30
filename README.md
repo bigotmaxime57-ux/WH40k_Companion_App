@@ -1,5 +1,7 @@
 # Wh40kSim : simulateur de dégâts Warhammer 40.000 (11e édition)
 
+[![CI](https://github.com/bigotmaxime57-ux/WH40k_Companion_App/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/bigotmaxime57-ux/WH40k_Companion_App/actions/workflows/ci.yml)
+
 Un moteur Monte Carlo qui simule un grand nombre de fois une séquence d'attaque (profils d'armes contre une unité
 cible) et en sort des statistiques, avec une application desktop Windows pour saisir les scénarios et lire les
 résultats, et une console de debug.

@@ -22,7 +22,9 @@ Voir aussi `README.md` (structure de la solution, règles de jeu implémentées,
 - **Langue** : interface et commentaires en français, noms de code (types, méthodes, propriétés) en anglais.
 - **Ne rien coder sans feu vert explicite** pour une étape. Les étapes sont décrites à l'avance (voir plus bas) ;
   signaler avant de commencer tout point qui contredit le code existant ou demande une décision.
-- **Après chaque étape** : `dotnet build` et `dotnet test` sans erreur ni avertissement, puis un commit dédié.
+- **Après chaque étape** : `dotnet build` et `dotnet test` sans erreur ni avertissement, puis un commit dédié. Une fois
+  la branche poussée, l'**intégration continue** (GitHub Actions, `.github/workflows/ci.yml` : tests sous Linux, build
+  complet sous Windows) doit être verte avant de présenter l'étape (`gh run list --branch <branche>`, `gh run view`).
 - **En fin d'étape**, expliquer brièvement ce qui a été créé et pourquoi, en expliquant les notions C# / Blazor
   introduites (sans faire un cours).
 - **Versions de paquets** : vérifier sur NuGet la dernière version stable compatible .NET 10 avant de référencer un paquet.
@@ -998,8 +1000,10 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   Prochaine étape : 3 (client WebAssembly), à préciser.
 - Phase 4, étape 3 (client WebAssembly) : fusionnée dans `main`, validée par l'utilisateur après essai dans Firefox
   le 2026-10-30. Prochaine étape : 4 (intégration continue, #7), à préciser.
-- Phase 4, étape 4 (intégration continue, #7) : précisée et validée le 2026-10-30, à coder sur la branche
-  `phase4/etape4-integration-continue`.
+- Phase 4, étape 4 (intégration continue, #7) : précisée et validée le 2026-10-30, codée sur la branche
+  `phase4/etape4-integration-continue`, **en attente de validation**. `.github/workflows/ci.yml` (tâches Linux et
+  Windows), `Wh40kSim.CI.slnf` (solution sans le desktop), badge dans le README, vérification de la CI ajoutée aux
+  règles de travail et à `/valider-etape`.
   UI commune : `ISimulationService.MaxIterations` (aucun en desktop) et suivi de la file (`IProgress<int>`),
   `SimulationServiceException` affichée en message, `QueueDialog` / `QueueStatus`, `SimulationPanel.MaxIterations`
   (choix rapides au-delà masqués, saisie bornée, bulle « ? »). `Wh40kSim.Web.Client` : `Routes` (thème lu avant

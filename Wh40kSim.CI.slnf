@@ -1,0 +1,18 @@
+{
+  "solution": {
+    "path": "Wh40kSim.sln",
+    "projects": [
+      "src\\Wh40kSim.Core\\Wh40kSim.Core.csproj",
+      "src\\Wh40kSim.Simulation\\Wh40kSim.Simulation.csproj",
+      "src\\Wh40kSim.Console\\Wh40kSim.Console.csproj",
+      "src\\Wh40kSim.UI\\Wh40kSim.UI.csproj",
+      "src\\Wh40kSim.Web.Client\\Wh40kSim.Web.Client.csproj",
+      "src\\Wh40kSim.Web\\Wh40kSim.Web.csproj",
+      "tests\\Wh40kSim.Core.Tests\\Wh40kSim.Core.Tests.csproj",
+      "tests\\Wh40kSim.Simulation.Tests\\Wh40kSim.Simulation.Tests.csproj",
+      "tests\\Wh40kSim.UI.Tests\\Wh40kSim.UI.Tests.csproj",
+      "tests\\Wh40kSim.Web.Tests\\Wh40kSim.Web.Tests.csproj",
+      "tests\\Wh40kSim.Web.Client.Tests\\Wh40kSim.Web.Client.Tests.csproj"
+    ]
+  }
+}

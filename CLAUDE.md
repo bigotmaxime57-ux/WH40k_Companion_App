@@ -940,8 +940,8 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   de 1 000 000 simulations, calculs simultanés et lancements par IP limités ; cinq étapes (contrat du résultat,
   serveur et API, client WebAssembly, intégration continue #7, Docker et mise en ligne). Prochaine étape : 1 (contrat
   du résultat), à préciser.
-- Phase 4, étape 1 (contrat du résultat) : précisée et validée le 2026-10-30, codée sur la branche
-  `phase4/etape1-contrat-resultat`, **en attente de validation**. `SimulationData` (+ `GroupData`,
+- Phase 4, étape 1 (contrat du résultat) : fusionnée dans `main`, validée par l'utilisateur le 2026-10-30.
+  Prochaine étape : 2 (serveur et API), à préciser (valeurs des limites à trancher). `SimulationData` (+ `GroupData`,
   `PrecisionWeaponData`, `PoolData`, `ConversionCounts`, membres `required`) et `SimulationData.Validate()` ;
   l'accumulateur produit les données (`ToData`), `SimulationResult(SimulationData)` calcule tout, `SimulationResult.Data` ;
   `SimulationJson` (réglages de `ScenarioJson`). Rien de visible à l'écran : API de `SimulationResult` inchangée.

@@ -13,6 +13,11 @@
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <!-- Culture de l'appli fixée à fr-FR (nombres, dates), quelle que soit la langue du navigateur -->
     <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
+    <!--
+      Essai (branche essai/aot) : code compilé à l'avance en WebAssembly au lieu d'être interprété, pour un affichage plus
+      rapide. Ne s'applique qu'à la publication (dotnet publish) et demande la charge de travail wasm-tools.
+    -->
+    <RunAOTCompilation>true</RunAOTCompilation>
   </PropertyGroup>
 
   <ItemGroup>

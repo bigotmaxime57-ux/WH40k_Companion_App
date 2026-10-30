@@ -869,8 +869,9 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   mots-clés et règles (8), unités (9, rapport en points en étape 5). Après le web, chaque phase livre sa partie web.
   Objectif de la phase 3 raccourci avec l'accord de l'utilisateur (comparaison passée en phase 5). Commentaires du
   code et README alignés. Prochaine étape : phase 3, étape 9 (overwatch, #11), à préciser.
-- Phase 3, étape 9 (overwatch, #11) : précisée avec l'utilisateur le 2026-10-30 (snap shooting V11), codée sur la
-  branche `phase3/etape9-overwatch`, **en attente de validation** (à tester à l'écran par l'utilisateur).
+- Phase 3, étape 9 (overwatch, #11) : précisée avec l'utilisateur le 2026-10-30 (snap shooting V11), fusionnée dans
+  `main`, validée par l'utilisateur à l'écran le 2026-10-30 (ticket #11 fermé). Prochaine étape : 10 (relances par
+  arme, « pêche aux 6 »), précisée, à coder sur sa propre branche ; tag `v0.3` à sa fin.
   `AttackContext.SnapShooting`, `Scenario.FiringWeapons` / `Warnings()` / `HalfRangeMatters` / `RemainedStationaryMatters`
   / `ChargedMatters` ; interrupteur dans `ContextPanel`, boosts de touche grisés (`BoostRowTitle`), avertissements dans
   `ScenarioErrors`, étiquette `OverwatchChip` sur les résultats. Retour de l'utilisateur : sous-ligne « Torrent :

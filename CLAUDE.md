@@ -985,8 +985,8 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   Prochaine étape : 2 (serveur et API), à préciser (valeurs des limites à trancher).
 - Phase 4, étape 2 (serveur et API) : fusionnée dans `main`, validée par l'utilisateur après essai le 2026-10-30.
   Prochaine étape : 3 (client WebAssembly), à préciser.
-- Phase 4, étape 3 (client WebAssembly) : précisée et validée le 2026-10-30, codée sur la branche
-  `phase4/etape3-client-web`, **en attente de validation** (à tester dans un navigateur par l'utilisateur).
+- Phase 4, étape 3 (client WebAssembly) : fusionnée dans `main`, validée par l'utilisateur après essai dans Firefox
+  le 2026-10-30. Prochaine étape : 4 (intégration continue, #7), à préciser.
   UI commune : `ISimulationService.MaxIterations` (aucun en desktop) et suivi de la file (`IProgress<int>`),
   `SimulationServiceException` affichée en message, `QueueDialog` / `QueueStatus`, `SimulationPanel.MaxIterations`
   (choix rapides au-delà masqués, saisie bornée, bulle « ? »). `Wh40kSim.Web.Client` : `Routes` (thème lu avant

@@ -995,7 +995,8 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   progression figée vers 16 % en web (calcul de 1 M en ~0,2 s sur le serveur, page redessinée à chaque pourcent, plus
   lent en WebAssembly) : la barre devient un composant autonome (`SimulationProgressBar`, suivi de `ProgressState`) qui
   se redessine seule, la page n'est plus redessinée pendant le calcul (idée de l'utilisateur) ; barre à 100 % avant le
-  traitement du résultat. 565 tests verts (223 Core, 84 Simulation, 218 UI, 21 Web, 19 client web ; UI stables sur
+  traitement du résultat ; fond de la page aux couleurs du thème pendant le chargement (blanc auparavant ; sans thème
+  mémorisé, selon le mode clair / sombre du système), puis celui de MudBlazor une fois la barre retirée. 565 tests verts (223 Core, 84 Simulation, 218 UI, 21 Web, 19 client web ; UI stables sur
   3 exécutions). `Wh40kSim.Web` : `SimulationOptions` (section
   « Simulation »), `SimulationQueue` (file sans limite, positions), `ISimulationRunner` / `SimulatorRunner`,
   `SimulationEndpoints` (`POST /api/simulations`, SSE `queued` / `progress` / `result` / `error`, `ProblemDetails`),

@@ -872,6 +872,14 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
 - Phase 3, étape 9 (overwatch, #11) : précisée avec l'utilisateur le 2026-10-30 (snap shooting V11), fusionnée dans
   `main`, validée par l'utilisateur à l'écran le 2026-10-30 (ticket #11 fermé). Prochaine étape : 10 (relances par
   arme, « pêche aux 6 »), précisée, à coder sur sa propre branche ; tag `v0.3` à sa fin.
+- Phase 3, étape 10 (relances par arme, « pêche aux 6 ») : codée sur la branche `phase3/etape10-relances-par-arme`,
+  **en attente de validation** (à tester à l'écran par l'utilisateur). `RerollPolicy` sans `NonCritical` (refusé par
+  `RerollPolicyJsonConverter`, message clair) ; `WeaponProfile.FishForCriticalHits` / `FishForCriticalWounds` (écrits
+  seulement s'ils sont cochés), `CanFishForCriticalHits` / `CanFishForCriticalWounds` ; choix compris dans
+  l'identité du pool ; interrupteurs sur la carte d'arme (`WeaponEditor`, ligne « Relances »), liste de relance à trois
+  choix (« Relance complète »), console. Scénario riche de `NonRegressionTests` recapturé (relance « tout sauf
+  critique » plus exprimable), l'exemple identique au bit près ; aucun scénario de `scenarios/` n'utilisait
+  `NonCritical`. 505 tests verts (223 Core, 71 Simulation, 211 UI ; UI stables sur 3 exécutions).
   `AttackContext.SnapShooting`, `Scenario.FiringWeapons` / `Warnings()` / `HalfRangeMatters` / `RemainedStationaryMatters`
   / `ChargedMatters` ; interrupteur dans `ContextPanel`, boosts de touche grisés (`BoostRowTitle`), avertissements dans
   `ScenarioErrors`, étiquette `OverwatchChip` sur les résultats. Retour de l'utilisateur : sous-ligne « Torrent :

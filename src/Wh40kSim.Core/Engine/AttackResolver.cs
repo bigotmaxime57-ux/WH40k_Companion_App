@@ -216,12 +216,13 @@ public sealed class AttackResolver
             modifier += 1;
         }
         modifier = Math.Clamp(modifier, -1, 1);
+        bool fishing = weapon.FishForCriticalHits && weapon.CanFishForCriticalHits(Attack, context);
 
         for (int i = 0; i < attacks; i++)
         {
             int roll = Dice.D6();
             var outcome = Evaluate(roll, skill, modifier, abilities.CriticalHitOn);
-            if (ShouldReroll(Attack.HitReroll, roll, outcome))
+            if (ShouldReroll(Attack.HitReroll, fishing, roll, outcome))
             {
                 roll = Dice.D6();
                 outcome = Evaluate(roll, skill, modifier, abilities.CriticalHitOn);
@@ -269,14 +270,15 @@ public sealed class AttackResolver
         }
         modifier = Math.Clamp(modifier, -1, 1);
 
-        // Twin-linked = relance des échecs ; on garde la relance la plus large disponible
+        // Twin-linked = relance complète du jet de blessure ; on garde la relance la plus large disponible
         var reroll = (RerollPolicy)Math.Max((int)Attack.WoundReroll, abilities.TwinLinked ? (int)RerollPolicy.Failed : 0);
+        bool fishing = weapon.FishForCriticalWounds && weapon.CanFishForCriticalWounds(Attack);
 
         for (int i = 0; i < hits; i++)
         {
             int roll = Dice.D6();
             var outcome = Evaluate(roll, target, modifier, abilities.CriticalWoundOn);
-            if (ShouldReroll(reroll, roll, outcome))
+            if (ShouldReroll(reroll, fishing, roll, outcome))
             {
                 roll = Dice.D6();
                 outcome = Evaluate(roll, target, modifier, abilities.CriticalWoundOn);
@@ -418,11 +420,14 @@ public sealed class AttackResolver
         return roll + modifier >= target ? RollOutcome.Success : RollOutcome.Fail;
     }
 
-    private static bool ShouldReroll(RerollPolicy policy, int roll, RollOutcome outcome) => policy switch
+    /// <summary>
+    /// Relance complète : les échecs, ou tout sauf les critiques en « pêche aux 6 » (<paramref name="fishing"/>, déjà
+    /// vérifié pour l'arme du pool).
+    /// </summary>
+    private static bool ShouldReroll(RerollPolicy policy, bool fishing, int roll, RollOutcome outcome) => policy switch
     {
         RerollPolicy.Ones => roll == 1,
-        RerollPolicy.Failed => outcome == RollOutcome.Fail,
-        RerollPolicy.NonCritical => outcome != RollOutcome.Critical,
+        RerollPolicy.Failed => fishing ? outcome != RollOutcome.Critical : outcome == RollOutcome.Fail,
         _ => false,
     };
 }

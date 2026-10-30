@@ -36,7 +36,7 @@ public class ScenarioFormTests
                 HitReroll = RerollPolicy.Ones,
                 Strength = 3,
                 WoundRoll = -1,
-                WoundReroll = RerollPolicy.NonCritical,
+                WoundReroll = RerollPolicy.Failed,
                 Attacks = 2,
                 Ap = 1,
                 Damage = 1,
@@ -55,6 +55,7 @@ public class ScenarioFormTests
                         Ap = -1,
                         Damage = DiceExpression.Parse("D6+1"),
                         Abilities = new WeaponAbilities { RapidFire = 1, SustainedHits = DiceExpression.Parse("D3"), CriticalHitOn = 5 },
+                        FishForCriticalHits = true,
                     },
                 },
                 new WeaponGroup
@@ -62,6 +63,7 @@ public class ScenarioFormTests
                     Weapon = new WeaponProfile
                     {
                         Name = "Épée",
+                        FishForCriticalWounds = true,
                         Type = WeaponType.Melee,
                         Attacks = DiceExpression.Parse("2D3"),
                         Abilities = new WeaponAbilities { Precision = true, Lance = true },

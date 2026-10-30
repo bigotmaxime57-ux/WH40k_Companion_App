@@ -8,11 +8,12 @@ public enum RerollPolicy
     /// <summary>Relance les 1.</summary>
     Ones = 1,
 
-    /// <summary>Relance les échecs.</summary>
+    /// <summary>
+    /// Relance complète : on peut relancer n'importe quel jet. Relance les échecs, ou tout ce qui n'est pas critique
+    /// pour une arme en « pêche aux 6 » (<see cref="WeaponProfile.FishForCriticalHits"/>,
+    /// <see cref="WeaponProfile.FishForCriticalWounds"/>).
+    /// </summary>
     Failed = 2,
-
-    /// <summary>Relance tout ce qui n'est pas critique (« pêche aux 6 » pour Lethal/Sustained/Devastating).</summary>
-    NonCritical = 3,
 }
 
 /// <summary>

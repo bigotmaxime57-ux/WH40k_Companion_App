@@ -23,19 +23,25 @@ public class ExactProbabilityTests
     [InlineData(RerollPolicy.None, 4.0 / 6)]
     [InlineData(RerollPolicy.Ones, 4.0 / 6 + 1.0 / 6 * 4.0 / 6)]
     [InlineData(RerollPolicy.Failed, 4.0 / 6 + 2.0 / 6 * 4.0 / 6)]
-    [InlineData(RerollPolicy.NonCritical, 1.0 / 6 + 5.0 / 6 * 4.0 / 6)]
     public void Wipe_probability_matches_the_binomial_law(RerollPolicy hitReroll, double hitProbability)
     {
         AssertMatches(Rerolling(new AttackerBoosts { HitReroll = hitReroll }), hitProbability * 0.5);
     }
 
     [Fact]
-    public void Rerolling_everything_but_criticals_on_both_rolls_matches_the_binomial_law()
+    public void Fishing_for_sixes_on_both_rolls_matches_the_binomial_law()
     {
-        // Touche : 6 du premier jet, sinon relance réussie sur 3+ ; blessure : 6 du premier jet, sinon relance sur 4+
-        var boosts = new AttackerBoosts { HitReroll = RerollPolicy.NonCritical, WoundReroll = RerollPolicy.NonCritical };
+        // Lethal Hits et Devastating Wounds, pêche aux 6 aux deux jets, relance complète.
+        // Touche : critique = 6 du premier jet ou de la relance (11/36), touche ordinaire = 3 à 5 à la relance (15/36).
+        // Touche critique : blessure automatique ; touche ordinaire : 6 du premier jet, sinon relance sur 4+.
+        var boosts = new AttackerBoosts { HitReroll = RerollPolicy.Failed, WoundReroll = RerollPolicy.Failed };
+        var weapon = new WeaponProfile
+        {
+            Skill = 3, Strength = 4, Abilities = new WeaponAbilities { LethalHits = true, DevastatingWounds = true },
+            FishForCriticalHits = true, FishForCriticalWounds = true,
+        };
 
-        AssertMatches(Rerolling(boosts), (1.0 / 6 + 5.0 / 6 * 4.0 / 6) * (1.0 / 6 + 5.0 / 6 * 0.5));
+        AssertMatches(Rerolling(boosts, weapon), 11.0 / 36 + 15.0 / 36 * (1.0 / 6 + 5.0 / 6 * 0.5));
     }
 
     [Fact]
@@ -51,9 +57,9 @@ public class ExactProbabilityTests
     }
 
     /// <summary>Scénario de base (20 attaques contre 8 figurines) avec les relances données.</summary>
-    private static Scenario Rerolling(AttackerBoosts boosts)
+    private static Scenario Rerolling(AttackerBoosts boosts, WeaponProfile? weapon = null)
     {
-        var scenario = Build.Scenario(new WeaponProfile { Skill = 3, Strength = 4 }, Build.Horde(models: Models), models: Attacks);
+        var scenario = Build.Scenario(weapon ?? new WeaponProfile { Skill = 3, Strength = 4 }, Build.Horde(models: Models), models: Attacks);
         return scenario with { Attacker = scenario.Attacker with { Boosts = boosts } };
     }
 

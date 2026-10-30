@@ -66,10 +66,37 @@ public static class ScenarioJson
             // Une propriété mal placée ou mal orthographiée (ex. "toughness" sur le défenseur) ne doit pas être ignorée en silence
             UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
         };
+        // Avant le convertisseur générique des énumérations : le premier qui accepte le type est utilisé
+        options.Converters.Add(new RerollPolicyJsonConverter());
         options.Converters.Add(new JsonStringEnumConverter());
         options.Converters.Add(new DiceExpressionJsonConverter());
         return options;
     }
+}
+
+/// <summary>
+/// Relance écrite par son nom (<c>None</c>, <c>Ones</c>, <c>Failed</c>) ; toute autre valeur est refusée, dont l'ancienne
+/// « tout sauf critique » (<c>NonCritical</c>), remplacée par la pêche aux 6 sur les armes.
+/// </summary>
+public sealed class RerollPolicyJsonConverter : JsonConverter<RerollPolicy>
+{
+    public override RerollPolicy Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        string? text = reader.TokenType == JsonTokenType.String ? reader.GetString() : null;
+        if (Enum.TryParse(text, ignoreCase: true, out RerollPolicy policy) && Enum.IsDefined(policy) && !int.TryParse(text, out _))
+        {
+            return policy;
+        }
+        if (string.Equals(text, "NonCritical", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new JsonException("La relance « NonCritical » (tout sauf critique) n'existe plus : choisir \"Failed\" (relance complète) "
+                                    + "et cocher la pêche aux 6 (fishForCriticalHits, fishForCriticalWounds) sur les armes concernées.");
+        }
+        throw new JsonException("Relance attendue : \"None\", \"Ones\" ou \"Failed\" (relance complète).");
+    }
+
+    public override void Write(Utf8JsonWriter writer, RerollPolicy value, JsonSerializerOptions options) =>
+        writer.WriteStringValue(value.ToString());
 }
 
 /// <summary>Une expression de dés s'écrit en JSON soit comme un nombre (2), soit comme un texte ("D6+1").</summary>

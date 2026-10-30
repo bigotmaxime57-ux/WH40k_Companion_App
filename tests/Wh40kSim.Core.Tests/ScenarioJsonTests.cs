@@ -14,7 +14,7 @@ public class ScenarioJsonTests
         Attacker = new AttackerUnit
         {
             Name = "Escouade",
-            Boosts = new AttackerBoosts { WoundRoll = 1, HitReroll = RerollPolicy.Ones, WoundReroll = RerollPolicy.NonCritical },
+            Boosts = new AttackerBoosts { WoundRoll = 1, HitReroll = RerollPolicy.Ones, WoundReroll = RerollPolicy.Failed },
             Weapons =
             [
                 new WeaponGroup
@@ -140,7 +140,35 @@ public class ScenarioJsonTests
 
         Assert.Equal("Melee", root["attacker"]!["weapons"]![1]!["weapon"]!["type"]!.GetValue<string>());
         Assert.Equal("Ones", root["attacker"]!["boosts"]!["hitReroll"]!.GetValue<string>());
-        Assert.Equal("NonCritical", root["attacker"]!["boosts"]!["woundReroll"]!.GetValue<string>());
+        Assert.Equal("Failed", root["attacker"]!["boosts"]!["woundReroll"]!.GetValue<string>());
+    }
+
+    [Theory]
+    [InlineData("\"NonCritical\"", "n'existe plus")]
+    [InlineData("\"Toutes\"", "Relance attendue")]
+    [InlineData("3", "Relance attendue")]
+    [InlineData("2", "Relance attendue")]
+    public void Unknown_rerolls_are_rejected_with_a_clear_message(string value, string message)
+    {
+        string json = $$"""{ "attacker": { "boosts": { "woundReroll": {{value}} }, "weapons": [{}] }, "defender": { "groups": [{}] } }""";
+
+        var error = Assert.Throws<JsonException>(() => ScenarioJson.Deserialize(json));
+        Assert.Contains(message, error.Message);
+    }
+
+    [Fact]
+    public void Fishing_choices_are_written_only_when_set_and_read_back()
+    {
+        var weapon = new WeaponProfile { Abilities = new WeaponAbilities { LethalHits = true }, FishForCriticalHits = true };
+        var scenario = FullScenario() with { Attacker = FullScenario().Attacker with { Weapons = [new WeaponGroup { Weapon = weapon }] } };
+
+        string json = ScenarioJson.Serialize(scenario);
+        var read = ScenarioJson.Deserialize(json).Attacker.Weapons[0].Weapon;
+
+        Assert.True(read.FishForCriticalHits);
+        Assert.False(read.FishForCriticalWounds);
+        Assert.DoesNotContain("fishForCriticalWounds", json);
+        Assert.DoesNotContain("fishFor", ScenarioJson.Serialize(FullScenario()));
     }
 
     [Fact]

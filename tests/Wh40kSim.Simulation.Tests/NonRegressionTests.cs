@@ -10,7 +10,10 @@ namespace Wh40kSim.Simulation.Tests;
 /// <para>Historique : capturés le 2026-10-27 avant le déplacement du simulateur dans Wh40kSim.Simulation ;
 /// recapturés le 2026-10-27 au passage au générateur xoshiro256** (ticket #10), seul changement de cette étape.
 /// Avant de recapturer, les nouveaux résultats ont été vérifiés : conformes à la théorie sur les cas exacts et à un
-/// générateur indépendant sur ces deux scénarios (l'ancien générateur surestimait les PV retirés d'environ 0,1 %).</para>
+/// générateur indépendant sur ces deux scénarios (l'ancien générateur surestimait les PV retirés d'environ 0,1 %).
+/// Scénario riche recapturé le 2026-10-30 (phase 3, étape 10) : la relance « tout sauf critique » de toutes les armes
+/// n'existe plus ; relance complète des blessures et pêche aux 6 sur le plasma (Devastating Wounds) seulement, les
+/// autres armes relançant leurs échecs. L'exemple, sans cette relance, est resté identique.</para>
 /// </summary>
 public class NonRegressionTests
 {
@@ -35,11 +38,11 @@ public class NonRegressionTests
     {
         var result = Simulator.Run(RichScenario(), Iterations, seed: 2026);
 
-        Assert.Equal([1827L, 9802, 21250, 25775, 20974, 12247, 5943, 2040, 124, 14, 4], result.Kills.Counts);
+        Assert.Equal([636L, 4646, 13944, 22649, 23966, 18115, 11358, 4286, 352, 36, 12], result.Kills.Counts);
         Assert.Equal(
-            [183L, 534, 2690, 1590, 7643, 4160, 11799, 8355, 11876, 11007, 8633, 10583, 4891, 7315, 2003, 3952, 585, 1841, 102, 115, 106, 5, 14, 12, 0, 1, 1, 4],
+            [56L, 179, 1209, 778, 4514, 2511, 9093, 5797, 11588, 9202, 10708, 10778, 7877, 9568, 3576, 6377, 1468, 3774, 294, 245, 289, 40, 31, 27, 0, 6, 3, 12],
             result.Damage.Counts);
-        AssertKilledPerGroup(result, 297_847, 240, 27_763, 4);
+        AssertKilledPerGroup(result, 359_356, 770, 28_192, 12);
     }
 
     private static void AssertKilledPerGroup(SimulationResult result, params long[] totals)
@@ -59,11 +62,11 @@ public class NonRegressionTests
     {
         Attacker = new AttackerUnit
         {
-            Boosts = new AttackerBoosts { HitRoll = 1, HitReroll = RerollPolicy.Ones, WoundReroll = RerollPolicy.NonCritical },
+            Boosts = new AttackerBoosts { HitRoll = 1, HitReroll = RerollPolicy.Ones, WoundReroll = RerollPolicy.Failed },
             Weapons =
             [
                 new WeaponGroup { ModelCount = 5, Weapon = new WeaponProfile { Name = "Bolter", Attacks = 2, Skill = 3, Strength = 4, Abilities = new WeaponAbilities { SustainedHits = DiceExpression.Parse("D3"), LethalHits = true, RapidFire = 1 } } },
-                new WeaponGroup { ModelCount = 2, Weapon = new WeaponProfile { Name = "Plasma", Attacks = DiceExpression.Parse("D3"), Skill = 3, Strength = 8, Ap = -3, Damage = 2, Abilities = new WeaponAbilities { DevastatingWounds = true, Precision = true, Melta = 2 } } },
+                new WeaponGroup { ModelCount = 2, Weapon = new WeaponProfile { Name = "Plasma", Attacks = DiceExpression.Parse("D3"), Skill = 3, Strength = 8, Ap = -3, Damage = 2, Abilities = new WeaponAbilities { DevastatingWounds = true, Precision = true, Melta = 2 }, FishForCriticalWounds = true } },
                 new WeaponGroup { ModelCount = 2, Weapon = new WeaponProfile { Name = "Épée", Type = WeaponType.Melee, Attacks = 3, Skill = 3, Strength = 5, Ap = -2, Damage = DiceExpression.Parse("D3+1"), Abilities = new WeaponAbilities { TwinLinked = true, Lance = true, CriticalHitOn = 5 } } },
             ],
         },

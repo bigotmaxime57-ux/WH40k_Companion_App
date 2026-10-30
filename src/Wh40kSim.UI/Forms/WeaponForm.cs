@@ -26,6 +26,8 @@ public sealed class WeaponForm
         Ap = weapon.Ap;
         Damage = weapon.Damage.ToString();
         Abilities = new WeaponAbilitiesForm(weapon.Abilities);
+        FishForCriticalHits = weapon.FishForCriticalHits;
+        FishForCriticalWounds = weapon.FishForCriticalWounds;
     }
 
     public int ModelCount { get; set; }
@@ -49,6 +51,12 @@ public sealed class WeaponForm
 
     public WeaponAbilitiesForm Abilities { get; set; }
 
+    /// <summary>« Pêche aux 6 » à la touche (voir <see cref="WeaponProfile.FishForCriticalHits"/>).</summary>
+    public bool FishForCriticalHits { get; set; }
+
+    /// <summary>« Pêche aux 6 » à la blessure (voir <see cref="WeaponProfile.FishForCriticalWounds"/>).</summary>
+    public bool FishForCriticalWounds { get; set; }
+
     /// <exception cref="FormatException">Si <see cref="Attacks"/> ou <see cref="Damage"/> est invalide.</exception>
     public WeaponGroup ToWeaponGroup() => new()
     {
@@ -63,6 +71,8 @@ public sealed class WeaponForm
             Ap = Ap,
             Damage = DiceExpression.Parse(Damage),
             Abilities = Abilities.ToWeaponAbilities(),
+            FishForCriticalHits = FishForCriticalHits,
+            FishForCriticalWounds = FishForCriticalWounds,
         },
     };
 

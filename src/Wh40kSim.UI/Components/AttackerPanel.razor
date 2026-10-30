@@ -27,6 +27,10 @@
             <HelpBubble Lines="@([L["Attacker_WeaponsHelp"]])" />
         </div>
 
+        @{
+            var boosts = Attacker.Boosts.ToAttackerBoosts();
+            var context = new AttackContext { SnapShooting = SnapShooting };
+        }
         @for (int i = 0; i < Attacker.Weapons.Count; i++)
         {
             int index = i;
@@ -35,7 +39,8 @@
                           CanMoveUp="index > 0" CanMoveDown="index < Attacker.Weapons.Count - 1"
                           OnMoveUp="() => Move(index, -1)" OnMoveDown="() => Move(index, 1)"
                           OnDuplicate="() => Duplicate(weapon)" OnRemove="() => Remove(weapon)"
-                          OnEditKeywords="() => EditKeywords.InvokeAsync(weapon)" />
+                          OnEditKeywords="() => EditKeywords.InvokeAsync(weapon)"
+                          Boosts="boosts" Context="context" />
         }
 
         <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Text" Color="Color.Primary" OnClick="Add"

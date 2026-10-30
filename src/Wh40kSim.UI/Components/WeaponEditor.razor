@@ -4,7 +4,8 @@
     descendre (ordre de résolution) / dupliquer / supprimer ; puis la ligne
     « Profil » (A, CT/CC, F, PA, D de même largeur, comme sur une fiche) et la ligne « Mots-clés », libellés alignés.
     Repliable : une fois replié, une ligne de résumé (Describe du Core). Les mots-clés actifs sont des étiquettes ; le
-    bouton « Mots-clés » ouvre le sélecteur (panneau latéral).
+    bouton « Mots-clés » ouvre le sélecteur (panneau latéral). Ligne « Relances » (pêche aux critiques à la touche, à la
+    blessure) seulement quand le Core la juge utile pour cette arme.
 *@
 @using Wh40kSim.UI.Keywords
 
@@ -90,6 +91,27 @@
                                OnClick="OnEditKeywords" data-test="edit-keywords">@L["Weapon_EditKeywords"]</MudButton>
                 </div>
             </div>
+
+            @* Pêche aux critiques : chaque interrupteur n'apparaît que si le Core juge qu'il a un sens pour cette arme *@
+            @if (Fishing is var (hits, wounds) && (hits || wounds))
+            {
+                <div class="wh-card-row" data-test="weapon-fishing">
+                    <MudText Typo="Typo.subtitle2" Class="wh-card-row-label">@L["Weapon_Rerolls"]</MudText>
+                    <div class="wh-keywords">
+                        @if (hits)
+                        {
+                            <MudSwitch T="bool" Label="@L["Weapon_FishHits"]" Color="Color.Primary" @bind-Value="Weapon.FishForCriticalHits"
+                                       @bind-Value:after="NotifyChanged" data-test="fish-hits" />
+                        }
+                        @if (wounds)
+                        {
+                            <MudSwitch T="bool" Label="@L["Weapon_FishWounds"]" Color="Color.Primary" @bind-Value="Weapon.FishForCriticalWounds"
+                                       @bind-Value:after="NotifyChanged" data-test="fish-wounds" />
+                        }
+                        <HelpBubble Lines="@([L["Help_Fishing"]])" />
+                    </div>
+                </div>
+            }
         }
     </div>
 </MudPaper>
@@ -126,6 +148,31 @@
     /// <summary>Ouvre le sélecteur de mots-clés pour cette arme.</summary>
     [Parameter]
     public EventCallback OnEditKeywords { get; set; }
+
+    /// <summary>Boosts de l'attaquant : la relance complète ouvre la pêche aux critiques.</summary>
+    [Parameter]
+    public AttackerBoosts Boosts { get; set; } = new();
+
+    /// <summary>Situation : pas de pêche aux critiques à la touche en overwatch.</summary>
+    [Parameter]
+    public AttackContext Context { get; set; } = new();
+
+    /// <summary>Pêche aux critiques possible à la touche, à la blessure (Core) ; rien tant qu'une expression de dés est invalide.</summary>
+    private (bool Hits, bool Wounds) Fishing
+    {
+        get
+        {
+            try
+            {
+                var weapon = Weapon.ToWeaponGroup().Weapon;
+                return (weapon.CanFishForCriticalHits(Boosts, Context), weapon.CanFishForCriticalWounds(Boosts));
+            }
+            catch (FormatException)
+            {
+                return (false, false);
+            }
+        }
+    }
 
     /// <summary>Résumé de l'arme par le Core ; seulement le nom tant qu'une expression de dés est invalide.</summary>
     private string Summary

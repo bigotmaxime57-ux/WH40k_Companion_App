@@ -39,13 +39,12 @@ internal static class ConsoleInput
         Ask(label, "", WeaponAbilities.Parse);
 
     public static RerollPolicy ReadReroll(string label) =>
-        Ask(label + " (aucune / 1 / ratés / noncrit)", "aucune", s => s.ToLowerInvariant() switch
+        Ask(label + " (aucune / 1 / complète)", "aucune", s => s.ToLowerInvariant() switch
         {
             "aucune" or "non" or "n" or "0" => RerollPolicy.None,
             "1" or "1s" or "uns" => RerollPolicy.Ones,
-            "rates" or "ratés" or "echecs" or "échecs" or "toutes" => RerollPolicy.Failed,
-            "noncrit" or "non crit" or "crit" => RerollPolicy.NonCritical,
-            _ => throw new FormatException("Valeurs possibles : aucune, 1, ratés, noncrit."),
+            "complete" or "complète" or "rates" or "ratés" or "echecs" or "échecs" or "toutes" => RerollPolicy.Failed,
+            _ => throw new FormatException("Valeurs possibles : aucune, 1, complète."),
         });
 
     public static void WriteTitle(string title)

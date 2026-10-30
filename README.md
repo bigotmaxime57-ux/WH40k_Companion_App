@@ -109,7 +109,7 @@ Valeurs du point de vue de l'attaquant (+1 = mieux pour lui). Deux sortes, à ne
    CT/CC modifiée par l'attaquant et le défenseur ; **couvert : CT dégradée de 1** de plus (tir uniquement, sauf
    Ignores Cover) ; résultat borné entre 2+ et 6+. Torrent = touche auto.
    Critique : Sustained Hits X (touches en plus), Lethal Hits (blessure auto).
-3. **Blessure** : table F/E (Force modifiée), modificateurs plafonnés à ±1 (Lance incluse), Twin-linked = relance des échecs.
+3. **Blessure** : table F/E (Force modifiée), modificateurs plafonnés à ±1 (Lance incluse), Twin-linked = relance complète du jet de blessure.
    **Endurance (05.02.01)** recalculée avant chaque pool : la plus haute des gardes du corps encore en jeu,
    sinon la plus haute des figurines restantes.
 4. **Sauvegardes (05.03 / 05.04)** : groupes d'allocation = un par PERSONNAGE, un par combinaison PV/Sv/InSv pour les autres
@@ -122,7 +122,12 @@ Valeurs du point de vue de l'attaquant (+1 = mieux pour lui). Deux sortes, à ne
 7. **Precision (24.28)** : le PERSONNAGE visé (premier en jeu, ou celui nommé dans `precisionTarget`) devient le groupe
    courant jusqu'à la fin du pool ou sa destruction ; les mortelles de Devastating Wounds vont d'abord sur lui.
 
-Relances disponibles (touche et blessure) : aucune, les 1, les échecs, tout sauf critique (« pêche aux 6 »).
+Relances disponibles (touche et blessure) : aucune, les 1, relance complète (`Failed` dans le JSON), qui relance les
+échecs. **Pêche aux critiques**, arme par arme (`fishForCriticalHits`, `fishForCriticalWounds` sur l'arme) : avec la relance
+complète, l'arme relance aussi ses réussites ordinaires pour chercher un critique. Elle n'agit que si elle a un sens :
+à la touche, une arme Lethal Hits ou Sustained Hits (ni Torrent, ni en overwatch) ; à la blessure, une arme
+Devastating Wounds, la relance complète venant des boosts ou de Twin-linked. Deux armes identiques qui font un choix
+différent forment deux pools. L'ancienne relance globale « tout sauf critique » (`NonCritical`) est refusée.
 
 **Tir en overwatch** (interrupteur de la Situation, `snapShooting` dans le JSON) : l'Overwatch de la 11e édition (15.08)
 tire en snap shooting (15.09). Seules les armes de tir tirent (les armes de mêlée restent dans le scénario, un

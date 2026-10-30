@@ -36,8 +36,9 @@ public sealed class AttackPool
     }
 
     /// <summary>
-    /// Deux armes font des attaques identiques si tout ce qui sert après le décompte des attaques est égal.
-    /// Le nom, la caractéristique A et les règles qui n'agissent que sur le nombre d'attaques (Blast, Rapid Fire) sont ignorés.
+    /// Deux armes font des attaques identiques si tout ce qui sert après le décompte des attaques est égal, choix de
+    /// « pêche aux critiques » compris (une seule stratégie de relance par groupe de dés). Le nom, la caractéristique A et les
+    /// règles qui n'agissent que sur le nombre d'attaques (Blast, Rapid Fire) sont ignorés.
     /// </summary>
     public static bool MakeIdenticalAttacks(WeaponProfile a, WeaponProfile b) =>
         a.Type == b.Type
@@ -45,6 +46,8 @@ public sealed class AttackPool
         && a.Strength == b.Strength
         && Math.Abs(a.Ap) == Math.Abs(b.Ap)
         && a.Damage == b.Damage
+        && a.FishForCriticalHits == b.FishForCriticalHits
+        && a.FishForCriticalWounds == b.FishForCriticalWounds
         && AttackAbilities(a) == AttackAbilities(b);
 
     private static WeaponAbilities AttackAbilities(WeaponProfile weapon) =>

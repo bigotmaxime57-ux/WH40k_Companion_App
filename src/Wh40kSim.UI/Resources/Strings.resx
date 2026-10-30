@@ -250,6 +250,9 @@
   <data name="Help_Profile" xml:space="preserve">
     <value>Modifications de caractéristiques, sans plafond : A et D restent au moins à 1, la PA ne dépasse jamais 0.</value>
   </data>
+  <data name="Help_Fishing" xml:space="preserve">
+    <value>Pêche aux critiques : avec la relance complète, cette arme relance aussi ses réussites ordinaires pour chercher un critique (touche : Lethal Hits, Sustained Hits ; blessure : Devastating Wounds). On risque de perdre une réussite, mais on gagne des critiques. Sans pêche aux critiques, la relance complète ne relance que les échecs. Proposé seulement quand l'arme a l'effet critique et que la relance complète est disponible (boosts de l'attaquant, ou Twin-linked pour la blessure).</value>
+  </data>
   <data name="Help_Results" xml:space="preserve">
     <value>80 % des cas : du 1er au 9e décile. Les tuiles et les pertes par groupe sont toujours les pertes réelles, plafonnées à l'effectif de l'unité.</value>
   </data>
@@ -434,10 +437,7 @@
     <value>Accueil</value>
   </data>
   <data name="Reroll_Failed" xml:space="preserve">
-    <value>Les échecs</value>
-  </data>
-  <data name="Reroll_NonCritical" xml:space="preserve">
-    <value>Tout sauf les critiques</value>
+    <value>Relance complète</value>
   </data>
   <data name="Reroll_None" xml:space="preserve">
     <value>Aucune</value>
@@ -588,6 +588,15 @@
   </data>
   <data name="Weapon_EditKeywords" xml:space="preserve">
     <value>Mots-clés</value>
+  </data>
+  <data name="Weapon_Rerolls" xml:space="preserve">
+    <value>Relances</value>
+  </data>
+  <data name="Weapon_FishHits" xml:space="preserve">
+    <value>Pêche aux critiques (touche)</value>
+  </data>
+  <data name="Weapon_FishWounds" xml:space="preserve">
+    <value>Pêche aux critiques (blessure)</value>
   </data>
   <data name="Weapon_Melee" xml:space="preserve">
     <value>Mêlée</value>

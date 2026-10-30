@@ -63,6 +63,18 @@ internal static class ScenarioWizard
             WoundReroll = ReadReroll("Relance des blessures"),
         };
 
+        // Pêche aux critiques, arme par arme, seulement quand elle a un sens (conditions portées par le Core ; l'overwatch,
+        // demandé plus tard, la rend sans effet à la touche)
+        for (int i = 0; i < weapons.Count; i++)
+        {
+            var weapon = weapons[i].Weapon;
+            bool hits = weapon.CanFishForCriticalHits(boosts, new AttackContext())
+                        && ReadBool($"{weapon.Name} : pêche aux critiques à la touche (relancer aussi les touches non critiques)", false);
+            bool wounds = weapon.CanFishForCriticalWounds(boosts)
+                          && ReadBool($"{weapon.Name} : pêche aux critiques à la blessure (relancer aussi les blessures non critiques)", false);
+            weapons[i] = weapons[i] with { Weapon = weapon with { FishForCriticalHits = hits, FishForCriticalWounds = wounds } };
+        }
+
         return new AttackerUnit { Name = name, Boosts = boosts, Weapons = weapons };
     }
 

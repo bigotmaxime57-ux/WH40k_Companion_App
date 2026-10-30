@@ -1003,8 +1003,10 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   Prochaine étape : 3 (client WebAssembly), à préciser.
 - Phase 4, étape 3 (client WebAssembly) : fusionnée dans `main`, validée par l'utilisateur après essai dans Firefox
   le 2026-10-30. Prochaine étape : 4 (intégration continue, #7), à préciser.
-- Phase 4, étape 4 (intégration continue, #7) : précisée et validée le 2026-10-30, codée sur la branche
-  `phase4/etape4-integration-continue`, **en attente de validation**. `.github/workflows/ci.yml` (tâches Linux et
+- Phase 4, étape 4 (intégration continue, #7) : fusionnée dans `main`, validée par l'utilisateur le 2026-10-30
+  (ticket #7 fermé). CI verte : Linux 1,1 min (565 tests : 223 Core, 84 Simulation, 218 UI, 21 Web, 19 client web),
+  Windows 7,9 min (desktop compris). Prochaine étape : 5 (Docker et mise en ligne), à préciser (hébergeur, nom de
+  domaine, déploiement automatique). `.github/workflows/ci.yml` (tâches Linux et
   Windows), `Wh40kSim.CI.slnf` (solution sans le desktop), badge dans le README, vérification de la CI ajoutée aux
   règles de travail et à `/valider-etape`. Corrigé grâce au premier passage de la CI : l'AOT dans le `.csproj`
   exigeait `wasm-tools` dès le build (elle est maintenant demandée dans la commande de publication, voir « Décisions

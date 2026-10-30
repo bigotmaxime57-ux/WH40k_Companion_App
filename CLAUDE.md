@@ -1028,17 +1028,13 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   pour pouvoir lancer le premier déploiement depuis l'onglet « Actions » (compte Fly.io, application « wh40ksim » et
   secret `FLY_API_TOKEN` faits par l'utilisateur). **Restent** : premier déploiement (lancé par l'utilisateur), site
   vérifié par lui, puis tag `v0.4` (avec son accord) qui clôt la phase 4.
-  **Où on en est (2026-10-30, fin de session)** : flux « Déploiement » lancé à la main depuis `main` ; CI verte, mais
-  l'étape `flyctl deploy` échoue sur le jeton. Premier essai : secret vide (`FLY_API_TOKEN:` sans `***` dans le
-  journal). Deuxième essai (secret du 15:05:08) : « Authenticate: token validation error », sans doute un jeton abîmé
-  par le `|` de PowerShell 5.1 vers `gh` (retour à la ligne ajouté). À faire par l'utilisateur (jamais par Claude, qui
-  ne voit pas le jeton), dans PowerShell avec `flyctl` connecté :
-  `gh secret set FLY_API_TOKEN --body ((fly tokens create deploy -a wh40ksim | Out-String).Trim())`
-  (en Git Bash : `fly tokens create deploy -a wh40ksim | tr -d '\r\n' | gh secret set FLY_API_TOKEN`), vérifier la
-  date avec `gh secret list`, puis « Re-run failed jobs » sur la dernière exécution (`gh run list --workflow
-  deploy.yml`). Si le refus persiste : vérifier que `fly tokens create deploy -a wh40ksim` marche seul (application
-  bien nommée « wh40ksim », compte connecté). Sur l'autre machine, `flyctl` n'est peut-être pas installé
-  (`winget install flyctl` ou script d'installation de fly.io, puis `fly auth login`). `Dockerfile`, `.dockerignore`, `fly.toml` (application « wh40ksim », à ajuster
+  **Premier déploiement réussi le 2026-10-30** (site vérifié par l'utilisateur : https://wh40ksim.fly.dev). Deux
+  échecs avant, sur le jeton : secret vide, puis jeton abîmé par le `|` de PowerShell 5.1 vers `gh` (retour à la
+  ligne ajouté). Pour refaire le secret (par l'utilisateur seulement, jamais par Claude) :
+  `gh secret set FLY_API_TOKEN --body ((fly tokens create deploy -a wh40ksim | Out-String).Trim())`, puis
+  `gh secret list` pour la date. Fly a créé **deux machines** au premier déploiement (haute disponibilité) : chacune
+  aurait sa file et ses limites ; proposé à l'utilisateur de revenir à une seule (`fly scale count 1 -a wh40ksim`).
+  Version du client web : `0.4`. `Dockerfile`, `.dockerignore`, `fly.toml` (application « wh40ksim », à ajuster
   au nom créé) ; `Wh40kSim.Web` : `/health`, `ForwardedHeaders:Enabled` (dernière adresse de `X-Forwarded-For`
   seulement) ; flux `deploy.yml` (tag `v*` ou à la main, CI réutilisée) et `docker.yml` (vérification de l'image :
   construction, démarrage, `/health`, page, client AOT) ; `ci.yml` réutilisable, branches seulement. Docker n'est pas
@@ -1086,6 +1082,8 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   `SimulationJson` (réglages de `ScenarioJson`). Rien de visible à l'écran : API de `SimulationResult` inchangée.
   `NonRegressionTests` inchangés ; temps inchangé (10 M simulations : 1,27 à 1,37 s). 518 tests verts (223 Core,
   83 Simulation, 212 UI).
+- Tag **`v0.4`** posé sur `main` le 2026-10-30 (fin de la phase 4, site en ligne ; le tag redéploie le site).
+  Prochaine phase : 5 (comparaison), à préciser.
 
 Points notés pour la suite :
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

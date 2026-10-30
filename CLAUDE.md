@@ -1030,7 +1030,11 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   au nom créé) ; `Wh40kSim.Web` : `/health`, `ForwardedHeaders:Enabled` (dernière adresse de `X-Forwarded-For`
   seulement) ; flux `deploy.yml` (tag `v*` ou à la main, CI réutilisée) et `docker.yml` (vérification de l'image :
   construction, démarrage, `/health`, page, client AOT) ; `ci.yml` réutilisable, branches seulement. Docker n'est pas
-  installé sur cette machine : l'image est vérifiée par GitHub Actions. `.github/workflows/ci.yml` (tâches Linux et
+  installé sur cette machine : l'image est vérifiée par GitHub Actions. Premier déploiement manuel (`fly deploy
+  --remote-only` par l'utilisateur) en échec sur la machine de construction de Fly (Depot), sans message, pendant la
+  publication AOT (mémoire probablement) : l'image est désormais construite par GitHub Actions et envoyée à Fly
+  (`flyctl deploy --local-only`). Un flux `workflow_dispatch` n'apparaît dans l'onglet « Actions » qu'une fois sur
+  `main` : premier déploiement par GitHub après la fusion. `.github/workflows/ci.yml` (tâches Linux et
   Windows), `Wh40kSim.CI.slnf` (solution sans le desktop), badge dans le README, vérification de la CI ajoutée aux
   règles de travail et à `/valider-etape`. Corrigé grâce au premier passage de la CI : l'AOT dans le `.csproj`
   exigeait `wasm-tools` dès le build (elle est maintenant demandée dans la commande de publication, voir « Décisions

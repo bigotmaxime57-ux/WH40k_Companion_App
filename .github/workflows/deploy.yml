@@ -1,6 +1,8 @@
 # Déploiement de la version web sur Fly.io : à chaque tag de version (v0.4, v0.5…), ou à la main depuis l'onglet
-# « Actions ». La CI tourne d'abord (ci.yml) ; le déploiement n'a lieu que si elle est verte. Fly construit l'image
-# depuis le Dockerfile (compilation AOT du client comprise), puis remplace la version en ligne.
+# « Actions ». La CI tourne d'abord (ci.yml) ; le déploiement n'a lieu que si elle est verte. L'image est construite
+# ici, sur la machine GitHub (--local-only : la compilation AOT du client échouait sur les machines de construction de
+# Fly, sans message, faute de mémoire probablement), envoyée au registre de Fly, puis lancée à la place de la version
+# en ligne.
 # Jeton de déploiement : secret du dépôt FLY_API_TOKEN (fly tokens create deploy, puis gh secret set FLY_API_TOKEN).
 name: Déploiement
 
@@ -33,6 +35,6 @@ jobs:
       - uses: superfly/flyctl-actions/setup-flyctl@1.5
 
       - name: Déploiement
-        run: flyctl deploy --remote-only
+        run: flyctl deploy --local-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

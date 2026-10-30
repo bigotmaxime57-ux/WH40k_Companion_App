@@ -188,12 +188,30 @@ Chaque étape sera précisée et validée avant d'être codée :
      11e lancement de la minute) ; file (`queued` position 1, puis résultat) ; annulation (place libérée) ; erreur
      inattendue (événement `error`).
    - Reporté à l'étape 5 : Docker, HTTPS, vraie adresse IP derrière un proxy (`X-Forwarded-For`), point de santé.
-3. **Client WebAssembly** (`Wh40kSim.Web.Client`, Blazor Web App en rendu WebAssembly interactif, sans prérendu) :
-   `AppShell` et ses écrans ; `ApiSimulationService` (lecture du flux SSE, progression, annulation, erreurs du
-   serveur affichées) ; fichiers dans le navigateur (`InputFile` pour ouvrir, téléchargement pour enregistrer,
-   fichiers partiels compris) ; préférences dans le stockage du navigateur, thème sans flash au démarrage ; plafond
-   connu de l'interface (choix rapide 10 M indisponible en web) ; raccourcis clavier vérifiés dans un vrai navigateur.
-   Wh40kSim.UI reste commun au desktop et au web.
+3. **Client WebAssembly** (`Wh40kSim.Web.Client`). Précisée et validée par l'utilisateur le 2026-10-30 :
+   - Blazor Web App : `Wh40kSim.Web` sert la page et le client ; `Wh40kSim.Web.Client` (WebAssembly, référence
+     Wh40kSim.UI), rendu WebAssembly interactif **sans prérendu**. Écrans de Wh40kSim.UI inchangés, seuls les
+     services changent. `dotnet run --project src/Wh40kSim.Web` ouvre le site sur `http://localhost:5080`.
+   - `ApiSimulationService` (`ISimulationService`) : `POST /api/simulations`, flux SSE lu au fil de l'eau, progression,
+     résultat brut reconstruit en `SimulationResult`, Annuler ferme la requête.
+   - **Attente dans la file** (décision de l'utilisateur) : **fenêtre** « En attente : N calculs avant vous », mise à
+     jour, avec Annuler, fermée au démarrage du calcul ; `ISimulationService` reçoit un suivi facultatif de la file
+     (`IProgress<int>`), jamais utilisé par le desktop.
+   - Erreurs du serveur dans le bandeau de message (refus 400 avec ses erreurs, 429 avec le délai, événement `error`,
+     serveur injoignable).
+   - Fichiers : ouvrir par le sélecteur du navigateur (bouton ou Ctrl+O, fichiers partiels compris) ; **enregistrer =
+     toujours un téléchargement** sous le nom proposé (décision de l'utilisateur).
+   - Préférences dans `localStorage` ; thème sans flash (script de la page pour la barre de chargement, thème lu avant
+     d'afficher `AppShell`) ; version affichée sur l'accueil.
+   - **Plafond demandé au serveur** (`GET /api/simulations/limits`, décision de l'utilisateur), exposé par
+     `ISimulationService` (aucun en desktop) ; **choix rapide 10 M masqué** en web, saisie au-delà refusée, Lancer
+     désactivé, bulle « ? » explicative.
+   - À vérifier par l'utilisateur dans un vrai navigateur : raccourcis (Ctrl+Entrée, Ctrl+S, Ctrl+O), quatre thèmes,
+     parcours complet (ouvrir, modifier, lancer, attente avec deux onglets, annuler, enregistrer).
+   - Tests : nouveau `Wh40kSim.Web.Client.Tests` (`ApiSimulationService` face à un faux flux SSE : progression, file,
+     résultat, 400, 429, `error`, annulation ; fichiers et préférences avec le JavaScript simulé par bUnit) ;
+     Wh40kSim.UI.Tests (choix 10 M masqué et saisie refusée avec un plafond, fenêtre d'attente, desktop inchangé) ;
+     Wh40kSim.Web.Tests (page servie avec le client, `GET /api/simulations/limits`).
 4. **Intégration continue** (#7) : GitHub Actions, build et tests à chaque push et pull request (le desktop MAUI
    demande Windows : runner Windows ou solution sans le desktop, à trancher).
 5. **Docker et mise en ligne** : image Docker (Linux, construction en plusieurs étapes), réglages de production
@@ -959,7 +977,9 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
 - Phase 4, étape 1 (contrat du résultat) : fusionnée dans `main`, validée par l'utilisateur le 2026-10-30.
   Prochaine étape : 2 (serveur et API), à préciser (valeurs des limites à trancher).
 - Phase 4, étape 2 (serveur et API) : fusionnée dans `main`, validée par l'utilisateur après essai le 2026-10-30.
-  Prochaine étape : 3 (client WebAssembly), à préciser. `Wh40kSim.Web` : `SimulationOptions` (section
+  Prochaine étape : 3 (client WebAssembly), à préciser.
+- Phase 4, étape 3 (client WebAssembly) : précisée et validée le 2026-10-30, à coder sur la branche
+  `phase4/etape3-client-web`. `Wh40kSim.Web` : `SimulationOptions` (section
   « Simulation »), `SimulationQueue` (file sans limite, positions), `ISimulationRunner` / `SimulatorRunner`,
   `SimulationEndpoints` (`POST /api/simulations`, SSE `queued` / `progress` / `result` / `error`, `ProblemDetails`),
   limiteur par IP (fenêtre fixe), `Wh40kSim.Web.http`, profil `http` sur le port 5080 ; `Wh40kSim.Web.Tests`

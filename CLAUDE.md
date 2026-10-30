@@ -113,7 +113,7 @@ optimiseur ajouté le 2026-10-29) :
   les simulations.
 
 Le tir en **overwatch** n'est pas un mode : c'est un interrupteur de la Situation (Quick sim et Full sim), qui fait
-tirer selon ses règles (étape 13, #11).
+tirer selon ses règles (étape 12, #11).
 
 Étapes détaillées dans « Phase 3 : étapes ». **Le choix des technologies doit tenir compte de la phase 7** : tout ce
 qu'on ajoute à Wh40kSim.UI (bibliothèque de graphiques, navigation) doit fonctionner aussi bien dans le
@@ -160,6 +160,17 @@ de codes.
 3. **Éditeur d'unités** (UI) : créer, modifier, dupliquer, supprimer.
 4. **Composition d'un scénario** : choix du loadout et du leader attaché → génération du `Scenario` (groupes d'armes de
    l'attaquant, groupes d'allocation et ordre du défenseur).
+5. **Rapport en points** (#2 ; ancienne étape 9 de la phase 3, déplacée le 2026-10-30 pour traiter les points avec les
+   fiches d'unité). Onglet du Full sim, dans l'esprit des onglets Groupes et Armes.
+   - Points portés par la fiche d'unité (et par chaque leader), repris dans le scénario composé ; saisie au Full sim
+     pour un scénario hors bibliothèque : à préciser. Points détruits et rendement de la phase 3, étape 4.
+   - **Kill threat** (décision de l'utilisateur, 2026-10-28 : rentabilité) : distribution des points détruits par
+     simulation (au prorata des PV, en points entiers arrondis à l'inférieur : exact pour P(≥ son coût)),
+     P(détruire au moins sa propre valeur).
+   - **Tanking** (décision de l'utilisateur, 2026-10-28 : les deux) : valeur conservée (points du défenseur qui
+     survivent, en moyenne ; P(garder au moins la moitié de sa valeur), comptée exactement) et coût pour détruire
+     (points de l'attaquant × PV de l'unité / moyenne des PV retirés **excédent compris**, approximation linéaire).
+   - Tests : valeurs exactes en points.
 
 ### Phase 7 : intégration web
 
@@ -341,7 +352,7 @@ couvrir par l'API et le client ; le découpage sera revu en début de phase.
 ## Phase 3 : étapes
 
 Découpage validé par l'utilisateur le 2026-10-27, revu le 2026-10-28 : le Full sim se construit écran par écran
-(étapes 6 à 9) au lieu de tout calculer avant l'interface ; chaque rapport est une tranche complète (statistiques dans
+(étapes 6 à 8) au lieu de tout calculer avant l'interface ; chaque rapport est une tranche complète (statistiques dans
 `Wh40kSim.Simulation`, testées, puis l'écran qui ne fait que les dessiner). Chaque étape sera précisée et validée
 avant d'être codée.
 
@@ -391,7 +402,7 @@ avant d'être codée.
    - Console : section « Dégâts bruts » (moyenne, gaspillage et sa part). Pas d'affichage dans l'interface (Full sim).
    - Tests : dés imposés (D3 contre 1 PV, réduction, FNP, Devastating Wounds), bruts ≥ PV retirés, égalité avec des
      armes D1, valeur exacte ; ticket #6 fermé par le commit (`Closes #6`).
-Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
+Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour le rapport en points de la phase 6) :
 - Aucun dé supplémentaire : non-régression au bit près. Le Core n'apporte que l'attribution nécessaire (pool qui a
   infligé chaque dégât, attaque « grâce à Precision »).
 - Temps mesuré à chaque étape ; si les suivis ralentissent la boucle, option de simulation pour garder le Quick sim
@@ -504,7 +515,7 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
      figurines tuées (moyenne, part du total), dégâts bruts (moyenne), gaspillage (part des dégâts bruts perdus).
    - **2. Une section par pool** (sous-titre comme les groupes) : tuiles figurines tuées, PV retirés, dégâts bruts /
      gaspillage, et **« Tire sur une unité déjà détruite »** = P(unité détruite avant que ce pool ne tire) (utile pour
-     l'ordre des armes, prépare l'optimiseur de l'étape 12) ; histogrammes des figurines tuées puis des PV retirés par ce pool.
+     l'ordre des armes, prépare l'optimiseur de l'étape 11) ; histogrammes des figurines tuées puis des PV retirés par ce pool.
    - **3. Gaspillage, toutes armes confondues** (dégâts bruts de l'étape 5, jamais affichés jusqu'ici) : tuiles dégâts
      bruts moyens, gaspillage et sa part, « aucune perte » (P(gaspillage = 0)), « perdu quand l'unité survit » (le
      gaspillage qui coûte : quand l'unité est détruite, il n'a rien coûté) ; barre retirés / perdus ; **histogramme
@@ -537,24 +548,16 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
    - Tests : dés imposés (attribution au pool, attaque qui achève, bruts arrêtés à la destruction, pool tiré sur une
      unité détruite) ; cohérence (sommes par pool = totaux réels, parts = 100 %) ; bUnit (onglet, tableau, barre,
      sections par pool, dégâts bruts).
-9. **Rapport en points** (#2).
-   - Saisie des points dans l'écran de saisie du Full sim (attaquant, chaque groupe du défenseur) ; points détruits
-     et rendement de l'étape 4.
-   - **Kill threat** (décision de l'utilisateur, 2026-10-28 : rentabilité) : distribution des points détruits par
-     simulation (au prorata des PV, en points entiers arrondis à l'inférieur : exact pour P(≥ son coût)),
-     P(détruire au moins sa propre valeur).
-   - **Tanking** (décision de l'utilisateur, 2026-10-28 : les deux) : valeur conservée (points du défenseur qui
-     survivent, en moyenne ; P(garder au moins la moitié de sa valeur), comptée exactement) et coût pour détruire
-     (points de l'attaquant × PV de l'unité / moyenne des PV retirés **excédent compris**, approximation linéaire).
-   - Tests : valeurs exactes en points. Tag intermédiaire proposé : `v0.3`.
-10. **Comparaison, côté Simulation.** Deux sens (#1) : N attaquants contre une cible, ou un attaquant contre N cibles ;
+   L'ancienne étape 9, **rapport en points** (#2), est passée en phase 6 le 2026-10-30 (décision de l'utilisateur :
+   traiter les points avec les fiches d'unité) ; étapes suivantes renumérotées.
+9. **Comparaison, côté Simulation.** Deux sens (#1) : N attaquants contre une cible, ou un attaquant contre N cibles ;
    situation commune. Même graine pour toutes les entrées (tirages partagés : écarts plus fiables). Indicateurs :
    moyennes, P(détruire l'unité), P(≥ k), % de l'unité détruite et points détruits (comparables entre cibles
    différentes) ; meilleure entrée pour chaque indicateur, ex æquo compris. JSON d'une comparaison ; console.
-11. **Comparaison, côté UI.** Entrées prises dans le scénario courant ou dans des fichiers (partiels ou complets),
+10. **Comparaison, côté UI.** Entrées prises dans le scénario courant ou dans des fichiers (partiels ou complets),
    dupliquées, renommées ; distributions superposées ; tableau côte à côte, meilleure entrée mise en évidence ;
    ouvrir / enregistrer.
-12. **Optimiseur du séquencement des armes** (#3, ajouté le 2026-10-29). Mode à part (tuile sur l'accueil) : à partir
+11. **Optimiseur du séquencement des armes** (#3, ajouté le 2026-10-29). Mode à part (tuile sur l'accueil) : à partir
    du scénario courant (ou d'un fichier), toutes les permutations des **pools** (pas des armes : celles d'un même pool
    sont lancées ensemble), avec les statistiques du Full sim. Décisions de l'utilisateur :
    - **Rondes éliminatoires** façon Raidbots : tous les ordres avec peu d'itérations (~10 000), puis les meilleurs avec
@@ -568,12 +571,12 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
    - **Export JSON** de l'ordre choisi, réutilisable au Quick sim et au Full sim : le format « attaquant seul » (ou
      scénario complet), qui garde l'ordre des armes, suffit (pas de nouveau format).
    - Fin de l'étape : ticket #3 fermé.
-13. **Overwatch** (#11, ajouté le 2026-10-29). Interrupteur « Tir en overwatch » dans la **Situation** (Quick sim et Full sim,
+12. **Overwatch** (#11, ajouté le 2026-10-29). Interrupteur « Tir en overwatch » dans la **Situation** (Quick sim et Full sim,
    décision de l'utilisateur) : le Core résout l'attaque avec les restrictions de l'overwatch, les écrans et les
    statistiques restent les mêmes, résultats marqués « Overwatch » ; mode enregistré dans le JSON du scénario. Les
    règles de l'overwatch ont changé en 11e édition : à détailler avec l'utilisateur en précisant l'étape (quand et
    contre quoi, jet de touche, mots-clés applicables, limites, effets autres que les pertes). Fin de phase : README,
-   tag (`v0.3.1` si `v0.3` a été posé à l'étape 9).
+   tag `v0.3`.
 
 ## Décisions techniques
 
@@ -775,6 +778,9 @@ Règles communes aux étapes 6 à 9 (décisions du 2026-10-28) :
   460 tests verts (194 Core, 70 Simulation, 196 UI) ; `NonRegressionTests` inchangés. Temps mesuré (10 M simulations,
   scénario d'exemple) dans le bruit de mesure à chaque ajout, donc pas d'option. Prochaine étape : 9 (rapport en
   points, #2), à préciser.
+- Roadmap revue le 2026-10-30 (branche `docs/roadmap-points-phase6`) : le rapport en points (#2) passe en phase 6,
+  étape 5, avec les fiches d'unité ; fin de la phase 3 renumérotée (comparaison en 9 et 10, optimiseur en 11,
+  overwatch en 12, tag `v0.3` en fin de phase). Prochaine étape : 9 (comparaison, côté Simulation, #1), à préciser.
 
 Points notés pour la suite :
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

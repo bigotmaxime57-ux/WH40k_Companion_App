@@ -134,19 +134,44 @@ Le « web local » prévu à l'origine est abandonné (2026-10-27) : le desktop 
 apporter (fichiers côté navigateur, Wh40kSim.UI dans un hôte web) est repris ici. Structure Blazor Web App :
 `Wh40kSim.Web` (serveur ASP.NET Core : API + service du client) et `Wh40kSim.Web.Client` (WebAssembly). Le calcul se
 fait sur le serveur. Ce qu'a apporté la phase 3 (Quick sim, Full sim et ses rapports, fichiers partiels, thèmes,
-overwatch) est à couvrir par l'API et le client ; les phases suivantes livrent leur propre partie web. Le découpage
-sera revu en début de phase.
+overwatch, pêche aux critiques) est à couvrir par l'API et le client ; les phases suivantes livrent leur propre partie
+web.
 
-1. **Contrat et API** (Minimal API) : contrat JSON du résultat, `POST` d'un scénario validé par
-   `Scenario.Validate` (erreurs en `ProblemDetails`), plafond d'itérations, tests d'intégration
-   (`WebApplicationFactory`).
-2. **Progression et annulation** : progression envoyée au client (Server-Sent Events), annulation si le client se
-   déconnecte.
-3. **Client WebAssembly** : `ApiSimulationService` implémente `ISimulationService` ; `IScenarioFileService` et
-   `IPreferenceService` côté navigateur (`InputFile`, téléchargement, stockage du navigateur) ; composants de
-   Wh40kSim.UI inchangés.
-4. **Finitions** : configuration, README, tag de fin de phase. Hébergement public hors périmètre sauf décision
-   contraire.
+Découpage revu avec l'utilisateur le 2026-10-30. Décisions :
+- **Mise en ligne publique** (décision contraire à « hébergement hors périmètre ») : site **public, sans compte** ;
+  **image Docker** qui tourne chez n'importe quel hébergeur, choisi à la dernière étape avec l'utilisateur (c'est lui
+  qui crée le compte) ; **déploiement automatique depuis GitHub** (GitHub Actions).
+- **Résultat transmis en histogrammes bruts** : le serveur envoie les compteurs bruts, le navigateur reconstruit
+  `SimulationResult` avec le même code `Wh40kSim.Simulation` (écrans inchangés, contrat JSON petit et stable).
+- **Progression en Server-Sent Events** sur la requête `POST` elle-même (pris en charge par .NET 10) ; la fermer
+  annule le calcul.
+- **Protections du serveur** : plafond de **1 000 000** simulations par lancement (au-delà : refus, message clair) ;
+  calculs simultanés limités (les suivants attendent, progression « en attente ») ; limite de lancements par adresse IP.
+  Le desktop n'a toujours pas de plafond.
+
+Chaque étape sera précisée et validée avant d'être codée :
+
+1. **Contrat du résultat** (Simulation, sans web). `SimulationResult` construit depuis un record sérialisable des
+   données brutes (`SimulationData` : scénario, graine, itérations, durée, histogrammes et compteurs agrégés) ;
+   `Simulator.Run` passe par lui. Tests : aller-retour JSON qui redonne exactement les mêmes statistiques ;
+   non-régression au bit près.
+2. **Serveur et API** (`Wh40kSim.Web`, Minimal API). `POST /api/simulations` (scénario au format de `ScenarioJson`,
+   nombre de simulations, graine) ; JSON illisible, `Scenario.Validate` ou plafond dépassé → `ProblemDetails` (liste des
+   erreurs) ; réponse en SSE : attente, progression (par point de pourcentage), résultat, erreur ; annulation à la
+   déconnexion ; calculs simultanés limités, limite par adresse IP, threads par calcul limités (`SimulationThreads`) ;
+   réglages dans la configuration. Tests d'intégration (`WebApplicationFactory`). Valeurs des limites à trancher.
+3. **Client WebAssembly** (`Wh40kSim.Web.Client`, Blazor Web App en rendu WebAssembly interactif, sans prérendu) :
+   `AppShell` et ses écrans ; `ApiSimulationService` (lecture du flux SSE, progression, annulation, erreurs du
+   serveur affichées) ; fichiers dans le navigateur (`InputFile` pour ouvrir, téléchargement pour enregistrer,
+   fichiers partiels compris) ; préférences dans le stockage du navigateur, thème sans flash au démarrage ; plafond
+   connu de l'interface (choix rapide 10 M indisponible en web) ; raccourcis clavier vérifiés dans un vrai navigateur.
+   Wh40kSim.UI reste commun au desktop et au web.
+4. **Intégration continue** (#7) : GitHub Actions, build et tests à chaque push et pull request (le desktop MAUI
+   demande Windows : runner Windows ou solution sans le desktop, à trancher).
+5. **Docker et mise en ligne** : image Docker (Linux, construction en plusieurs étapes), réglages de production
+   (limites, HTTPS par l'hébergeur ou un proxy, point de santé) ; publication de l'image et déploiement par GitHub
+   Actions ; choix de l'hébergeur et du nom de domaine avec l'utilisateur ; README (lancement local, déploiement) ; tag
+   de fin de phase `v0.4`.
 
 ### Phase 5 : comparaison
 
@@ -897,6 +922,12 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   identique au bit près ; aucun scénario de `scenarios/` n'utilisait `NonCritical`. Avec le correctif #12 : 509 tests
   verts (223 Core, 74 Simulation, 212 UI). Dernière étape de la phase 3 : tag `v0.3` proposé (à poser avec l'accord
   de l'utilisateur). Prochaine phase : 4 (intégration web), à préciser.
+- Tag **`v0.3`** posé sur `main` le 2026-10-30 (fin de la phase 3).
+- Phase 4 découpée avec l'utilisateur le 2026-10-30 (branche `docs/phase4-decoupage`) : mise en ligne publique sans
+  compte (image Docker, déploiement par GitHub Actions), résultat en histogrammes bruts, progression en SSE, plafond
+  de 1 000 000 simulations, calculs simultanés et lancements par IP limités ; cinq étapes (contrat du résultat,
+  serveur et API, client WebAssembly, intégration continue #7, Docker et mise en ligne). Prochaine étape : 1 (contrat
+  du résultat), à préciser.
 
 Points notés pour la suite :
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

@@ -260,7 +260,8 @@ Chaque étape sera précisée et validée avant d'être codée :
    - Écran tactile (`hover: none`) : infobulles des boutons masquées ; bulles « ? » ouvertes et fermées d'un appui
      (`HelpBubble`, `ShowOnClick`).
    - Résultats : onglets en icônes seules, texte des axes des graphiques agrandi, tableaux défilables dans leur cadre ;
-     Quick sim : défilement jusqu'aux résultats à la fin d'un calcul. Panneau des mots-clés en plein écran.
+     tuiles des résultats les unes sous les autres ; Quick sim : défilement jusqu'aux résultats à la fin d'un calcul.
+     Panneau des mots-clés en plein écran.
    - Profil de lancement « reseau-local » (`http://0.0.0.0:5080`) pour essayer le site local depuis le téléphone.
    - Fin d'étape : tag `v0.4.1` (avec l'accord de l'utilisateur), qui redéploie le site.
 

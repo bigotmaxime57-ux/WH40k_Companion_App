@@ -1483,6 +1483,11 @@ rect.wh-chart-bar-neutral {
         margin: 0;
     }
 
+    /* Tuiles des résultats les unes sous les autres (côte à côte, elles étaient trop étroites et de hauteurs inégales) */
+    .wh-tiles {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
     /* Graphiques : le SVG est réduit à la largeur de l'écran, son texte est agrandi d'autant pour rester lisible */
     .wh-chart-axis {
         font-size: 20px;

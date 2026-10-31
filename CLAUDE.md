@@ -248,6 +248,21 @@ Chaque étape sera précisée et validée avant d'être codée :
      tests d'intégration (`/health`, adresse IP lue seulement quand c'est activé) ; README (adresse, déploiement,
      commandes Fly). Premier déploiement manuel vérifié par l'utilisateur, puis tag **`v0.4`** (avec son accord), qui
      déploie et clôt la phase 4.
+6. **Affichage sur téléphone** (ajoutée après `v0.4`, 2026-10-31 : sur téléphone, la page débordait de l'écran et le
+   navigateur la dézoomait). Validée par l'utilisateur sur captures de son téléphone. Tout dans Wh40kSim.UI (CSS
+   surtout), rien ne change au-dessus de 600 px (PC, desktop) :
+   - Un seul seuil : largeur < 600 px (« xs » de MudBlazor), bloc « Téléphone » à la fin de `wh40ksim.css` ; même
+     seuil dans `wh40ksim.js` (`scrollIntoViewOnPhone`).
+   - Barre de titre sur une ligne (nom de l'écran seul, titre de l'appli masqué) ; barre des fichiers en icônes seules
+     (`aria-label`), nom du fichier dessous ; marges réduites ; nombre de simulations et graine côte à côte.
+   - Cartes d'arme et de groupe : boutons sur la ligne du repli, champs d'identité dessous, libellés au-dessus des
+     champs, caractéristiques sur deux rangées, bandeau du type réduit à un filet ; champs numériques sans flèches.
+   - Écran tactile (`hover: none`) : infobulles des boutons masquées ; bulles « ? » ouvertes et fermées d'un appui
+     (`HelpBubble`, `ShowOnClick`).
+   - Résultats : onglets en icônes seules, texte des axes des graphiques agrandi, tableaux défilables dans leur cadre ;
+     Quick sim : défilement jusqu'aux résultats à la fin d'un calcul. Panneau des mots-clés en plein écran.
+   - Profil de lancement « reseau-local » (`http://0.0.0.0:5080`) pour essayer le site local depuis le téléphone.
+   - Fin d'étape : tag `v0.4.1` (avec l'accord de l'utilisateur), qui redéploie le site.
 
 ### Phase 5 : comparaison
 
@@ -1084,6 +1099,9 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   83 Simulation, 212 UI).
 - Tag **`v0.4`** posé sur `main` le 2026-10-30 (fin de la phase 4, site en ligne ; le tag redéploie le site).
   Prochaine phase : 5 (comparaison), à préciser.
+- Phase 4, étape 6 (affichage sur téléphone) : codée sur `phase4/affichage-telephone`, **en attente de validation**
+  (à essayer par l'utilisateur sur son téléphone : profil « reseau-local » ou vue adaptative de Firefox). 570 tests
+  verts (223 Core, 84 Simulation, 219 UI, 25 Web, 19 client web). Ensuite : tag `v0.4.1`, puis phase 5.
 
 Points notés pour la suite :
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

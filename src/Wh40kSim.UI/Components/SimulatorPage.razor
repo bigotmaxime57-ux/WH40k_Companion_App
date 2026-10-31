@@ -7,7 +7,7 @@
 @page "/quick-sim"
 @inherits ScenarioEditorPage
 
-<MudStack Spacing="3" Class="pa-4">
+<MudStack Spacing="3" Class="pa-4 wh-page">
     <ScenarioToolbar Running="Running" CanSave="CanSave" FileLabel="@FileLabel" OnNew="NewScenarioAsync" OnOpen="OpenAsync" OnSave="SaveAsync" />
 
     @if (Message is not null)
@@ -47,7 +47,8 @@
                                            data-test="stale-rerun">@L["StaleResults_Rerun"]</MudButton>
                             </MudAlert>
                         }
-                        <ResultsView Result="Run.Result" />
+                        @* Repère du défilement vers les résultats, sur téléphone (sous la saisie) *@
+                        <div @ref="_results" class="wh-scroll-anchor"><ResultsView Result="Run.Result" /></div>
                     }
                 </MudStack>
             </div>
@@ -58,5 +59,20 @@
 <KeywordDrawer Weapon="KeywordWeapon" OnClose="CloseKeywords" Changed="OnAttackerChanged" />
 
 @code {
+    private ElementReference _results;
+    private bool _scrollToResults;
+
     protected override SimulationRun Run => Session.QuickSim;
+
+    protected override void OnSimulationCompleted() => _scrollToResults = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (_scrollToResults)
+        {
+            _scrollToResults = false;
+            await ScrollIntoViewOnPhoneAsync(_results);
+        }
+    }
 }

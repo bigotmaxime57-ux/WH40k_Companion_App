@@ -12,7 +12,7 @@
 @inject IJSRuntime JS
 
 @* wh-report : couleur principale du thème partout, sans couleur de camp (voir wh40ksim.css) *@
-<MudStack Spacing="3" Class="pa-4 wh-report">
+<MudStack Spacing="3" Class="pa-4 wh-page wh-report">
     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Wrap="Wrap.Wrap">
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.ArrowBack" OnClick="BackToEntry"
                    data-test="back-to-entry">@L["FullSim_BackToEntry"]</MudButton>
@@ -40,7 +40,7 @@
         <div @ref="_stickySentinel"></div>
         <div @ref="_tabsHost" data-test="results-tabs-host">
             @* Onglet retenu dans la session pour ce résultat (retrouvé en revenant de la saisie, remis à zéro par un nouveau calcul) *@
-            <MudTabs Elevation="3" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="pa-4" Class="wh-results-tabs"
+            <MudTabs Elevation="3" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="pa-4 wh-tab-panels" Class="wh-results-tabs"
                      HeaderPosition="TabHeaderPosition.Before" @bind-ActivePanelIndex="Session.FullSim.ResultsTab">
                 <Header>
                     <div class="wh-tabs-back">

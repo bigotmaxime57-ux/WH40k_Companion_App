@@ -1,19 +1,20 @@
-@* Barre des fichiers d'un écran de saisie : Nouveau, Ouvrir, Enregistrer et nom du fichier (« * » si modifié). *@
+@* Barre des fichiers d'un écran de saisie : Nouveau, Ouvrir, Enregistrer et nom du fichier (« * » si modifié).
+   Sur téléphone, les boutons n'affichent que leur icône et le nom du fichier passe à la ligne (wh40ksim.css). *@
 
-<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Wrap="Wrap.Wrap" Class="wh-toolbar">
     <MudTooltip Text="@L["Toolbar_NewHelp"]">
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.NoteAdd" Disabled="Running" OnClick="OnNew"
-                   data-test="new">@L["Toolbar_New"]</MudButton>
+                   aria-label="@L["Toolbar_New"]" data-test="new"><span class="wh-toolbar-label">@L["Toolbar_New"]</span></MudButton>
     </MudTooltip>
     <MudTooltip Text="@L["Toolbar_OpenHelp"]">
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.FolderOpen" Disabled="Running" OnClick="OnOpen"
-                   data-test="open">@L["Toolbar_Open"]</MudButton>
+                   aria-label="@L["Toolbar_Open"]" data-test="open"><span class="wh-toolbar-label">@L["Toolbar_Open"]</span></MudButton>
     </MudTooltip>
     <MudTooltip Text="@L["Toolbar_SaveHelp"]">
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Save" Disabled="@(!CanSave)" OnClick="OnSave"
-                   data-test="save">@L["Toolbar_Save"]</MudButton>
+                   aria-label="@L["Toolbar_Save"]" data-test="save"><span class="wh-toolbar-label">@L["Toolbar_Save"]</span></MudButton>
     </MudTooltip>
-    <MudText Typo="Typo.body2" data-test="file-name">@FileLabel</MudText>
+    <MudText Typo="Typo.body2" Class="wh-toolbar-file" data-test="file-name">@FileLabel</MudText>
 </MudStack>
 
 @code {

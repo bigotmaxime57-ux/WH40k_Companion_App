@@ -30,6 +30,18 @@ public class SimulatorPageTests : ComponentTestContext
     }
 
     [Fact]
+    public void File_buttons_keep_their_name_when_only_their_icon_is_shown()
+    {
+        var page = Render<SimulatorPage>();
+
+        // Sur téléphone, le libellé (wh-toolbar-label) est masqué : le nom reste donné par aria-label
+        Assert.Equal("Nouveau", page.Find("[data-test=new]").GetAttribute("aria-label"));
+        Assert.Equal("Ouvrir", page.Find("[data-test=open]").GetAttribute("aria-label"));
+        Assert.Equal("Enregistrer", page.Find("[data-test=save]").GetAttribute("aria-label"));
+        Assert.Equal("Nouveau", page.Find("[data-test=new] .wh-toolbar-label").TextContent);
+    }
+
+    [Fact]
     public void Invalid_dice_disables_run_and_is_shown_under_the_field()
     {
         var page = Render<SimulatorPage>();

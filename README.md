@@ -78,7 +78,11 @@ navigateur. Le calcul se fait sur le serveur : 1 000 000 de simulations au plus 
 (une fenêtre indique la place dans la file), 10 lancements par minute et par adresse IP (réglables dans
 `src/Wh40kSim.Web/appsettings.json`). Les scénarios s'ouvrent avec le sélecteur de fichier du navigateur et s'enregistrent
 par un téléchargement ; le thème est mémorisé par le navigateur. L'API seule s'essaie depuis Rider avec
-`src/Wh40kSim.Web/Wh40kSim.Web.http`. Hors de l'environnement Development, le site se lance depuis une version publiée
+`src/Wh40kSim.Web/Wh40kSim.Web.http`. Pour essayer le site sur un téléphone du même réseau Wi-Fi, le profil
+« reseau-local » ouvre le serveur au réseau : sur le téléphone, `http://<adresse IP du PC>:5080` (adresse donnée par
+`ipconfig` ; Windows peut demander d'autoriser le programme dans son pare-feu). Mise en page téléphone en dessous de
+600 px de large (fin de `wh40ksim.css`) ; sur PC, la vue adaptative du navigateur (Ctrl+Maj+M dans Firefox) la montre
+aussi. Hors de l'environnement Development, le site se lance depuis une version publiée
 (`dotnet publish`) : c'est là que les fichiers du client et de MudBlazor sont rassemblés. La publication compile le
 client à l'avance (AOT, bien plus fluide dans le navigateur, quelques minutes de compilation), demandée par
 `-p:RunAOTCompilation=true`, et demande alors la charge de travail `wasm-tools` (`dotnet workload install wasm-tools`,

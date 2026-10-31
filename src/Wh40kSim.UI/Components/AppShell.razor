@@ -27,8 +27,9 @@
                                aria-label="@L["Nav_Home"]" data-test="home" />
             </MudTooltip>
         }
-        <MudIcon Icon="@Icons.Material.Filled.MilitaryTech" Class="mr-2" />
-        <MudText Typo="Typo.h6" Class="wh-brand">@L["App_Title"]</MudText>
+        <MudIcon Icon="@Icons.Material.Filled.MilitaryTech" Class="mr-2 wh-brand-icon" />
+        @* Sur téléphone, le titre de l'application s'efface devant le nom de l'écran (wh40ksim.css) *@
+        <MudText Typo="Typo.h6" Class="@(ScreenName is null ? "wh-brand" : "wh-brand wh-app-title-secondary")">@L["App_Title"]</MudText>
         @if (ScreenName is not null)
         {
             <MudText Typo="Typo.h6" Class="wh-brand wh-screen-name" data-test="screen-name">@ScreenName</MudText>

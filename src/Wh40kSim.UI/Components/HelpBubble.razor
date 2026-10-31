@@ -1,9 +1,10 @@
 @*
     Bulle « ? » à côté d'un titre : les explications n'apparaissent qu'au survol, après une seconde, pour ne pas
-    encombrer l'écran.
+    encombrer l'écran. Un appui l'ouvre ou la ferme aussi (seul moyen au doigt, sans survol) ; sur un écran tactile, ce
+    sont les seules infobulles gardées (wh40ksim.css, classe wh-help-tip).
 *@
 
-<MudTooltip Delay="1000" Arrow="true" Placement="Placement.Bottom" RootClass="wh-help">
+<MudTooltip Delay="1000" Arrow="true" Placement="Placement.Bottom" RootClass="wh-help" Class="wh-help-tip" ShowOnClick="true">
     <ChildContent>
         <MudIcon Icon="@Icons.Material.Outlined.HelpOutline" Size="Size.Small" Class="wh-help-icon" data-test="help" />
     </ChildContent>

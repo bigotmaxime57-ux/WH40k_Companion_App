@@ -135,6 +135,19 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
         }
     }
 
+    /// <summary>Fait défiler la page jusqu'à <paramref name="element"/>, sur téléphone seulement (module JavaScript).</summary>
+    protected async Task ScrollIntoViewOnPhoneAsync(ElementReference element)
+    {
+        try
+        {
+            if (_shortcutsModule is not null) await _shortcutsModule.InvokeVoidAsync("scrollIntoViewOnPhone", element);
+        }
+        catch (JSException)
+        {
+            // Défilement impossible : les résultats restent accessibles plus bas
+        }
+    }
+
     public async ValueTask DisposeAsync()
     {
         _cancellation?.Cancel();

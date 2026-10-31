@@ -259,7 +259,8 @@ Chaque étape sera précisée et validée avant d'être codée :
      champs, caractéristiques sur deux rangées, bandeau du type réduit à un filet ; champs numériques sans flèches.
    - Écran tactile (`hover: none`) : infobulles des boutons masquées ; bulles « ? » ouvertes et fermées d'un appui
      (`HelpBubble`, `ShowOnClick`).
-   - Résultats : onglets en icônes seules, texte des axes des graphiques agrandi, tableaux défilables dans leur cadre ;
+   - Résultats : les trois onglets toujours visibles, de même largeur, icône au-dessus d'un nom en petit (MudTabs
+     imposait 160 px par onglet : un seul visible entre deux flèches), texte des axes des graphiques agrandi, tableaux défilables dans leur cadre ;
      tuiles des résultats les unes sous les autres ; Quick sim : défilement jusqu'aux résultats à la fin d'un calcul.
      Panneau des mots-clés en plein écran.
    - Profil de lancement « reseau-local » (`http://0.0.0.0:5080`) pour essayer le site local depuis le téléphone.

@@ -1472,11 +1472,33 @@ rect.wh-chart-bar-neutral {
         --mud-drawer-width: 100vw !important;
     }
 
-    /* Onglets des résultats : icône seule (le nom reste lu par les lecteurs d'écran) */
-    .wh-results-tabs .mud-tab {
-        font-size: 0;
+    /*
+       Onglets des résultats : les trois toujours visibles, de même largeur, icône au-dessus d'un nom en petit (comme
+       une barre d'onglets d'application mobile). MudTabs impose 160 px par onglet (style en ligne, d'où !important) :
+       trois onglets ne tenaient pas, d'où un seul onglet visible entre deux flèches de défilement.
+    */
+    .wh-results-tabs .mud-tabs-scroll-button {
+        display: none;
+    }
+
+    .wh-results-tabs .mud-tabs-tabbar-inner,
+    .wh-results-tabs .mud-tabs-tabbar-content,
+    .wh-results-tabs .mud-tabs-tabbar-wrapper {
+        flex: 1 1 auto;
         min-width: 0;
-        padding-inline: 1rem;
+        transform: none !important;
+        width: 100%;
+    }
+
+    .wh-results-tabs .mud-tab {
+        flex: 1 1 0;
+        flex-direction: column;
+        font-size: .7rem;
+        gap: .1rem;
+        letter-spacing: .04em;
+        line-height: 1.2;
+        min-width: 0 !important;
+        padding: .4rem .25rem;
     }
 
     .wh-results-tabs .mud-tab .mud-icon-root {

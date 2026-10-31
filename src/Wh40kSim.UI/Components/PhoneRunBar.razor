@@ -1,0 +1,52 @@
+@*
+    Barre de lancement compacte, sur téléphone seulement (affichée par wh40ksim.css) : nombre de simulations et Lancer,
+    remplacé par Annuler pendant le calcul, avec la progression dessous. Collée sous la barre de titre au défilement, pour
+    lancer sans remonter en haut de la page (Quick sim, Full sim). Mêmes réglages que le panneau de simulation.
+*@
+
+<div class="wh-phone-run-bar" data-test="phone-run-bar">
+    <div class="wh-phone-run-iterations">
+        <MudNumericField T="int" Label="@L["Simulation_Iterations"]" Min="1" Max="@(MaxIterations ?? 100_000_000)" Step="100_000"
+                         Margin="Margin.Dense" Disabled="Running" Value="Iterations" ValueChanged="IterationsChanged"
+                         data-test="phone-iterations" />
+    </div>
+    @if (Running)
+    {
+        <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Stop"
+                   OnClick="OnCancel" data-test="phone-cancel">@L["Simulation_Cancel"]</MudButton>
+        <div class="wh-phone-run-progress"><SimulationProgressBar State="Progress" /></div>
+    }
+    else
+    {
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PlayArrow"
+                   Disabled="@(!CanRun)" OnClick="OnRun" data-test="phone-run">@L["Simulation_Run"]</MudButton>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Iterations { get; set; }
+
+    /// <summary>Plafond par lancement (version web) : saisie bornée ; null = aucun.</summary>
+    [Parameter]
+    public int? MaxIterations { get; set; }
+
+    [Parameter]
+    public EventCallback<int> IterationsChanged { get; set; }
+
+    /// <summary>Faux si le scénario est invalide ou si une simulation tourne déjà.</summary>
+    [Parameter]
+    public bool CanRun { get; set; }
+
+    [Parameter]
+    public bool Running { get; set; }
+
+    [Parameter, EditorRequired]
+    public ProgressState Progress { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback OnRun { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+}

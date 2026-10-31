@@ -1,19 +1,20 @@
 @*
     Lancement de la simulation : nombre d'itérations, graine, progression et annulation. En carte (Quick sim) ou en
     bandeau sur une ligne (Banner, Full sim). Avec un plafond (version web), les choix rapides au-delà sont masqués.
+    Sur téléphone, le bandeau laisse le nombre de simulations, Lancer et la progression à la barre compacte (PhoneRunBar).
 *@
 
 @if (Banner)
 {
     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Wrap="Wrap.Wrap" Class="wh-simulation-banner">
-        <div class="wh-banner-field">@IterationsField</div>
+        <div class="wh-banner-field wh-phone-hidden">@IterationsField</div>
         <div class="wh-banner-field">@SeedField</div>
         @PresetButtons
-        @RunButtons
+        <div class="wh-phone-hidden">@RunButtons</div>
         <HelpBubble Lines="@([L["Help_Simulation"]])" />
         @if (Running)
         {
-            <div class="wh-banner-progress">@ProgressBar</div>
+            <div class="wh-banner-progress wh-phone-hidden">@ProgressBar</div>
         }
     </MudStack>
 }

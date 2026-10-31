@@ -23,6 +23,9 @@
         <SimulationPanel Banner="true" @bind-Iterations="Run.Iterations" @bind-Seed="Run.Seed" MaxIterations="MaxIterations" CanRun="CanRun" Running="Running"
                          Progress="Progress" OnRun="RunAsync" OnCancel="Cancel" />
     </MudPaper>
+    @* Téléphone : nombre de simulations et Lancer dans une barre compacte qui reste collée en haut au défilement *@
+    <PhoneRunBar @bind-Iterations="Run.Iterations" MaxIterations="MaxIterations" CanRun="CanRun" Running="Running" Progress="Progress"
+                 OnRun="RunAsync" OnCancel="Cancel" />
 
     @if (Message is not null)
     {

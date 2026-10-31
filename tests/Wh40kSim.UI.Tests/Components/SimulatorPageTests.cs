@@ -42,6 +42,19 @@ public class SimulatorPageTests : ComponentTestContext
     }
 
     [Fact]
+    public void The_phone_run_bar_shares_the_settings_and_the_validation_of_the_panel()
+    {
+        var page = Render<SimulatorPage>();
+
+        // Barre compacte (montrée par le CSS sur téléphone seulement) : même nombre de simulations que le panneau
+        page.Find("input[data-test=phone-iterations]").Change("10000");
+        Assert.Equal("10000", page.Find("input[data-test=iterations]").GetAttribute("value")?.Replace(" ", "").Replace(" ", ""));
+
+        page.Find("input[data-test=attacks]").Change("D");
+        Assert.True(IsDisabled(page, "phone-run"));
+    }
+
+    [Fact]
     public void Invalid_dice_disables_run_and_is_shown_under_the_field()
     {
         var page = Render<SimulatorPage>();

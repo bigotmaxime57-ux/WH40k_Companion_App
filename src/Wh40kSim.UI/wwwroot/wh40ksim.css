@@ -553,8 +553,9 @@ rect.wh-chart-bar-neutral {
     display: flex;
 }
 
-/* Choix de l'onglet sur téléphone (bouton et liste) : affiché seulement par la mise en page téléphone, plus bas */
-.wh-tabs-phone {
+/* Choix de l'onglet et barre de lancement compacte : affichés seulement par la mise en page téléphone, plus bas */
+.wh-tabs-phone,
+.wh-phone-run-bar {
     display: none;
 }
 
@@ -1417,10 +1418,40 @@ rect.wh-chart-bar-neutral {
         flex-basis: 100%;
     }
 
-    /* Bandeau du Full sim : nombre de simulations et graine côte à côte */
+    /* Bandeau du Full sim : graine sur toute la largeur ; nombre de simulations, Lancer et progression passent dans la
+       barre compacte (PhoneRunBar) */
     .wh-banner-field {
         flex: 1 1 8rem;
         width: auto;
+    }
+
+    .wh-phone-hidden {
+        display: none !important;
+    }
+
+    /* Barre de lancement compacte, collée sous la barre de titre au défilement */
+    .wh-phone-run-bar {
+        align-items: center;
+        background: var(--mud-palette-surface);
+        border-bottom: 2px solid var(--mud-palette-primary);
+        border-radius: var(--mud-default-borderradius);
+        box-shadow: var(--mud-elevation-3);
+        display: flex;
+        flex-wrap: wrap;
+        gap: .25rem .75rem;
+        padding: .25rem .75rem .5rem;
+        position: sticky;
+        top: 48px;
+        z-index: 6;
+    }
+
+    .wh-phone-run-iterations {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    .wh-phone-run-progress {
+        flex-basis: 100%;
     }
 
     /* Cartes d'arme et de groupe : boutons sur la ligne du bouton de repli, champs d'identité dessous */

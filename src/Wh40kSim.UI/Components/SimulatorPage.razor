@@ -9,6 +9,9 @@
 
 <MudStack Spacing="3" Class="pa-4 wh-page">
     <ScenarioToolbar Running="Running" CanSave="CanSave" FileLabel="@FileLabel" OnNew="NewScenarioAsync" OnOpen="OpenAsync" OnSave="SaveAsync" />
+    @* Téléphone : nombre de simulations et Lancer dans une barre compacte qui reste collée en haut au défilement *@
+    <PhoneRunBar @bind-Iterations="Run.Iterations" MaxIterations="MaxIterations" CanRun="CanRun" Running="Running" Progress="Progress"
+                 OnRun="RunAsync" OnCancel="Cancel" />
 
     @if (Message is not null)
     {

@@ -264,6 +264,9 @@ Chaque étape sera précisée et validée avant d'être codée :
      vide), texte des axes des graphiques agrandi, tableaux défilables dans leur cadre ;
      tuiles des résultats les unes sous les autres ; Quick sim : défilement jusqu'aux résultats à la fin d'un calcul.
      Panneau des mots-clés en plein écran.
+   - Barre de lancement compacte (`PhoneRunBar`, Quick sim et Full sim) collée sous la barre de titre : nombre de
+     simulations et Lancer, remplacé par Annuler et la progression pendant le calcul ; dans le bandeau du Full sim, ces
+     champs sont masqués sur téléphone (`wh-phone-hidden`). Rien de collé sur PC (pages assez courtes).
    - Profil de lancement « reseau-local » (`http://0.0.0.0:5080`) pour essayer le site local depuis le téléphone.
    - Fin d'étape : tag `v0.4.1` (avec l'accord de l'utilisateur), qui redéploie le site.
 
@@ -1103,8 +1106,8 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
 - Tag **`v0.4`** posé sur `main` le 2026-10-30 (fin de la phase 4, site en ligne ; le tag redéploie le site).
   Prochaine phase : 5 (comparaison), à préciser.
 - Phase 4, étape 6 (affichage sur téléphone) : codée sur `phase4/affichage-telephone`, **en attente de validation**
-  (essayée par l'utilisateur dans l'émulation d'appareil d'Edge : le pare-feu bloque « reseau-local »). 571 tests
-  verts (223 Core, 84 Simulation, 220 UI, 25 Web, 19 client web). Ensuite : tag `v0.4.1`, puis phase 5.
+  (essayée par l'utilisateur dans l'émulation d'appareil d'Edge : le pare-feu bloque « reseau-local »). 572 tests
+  verts (223 Core, 84 Simulation, 221 UI, 25 Web, 19 client web). Ensuite : tag `v0.4.1`, puis phase 5.
 
 Points notés pour la suite :
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

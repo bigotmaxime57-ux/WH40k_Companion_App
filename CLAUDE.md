@@ -1055,7 +1055,7 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   `gh secret set FLY_API_TOKEN --body ((fly tokens create deploy -a wh40ksim | Out-String).Trim())`, puis
   `gh secret list` pour la date. Fly a créé **deux machines** au premier déploiement (haute disponibilité) : chacune
   aurait sa file et ses limites ; proposé à l'utilisateur de revenir à une seule (`fly scale count 1 -a wh40ksim`).
-  Version du client web : `0.4`. `Dockerfile`, `.dockerignore`, `fly.toml` (application « wh40ksim », à ajuster
+  Version du client web : `0.4` (`0.4.1` depuis l'étape 6). `Dockerfile`, `.dockerignore`, `fly.toml` (application « wh40ksim », à ajuster
   au nom créé) ; `Wh40kSim.Web` : `/health`, `ForwardedHeaders:Enabled` (dernière adresse de `X-Forwarded-For`
   seulement) ; flux `deploy.yml` (tag `v*` ou à la main, CI réutilisée) et `docker.yml` (vérification de l'image :
   construction, démarrage, `/health`, page, client AOT) ; `ci.yml` réutilisable, branches seulement. Docker n'est pas
@@ -1105,9 +1105,11 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   83 Simulation, 212 UI).
 - Tag **`v0.4`** posé sur `main` le 2026-10-30 (fin de la phase 4, site en ligne ; le tag redéploie le site).
   Prochaine phase : 5 (comparaison), à préciser.
-- Phase 4, étape 6 (affichage sur téléphone) : codée sur `phase4/affichage-telephone`, **en attente de validation**
-  (essayée par l'utilisateur dans l'émulation d'appareil d'Edge : le pare-feu bloque « reseau-local »). 572 tests
-  verts (223 Core, 84 Simulation, 221 UI, 25 Web, 19 client web). Ensuite : tag `v0.4.1`, puis phase 5.
+- Phase 4, étape 6 (affichage sur téléphone) : fusionnée dans `main`, validée par l'utilisateur le 2026-10-31 après
+  essai dans l'émulation d'appareil d'Edge (le pare-feu de cette machine bloque « reseau-local ») et plusieurs retours
+  (tuiles en colonne, onglets dans une liste, barre de lancement compacte à choix rapides). **Tag `v0.4.1`** (accord de
+  l'utilisateur), qui redéploie le site. 572 tests verts (223 Core, 84 Simulation, 221 UI, 25 Web, 19 client web).
+  Prochaine phase : 5 (comparaison), à préciser.
 
 Points notés pour la suite :
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

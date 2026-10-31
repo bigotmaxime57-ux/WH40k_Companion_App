@@ -664,6 +664,9 @@
   <data name="FullSim_TabWeapons" xml:space="preserve">
     <value>Armes</value>
   </data>
+  <data name="FullSim_TabsMenu" xml:space="preserve">
+    <value>Choisir l'onglet</value>
+  </data>
   <data name="Weapons_SummaryTitle" xml:space="preserve">
     <value>Répartition par arme</value>
   </data>

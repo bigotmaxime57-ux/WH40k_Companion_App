@@ -9,7 +9,7 @@
 *@
 
 <MudPaper Outlined="true" Class="@($"pa-4 my-3 wh-subcard {(Group.IsCharacter ? "wh-subcard-character" : "")}")" data-test="group">
-    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="wh-card-header">
         <CollapseToggle @bind-Expanded="_expanded" data-test="toggle-group" />
         <span class="wh-group-number">@Number</span>
         @if (PrecisionTarget is { } isTarget)

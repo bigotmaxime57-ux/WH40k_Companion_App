@@ -1,6 +1,8 @@
 @*
     Lancement de la simulation : nombre d'itérations, graine, progression et annulation. En carte (Quick sim) ou en
     bandeau sur une ligne (Banner, Full sim). Avec un plafond (version web), les choix rapides au-delà sont masqués.
+    Sur téléphone, le bandeau laisse les choix rapides, Lancer et la progression à la barre compacte (PhoneRunBar) et
+    garde la saisie libre du nombre de simulations et la graine.
 *@
 
 @if (Banner)
@@ -8,12 +10,12 @@
     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Wrap="Wrap.Wrap" Class="wh-simulation-banner">
         <div class="wh-banner-field">@IterationsField</div>
         <div class="wh-banner-field">@SeedField</div>
-        @PresetButtons
-        @RunButtons
+        <div class="wh-phone-hidden">@PresetButtons</div>
+        <div class="wh-phone-hidden">@RunButtons</div>
         <HelpBubble Lines="@([L["Help_Simulation"]])" />
         @if (Running)
         {
-            <div class="wh-banner-progress">@ProgressBar</div>
+            <div class="wh-banner-progress wh-phone-hidden">@ProgressBar</div>
         }
     </MudStack>
 }
@@ -77,8 +79,8 @@ else
     [Parameter]
     public bool Banner { get; set; }
 
-    /// <summary>Choix rapides du nombre de simulations.</summary>
-    private static readonly int[] Presets = [10_000, 100_000, 1_000_000, 10_000_000];
+    /// <summary>Choix rapides du nombre de simulations (repris par la barre compacte du téléphone, PhoneRunBar).</summary>
+    internal static readonly int[] Presets = [10_000, 100_000, 1_000_000, 10_000_000];
 
     [Parameter]
     public int Iterations { get; set; }

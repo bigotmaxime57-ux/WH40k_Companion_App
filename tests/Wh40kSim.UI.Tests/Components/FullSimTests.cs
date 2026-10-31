@@ -131,6 +131,24 @@ public class FullSimTests() : ComponentTestContext(renderPopoverProvider: false)
     }
 
     [Fact]
+    public void On_a_phone_the_tab_list_opens_from_a_button_named_after_the_current_tab()
+    {
+        var shell = Open(AppRoutes.FullSim);
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimPage>()));
+        shell.Find("[data-test=run]").Click();
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimResultsPage>()));
+
+        // Bouton (montré par le CSS sur téléphone seulement) au nom de l'onglet affiché, qui ouvre la liste des onglets
+        Assert.Contains("Distributions", shell.Find(".wh-tabs-phone-menu button").TextContent);
+        shell.ClickUntil(".wh-tabs-phone-menu button", () => shell.FindAll("[data-test=tabs-phone-2]").Count > 0);
+        shell.Find("[data-test=tabs-phone-2]").Click();
+
+        shell.WaitForAssertion(() => Assert.NotNull(shell.Find("[data-test=weapons-report]")));
+        Assert.Equal(2, Session.FullSim.ResultsTab);
+        Assert.Contains("Armes", shell.Find(".wh-tabs-phone-menu button").TextContent);
+    }
+
+    [Fact]
     public void Results_use_the_theme_colour_rather_than_a_side_colour()
     {
         var shell = Open(AppRoutes.FullSim);

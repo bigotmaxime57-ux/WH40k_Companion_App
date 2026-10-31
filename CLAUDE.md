@@ -248,6 +248,27 @@ Chaque étape sera précisée et validée avant d'être codée :
      tests d'intégration (`/health`, adresse IP lue seulement quand c'est activé) ; README (adresse, déploiement,
      commandes Fly). Premier déploiement manuel vérifié par l'utilisateur, puis tag **`v0.4`** (avec son accord), qui
      déploie et clôt la phase 4.
+6. **Affichage sur téléphone** (ajoutée après `v0.4`, 2026-10-31 : sur téléphone, la page débordait de l'écran et le
+   navigateur la dézoomait). Validée par l'utilisateur sur captures de son téléphone. Tout dans Wh40kSim.UI (CSS
+   surtout), rien ne change au-dessus de 600 px (PC, desktop) :
+   - Un seul seuil : largeur < 600 px (« xs » de MudBlazor), bloc « Téléphone » à la fin de `wh40ksim.css` ; même
+     seuil dans `wh40ksim.js` (`scrollIntoViewOnPhone`).
+   - Barre de titre sur une ligne (nom de l'écran seul, titre de l'appli masqué) ; barre des fichiers en icônes seules
+     (`aria-label`), nom du fichier dessous ; marges réduites ; nombre de simulations et graine côte à côte.
+   - Cartes d'arme et de groupe : boutons sur la ligne du repli, champs d'identité dessous, libellés au-dessus des
+     champs, caractéristiques sur deux rangées, bandeau du type réduit à un filet ; champs numériques sans flèches.
+   - Écran tactile (`hover: none`) : infobulles des boutons masquées ; bulles « ? » ouvertes et fermées d'un appui
+     (`HelpBubble`, `ShowOnClick`).
+   - Résultats : barre d'onglets remplacée par un bouton au nom de l'onglet affiché, qui ouvre la liste des onglets
+     (collé sous la barre de titre ; essayé avant : trois onglets côte à côte, soulignement décalé et barre à moitié
+     vide), texte des axes des graphiques agrandi, tableaux défilables dans leur cadre ;
+     tuiles des résultats les unes sous les autres ; Quick sim : défilement jusqu'aux résultats à la fin d'un calcul.
+     Panneau des mots-clés en plein écran.
+   - Barre de lancement compacte (`PhoneRunBar`, Quick sim et Full sim) collée sous la barre de titre : choix rapides
+     du nombre de simulations (« 10 k », « 1 M ») et Lancer, remplacé par Annuler et la progression pendant le calcul ;
+     dans le bandeau du Full sim, choix rapides, Lancer et progression sont masqués sur téléphone (`wh-phone-hidden`). Rien de collé sur PC (pages assez courtes).
+   - Profil de lancement « reseau-local » (`http://0.0.0.0:5080`) pour essayer le site local depuis le téléphone.
+   - Fin d'étape : tag `v0.4.1` (avec l'accord de l'utilisateur), qui redéploie le site.
 
 ### Phase 5 : comparaison
 
@@ -1034,7 +1055,7 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   `gh secret set FLY_API_TOKEN --body ((fly tokens create deploy -a wh40ksim | Out-String).Trim())`, puis
   `gh secret list` pour la date. Fly a créé **deux machines** au premier déploiement (haute disponibilité) : chacune
   aurait sa file et ses limites ; proposé à l'utilisateur de revenir à une seule (`fly scale count 1 -a wh40ksim`).
-  Version du client web : `0.4`. `Dockerfile`, `.dockerignore`, `fly.toml` (application « wh40ksim », à ajuster
+  Version du client web : `0.4` (`0.4.1` depuis l'étape 6). `Dockerfile`, `.dockerignore`, `fly.toml` (application « wh40ksim », à ajuster
   au nom créé) ; `Wh40kSim.Web` : `/health`, `ForwardedHeaders:Enabled` (dernière adresse de `X-Forwarded-For`
   seulement) ; flux `deploy.yml` (tag `v*` ou à la main, CI réutilisée) et `docker.yml` (vérification de l'image :
   construction, démarrage, `/health`, page, client AOT) ; `ci.yml` réutilisable, branches seulement. Docker n'est pas
@@ -1083,6 +1104,11 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   `NonRegressionTests` inchangés ; temps inchangé (10 M simulations : 1,27 à 1,37 s). 518 tests verts (223 Core,
   83 Simulation, 212 UI).
 - Tag **`v0.4`** posé sur `main` le 2026-10-30 (fin de la phase 4, site en ligne ; le tag redéploie le site).
+  Prochaine phase : 5 (comparaison), à préciser.
+- Phase 4, étape 6 (affichage sur téléphone) : fusionnée dans `main`, validée par l'utilisateur le 2026-10-31 après
+  essai dans l'émulation d'appareil d'Edge (le pare-feu de cette machine bloque « reseau-local ») et plusieurs retours
+  (tuiles en colonne, onglets dans une liste, barre de lancement compacte à choix rapides). **Tag `v0.4.1`** (accord de
+  l'utilisateur), qui redéploie le site. 572 tests verts (223 Core, 84 Simulation, 221 UI, 25 Web, 19 client web).
   Prochaine phase : 5 (comparaison), à préciser.
 
 Points notés pour la suite :

@@ -9,7 +9,7 @@
 @inject NavigationManager Navigation
 @inject IDialogService Dialogs
 
-<MudStack Spacing="3" Class="pa-4">
+<MudStack Spacing="3" Class="pa-4 wh-page">
     <MudPaper Elevation="3" Class="pa-3 wh-section wh-banner" data-test="banner">
         <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Wrap="Wrap.Wrap" Spacing="3">
             <ScenarioToolbar Running="Running" CanSave="CanSave" FileLabel="@FileLabel" OnNew="NewScenarioAsync" OnOpen="OpenAsync" OnSave="SaveAsync" />
@@ -23,6 +23,9 @@
         <SimulationPanel Banner="true" @bind-Iterations="Run.Iterations" @bind-Seed="Run.Seed" MaxIterations="MaxIterations" CanRun="CanRun" Running="Running"
                          Progress="Progress" OnRun="RunAsync" OnCancel="Cancel" />
     </MudPaper>
+    @* Téléphone : nombre de simulations et Lancer dans une barre compacte qui reste collée en haut au défilement *@
+    <PhoneRunBar @bind-Iterations="Run.Iterations" MaxIterations="MaxIterations" CanRun="CanRun" Running="Running" Progress="Progress"
+                 OnRun="RunAsync" OnCancel="Cancel" />
 
     @if (Message is not null)
     {

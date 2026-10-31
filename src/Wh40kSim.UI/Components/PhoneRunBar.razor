@@ -1,0 +1,60 @@
+@*
+    Barre de lancement compacte, sur téléphone seulement (affichée par wh40ksim.css) : choix rapides du nombre de
+    simulations et Lancer, remplacé par Annuler pendant le calcul, avec la progression dessous. Collée sous la barre de
+    titre au défilement, pour lancer sans remonter en haut de la page (Quick sim, Full sim). Mêmes réglages que le
+    panneau de simulation (un nombre quelconque se saisit dans le panneau). Avec un plafond, les choix au-delà sont masqués.
+*@
+
+<div class="wh-phone-run-bar" data-test="phone-run-bar">
+    <MudButtonGroup Size="Size.Small" Color="Color.Primary" Variant="Variant.Outlined" Class="wh-phone-run-presets">
+        @foreach (int preset in SimulationPanel.Presets.Where(p => MaxIterations is not int max || p <= max))
+        {
+            <MudButton Class="@(preset == Iterations ? "wh-preset-active" : null)" Disabled="Running"
+                       OnClick="() => IterationsChanged.InvokeAsync(preset)" aria-label="@preset.ToString("N0")"
+                       data-test="@($"phone-preset-{preset}")">@Short(preset)</MudButton>
+        }
+    </MudButtonGroup>
+    @if (Running)
+    {
+        <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Stop"
+                   OnClick="OnCancel" data-test="phone-cancel">@L["Simulation_Cancel"]</MudButton>
+        <div class="wh-phone-run-progress"><SimulationProgressBar State="Progress" /></div>
+    }
+    else
+    {
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PlayArrow"
+                   Disabled="@(!CanRun)" OnClick="OnRun" data-test="phone-run">@L["Simulation_Run"]</MudButton>
+    }
+</div>
+
+@code {
+    /// <summary>Libellé court d'un choix rapide, pour tenir sur la largeur d'un téléphone : « 10 k », « 1 M ».</summary>
+    private static string Short(int preset) =>
+        preset >= 1_000_000 ? $"{preset / 1_000_000} M" : $"{preset / 1_000} k";
+
+    [Parameter]
+    public int Iterations { get; set; }
+
+    /// <summary>Plafond par lancement (version web) : choix rapides au-delà masqués ; null = aucun.</summary>
+    [Parameter]
+    public int? MaxIterations { get; set; }
+
+    [Parameter]
+    public EventCallback<int> IterationsChanged { get; set; }
+
+    /// <summary>Faux si le scénario est invalide ou si une simulation tourne déjà.</summary>
+    [Parameter]
+    public bool CanRun { get; set; }
+
+    [Parameter]
+    public bool Running { get; set; }
+
+    [Parameter, EditorRequired]
+    public ProgressState Progress { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback OnRun { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+}

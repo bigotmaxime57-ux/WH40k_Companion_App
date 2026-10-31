@@ -553,6 +553,12 @@ rect.wh-chart-bar-neutral {
     display: flex;
 }
 
+/* Choix de l'onglet et barre de lancement compacte : affichés seulement par la mise en page téléphone, plus bas */
+.wh-tabs-phone,
+.wh-phone-run-bar {
+    display: none;
+}
+
 /* Colonne de droite (simulation, résultats) : reste visible sous la barre de titre, avec son propre défilement */
 @media (min-width: 1280px) {
     .wh-sticky-column {
@@ -1343,4 +1349,227 @@ rect.wh-chart-bar-neutral {
     background: var(--wh-gradient);
     border-radius: 2px;
     box-shadow: 0 0 6px rgba(var(--wh-accent-rgb), .7);
+}
+
+/* --- Téléphone ------------------------------------------------------------------------------------- */
+
+/*
+   Mise en page téléphone : en dessous de 600 px de large (point de rupture « xs » de MudBlazor). Rien ne change au-dessus
+   (PC, tablette, fenêtre du desktop, large d'au moins 900 px). But premier : aucune ligne plus large que l'écran, sinon
+   le navigateur dézoome toute la page. Même seuil dans wh40ksim.js (scrollIntoViewOnPhone).
+*/
+@media (max-width: 599.98px) {
+    /* Barre de titre sur une ligne : le titre de l'application s'efface devant le nom de l'écran */
+    .wh-shell .mud-appbar .mud-toolbar {
+        padding-inline: .25rem .5rem;
+    }
+
+    .wh-brand {
+        font-size: 1rem;
+        letter-spacing: .08em;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .wh-app-title-secondary,
+    .wh-brand-icon {
+        display: none;
+    }
+
+    .wh-screen-name {
+        opacity: 1;
+    }
+
+    .wh-screen-name::before {
+        content: none;
+    }
+
+    /* Marges des écrans réduites */
+    .wh-page.pa-4,
+    .wh-page.pa-6 {
+        padding: .5rem !important;
+    }
+
+    .wh-tab-panels.pa-4 {
+        padding: .75rem .5rem !important;
+    }
+
+    .wh-section.pa-4 {
+        padding: .75rem !important;
+    }
+
+    /* Barre des fichiers : boutons réduits à leur icône, nom du fichier sur sa propre ligne */
+    .wh-toolbar-label {
+        display: none;
+    }
+
+    .wh-toolbar .mud-button-root {
+        min-width: 0;
+        padding-inline: .75rem;
+    }
+
+    .wh-toolbar .mud-button-icon-start {
+        margin: 0;
+    }
+
+    .wh-toolbar-file {
+        flex-basis: 100%;
+    }
+
+    /* Bandeau du Full sim : nombre de simulations et graine côte à côte ; choix rapides, Lancer et progression passent
+       dans la barre compacte (PhoneRunBar) */
+    .wh-banner-field {
+        flex: 1 1 8rem;
+        width: auto;
+    }
+
+    .wh-phone-hidden {
+        display: none !important;
+    }
+
+    /* Barre de lancement compacte, collée sous la barre de titre au défilement */
+    .wh-phone-run-bar {
+        align-items: center;
+        background: var(--mud-palette-surface);
+        border-bottom: 2px solid var(--mud-palette-primary);
+        border-radius: var(--mud-default-borderradius);
+        box-shadow: var(--mud-elevation-3);
+        display: flex;
+        flex-wrap: wrap;
+        gap: .25rem .75rem;
+        padding: .5rem .75rem;
+        position: sticky;
+        top: 48px;
+        z-index: 6;
+    }
+
+    .wh-phone-run-presets {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .wh-phone-run-presets .mud-button-root {
+        flex: 1 1 0;
+        min-width: 0;
+        padding-inline: .3rem;
+    }
+
+    .wh-phone-run-progress {
+        flex-basis: 100%;
+    }
+
+    /* Cartes d'arme et de groupe : boutons sur la ligne du bouton de repli, champs d'identité dessous */
+    .wh-card-header {
+        flex-wrap: wrap;
+    }
+
+    .wh-card-header > .wh-card-name,
+    .wh-card-header > .wh-card-type,
+    .wh-card-header > .wh-card-count,
+    .wh-card-header > .wh-character-check {
+        order: 1;
+    }
+
+    .wh-card-header > .wh-card-name {
+        flex: 1 1 100%;
+    }
+
+    .wh-card-header > .wh-card-type,
+    .wh-card-header > .wh-card-count {
+        flex: 1 1 6rem;
+    }
+
+    /* Bandeau du type d'arme réduit à un filet (le type reste dans le champ « Type ») */
+    .wh-weapon-band {
+        flex-basis: .4rem;
+    }
+
+    .wh-weapon-type-icon {
+        display: none !important;
+    }
+
+    .wh-weapon-body.pa-3 {
+        padding: .6rem !important;
+    }
+
+    /* Lignes « Profil », « Mots-clés »… : libellé au-dessus des champs, caractéristiques sur deux rangées */
+    .wh-card-row {
+        gap: .35rem;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .wh-stat-line {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    /* Champs numériques sans flèches : inutiles au doigt, le pavé numérique du téléphone s'ouvre */
+    .mud-input-numeric-spin {
+        display: none !important;
+    }
+
+    /* Panneau des mots-clés en plein écran */
+    .wh-keyword-panel {
+        --mud-drawer-width: 100vw !important;
+    }
+
+    /*
+       Onglets des résultats : barre d'onglets masquée (trop étroite pour ses trois onglets), remplacée par un bouton au
+       nom de l'onglet affiché qui ouvre la liste des onglets (FullSimResultsPage), collé sous la barre de titre
+    */
+    .wh-results-tabs > .mud-tabs-tabbar {
+        display: none;
+    }
+
+    .wh-tabs-phone {
+        align-items: center;
+        background: var(--mud-palette-background);
+        display: flex;
+        gap: .5rem;
+        margin-bottom: .75rem;
+        padding: .4rem 0;
+        position: sticky;
+        top: 48px;
+        z-index: 5;
+    }
+
+    .wh-tabs-phone .wh-tabs-back {
+        padding: 0;
+    }
+
+    .wh-tabs-phone-menu {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* Tuiles des résultats les unes sous les autres (côte à côte, elles étaient trop étroites et de hauteurs inégales) */
+    .wh-tiles {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    /* Graphiques : le SVG est réduit à la largeur de l'écran, son texte est agrandi d'autant pour rester lisible */
+    .wh-chart-axis {
+        font-size: 20px;
+    }
+
+    /* Tableaux trop larges : défilement dans leur cadre plutôt que dans la page */
+    .wh-shell .mud-table-container {
+        overflow-x: auto;
+    }
+
+    /* Quick sim : repère du défilement vers les résultats, sous la barre de titre */
+    .wh-scroll-anchor {
+        scroll-margin-top: 56px;
+    }
+}
+
+/*
+   Écran tactile (pas de survol) : les infobulles des boutons s'ouvrent au toucher et restent affichées par-dessus la
+   page ; on ne garde que les bulles « ? » (HelpBubble), qui s'ouvrent et se ferment d'un appui.
+*/
+@media (hover: none) {
+    .mud-tooltip:not(.wh-help-tip) {
+        display: none !important;
+    }
 }

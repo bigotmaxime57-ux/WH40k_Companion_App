@@ -30,6 +30,34 @@ public class SimulatorPageTests : ComponentTestContext
     }
 
     [Fact]
+    public void File_buttons_keep_their_name_when_only_their_icon_is_shown()
+    {
+        var page = Render<SimulatorPage>();
+
+        // Sur téléphone, le libellé (wh-toolbar-label) est masqué : le nom reste donné par aria-label
+        Assert.Equal("Nouveau", page.Find("[data-test=new]").GetAttribute("aria-label"));
+        Assert.Equal("Ouvrir", page.Find("[data-test=open]").GetAttribute("aria-label"));
+        Assert.Equal("Enregistrer", page.Find("[data-test=save]").GetAttribute("aria-label"));
+        Assert.Equal("Nouveau", page.Find("[data-test=new] .wh-toolbar-label").TextContent);
+    }
+
+    [Fact]
+    public void The_phone_run_bar_shares_the_settings_and_the_validation_of_the_panel()
+    {
+        var page = Render<SimulatorPage>();
+
+        // Barre compacte (montrée par le CSS sur téléphone seulement) : choix rapides, même nombre de simulations que le panneau
+        Assert.Equal("10 k", page.Find("[data-test=phone-preset-10000]").TextContent.Trim());
+        page.Find("[data-test=phone-preset-10000]").Click();
+        Assert.Equal("10000", page.Find("input[data-test=iterations]").GetAttribute("value")?.Replace(" ", "").Replace(" ", ""));
+        Assert.Contains("wh-preset-active", page.Find("[data-test=phone-preset-10000]").ClassName);
+        Assert.Contains("wh-preset-active", page.Find("[data-test=preset-10000]").ClassName);
+
+        page.Find("input[data-test=attacks]").Change("D");
+        Assert.True(IsDisabled(page, "phone-run"));
+    }
+
+    [Fact]
     public void Invalid_dice_disables_run_and_is_shown_under_the_field()
     {
         var page = Render<SimulatorPage>();

@@ -36,3 +36,11 @@ export function watchSticky(sentinel, host, offset) {
     observer.observe(sentinel);
     return { dispose: () => observer.disconnect() };
 }
+
+// Quick sim sur téléphone : les résultats arrivent sous la saisie ; à la fin d'un calcul, la page défile jusqu'à eux.
+// Même seuil que la mise en page téléphone de wh40ksim.css. Sur un écran plus large, ils sont déjà visibles à droite.
+export function scrollIntoViewOnPhone(element) {
+    if (element && window.matchMedia("(max-width: 599.98px)").matches) {
+        element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+}

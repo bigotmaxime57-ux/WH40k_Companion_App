@@ -1418,8 +1418,8 @@ rect.wh-chart-bar-neutral {
         flex-basis: 100%;
     }
 
-    /* Bandeau du Full sim : graine sur toute la largeur ; nombre de simulations, Lancer et progression passent dans la
-       barre compacte (PhoneRunBar) */
+    /* Bandeau du Full sim : nombre de simulations et graine côte à côte ; choix rapides, Lancer et progression passent
+       dans la barre compacte (PhoneRunBar) */
     .wh-banner-field {
         flex: 1 1 8rem;
         width: auto;
@@ -1439,15 +1439,21 @@ rect.wh-chart-bar-neutral {
         display: flex;
         flex-wrap: wrap;
         gap: .25rem .75rem;
-        padding: .25rem .75rem .5rem;
+        padding: .5rem .75rem;
         position: sticky;
         top: 48px;
         z-index: 6;
     }
 
-    .wh-phone-run-iterations {
+    .wh-phone-run-presets {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .wh-phone-run-presets .mud-button-root {
         flex: 1 1 0;
         min-width: 0;
+        padding-inline: .3rem;
     }
 
     .wh-phone-run-progress {

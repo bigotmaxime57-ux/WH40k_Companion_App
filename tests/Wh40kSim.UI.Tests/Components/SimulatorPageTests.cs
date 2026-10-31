@@ -46,9 +46,12 @@ public class SimulatorPageTests : ComponentTestContext
     {
         var page = Render<SimulatorPage>();
 
-        // Barre compacte (montrée par le CSS sur téléphone seulement) : même nombre de simulations que le panneau
-        page.Find("input[data-test=phone-iterations]").Change("10000");
+        // Barre compacte (montrée par le CSS sur téléphone seulement) : choix rapides, même nombre de simulations que le panneau
+        Assert.Equal("10 k", page.Find("[data-test=phone-preset-10000]").TextContent.Trim());
+        page.Find("[data-test=phone-preset-10000]").Click();
         Assert.Equal("10000", page.Find("input[data-test=iterations]").GetAttribute("value")?.Replace(" ", "").Replace(" ", ""));
+        Assert.Contains("wh-preset-active", page.Find("[data-test=phone-preset-10000]").ClassName);
+        Assert.Contains("wh-preset-active", page.Find("[data-test=preset-10000]").ClassName);
 
         page.Find("input[data-test=attacks]").Change("D");
         Assert.True(IsDisabled(page, "phone-run"));

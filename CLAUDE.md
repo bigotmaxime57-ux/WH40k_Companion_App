@@ -264,9 +264,9 @@ Chaque étape sera précisée et validée avant d'être codée :
      vide), texte des axes des graphiques agrandi, tableaux défilables dans leur cadre ;
      tuiles des résultats les unes sous les autres ; Quick sim : défilement jusqu'aux résultats à la fin d'un calcul.
      Panneau des mots-clés en plein écran.
-   - Barre de lancement compacte (`PhoneRunBar`, Quick sim et Full sim) collée sous la barre de titre : nombre de
-     simulations et Lancer, remplacé par Annuler et la progression pendant le calcul ; dans le bandeau du Full sim, ces
-     champs sont masqués sur téléphone (`wh-phone-hidden`). Rien de collé sur PC (pages assez courtes).
+   - Barre de lancement compacte (`PhoneRunBar`, Quick sim et Full sim) collée sous la barre de titre : choix rapides
+     du nombre de simulations (« 10 k », « 1 M ») et Lancer, remplacé par Annuler et la progression pendant le calcul ;
+     dans le bandeau du Full sim, choix rapides, Lancer et progression sont masqués sur téléphone (`wh-phone-hidden`). Rien de collé sur PC (pages assez courtes).
    - Profil de lancement « reseau-local » (`http://0.0.0.0:5080`) pour essayer le site local depuis le téléphone.
    - Fin d'étape : tag `v0.4.1` (avec l'accord de l'utilisateur), qui redéploie le site.
 

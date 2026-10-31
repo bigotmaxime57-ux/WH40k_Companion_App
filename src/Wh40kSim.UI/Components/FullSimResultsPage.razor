@@ -1,7 +1,8 @@
 @*
     Écran des résultats du Full sim : retour à la saisie et en-tête (scénario, simulations, graine, durée), puis un
     onglet par graphique ou tableau de bord. La barre d'onglets reste visible au défilement ; une fois collée en haut,
-    elle montre un retour compact (flèche ronde), le bouton du haut étant sorti de l'écran. Lit Session.FullSim.Result
+    elle montre un retour compact (flèche ronde), le bouton du haut étant sorti de l'écran. Sur téléphone, la barre
+    d'onglets est remplacée par un bouton qui ouvre la liste des onglets. Lit Session.FullSim.Result
     sans aucun calcul ; sans résultat, renvoie à la saisie.
 *@
 @page "/full-sim/results"
@@ -39,6 +40,26 @@
         @* Repère juste au-dessus de la barre d'onglets : quand il passe sous la barre de titre, la barre est collée *@
         <div @ref="_stickySentinel"></div>
         <div @ref="_tabsHost" data-test="results-tabs-host">
+            @*
+                Sur téléphone (wh40ksim.css), la barre d'onglets est masquée : à sa place, un bouton au nom de l'onglet affiché
+                ouvre la liste des onglets. Il reste collé sous la barre de titre, avec le retour compact une fois collé.
+            *@
+            <div class="wh-tabs-phone" data-test="tabs-phone">
+                <div class="wh-tabs-back">
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Variant="Variant.Outlined" Color="Color.Primary"
+                                   Size="Size.Small" OnClick="BackToEntry" aria-label="@L["FullSim_BackToEntry"]" />
+                </div>
+                <MudMenu Label="@Tabs[Session.FullSim.ResultsTab].Name" StartIcon="@Tabs[Session.FullSim.ResultsTab].Icon"
+                         EndIcon="@Icons.Material.Filled.ArrowDropDown" Variant="Variant.Outlined" Color="Color.Primary" FullWidth="true"
+                         AriaLabel="@L["FullSim_TabsMenu"]" Class="wh-tabs-phone-menu" data-test="tabs-phone-menu">
+                    @for (int i = 0; i < Tabs.Length; i++)
+                    {
+                        int index = i;
+                        <MudMenuItem Icon="@Tabs[index].Icon" OnClick="@(() => Session.FullSim.ResultsTab = index)"
+                                     data-test="@($"tabs-phone-{index}")">@Tabs[index].Name</MudMenuItem>
+                    }
+                </MudMenu>
+            </div>
             @* Onglet retenu dans la session pour ce résultat (retrouvé en revenant de la saisie, remis à zéro par un nouveau calcul) *@
             <MudTabs Elevation="3" Rounded="true" ApplyEffectsToContainer="true" TabPanelsClass="pa-4 wh-tab-panels" Class="wh-results-tabs"
                      HeaderPosition="TabHeaderPosition.Before" @bind-ActivePanelIndex="Session.FullSim.ResultsTab">
@@ -52,7 +73,7 @@
                     </div>
                 </Header>
                 <ChildContent>
-            <MudTabPanel Text="@L["FullSim_TabDistributions"]" Icon="@Icons.Material.Filled.BarChart" data-test="tab-distributions">
+            <MudTabPanel Text="@Tabs[0].Name" Icon="@Tabs[0].Icon" data-test="tab-distributions">
                 <SummaryTiles Result="Result" Extended="_extended" />
                 @if (Result.ProbabilityWipe > 0)
                 {
@@ -86,10 +107,10 @@
                     </MudItem>
                 </MudGrid>
             </MudTabPanel>
-            <MudTabPanel Text="@L["FullSim_TabGroups"]" Icon="@Icons.Material.Filled.Shield" data-test="tab-groups">
+            <MudTabPanel Text="@Tabs[1].Name" Icon="@Tabs[1].Icon" data-test="tab-groups">
                 <GroupsReport Result="Result" />
             </MudTabPanel>
-            <MudTabPanel Text="@L["FullSim_TabWeapons"]" Icon="@WeaponIcons.For(WeaponType.Ranged)" data-test="tab-weapons">
+            <MudTabPanel Text="@Tabs[2].Name" Icon="@Tabs[2].Icon" data-test="tab-weapons">
                 <WeaponsReport Result="Result" />
             </MudTabPanel>
                 </ChildContent>
@@ -109,6 +130,14 @@
     private IJSObjectReference? _stickyWatch;
 
     private SimulationResult? Result => Session.FullSim.Result;
+
+    /// <summary>Nom et icône de chaque onglet, dans l'ordre : barre d'onglets et liste du téléphone.</summary>
+    private (string Name, string Icon)[] Tabs =>
+    [
+        (L["FullSim_TabDistributions"], Icons.Material.Filled.BarChart),
+        (L["FullSim_TabGroups"], Icons.Material.Filled.Shield),
+        (L["FullSim_TabWeapons"], WeaponIcons.For(WeaponType.Ranged)),
+    ];
 
     private void BackToEntry() => Navigation.NavigateTo(AppRoutes.FullSim);
 

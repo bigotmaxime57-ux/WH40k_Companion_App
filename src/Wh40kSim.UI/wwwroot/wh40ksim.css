@@ -553,6 +553,11 @@ rect.wh-chart-bar-neutral {
     display: flex;
 }
 
+/* Choix de l'onglet sur téléphone (bouton et liste) : affiché seulement par la mise en page téléphone, plus bas */
+.wh-tabs-phone {
+    display: none;
+}
+
 /* Colonne de droite (simulation, résultats) : reste visible sous la barre de titre, avec son propre défilement */
 @media (min-width: 1280px) {
     .wh-sticky-column {
@@ -1473,36 +1478,32 @@ rect.wh-chart-bar-neutral {
     }
 
     /*
-       Onglets des résultats : les trois toujours visibles, de même largeur, icône au-dessus d'un nom en petit (comme
-       une barre d'onglets d'application mobile). MudTabs impose 160 px par onglet (style en ligne, d'où !important) :
-       trois onglets ne tenaient pas, d'où un seul onglet visible entre deux flèches de défilement.
+       Onglets des résultats : barre d'onglets masquée (trop étroite pour ses trois onglets), remplacée par un bouton au
+       nom de l'onglet affiché qui ouvre la liste des onglets (FullSimResultsPage), collé sous la barre de titre
     */
-    .wh-results-tabs .mud-tabs-scroll-button {
+    .wh-results-tabs > .mud-tabs-tabbar {
         display: none;
     }
 
-    .wh-results-tabs .mud-tabs-tabbar-inner,
-    .wh-results-tabs .mud-tabs-tabbar-content,
-    .wh-results-tabs .mud-tabs-tabbar-wrapper {
-        flex: 1 1 auto;
+    .wh-tabs-phone {
+        align-items: center;
+        background: var(--mud-palette-background);
+        display: flex;
+        gap: .5rem;
+        margin-bottom: .75rem;
+        padding: .4rem 0;
+        position: sticky;
+        top: 48px;
+        z-index: 5;
+    }
+
+    .wh-tabs-phone .wh-tabs-back {
+        padding: 0;
+    }
+
+    .wh-tabs-phone-menu {
+        flex: 1;
         min-width: 0;
-        transform: none !important;
-        width: 100%;
-    }
-
-    .wh-results-tabs .mud-tab {
-        flex: 1 1 0;
-        flex-direction: column;
-        font-size: .7rem;
-        gap: .1rem;
-        letter-spacing: .04em;
-        line-height: 1.2;
-        min-width: 0 !important;
-        padding: .4rem .25rem;
-    }
-
-    .wh-results-tabs .mud-tab .mud-icon-root {
-        margin: 0;
     }
 
     /* Tuiles des résultats les unes sous les autres (côte à côte, elles étaient trop étroites et de hauteurs inégales) */

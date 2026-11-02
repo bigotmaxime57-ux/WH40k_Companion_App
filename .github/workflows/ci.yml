@@ -8,7 +8,13 @@ name: CI
 on:
   push:
     branches: ['**']             # les tags de version passent par le déploiement, qui lance lui-même la CI
+    paths-ignore:                # documentation seule (roadmap, README, skills) : rien à compiler ni à tester
+      - '**/*.md'
+      - '.claude/**'
   pull_request:
+    paths-ignore:
+      - '**/*.md'
+      - '.claude/**'
   workflow_call:
 
 permissions:

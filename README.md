@@ -11,9 +11,9 @@ résultats, et une console de debug.
 1. Moteur de simulation (11e édition) et console : **terminé**.
 2. Interface graphique : application desktop Windows (MAUI Blazor Hybrid + MudBlazor) : **terminée** (`v0.2a`).
 3. Graphiques et Full sim : écran d'accueil, Quick sim, Full sim (écran de saisie, puis résultats en onglets :
-   histogrammes, puis rapports par groupe et par arme), overwatch. En cours.
-4. Intégration web : API serveur + client web. Les phases suivantes livrent aussi leur partie web.
-5. Comparaison de plusieurs attaquants ou de plusieurs cibles.
+   histogrammes, puis rapports par groupe et par arme), overwatch : **terminée** (`v0.3`).
+4. Intégration web : API serveur + client web, site en ligne : **terminée** (`v0.4`, `v0.4.1`). Les phases suivantes livrent aussi leur partie web.
+5. Comparaison de plusieurs attaquants contre une même cible : top 3, rondes éliminatoires, armes à plusieurs profils.
 6. Optimiseur de l'ordre des armes.
 7. Traduction : anglais, choix de la langue, messages du Core.
 8. Mots-clés du défenseur (vrai Anti-X…), règles d'armée et détachements, stockage des règles.

@@ -1287,7 +1287,11 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   démarré sous lui par `setpriv`) ; `docker.yml` vérifie le journal sur un volume et l'utilisateur non root. **À faire
   par l'utilisateur** avant le prochain déploiement : `fly scale count 1` et `fly volumes create wh40ksim_data` (voir
   README). 705 tests verts (223 Core, 146 Simulation, 271 UI, 41 Web, 24 client web). Volume créé par l'utilisateur
-  (une machine) ; version `0.5.1` du client web et **tag `v0.5.1`** (demande de l'utilisateur), qui déploie le journal. Vu dans les journaux de Fly :
+  (une machine) ; version `0.5.1` du client web et **tag `v0.5.1`** (demande de l'utilisateur), qui déploie le journal.
+  Premier déploiement en échec (« insufficient resources to create new machine with existing volume » : plus de place
+  sur le serveur physique du volume, site coupé ~20 min) ; second volume créé par l'utilisateur sur un autre serveur
+  (zone `9b22`), déploiement relancé (travail en échec seulement) : réussi, site vérifié (`/health`). Le premier volume
+  (`vol_re1l0kyn7dyjk6o4`, zone `1589`), resté vide, peut être supprimé par l'utilisateur. Vu dans les journaux de Fly :
   « Trial machine stopping. To run for longer than 5m0s, add a credit card » (compte d'essai). Simulation : `EliminationRounds.Run` / `Comparator.Run` (`maxFinalists`),
   `ComparisonDataJson`, `ComparisonJson.EnsureComplete`. Serveur : `ComparisonEndpoints` (`POST /api/comparisons`,
   `ComparisonRequest`, `ComparisonProgress`), `ISimulationRunner.RunComparisonAsync`, `SimulationOptions`

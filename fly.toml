@@ -10,6 +10,14 @@ primary_region = "cdg"            # Paris
 [env]
   # Adresse du visiteur lue dans X-Forwarded-For (posé par le proxy de Fly) : limite de lancements par IP
   ForwardedHeaders__Enabled = "true"
+  # Journal des lancements (une ligne par simulation ou comparaison demandée), sur le volume ci-dessous
+  Simulation__LaunchLogPath = "/data/lancements.log"
+
+# Volume persistant (le disque de la machine est effacé à chaque redémarrage), créé une fois avec
+# « fly volumes create wh40ksim_data --region cdg --size 1 -a wh40ksim » ; un volume par machine
+[mounts]
+  source = "wh40ksim_data"
+  destination = "/data"
 
 [http_service]
   internal_port = 8080

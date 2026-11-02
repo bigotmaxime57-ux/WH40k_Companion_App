@@ -28,4 +28,10 @@ public sealed class SimulationOptions
     /// le plus : chaque finaliste y fait toutes ses simulations).
     /// </summary>
     public int MaxComparisonFinalists { get; set; } = 5;
+
+    /// <summary>
+    /// Fichier du journal des lancements (une ligne par simulation ou comparaison demandée) ; null ou vide : pas de
+    /// journal. Sur Fly : sur le volume monté en /data (voir fly.toml).
+    /// </summary>
+    public string? LaunchLogPath { get; set; }
 }

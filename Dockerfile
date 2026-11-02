@@ -30,9 +30,11 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 COPY --from=build /app .
 
-# HTTP sur le port 8080 (HTTPS assuré par l'hébergeur), utilisateur sans privilèges de l'image .NET
+# HTTP sur le port 8080 (HTTPS assuré par l'hébergeur). Le serveur tourne sous l'utilisateur sans privilèges de l'image
+# .NET : le script de démarrage, lancé en root, lui confie d'abord le volume /data (journal des lancements), puis
+# démarre le serveur sous cet utilisateur
 ENV ASPNETCORE_HTTP_PORTS=8080
 EXPOSE 8080
-USER $APP_UID
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
 
-ENTRYPOINT ["dotnet", "Wh40kSim.Web.dll"]
+ENTRYPOINT ["sh", "/app/docker-entrypoint.sh"]

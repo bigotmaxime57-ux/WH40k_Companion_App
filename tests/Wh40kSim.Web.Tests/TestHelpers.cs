@@ -13,10 +13,14 @@ namespace Wh40kSim.Web.Tests;
 /// <summary>Serveur de test : limites réglées par test, calcul réel ou remplacé.</summary>
 internal static class Api
 {
-    public static WebApplicationFactory<Program> Create(int launchesPerMinute = 1_000, ISimulationRunner? runner = null) =>
+    public static WebApplicationFactory<Program> Create(int launchesPerMinute = 1_000, ISimulationRunner? runner = null, string? launchLog = null) =>
         new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
             builder.UseSetting("Simulation:LaunchesPerMinute", launchesPerMinute.ToString());
+            if (launchLog is not null)
+            {
+                builder.UseSetting("Simulation:LaunchLogPath", launchLog);
+            }
             if (runner is not null)
             {
                 builder.ConfigureTestServices(services => services.AddSingleton(runner));

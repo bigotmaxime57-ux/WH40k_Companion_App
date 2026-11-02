@@ -8,6 +8,7 @@ on:
     branches: ['**']
     paths:
       - 'Dockerfile'
+      - 'docker-entrypoint.sh'
       - '.dockerignore'
       - 'Directory.Build.props'
       - 'src/**/*.csproj'
@@ -34,7 +35,9 @@ jobs:
 
       - name: Démarrage et vérifications
         run: |
-          docker run -d --name wh40ksim -p 8080:8080 wh40ksim
+          # Comme sur Fly : volume monté en /data (appartenant à root) et journal des lancements dessus
+          docker volume create wh40ksim-data
+          docker run -d --name wh40ksim -p 8080:8080 -v wh40ksim-data:/data -e Simulation__LaunchLogPath=/data/lancements.log wh40ksim
           for i in $(seq 1 30); do
             if curl -fsS http://localhost:8080/health; then break; fi
             sleep 1
@@ -47,6 +50,11 @@ jobs:
           docker exec wh40ksim sh -c 'ls -l wwwroot/_framework/dotnet.native.*.wasm | awk "{ print \$5, \$9 }"'
           size=$(docker exec wh40ksim sh -c 'stat -c %s wwwroot/_framework/dotnet.native.*.wasm')
           test "$size" -gt 15000000
+          # Serveur sans privilèges (pas root), et journal des lancements écrit sur le volume après une demande refusée
+          test "$(docker exec wh40ksim stat -c %u /proc/1)" != "0"
+          curl -s -o /dev/null -X POST -H 'Content-Type: application/json' -d '{ pas du json' http://localhost:8080/api/simulations
+          docker exec wh40ksim cat /data/lancements.log
+          docker exec wh40ksim grep -q 'simulation | refusé : Demande illisible' /data/lancements.log
 
       - name: Journal du conteneur (en cas d'échec)
         if: failure()

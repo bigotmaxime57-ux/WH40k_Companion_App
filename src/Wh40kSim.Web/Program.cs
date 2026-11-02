@@ -14,6 +14,7 @@ builder.Services.AddRazorComponents().AddInteractiveWebAssemblyComponents();
 builder.Services.Configure<SimulationOptions>(builder.Configuration.GetSection(SimulationOptions.Section));
 builder.Services.AddSingleton<SimulationQueue>();
 builder.Services.AddSingleton<ISimulationRunner, SimulatorRunner>();
+builder.Services.AddSingleton<LaunchLog>();
 builder.Services.AddProblemDetails();
 // Point de santé (/health) : interrogé par l'hébergeur pour savoir si le serveur est prêt
 builder.Services.AddHealthChecks();

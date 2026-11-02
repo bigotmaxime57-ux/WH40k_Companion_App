@@ -128,6 +128,7 @@ public static class Simulator
         private readonly long[] _damage = new long[defender.TotalWounds + 1];       // _damage[d] = simulations avec exactement d PV retirés
         private readonly long[] _killedPerGroup = new long[defender.Groups.Count];  // figurines tuées par groupe, cumulées
         private readonly long[] _damagePerGroup = new long[defender.Groups.Count];  // PV retirés par groupe, cumulés
+        private long _killsTimesDamage;                                             // figurines tuées × PV retirés, cumulés (score d'efficacité)
 
         // Distributions par groupe (_groupKills[g][k] = simulations avec exactement k figurines tuées dans le groupe g),
         // figurines tuées et PV retirés aux gardes du corps (groupes non-PERSONNAGES ensemble) et pertes « grâce à
@@ -181,6 +182,7 @@ public static class Simulator
             var state = resolver.Target;
             _kills[state.ModelsKilled]++;
             _damage[state.DamageDealt]++;
+            _killsTimesDamage += (long)state.ModelsKilled * state.DamageDealt;
             int bodyguardsKilled = 0;
             int bodyguardDamage = 0;
             bool bodyguardsAlive = false;
@@ -290,6 +292,7 @@ public static class Simulator
         {
             for (int i = 0; i < _kills.Length; i++) _kills[i] += other._kills[i];
             for (int i = 0; i < _damage.Length; i++) _damage[i] += other._damage[i];
+            _killsTimesDamage += other._killsTimesDamage;
             for (int i = 0; i < _killedPerGroup.Length; i++) _killedPerGroup[i] += other._killedPerGroup[i];
             for (int i = 0; i < _damagePerGroup.Length; i++) _damagePerGroup[i] += other._damagePerGroup[i];
             for (int g = 0; g < _groupKills.Length; g++)
@@ -342,6 +345,7 @@ public static class Simulator
                 Elapsed = elapsed,
                 Kills = [.. _kills],
                 Damage = [.. _damage],
+                KillsTimesDamage = _killsTimesDamage,
                 ExtendedKills = TrimTrailingZeros(_extendedKills, _kills.Length),
                 ExtendedDamage = TrimTrailingZeros(_extendedDamage, _damage.Length),
                 RawDamage = TrimTrailingZeros(_rawDamage, _damage.Length),

@@ -91,6 +91,7 @@ public class SimulationJsonTests
 
     [Theory]
     [InlineData("unitSurvives")]
+    [InlineData("killsTimesDamage")]
     [InlineData("groups")]
     public void A_missing_property_is_rejected(string property)
     {

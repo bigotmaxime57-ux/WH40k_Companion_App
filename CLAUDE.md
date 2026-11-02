@@ -292,12 +292,32 @@ Découpage revu avec l'utilisateur le 2026-11-02. Décisions :
 - **Armes à plusieurs profils dans le comparateur seulement** : Quick sim, Full sim et Core inchangés (le joueur y
   choisit son profil ; s'il hésite, le comparateur est fait pour ça).
 
-1. **Comparaison, côté Simulation.** `Comparison` : un défenseur, une situation, au moins 2 attaquants (le nom de
-   l'attaquant désigne l'entrée, unique). Lancement entrée après entrée (`Simulator.Run`, même graine), progression
-   globale, annulation. Indicateurs : score d'efficacité, figurines tuées et PV retirés en moyenne, P(unité détruite),
-   % de l'unité détruite, P(≥ k) ; meilleure entrée pour chacun, ex æquo compris. Résultat sérialisable (un
-   `SimulationData` par entrée : contrat de l'API) ; JSON d'une comparaison, lecture stricte. Aucun dé en plus
-   (non-régression au bit près).
+1. **Comparaison, côté Simulation.** Précisée et validée par l'utilisateur le 2026-11-02 :
+   - `Comparison` (`Wh40kSim.Simulation/Comparisons/`) : un défenseur, une situation, au moins 2 attaquants, sans
+     maximum. `Validate()` : moins de 2 attaquants, noms vides ou en double (sans tenir compte des majuscules ni des
+     espaces autour), erreurs de `Scenario.Validate` de chaque entrée précédées de son nom (une entrée invalide bloque
+     le lancement) ; `Warnings()` de chaque entrée, avec son nom ; `ToScenarios()`.
+   - `ComparisonJson` : `{ "defender": …, "context": …, "attackers": [ … ] }` (attaquants au format des fichiers),
+     réglages stricts de `ScenarioJson.Options` ; fichier ouvert et enregistré par l'interface à l'étape 3.
+   - **Score d'efficacité** pour toute simulation : score de chaque simulation = 100 × (0,4 × PV / PV de l'unité +
+     0,3 × figurines / effectif + 0,3 × unité détruite) ; `SimulationResult.EfficiencyScore` (`EfficiencyScore.Compute`) :
+     moyenne, erreur type exacte, trois parts. Nouveau compteur brut de `SimulationData` : `KillsTimesDamage`, produit
+     figurines tuées × PV retirés cumulé, seul lien manquant pour la variance (au lieu d'un tableau croisé figurines × PV,
+     prévu d'abord : même exactitude, un seul entier). Pas affiché au Quick sim ni au Full sim. Temps mesuré (si le
+     compteur ralentit, seulement pour une comparaison).
+   - `Comparator.Run(comparison, iterations, seed, progress, annulation, threads)` : attaquants l'un après l'autre
+     (`Simulator.Run`, tous les cœurs), même nombre de simulations et même graine (tirée une fois si absente),
+     progression unique croissante, annulation sans résultat partiel.
+   - `ComparisonResult`, construit depuis `ComparisonData` (un `SimulationData` par attaquant, cohérence vérifiée) :
+     un `SimulationResult` par entrée ; **classement** par score moyen, rang, écart avec l'entrée précédente
+     significatif ou non (environ 2 erreurs types, entrées indépendantes) ; **top 3 toujours à 3 gagnants**, mention
+     si le 4e est à égalité statistique avec le 3e (décision de l'utilisateur) ; meilleure(s) entrée(s) pour le score,
+     les figurines tuées et les PV retirés en moyenne, P(unité détruite), P(≥ k) (`BestAt(k)`), ex æquo compris ;
+     % de l'unité détruite. JSON des données (transport) reporté à l'étape 6 ; records sérialisables.
+   - Inchangés : Core, moteur (`NonRegressionTests` au bit près), console, Quick sim, Full sim.
+   - Tests : entrées identiques au bit près à `Simulator.Run` à graine égale ; score exact (dés imposés) et moyenne =
+     0,4 × part des PV + 0,3 × part des figurines + 0,3 × P(unité détruite) ; classement, écarts, ex æquo ; validation ;
+     JSON ; progression, annulation.
 2. **Rondes éliminatoires, côté Simulation.** Façon Raidbots : une ronde courte sur toutes les entrées, puis une plus
    longue sur les meilleures, puis éventuellement une troisième ; élimination sur le score d'efficacité ; progression
    par ronde ; éliminés gardés avec leur ronde. Mécanisme **générique**, repris par l'optimiseur (phase 6). **Seuils**
@@ -1148,6 +1168,15 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   3 gagnants, armes à plusieurs profils (comparateur seulement), web ; #1 (N cibles) reporté, points en phase 9,
   console inchangée. Avec la CI ignorant les push de documentation seule (`*.md`, `.claude/`). Fusionnée dans `main`
   le 2026-11-02. Prochaine étape : 1 (comparaison, côté Simulation), à préciser.
+- Phase 5, étape 1 (comparaison, côté Simulation) : précisée et validée le 2026-11-02, codée sur la branche
+  `phase5/etape1-comparaison-simulation`, fusionnée dans `main`, validée par l'utilisateur le 2026-11-02. Prochaine
+  étape : 2 (rondes éliminatoires), à préciser (seuils à fixer ensemble d'après des temps mesurés). `Wh40kSim.Simulation/Comparisons/` :
+  `Comparison`, `ComparisonJson`, `ComparisonData`, `Comparator`, `ComparisonResult` (`Ranking`, `RankedEntry`,
+  `Podium`, `PodiumBoundaryTied`, `BestScore`… `BestKillsAtLeast`, `AreTied`) ; `EfficiencyScore` ;
+  `SimulationData.KillsTimesDamage` ; `SimulationResult.EfficiencyScore` / `MeanDamageShare`. 604 tests verts
+  (223 Core, 116 Simulation, 221 UI, 25 Web, 19 client web) ; `NonRegressionTests` inchangés. Temps (10 M
+  simulations, scénario d'exemple, 6 mesures en alternance) : médianes 1,72 s sur `main`, 1,68 s sur la branche,
+  dans le bruit : pas d'option.
 
 Points notés pour la suite :
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

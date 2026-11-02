@@ -25,6 +25,12 @@ public sealed record SimulationData
     /// <summary>PV retirés (0 aux PV de l'unité).</summary>
     public required long[] Damage { get; init; }
 
+    /// <summary>
+    /// Produit figurines tuées × PV retirés de chaque simulation, cumulé : avec les deux histogrammes, il donne l'erreur
+    /// type exacte du score d'efficacité (<see cref="EfficiencyScore"/>).
+    /// </summary>
+    public required long KillsTimesDamage { get; init; }
+
     /// <summary>Figurines tuées en prolongeant la séquence après la destruction de l'unité (marge).</summary>
     public required long[] ExtendedKills { get; init; }
 
@@ -120,6 +126,10 @@ public sealed record SimulationData
         if (UnitSurvives < 0 || UnitSurvives > iterations || WasteWhenUnitSurvives < 0)
         {
             errors.Add("Simulations où l'unité survit : valeurs impossibles.");
+        }
+        if (KillsTimesDamage < 0 || KillsTimesDamage > (long)defender.TotalModels * defender.TotalWounds * iterations)
+        {
+            errors.Add("Produit figurines tuées × PV retirés : valeur impossible.");
         }
 
         if (Groups is null || Groups.Count != defender.Groups.Count)

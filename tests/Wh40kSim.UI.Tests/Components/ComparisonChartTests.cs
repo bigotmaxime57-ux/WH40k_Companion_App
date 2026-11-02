@@ -125,6 +125,18 @@ public class ComparisonChartTests : ComponentTestContext
     }
 
     [Fact]
+    public void The_legend_is_in_a_column_beside_the_chart()
+    {
+        var chart = RenderChart(Three, unitSize: 3);
+
+        var side = chart.Find(".wh-cmp-side");
+        Assert.Equal(3, side.QuerySelectorAll("[data-test^=cmp-legend-]").Length);
+        Assert.NotNull(side.QuerySelector("[data-test=legend-limit]"));
+        Assert.NotNull(side.QuerySelector("input[data-test=cmp-show-at-least]"));
+        Assert.Null(chart.Find(".wh-cmp-chart").QuerySelector("[data-test^=cmp-legend-]"));
+    }
+
+    [Fact]
     public void Two_series_are_enough()
     {
         var chart = RenderChart(Three[..2]);

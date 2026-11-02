@@ -495,14 +495,52 @@ path.wh-cmp-curve {
     justify-content: center;
 }
 
-/* Cartouche de légende en haut à droite de la zone des barres */
+/* Graphique en hauteur à gauche, colonne de légende à droite (dessous sur téléphone) */
+.wh-cmp-layout {
+    align-items: flex-start;
+    display: flex;
+    gap: 12px;
+}
+
+.wh-cmp-layout > .wh-cmp-chart {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.wh-cmp-side {
+    display: flex;
+    flex: 0 0 11rem;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 2rem;
+}
+
+.wh-cmp-side-hints {
+    color: var(--mud-palette-text-secondary);
+    display: flex;
+    flex-direction: column;
+    font-size: 11px;
+    gap: 6px;
+}
+
+.wh-cmp-side-hints > span > i {
+    display: inline-block;
+    height: 12px;
+    margin-right: 6px;
+    vertical-align: -1px;
+    width: 12px;
+}
+
+/* Cartouche de légende des attaquants */
 .wh-cmp-legend-box {
     background: color-mix(in srgb, var(--mud-palette-surface) 85%, transparent);
     border: 1px solid var(--mud-palette-lines-default);
     border-radius: 3px;
-    font-size: 11px;
-    padding: 3px 8px;
-    position: absolute;
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+    gap: 6px;
+    padding: 6px 8px;
 }
 
 .wh-cmp-legend-title {
@@ -511,13 +549,17 @@ path.wh-cmp-curve {
 }
 
 .wh-cmp-legend {
-    align-items: center;
+    align-items: flex-start;
     color: var(--mud-palette-text-primary);
     cursor: pointer;
     display: flex;
-    gap: .3rem;
+    gap: .4rem;
     user-select: none;
-    white-space: nowrap;
+}
+
+.wh-cmp-legend > .wh-cmp-legend-swatch {
+    flex: 0 0 auto;
+    margin-top: 3px;
 }
 
 .wh-cmp-legend-swatch {
@@ -545,11 +587,16 @@ path.wh-cmp-curve {
     width: 22px !important;
 }
 
-/* Sur téléphone, la légende en cartouche passerait sur les barres : elle reprend sa place sous le graphique */
+/* Sur téléphone, pas la place pour une colonne : la légende passe sous le graphique */
 @media (max-width: 599.98px) {
-    .wh-cmp-legend-box {
-        margin-top: 4px;
-        position: static;
+    .wh-cmp-layout {
+        flex-direction: column;
+    }
+
+    .wh-cmp-side {
+        flex-basis: auto;
+        padding-top: 0;
+        width: 100%;
     }
 }
 

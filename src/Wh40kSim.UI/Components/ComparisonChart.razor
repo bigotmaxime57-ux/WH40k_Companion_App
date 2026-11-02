@@ -3,13 +3,14 @@
     une capture fournie par l'utilisateur) : barres « exactement k » jointives, semi-transparentes, à fin liseré, les
     séries se mélangeant là où elles se recouvrent (la dernière d'abord, la première par-dessus) ; au-dessus, une boîte à
     moustaches par série (quartiles, médiane, fourchette 10-90 %) alignée sur l'axe des valeurs ; titres des axes ;
-    légende en cartouche en haut à droite, cliquable pour masquer une série. Courbes « au moins k » (axe de droite)
+    graphique en hauteur, légende dans une colonne à sa droite (dessous sur téléphone), cliquable pour masquer une série. Courbes « au moins k » (axe de droite)
     affichées sur demande. Infobulle au survol d'une colonne avec les valeurs de chaque série. Valeurs négligeables aux
     extrémités masquées (comme les tableaux). Couleurs des séries : palette du thème (--wh-share-n).
 *@
 @using System.Globalization
 
-<div class="wh-chart wh-cmp-chart" data-test="comparison-chart">
+<div class="wh-cmp-layout" data-test="comparison-chart">
+    <div class="wh-chart wh-cmp-chart">
     <svg viewBox="0 0 @F(Width) @F(Height)" role="img" aria-label="@Title">
         @* Boîtes à moustaches, une ligne par série *@
         @foreach (int s in VisibleSeries)
@@ -94,20 +95,6 @@
         }
     </svg>
 
-    @* Cartouche de légende en haut à droite de la zone des barres *@
-    <div class="wh-cmp-legend-box" style="right: @F((Right + 6) / Width * 100)%; top: @F((PlotTop + 6) / Height * 100)%">
-        <div class="wh-cmp-legend-title">@L["Comparison_ChartLegendTitle"]</div>
-        @for (int s = 0; s < Series.Count; s++)
-        {
-            int index = s;
-            <div class="@(_hidden.Contains(s) ? "wh-cmp-legend wh-cmp-legend-hidden" : "wh-cmp-legend")" role="button" tabindex="0"
-                 title="@L["Comparison_ChartToggle"]" @onclick="() => Toggle(index)" data-test="@($"cmp-legend-{s}")">
-                <i class="@($"wh-cmp-legend-swatch {SeriesClass(s)}")"></i>@Series[s].Label
-                <span class="wh-cmp-legend-mean">· @L["Comparison_ChartMean", Series[s].Distribution.Mean.ToString("F1")]</span>
-            </div>
-        }
-    </div>
-
     @if (_hover is int hovered)
     {
         int value = _values[hovered];
@@ -126,13 +113,29 @@
             }
         </div>
     }
+    </div>
 
-    <div class="wh-chart-legend">
-        <span class="wh-cmp-legend-hint"><i class="wh-cmp-swatch-box"></i>@L["Comparison_ChartBoxLegend"]</span>
-        @if (_unitColumn >= 0)
-        {
-            <span data-test="legend-limit"><i class="wh-chart-swatch-limit"></i>@L["Comparison_ChartUnitLimit"]</span>
-        }
+    @* Colonne de droite : légende des attaquants (cliquable), explications, courbes sur demande ; dessous sur téléphone *@
+    <div class="wh-cmp-side">
+        <div class="wh-cmp-legend-box">
+            <div class="wh-cmp-legend-title">@L["Comparison_ChartLegendTitle"]</div>
+            @for (int s = 0; s < Series.Count; s++)
+            {
+                int index = s;
+                <div class="@(_hidden.Contains(s) ? "wh-cmp-legend wh-cmp-legend-hidden" : "wh-cmp-legend")" role="button" tabindex="0"
+                     title="@L["Comparison_ChartToggle"]" @onclick="() => Toggle(index)" data-test="@($"cmp-legend-{s}")">
+                    <i class="@($"wh-cmp-legend-swatch {SeriesClass(s)}")"></i>
+                    <span>@Series[s].Label<br /><span class="wh-cmp-legend-mean">@L["Comparison_ChartMean", Series[s].Distribution.Mean.ToString("F1")]</span></span>
+                </div>
+            }
+        </div>
+        <div class="wh-cmp-side-hints">
+            <span class="wh-cmp-legend-hint"><i class="wh-cmp-swatch-box"></i>@L["Comparison_ChartBoxLegend"]</span>
+            @if (_unitColumn >= 0)
+            {
+                <span data-test="legend-limit"><i class="wh-chart-swatch-limit"></i>@L["Comparison_ChartUnitLimit"]</span>
+            }
+        </div>
         <MudSwitch T="bool" Size="Size.Small" Color="Color.Primary" Value="_showAtLeast" ValueChanged="ToggleAtLeast"
                    Label="@L["Comparison_ChartShowAtLeast"]" data-test="cmp-show-at-least" />
     </div>
@@ -181,7 +184,7 @@
     /// <summary>Haut de la zone des barres : sous les boîtes à moustaches (une ligne par série).</summary>
     private double PlotTop => BoxTop + Series.Count * BoxStep + 8;
 
-    private double Height => PlotTop + 230;
+    private double Height => PlotTop + 360;
 
     private double Bottom => Height - 36;
 

@@ -370,6 +370,50 @@ public class ComparisonPageTests() : ComponentTestContext(renderPopoverProvider:
         Assert.Equal(["Bolter (rafale)"], saved.Weapons.Select(w => w.Weapon.Name));
     }
 
+    // Version web : limites du serveur, file d'attente
+
+    [Fact]
+    public void Beyond_the_site_limit_of_variants_run_is_disabled_with_an_explanation()
+    {
+        Simulations.MaxComparisonVariants = 2;
+        var shell = OpenComparison();
+        shell.Find("[data-test=add-from-scenario]").Click();
+        Assert.Empty(shell.FindAll("[data-test=comparison-limit]"));
+
+        shell.Find("[data-test=add-from-scenario]").Click();
+
+        Assert.Contains("au plus 2 variantes", shell.Find("[data-test=comparison-limit]").TextContent);
+        Assert.True(shell.Find("[data-test=run]").HasAttribute("disabled"));
+    }
+
+    [Fact]
+    public void Beyond_the_site_limit_of_iterations_run_is_disabled()
+    {
+        Simulations.MaxIterations = 100_000;
+        Session.Comparison.Iterations = 1_000_000;
+        var shell = OpenComparison();
+        shell.Find("[data-test=add-from-scenario]").Click();
+
+        Assert.Contains("100", shell.Find("[data-test=comparison-limit]").TextContent);
+        Assert.True(shell.Find("[data-test=run]").HasAttribute("disabled"));
+        Assert.Empty(shell.FindAll("[data-test=preset-10000000]"));
+    }
+
+    [Fact]
+    public void A_comparison_waiting_in_the_server_queue_shows_the_waiting_window()
+    {
+        Simulations.QueuePositions = [2];
+        Simulations.Gate = new TaskCompletionSource();
+        var shell = OpenComparison();
+        shell.Find("[data-test=add-from-scenario]").Click();
+
+        shell.Find("[data-test=run]").Click();
+
+        shell.WaitForAssertion(() => Assert.Contains("2", shell.Find("[data-test=queue-position]").TextContent));
+        Simulations.Gate.SetResult();
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<ComparisonResultsPage>()));
+    }
+
     [Fact]
     public void The_round_plan_follows_the_number_of_attackers()
     {

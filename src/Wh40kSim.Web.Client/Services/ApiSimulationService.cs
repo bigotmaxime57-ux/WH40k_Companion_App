@@ -8,12 +8,14 @@ using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using Wh40kSim.Core.Model;
 using Wh40kSim.Core.Serialization;
 using Wh40kSim.Simulation;
+using Wh40kSim.Simulation.Comparisons;
 using Wh40kSim.UI.Services;
 
 namespace Wh40kSim.Web.Client.Services;
 
 /// <summary>
-/// Simulation par l'API du serveur (<c>POST /api/simulations</c>) : le flux Server-Sent Events est lu au fil de l'eau
+/// Simulation et comparaison par l'API du serveur (<c>POST /api/simulations</c>, <c>/api/comparisons</c>) : le flux
+/// Server-Sent Events est lu au fil de l'eau
 /// (position dans la file, progression), puis les données brutes du résultat redeviennent un
 /// <see cref="SimulationResult"/>. Annuler ferme la requête : le serveur arrête le calcul ou retire la demande.
 /// Les refus et les pannes deviennent des <see cref="SimulationServiceException"/> (messages en français).
@@ -22,6 +24,7 @@ public sealed class ApiSimulationService(HttpClient http) : ISimulationService
 {
     public const string SimulationsPath = "api/simulations";
     public const string LimitsPath = "api/simulations/limits";
+    public const string ComparisonsPath = "api/comparisons";
 
     /// <summary>Pause laissée au navigateur pour afficher la barre à 100 % avant de traiter le résultat.</summary>
     private static readonly TimeSpan ResultPaintDelay = TimeSpan.FromMilliseconds(50);
@@ -36,14 +39,16 @@ public sealed class ApiSimulationService(HttpClient http) : ISimulationService
         {
             var limits = await http.GetFromJsonAsync<SimulationLimits>(LimitsPath, cancellationToken);
             MaxIterations = limits?.MaxIterations;
+            MaxComparisonVariants = limits?.MaxComparisonVariants;
         }
         catch (Exception ex) when (ex is HttpRequestException or JsonException or NotSupportedException)
         {
             MaxIterations = null;
+            MaxComparisonVariants = null;
         }
     }
 
-    public async Task<SimulationResult> RunAsync(
+    public Task<SimulationResult> RunAsync(
         Scenario scenario,
         int iterations,
         int? seed = null,
@@ -60,7 +65,74 @@ public sealed class ApiSimulationService(HttpClient http) : ISimulationService
         {
             body["seed"] = value;
         }
-        using var request = new HttpRequestMessage(HttpMethod.Post, SimulationsPath)
+        return StreamAsync(
+            SimulationsPath, body, queuePosition,
+            data =>
+            {
+                if (double.TryParse(data, CultureInfo.InvariantCulture, out double done))
+                {
+                    progress?.Report(done);
+                }
+            },
+            () => progress?.Report(1),
+            data => new SimulationResult(SimulationJson.Deserialize(data)),
+            cancellationToken);
+    }
+
+    /// <summary>Plafond de variantes d'une comparaison sur le serveur (null tant qu'il n'est pas connu).</summary>
+    public int? MaxComparisonVariants { get; private set; }
+
+    public bool SupportsComparison => true;
+
+    /// <summary>Comparaison par l'API (<c>POST /api/comparisons</c>), même flux que la simulation, progression par ronde.</summary>
+    public Task<ComparisonResult> RunComparisonAsync(
+        Comparison comparison,
+        int iterations,
+        int? seed = null,
+        IProgress<RoundProgress>? progress = null,
+        CancellationToken cancellationToken = default,
+        IProgress<int>? queuePosition = null)
+    {
+        var body = new JsonObject
+        {
+            ["comparison"] = JsonNode.Parse(ComparisonJson.Serialize(comparison)),
+            ["iterations"] = iterations,
+        };
+        if (seed is int value)
+        {
+            body["seed"] = value;
+        }
+        var last = new RoundProgress(1, 1, 0);
+        return StreamAsync(
+            ComparisonsPath, body, queuePosition,
+            data =>
+            {
+                if (JsonSerializer.Deserialize<ComparisonProgress>(data, ProgressOptions) is { } p)
+                {
+                    last = new RoundProgress(p.Round, p.RoundCount, p.Fraction);
+                    progress?.Report(last);
+                }
+            },
+            () => progress?.Report(last with { Round = last.RoundCount, Fraction = 1 }),
+            data => new ComparisonResult(ComparisonDataJson.Deserialize(data)),
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Envoie la demande et lit le flux Server-Sent Events au fil de l'eau : position dans la file, progression, puis
+    /// résultat (lu par <paramref name="read"/>) ou erreur. Refus, pannes et résultat illisible deviennent des
+    /// <see cref="SimulationServiceException"/>.
+    /// </summary>
+    private async Task<T> StreamAsync<T>(
+        string path,
+        JsonObject body,
+        IProgress<int>? queuePosition,
+        Action<string> onProgress,
+        Action onFinished,
+        Func<string, T> read,
+        CancellationToken cancellationToken)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, path)
         {
             Content = new StringContent(body.ToJsonString(), Encoding.UTF8, "application/json"),
         };
@@ -83,15 +155,22 @@ public sealed class ApiSimulationService(HttpClient http) : ISimulationService
                     case "queued" when int.TryParse(data, CultureInfo.InvariantCulture, out int position):
                         queuePosition?.Report(position);
                         break;
-                    case "progress" when double.TryParse(data, CultureInfo.InvariantCulture, out double done):
-                        progress?.Report(done);
+                    case "progress":
+                        onProgress(data);
                         break;
                     case "result":
                         // Barre à 100 % et page redessinée avant le traitement du résultat, qui occupe un moment le
                         // navigateur (lecture, statistiques, affichage des tableaux)
-                        progress?.Report(1);
+                        onFinished();
                         await Task.Delay(ResultPaintDelay, cancellationToken);
-                        return Result(data);
+                        try
+                        {
+                            return read(data);
+                        }
+                        catch (Exception ex) when (ex is JsonException or ArgumentException)
+                        {
+                            throw new SimulationServiceException("Résultat illisible", [ex.Message]);
+                        }
                     case "error":
                         throw new SimulationServiceException("Échec du calcul", [data]);
                 }
@@ -104,17 +183,10 @@ public sealed class ApiSimulationService(HttpClient http) : ISimulationService
         }
     }
 
-    private static SimulationResult Result(string data)
-    {
-        try
-        {
-            return new SimulationResult(SimulationJson.Deserialize(data));
-        }
-        catch (JsonException ex)
-        {
-            throw new SimulationServiceException("Résultat illisible", [ex.Message]);
-        }
-    }
+    private static readonly JsonSerializerOptions ProgressOptions = new(JsonSerializerDefaults.Web);
+
+    /// <summary>Progression d'une comparaison, telle que l'envoie le serveur.</summary>
+    private sealed record ComparisonProgress(int Round, int RoundCount, double Fraction);
 
     /// <summary>Refus du serveur : titre et erreurs de son <c>ProblemDetails</c>, à défaut le code HTTP.</summary>
     private static async Task<SimulationServiceException> RejectionAsync(HttpResponseMessage response, CancellationToken cancellationToken)
@@ -138,5 +210,5 @@ public sealed class ApiSimulationService(HttpClient http) : ISimulationService
             : new SimulationServiceException($"Erreur du serveur ({(int)response.StatusCode})", []);
     }
 
-    private sealed record SimulationLimits(int MaxIterations);
+    private sealed record SimulationLimits(int MaxIterations, int? MaxComparisonVariants);
 }

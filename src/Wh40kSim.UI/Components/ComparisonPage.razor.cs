@@ -68,7 +68,32 @@ public partial class ComparisonPage
 
     private bool Running => Session.IsRunning;
 
-    private bool CanRun => !Running && _comparison is not null && Errors.Count == 0;
+    private bool CanRun => !Running && _comparison is not null && Errors.Count == 0 && LimitMessage is null;
+
+    /// <summary>Plafond de simulations du service (null = aucun, cas du desktop).</summary>
+    private int? MaxIterations => SimulationService.MaxIterations;
+
+    /// <summary>
+    /// Limite du site dépassée (version web) : simulations de la finale ou nombre de variantes ; null si rien ne
+    /// dépasse (toujours en desktop).
+    /// </summary>
+    private string? LimitMessage
+    {
+        get
+        {
+            if (MaxIterations is int max && State.Iterations > max)
+            {
+                return L["Comparison_LimitIterations", max.ToString("N0")];
+            }
+            int variants = Form.Entries.Sum(e => e.VariantCount);
+            return SimulationService.MaxComparisonVariants is int maxVariants && variants > maxVariants
+                ? L["Comparison_LimitVariants", maxVariants, variants].Value
+                : null;
+        }
+    }
+
+    private QueueStatus? _queue;          // attente du lancement en cours dans la file du serveur
+    private IDialogReference? _queueDialog;
 
     private bool CanSave => !Running && _comparison is not null;
 
@@ -598,17 +623,22 @@ public partial class ComparisonPage
         var shown = (Round: 0, Value: 0.0);
         var progress = new Progress<RoundProgress>(p =>
         {
+            _ = InvokeAsync(CloseQueueDialog); // le calcul a commencé : plus d'attente
             if (p.Round != shown.Round || p.Fraction - shown.Value >= 0.01 || p.Fraction >= 1)
             {
                 shown = (p.Round, p.Fraction);
                 Progress.Report(p.Fraction, L["Comparison_Round", p.Round, p.RoundCount]);
             }
         });
+        // File d'attente du serveur (web seulement) : même fenêtre que pour une simulation
+        _queue = new QueueStatus();
+        var queuePosition = new Progress<int>(position => _ = InvokeAsync(() => ShowQueueDialogAsync(position)));
 
         bool completed = false;
         try
         {
-            State.Result = await SimulationService.RunComparisonAsync(_comparison!, State.Iterations, State.Seed, progress, _cancellation.Token);
+            State.Result = await SimulationService.RunComparisonAsync(
+                _comparison!, State.Iterations, State.Seed, progress, _cancellation.Token, queuePosition);
             completed = true;
         }
         catch (OperationCanceledException)
@@ -621,6 +651,7 @@ public partial class ComparisonPage
         }
         finally
         {
+            CloseQueueDialog();
             Session.IsRunning = false;
             _cancellation.Dispose();
             _cancellation = null;
@@ -633,6 +664,44 @@ public partial class ComparisonPage
     }
 
     private void Cancel() => _cancellation?.Cancel();
+
+    /// <summary>Nouvelle position dans la file : ouvre la fenêtre d'attente la première fois, sinon la met à jour.</summary>
+    private async Task ShowQueueDialogAsync(int position)
+    {
+        if (_queue is not { Started: false } queue)
+        {
+            return;
+        }
+        queue.Position = position;
+        if (_queueDialog is null && !queue.Opening)
+        {
+            queue.Opening = true;
+            var parameters = new DialogParameters<QueueDialog>
+            {
+                { d => d.Status, queue },
+                { d => d.OnCancel, EventCallback.Factory.Create(this, Cancel) },
+            };
+            var dialog = await DialogService.ShowAsync<QueueDialog>(L["Queue_Title"], parameters, QueueDialog.Options);
+            if (queue.Started)
+            {
+                dialog.Close(); // le calcul a commencé pendant l'ouverture
+            }
+            else
+            {
+                _queueDialog = dialog;
+            }
+        }
+    }
+
+    private void CloseQueueDialog()
+    {
+        if (_queue is not null)
+        {
+            _queue.Started = true;
+        }
+        _queueDialog?.Close();
+        _queueDialog = null;
+    }
 
     private void ShowResults() => Navigation.NavigateTo(AppRoutes.ComparisonResults);
 

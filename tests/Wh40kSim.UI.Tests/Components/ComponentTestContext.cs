@@ -136,16 +136,24 @@ public sealed class FakeSimulationService : ISimulationService
 
     public int ComparisonCalls { get; private set; }
 
+    /// <summary>Plafond de variantes annoncé (null = aucun, comme le desktop).</summary>
+    public int? MaxComparisonVariants { get; set; }
+
     /// <summary>Comparaison réelle, en peu de simulations ; même porte que la simulation simple.</summary>
     public async Task<ComparisonResult> RunComparisonAsync(
         Comparison comparison,
         int iterations,
         int? seed = null,
         IProgress<RoundProgress>? progress = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IProgress<int>? queuePosition = null)
     {
         ComparisonCalls++;
         LastIterations = iterations;
+        foreach (int position in QueuePositions)
+        {
+            queuePosition?.Report(position);
+        }
         if (Gate is not null)
         {
             await Gate.Task.WaitAsync(cancellationToken);

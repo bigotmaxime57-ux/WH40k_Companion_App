@@ -22,7 +22,7 @@
         <MudDivider Class="my-2" />
         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Wrap="Wrap.Wrap">
             <div style="flex: 1 1 auto">
-                <SimulationPanel Banner="true" @bind-Iterations="State.Iterations" @bind-Seed="State.Seed" CanRun="CanRun" Running="Running"
+                <SimulationPanel Banner="true" @bind-Iterations="State.Iterations" @bind-Seed="State.Seed" MaxIterations="MaxIterations" CanRun="CanRun" Running="Running"
                                  Progress="Progress" OnRun="RunAsync" OnCancel="Cancel" />
             </div>
             <MudText Typo="Typo.body2" data-test="round-plan">@RoundPlanLabel</MudText>
@@ -35,13 +35,18 @@
             <HelpBubble Lines="@([L["Help_SnapShooting"], L["Help_SnapShootingLimits"], L["Comparison_SnapShootingHelp"]])" />
         </div>
     </MudPaper>
-    <PhoneRunBar @bind-Iterations="State.Iterations" CanRun="CanRun" Running="Running" Progress="Progress" OnRun="RunAsync" OnCancel="Cancel" />
+    <PhoneRunBar @bind-Iterations="State.Iterations" MaxIterations="MaxIterations" CanRun="CanRun" Running="Running" Progress="Progress" OnRun="RunAsync" OnCancel="Cancel" />
 
     @if (Message is not null)
     {
         <MudAlert Severity="MessageSeverity" ShowCloseIcon="true" CloseIconClicked="ClearMessage" data-test="message">@Message</MudAlert>
     }
     <ScenarioErrors Errors="Errors" Warnings="Warnings" HasDiceErrors="HasDiceErrors" />
+    @* Limites du site (version web seulement) : Lancer reste désactivé tant qu'une limite est dépassée *@
+    @if (LimitMessage is { } limit)
+    {
+        <MudAlert Severity="Severity.Warning" Dense="true" data-test="comparison-limit">@limit</MudAlert>
+    }
 
     <MudGrid Spacing="3">
         <MudItem xs="12" md="7">

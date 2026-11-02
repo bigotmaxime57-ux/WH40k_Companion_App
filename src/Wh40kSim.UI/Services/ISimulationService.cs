@@ -34,16 +34,22 @@ public interface ISimulationService
     /// </summary>
     bool SupportsComparison => false;
 
+    /// <summary>Nombre maximal de variantes par comparaison (null = aucun plafond, cas du desktop).</summary>
+    int? MaxComparisonVariants => null;
+
     /// <summary>Lance une comparaison en rondes éliminatoires (voir <see cref="Comparator.Run"/>).</summary>
     /// <param name="progress">Ronde en cours et son avancement.</param>
+    /// <param name="queuePosition">Position dans la file d'attente du serveur (voir <see cref="RunAsync"/>) ; jamais appelé en desktop.</param>
     /// <exception cref="OperationCanceledException">Si <paramref name="cancellationToken"/> est annulé.</exception>
+    /// <exception cref="SimulationServiceException">Si le calcul est refusé ou échoue (message à afficher).</exception>
     /// <exception cref="NotSupportedException">Si l'hôte ne sait pas comparer (<see cref="SupportsComparison"/>).</exception>
     Task<ComparisonResult> RunComparisonAsync(
         Comparison comparison,
         int iterations,
         int? seed = null,
         IProgress<RoundProgress>? progress = null,
-        CancellationToken cancellationToken = default) =>
+        CancellationToken cancellationToken = default,
+        IProgress<int>? queuePosition = null) =>
         throw new NotSupportedException("Comparaison indisponible sur cet hôte.");
 }
 

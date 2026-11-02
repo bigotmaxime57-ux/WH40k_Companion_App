@@ -19,8 +19,8 @@ public sealed record SimulationRequest
     public int? Seed { get; init; }
 }
 
-/// <summary>Limites du serveur utiles au client (<c>GET /api/simulations/limits</c>).</summary>
-public sealed record SimulationLimits(int MaxIterations);
+/// <summary>Limites du serveur utiles au client (<c>GET /api/simulations/limits</c>) : simulations, variantes d'une comparaison.</summary>
+public sealed record SimulationLimits(int MaxIterations, int MaxComparisonVariants);
 
 /// <summary>
 /// <c>POST /api/simulations</c> : refus en <c>ProblemDetails</c> avant tout calcul (demande illisible, scénario invalide,
@@ -45,7 +45,7 @@ public static class SimulationEndpoints
         app.MapPost("/api/simulations", RunAsync).RequireRateLimiting(RateLimitPolicy);
         // Plafond connu du client web au démarrage (choix rapides, saisie bornée)
         app.MapGet("/api/simulations/limits", (IOptions<SimulationOptions> options) =>
-            TypedResults.Ok(new SimulationLimits(options.Value.MaxIterations)));
+            TypedResults.Ok(new SimulationLimits(options.Value.MaxIterations, options.Value.MaxComparisonVariants)));
     }
 
     private static async Task<IResult> RunAsync(
@@ -113,7 +113,7 @@ public static class SimulationEndpoints
             // Début du calcul : sort de l'état « en attente » côté client
             events.TryWrite(new SseItem<string>(Format(0), ProgressEvent));
             double shown = 0;
-            var progress = new SynchronousProgress(value =>
+            var progress = new SynchronousProgress<double>(value =>
             {
                 if (value - shown >= ProgressStep || value >= 1)
                 {
@@ -140,15 +140,15 @@ public static class SimulationEndpoints
         }
     }
 
-    private static string Format(double progress) => progress.ToString("0.###", CultureInfo.InvariantCulture);
+    internal static string Format(double progress) => progress.ToString("0.###", CultureInfo.InvariantCulture);
 
-    private static IResult Problem(string title, IReadOnlyList<string> errors) =>
+    internal static IResult Problem(string title, IReadOnlyList<string> errors) =>
         TypedResults.Problem(title: title, statusCode: StatusCodes.Status400BadRequest,
             extensions: new Dictionary<string, object?> { ["errors"] = errors });
 
     /// <summary>Progression rapportée tout de suite, depuis le thread de calcul (pas de contexte à retrouver).</summary>
-    private sealed class SynchronousProgress(Action<double> report) : IProgress<double>
+    internal sealed class SynchronousProgress<T>(Action<T> report) : IProgress<T>
     {
-        public void Report(double value) => report(value);
+        public void Report(T value) => report(value);
     }
 }

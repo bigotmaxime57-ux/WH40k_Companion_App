@@ -403,8 +403,25 @@ Découpage revu avec l'utilisateur le 2026-11-02. Décisions :
      sur la carte de l'attaquant et dans le plan des rondes ; un attaquant enregistré depuis sa carte ne garde que le
      premier profil (bulle « ? »).
    - Tests : dépliage, validation, JSON, rondes sur les variantes, meilleur profil, variante concrète, interface.
-6. **Partie web** : comparaison, rondes et profils dans l'API et le client ; plafond de simulations par lancement à
-   adapter (plusieurs entrées, plusieurs rondes).
+6. **Partie web.** Précisée et validée par l'utilisateur le 2026-11-02 :
+   - Serveur : `POST /api/comparisons` (`{ "comparison": …, "iterations": …, "seed": … }`, format des fichiers de
+     comparaison, lecture stricte) ; refus en `ProblemDetails` (400 : JSON illisible, comparaison invalide avec ses
+     erreurs, limites ; 429 : même limite de lancements par minute et par IP que les simulations) ; Server-Sent Events
+     `queued`, `progress` (ronde, nombre de rondes, avancement), `result` (données brutes, `ComparisonDataJson` sur une
+     ligne, cohérence vérifiée à la lecture), `error` ; **même file d'attente** que les simulations (un calcul à la
+     fois) ; requête fermée : sortie de la file ou arrêt du calcul. `GET /api/simulations/limits` donne aussi les
+     limites de la comparaison.
+   - **Limites web** (décision de l'utilisateur ; desktop sans limite) : finale à **1 000 000** simulations au plus,
+     **50 variantes** au plus, **5 finalistes** au plus sur le serveur (les 5 meilleurs scores si plus d'entrées restent
+     en lice avant la finale) ; réglables dans `appsettings.json`.
+   - Client : `ApiSimulationService` compare (flux SSE, progression par ronde, résultat reconstruit en
+     `ComparisonResult`, Annuler ferme la requête) ; **tuile du comparateur visible** ; fenêtre d'attente dans la file
+     (`RunComparisonAsync` reçoit le suivi facultatif de la file) ; erreurs dans le bandeau ; limites lues sur le serveur
+     (choix rapides au-delà masqués, Lancer désactivé avec une explication au-delà de 50 variantes).
+   - Tests : bout en bout (résultat identique à `Comparator.Run` à graine égale), refus, file, annulation, `error` ;
+     client (flux, file, erreurs, annulation) ; interface (tuile, limites).
+   - Fin de phase : README, version `0.5` du client web, **tag `v0.5`** (avec l'accord de l'utilisateur), qui déploie
+     le site et clôt la phase 5.
 
 ### Phase 6 : optimiseur du séquencement des armes
 
@@ -1256,6 +1273,16 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   `phase5/etape5-armes-multiprofils`, fusionnée dans `main`, validée par l'utilisateur à l'écran le 2026-11-02.
   Essais écartés après coup sur les graphiques (barres opaques ; palette vive et contour des séries) : la version
   transparente est gardée. Prochaine étape : 6 (partie web), à préciser.
+- Phase 5, étape 6 (partie web) : précisée et validée le 2026-11-02, codée sur la branche
+  `phase5/etape6-comparaison-web`, **en attente de validation** (essai dans un navigateur par l'utilisateur, puis tag
+  `v0.5` avec son accord). Simulation : `EliminationRounds.Run` / `Comparator.Run` (`maxFinalists`),
+  `ComparisonDataJson`, `ComparisonJson.EnsureComplete`. Serveur : `ComparisonEndpoints` (`POST /api/comparisons`,
+  `ComparisonRequest`, `ComparisonProgress`), `ISimulationRunner.RunComparisonAsync`, `SimulationOptions`
+  (`MaxComparisonVariants`, `MaxComparisonFinalists`), `SimulationLimits.MaxComparisonVariants`. Client :
+  `ApiSimulationService` (comparaison, flux SSE mis en commun, limite de variantes), `ISimulationService`
+  (`MaxComparisonVariants`, suivi de la file pour la comparaison) ; `ComparisonPage` : fenêtre d'attente, limites du
+  site (alerte, Lancer désactivé). Version du client web : `0.5`. README : section « Comparateur ». 699 tests verts
+  (223 Core, 146 Simulation, 271 UI, 35 Web, 24 client web ; UI stables sur 3 exécutions).
   Simulation : `WeaponAlternatives`, `ComparisonEntry.Alternatives` / `Variants()`, `ProfileChoice`,
   `ComparisonVariant`, `Comparison.Variants()` (les scénarios simulés sont ceux des variantes) ;
   `ComparisonData.Comparison` (définition gardée, une entrée par variante, scénario vérifié) ; `RankedEntry.Variant`,

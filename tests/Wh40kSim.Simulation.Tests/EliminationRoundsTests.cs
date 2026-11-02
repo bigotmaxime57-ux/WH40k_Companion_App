@@ -81,6 +81,30 @@ public class EliminationRoundsTests
     }
 
     [Fact]
+    public void The_finalist_cap_keeps_only_the_best_scores()
+    {
+        // 6 candidats identiques (même graine : mêmes résultats) : sans plafond, tous à égalité vont en finale ;
+        // avec un plafond de 4, les 4 premiers (égalité exacte : ordre des candidats)
+        var candidates = Enumerable.Range(0, 6).Select(i => Against(Attacker($"C{i}", 20))).ToList();
+
+        var free = EliminationRounds.Run(candidates, [10_000, 20_000], seed: 3);
+        var capped = EliminationRounds.Run(candidates, [10_000, 20_000], seed: 3, maxFinalists: 4);
+
+        Assert.All(free, o => Assert.Null(o.EliminatedInRound));
+        Assert.Equal([null, null, null, null, 1, 1], capped.Select(o => o.EliminatedInRound));
+    }
+
+    [Fact]
+    public void The_finalist_cap_never_goes_below_the_podium()
+    {
+        var candidates = new[] { 20, 20, 20, 20 }.Select((a, i) => Against(Attacker($"C{i}", a))).ToList();
+
+        var capped = EliminationRounds.Run(candidates, [10_000, 20_000], seed: 3, maxFinalists: 1);
+
+        Assert.Equal(3, capped.Count(o => o.EliminatedInRound is null));
+    }
+
+    [Fact]
     public void Three_candidates_or_fewer_are_never_eliminated()
     {
         var candidates = new[] { Attacker("A", 20), Attacker("B", 1), Attacker("C", 1) }.Select(Against).ToList();

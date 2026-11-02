@@ -19,4 +19,13 @@ public sealed class SimulationOptions
 
     /// <summary>Threads de calcul par simulation (null = tous les cœurs).</summary>
     public int? ThreadsPerSimulation { get; set; }
+
+    /// <summary>Comparaison : nombre maximal de variantes (attaquants et combinaisons de profils) par lancement.</summary>
+    public int MaxComparisonVariants { get; set; } = 50;
+
+    /// <summary>
+    /// Comparaison : nombre maximal de finalistes ; au-delà, seuls les meilleurs scores vont en finale (la finale coûte
+    /// le plus : chaque finaliste y fait toutes ses simulations).
+    /// </summary>
+    public int MaxComparisonFinalists { get; set; } = 5;
 }

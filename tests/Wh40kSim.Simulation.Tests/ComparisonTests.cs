@@ -329,6 +329,29 @@ public class ComparisonTests
 
     private static string Errors(ComparisonData data) => string.Join(" | ", data.Validate());
 
+    [Fact]
+    public void Comparison_data_make_the_json_round_trip_on_a_single_line()
+    {
+        var result = Comparator.Run(new Comparison { Defender = Squad, Entries = [Hellblasters] }, 2_000, seed: 3);
+
+        string json = ComparisonDataJson.Serialize(result.Data);
+        var copy = new ComparisonResult(ComparisonDataJson.Deserialize(json));
+
+        Assert.DoesNotContain('\n', json);
+        Assert.Equal(json, ComparisonDataJson.Serialize(copy.Data));
+        Assert.Equal(result.Ranking.Select(r => r.Name), copy.Ranking.Select(r => r.Name));
+        Assert.Equal(result.BestProfilesByAttacker.Select(b => b.Best.Name), copy.BestProfilesByAttacker.Select(b => b.Best.Name));
+    }
+
+    [Fact]
+    public void Inconsistent_comparison_data_are_rejected_in_json()
+    {
+        var data = Comparator.Run(Of(Attacker("A", 3), Attacker("B", 20)), 1_000, seed: 7).Data;
+
+        var error = Assert.Throws<JsonException>(() => ComparisonDataJson.Deserialize(ComparisonDataJson.Serialize(data with { Entries = [data.Entries[0]] })));
+        Assert.Contains("une par variante", error.Message);
+    }
+
     // Armes à plusieurs profils
 
     private static WeaponProfile Profile(string name, int attacks, int strength = 4) => new() { Name = name, Attacks = attacks, Skill = 3, Strength = strength };

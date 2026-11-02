@@ -13,7 +13,8 @@ résultats, et une console de debug.
 3. Graphiques et Full sim : écran d'accueil, Quick sim, Full sim (écran de saisie, puis résultats en onglets :
    histogrammes, puis rapports par groupe et par arme), overwatch : **terminée** (`v0.3`).
 4. Intégration web : API serveur + client web, site en ligne : **terminée** (`v0.4`, `v0.4.1`). Les phases suivantes livrent aussi leur partie web.
-5. Comparaison de plusieurs attaquants contre une même cible : top 3, rondes éliminatoires, armes à plusieurs profils.
+5. Comparateur : plusieurs attaquants contre une même cible, top 3, rondes éliminatoires, graphiques superposés, armes
+   à plusieurs profils, desktop et site : **terminée** (`v0.5`).
 6. Optimiseur de l'ordre des armes.
 7. Traduction : anglais, choix de la langue, messages du Core.
 8. Mots-clés du défenseur (vrai Anti-X…), règles d'armée et détachements, stockage des règles.
@@ -29,17 +30,22 @@ src/Wh40kSim.Core            Règles du jeu, bibliothèque pure : modèles + ré
   Model/                     Arme, unités, situation, scénario
   Engine/                    Séquence d'attaque (pools, touche, blessure, allocation, dégâts)
   Serialization/             Lecture / écriture des scénarios en JSON
-src/Wh40kSim.Simulation      Monte Carlo : simulateur parallèle et déterministe, résultats agrégés en histogrammes
+src/Wh40kSim.Simulation      Monte Carlo : simulateur parallèle et déterministe, résultats agrégés en histogrammes ;
+                             rondes éliminatoires, score d'efficacité
+  Comparisons/               Comparateur : comparaison (attaquants, situations, profils de rechange), variantes,
+                             classement, top 3, JSON
   Statistics/                Distributions : moyenne, écart-type, centiles, P(= k), P(≥ k), lignes de tableau
 src/Wh40kSim.Console         Appli console de debug (saisie interactive ou fichier JSON) : affichage uniquement
 src/Wh40kSim.Desktop         Application desktop Windows (MAUI Blazor Hybrid) : hôte de Wh40kSim.UI
-src/Wh40kSim.Web             Serveur web : page du client, API de simulation (POST /api/simulations, progression en
+src/Wh40kSim.Web             Serveur web : page du client, API de simulation et de comparaison (POST /api/simulations,
+                             POST /api/comparisons, progression en
                              Server-Sent Events, file d'attente, limites réglables dans appsettings.json)
 src/Wh40kSim.Web.Client      Client web (Blazor WebAssembly) : l'interface de Wh40kSim.UI dans le navigateur
                              (simulation par l'API, fichiers ouverts / téléchargés, préférences du navigateur)
 src/Wh40kSim.UI              Interface Blazor + MudBlazor partagée par les hôtes (aucune règle de jeu, aucun calcul)
   Components/                AppShell (barre de titre, menu des thèmes, routeur), accueil, écrans « Quick sim » et
-                             « Full sim » (saisie, résultats en onglets) : attaquant, défenseur, situation,
+                             « Full sim » (saisie, résultats en onglets), comparateur (saisie, podium, classement,
+                             graphiques superposés) : attaquant, défenseur, situation,
                              simulation, résultats, histogrammes SVG
   Forms/                     Modèles de formulaire modifiables, convertis vers / depuis les records du Core
   Resources/                 Textes de l'interface (Strings.resx, français)
@@ -209,6 +215,43 @@ de l'unité (les figurines virtuelles de l'excédent comptent aussi). Le **gaspi
 retirés, excédent compris : un D3 qui fait 3 sur une figurine à 1 PV gaspille 2. Ce qui dépasse la destruction de
 l'unité n'en fait pas partie : c'est la marge. Aucun dé supplémentaire n'est tiré. Affichés par la console (section
 « Dégâts bruts ») ; dans l'interface au Full sim.
+
+## Comparateur
+
+Plusieurs attaquants contre un même défenseur : qui fait le mieux ? Écran « Comparateur » de l'accueil, desktop et site.
+
+- **Score d'efficacité** (0 à 100), calculé à chaque simulation : 40 % pour la part des PV retirés, 30 % pour la part
+  des figurines tuées, 30 % pour la destruction de l'unité. Il classe les attaquants ; deux scores sont à égalité si
+  leur écart reste dans le bruit de la simulation (2 erreurs types).
+- **Rondes éliminatoires** : jusqu'à 3 attaquants, une seule ronde ; de 4 à 9, deux rondes ; à partir de 10, trois
+  rondes (M/100, M/10 puis M simulations, M étant le nombre choisi). Après chaque ronde, le top 3 reste, et un
+  attaquant nettement en dessous du 3e (plus de 3 erreurs types) est éliminé. Seuils fixés d'après un banc d'essai :
+  100 attaquants en ~18 s au lieu de 160 s, le vrai top 3 toujours en finale.
+- **Résultats** : podium des 3 gagnants (score, statistiques principales), graphiques superposés de leurs
+  distributions (figurines tuées, PV retirés), classement de tous les attaquants (finalistes, puis éliminés).
+- **Situation** : l'overwatch est commun ; « a chargé », « immobile », « demi-portée » et la cible de Precision sont
+  propres à chaque attaquant, dans sa carte, seulement quand ses armes en ont besoin.
+- **Armes à plusieurs profils** : une arme peut recevoir des profils de rechange ; chaque combinaison de profils est
+  une variante comparée comme un attaquant, et le résultat donne le meilleur profil pour chaque arme.
+- **Site** : finale à 1 000 000 simulations au plus, 50 variantes au plus, 5 finalistes au plus (limites réglables
+  dans `appsettings.json`) ; le desktop n'a pas de limite.
+
+Format d'un fichier de comparaison :
+
+```json
+{
+  "defender": { … },
+  "snapShooting": false,
+  "entries": [
+    { "attacker": { … }, "context": { "charged": true },
+      "alternatives": [ { "weapon": 0, "profiles": [ { "name": "Plasma (surchargé)", … } ] } ] }
+  ]
+}
+```
+
+Défenseur et attaquants au format des fichiers de scénario ; `snapShooting`, `context` et `alternatives` sont
+facultatifs. L'API du site reçoit la même comparaison : `POST /api/comparisons` avec
+`{ "comparison": …, "iterations": …, "seed": … }`, réponse en Server-Sent Events comme `POST /api/simulations`.
 
 ## Hypothèses restantes
 

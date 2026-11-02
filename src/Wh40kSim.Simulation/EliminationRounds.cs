@@ -32,6 +32,10 @@ public static class EliminationRounds
     /// graine partout : les premières simulations d'une ronde longue sont exactement celles d'une ronde courte, et un
     /// finaliste est identique à une simulation seule de son scénario à graine égale.
     /// </summary>
+    /// <param name="maxFinalists">
+    /// Plafond de finalistes (serveur web) : si plus de candidats restent en lice avant la finale, seuls les meilleurs
+    /// scores y vont, les autres sont éliminés à la ronde qui précède ; null : pas de plafond (desktop).
+    /// </param>
     /// <returns>L'issue de chaque candidat, dans l'ordre des candidats.</returns>
     /// <exception cref="OperationCanceledException">Si le calcul est annulé (aucun résultat partiel).</exception>
     public static IReadOnlyList<RoundOutcome> Run(
@@ -40,7 +44,8 @@ public static class EliminationRounds
         int seed,
         IProgress<RoundProgress>? progress = null,
         CancellationToken cancellationToken = default,
-        SimulationThreads? threads = null)
+        SimulationThreads? threads = null,
+        int? maxFinalists = null)
     {
         ArgumentNullException.ThrowIfNull(candidates);
         ArgumentNullException.ThrowIfNull(plan);
@@ -62,6 +67,12 @@ public static class EliminationRounds
 
             bool final = round == plan.Count - 1;
             var survivors = final ? Enumerable.Range(0, alive.Count).ToList() : Survivors(results);
+            if (!final && round == plan.Count - 2 && maxFinalists is int max && survivors.Count > Math.Max(max, Kept))
+            {
+                // Plafond de finalistes : les meilleurs scores seulement
+                survivors = survivors.OrderByDescending(i => results[i].EfficiencyScore.Mean).ThenBy(i => i)
+                    .Take(Math.Max(max, Kept)).Order().ToList();
+            }
             for (int i = 0; i < alive.Count; i++)
             {
                 outcomes[alive[i]] = new RoundOutcome(results[i], survivors.Contains(i) ? null : round + 1);

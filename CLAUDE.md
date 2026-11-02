@@ -367,13 +367,22 @@ Découpage revu avec l'utilisateur le 2026-11-02. Décisions :
      graphiques, figurines tuées et PV retirés (limite de l'unité en pointillé), des **3 gagnants seulement** (podium,
      finalistes ; 2 s'il n'y en a que 2), pertes réelles (sans marge).
    - Nouveau composant SVG `ComparisonChart` (`HistogramChart` inchangé) : **barres transparentes superposées**
-     (décision de l'utilisateur), remplissage semi-transparent et contour plein de la couleur de chaque gagnant, le 3e
-     dessiné d'abord, le 1er par-dessus ; 3 courbes « au moins k » lissées (axe de droite) ; moyenne de chaque gagnant
-     en trait de sa couleur ; infobulle par colonne avec les trois valeurs ; légende (rang, nom) cliquable pour masquer
-     une série ; valeurs négligeables aux extrémités masquées.
+     (décision de l'utilisateur), le 3e dessiné d'abord, le 1er par-dessus ; infobulle par colonne avec les trois
+     valeurs ; valeurs négligeables aux extrémités masquées.
+   - **Rendu plus léger**, retenu par l'utilisateur après essai (branche `essai/graphiques-comparaison-style`, d'après
+     une capture qu'il a fournie ; la première version, jugée trop massive, avait des barres à contour plein, les
+     courbes et les moyennes toujours affichées) : barres jointives à fin liseré, séries mélangées là où elles se
+     recouvrent ; **boîte à moustaches** par gagnant au-dessus des barres (quartiles, médiane, 10-90 %) à la place des
+     traits de moyenne ; axes fins sans quadrillage, titres des axes ; courbes « au moins k » **sur demande**
+     (interrupteur) ; graphique **en hauteur**, **légende dans une colonne à droite** (cliquable pour masquer une série,
+     moyenne de chaque gagnant, explications), dessous sur téléphone ; les deux graphiques **côte à côte** sur un écran
+     large (`lg`), titres centrés.
    - Couleurs : les trois premières couleurs de série du thème (`--wh-share-0…2`), reprises en pastille sur les tuiles
-     du podium.
-   - Tests bUnit : séries selon le nombre de finalistes, éliminés absents, infobulle, légende cliquable, limite de l'unité.
+     du podium. Tuiles du podium : **statistiques principales** à droite (figurines tuées, PV retirés et part de
+     l'unité, unité détruite ; demande de l'utilisateur).
+   - Tests bUnit : séries selon le nombre de finalistes, éliminés absents, infobulle, légende cliquable, boîtes à
+     moustaches, courbes sur demande, limite de l'unité, disposition (colonne de légende, côte à côte), statistiques du
+     podium.
 5. **Armes à plusieurs profils.** Dans la définition d'une comparaison seulement : une arme peut porter plusieurs
    profils ; la comparaison déplie **toutes les combinaisons** en variantes (attaquants ordinaires), départagées par
    les rondes ; le profil retenu pour chaque arme des gagnants est indiqué. Hazardous non géré (phase 8), sans
@@ -1227,8 +1236,9 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
 - Phase 5, étape 4 (graphiques de la comparaison) : précisée et validée le 2026-11-02, codée sur la branche
   `phase5/etape4-graphiques-comparaison`, **en attente de validation** (à vérifier à l'écran par l'utilisateur).
   `ComparisonChart` (`ChartSeries`), section « Distributions » de `ComparisonResultsPage` (figurines, PV), pastilles
-  du podium ; CSS `wh-cmp-*`. 661 tests verts (223 Core, 135 Simulation, 259 UI, 25 Web, 19 client web ; UI stables
-  sur 3 exécutions).
+  et statistiques du podium ; CSS `wh-cmp-*`. Rendu plus léger de la branche d'essai repris dans l'étape (fusionnée
+  dans la branche de l'étape, puis supprimée). Corrigé au passage : le test des fichiers de `scenarios/` accepte les
+  fichiers de comparaison. 664 tests verts (223 Core, 135 Simulation, 262 UI, 25 Web, 19 client web).
   `ComparisonPage` (`/comparison`) et `ComparisonResultsPage` (`/comparison/results`), `ComparisonForm`,
   `ComparisonState` (`ScenarioSession.Comparison`) ; `ISimulationService.SupportsComparison` / `RunComparisonAsync`,
   `IScenarioFileService.OpenManyAsync` (desktop : `PickMultipleAsync` ; web : `openFiles`) ; `AttackerPanel` (titre,

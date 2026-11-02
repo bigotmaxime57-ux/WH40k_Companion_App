@@ -1146,7 +1146,8 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
 - Phase 5 découpée avec l'utilisateur le 2026-11-02 (branche `docs/phase5-decoupage`) : top 3 de N attaquants contre
   un défenseur, score d'efficacité (40 / 30 / 30), rondes éliminatoires, interface, histogrammes superposés des
   3 gagnants, armes à plusieurs profils (comparateur seulement), web ; #1 (N cibles) reporté, points en phase 9,
-  console inchangée. Prochaine étape : 1 (comparaison, côté Simulation), à préciser.
+  console inchangée. Avec la CI ignorant les push de documentation seule (`*.md`, `.claude/`). Fusionnée dans `main`
+  le 2026-11-02. Prochaine étape : 1 (comparaison, côté Simulation), à préciser.
 
 Points notés pour la suite :
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

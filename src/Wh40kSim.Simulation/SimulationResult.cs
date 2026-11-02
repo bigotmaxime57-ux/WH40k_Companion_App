@@ -35,6 +35,7 @@ public sealed class SimulationResult
         ExtendedDamage = new DiscreteDistribution(data.ExtendedDamage);
         RawDamage = new DiscreteDistribution(data.RawDamage);
         Waste = new DiscreteDistribution(data.Waste);
+        EfficiencyScore = EfficiencyScore.Compute(Kills, Damage, data.KillsTimesDamage);
         MeanWasteWhenUnitSurvives = data.UnitSurvives > 0 ? (double)data.WasteWhenUnitSurvives / data.UnitSurvives : null;
         _killedPerGroup = data.Groups.Select(g => g.KilledTotal).ToArray();
         _damagePerGroup = data.Groups.Select(g => g.DamageTotal).ToArray();
@@ -98,6 +99,12 @@ public sealed class SimulationResult
 
     /// <summary>Probabilité de détruire toute l'unité.</summary>
     public double ProbabilityWipe => Kills.ProbabilityAtLeast(TotalModels);
+
+    /// <summary>Part moyenne de l'unité détruite, en PV (PV retirés en moyenne / PV de l'unité, entre 0 et 1).</summary>
+    public double MeanDamageShare => Damage.Mean / TotalWounds;
+
+    /// <summary>Score d'efficacité (0 à 100), critère du classement de la comparaison.</summary>
+    public EfficiencyScore EfficiencyScore { get; }
 
     /// <summary>Nombre moyen de figurines tuées dans le groupe <paramref name="group"/> (ordre d'allocation du défenseur).</summary>
     public double MeanKilledInGroup(int group) => (double)_killedPerGroup[group] / Iterations;

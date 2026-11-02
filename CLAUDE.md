@@ -318,11 +318,23 @@ Découpage revu avec l'utilisateur le 2026-11-02. Décisions :
    - Tests : entrées identiques au bit près à `Simulator.Run` à graine égale ; score exact (dés imposés) et moyenne =
      0,4 × part des PV + 0,3 × part des figurines + 0,3 × P(unité détruite) ; classement, écarts, ex æquo ; validation ;
      JSON ; progression, annulation.
-2. **Rondes éliminatoires, côté Simulation.** Façon Raidbots : une ronde courte sur toutes les entrées, puis une plus
-   longue sur les meilleures, puis éventuellement une troisième ; élimination sur le score d'efficacité ; progression
-   par ronde ; éliminés gardés avec leur ronde. Mécanisme **générique**, repris par l'optimiseur (phase 6). **Seuils**
-   (quand faire une, deux ou trois rondes, simulations par ronde) **à fixer avec l'utilisateur** en début d'étape,
-   d'après des temps mesurés.
+2. **Rondes éliminatoires, côté Simulation.** Précisée et validée par l'utilisateur le 2026-11-02, seuils fixés d'après
+   un banc d'essai (idée de l'utilisateur ; variantes réalistes de ses Rubrics contre 10 RM + Sorc et 5 RM + Sorc,
+   M = 1 M, 12 cœurs) : les rondes sont rentables dès 4 attaquants, trois rondes plus rapides que deux dès ~10 ;
+   100 attaquants en 17 s au lieu de 156 s ; le vrai top 3 toujours en finale (26 cas) ; 3 à 5 entrées en lice après
+   une ronde à 10 000.
+   - `RoundPlan.For(entrées, M)` : **1 ronde jusqu'à 3 attaquants, 2 de 4 à 9, 3 dès 10** ; rondes de M/100, M/10, M ;
+     ronde préliminaire sautée sous 10 000 simulations.
+   - `EliminationRounds` (générique, repris par la phase 6) : scénarios candidats + plan → dernier résultat et ronde
+     d'élimination de chacun. Après chaque ronde : top 3 gardé, autre entrée éliminée si son score est à plus de
+     **3 erreurs types** sous le 3e ; **pas de plafond** de finalistes. Même graine dans toutes les rondes (une ronde
+     courte = début exact d'une plus longue) : finalistes identiques au bit près à un Quick sim à graine égale.
+   - Comparaison : `Comparator.Run` passe par les rondes ; progression `RoundProgress` (ronde, nombre de rondes,
+     avancement) ; `ComparisonData` garde le plan, la ronde d'élimination de chaque entrée et la durée totale ;
+     `ComparisonResult` : finalistes en tête par score, puis éliminés (dernières rondes d'abord, puis score), ronde
+     d'élimination et simulations de chaque entrée ; top 3, égalités et meilleures entrées sur les finalistes seuls.
+   - Tests : seuils et rondes sautées ; élimination (nettement plus faible éliminé en première ronde, top 3 et entrées à
+     égalité gardés) ; finalistes identiques à `Simulator.Run` ; progression par ronde ; annulation ; cohérence.
 3. **Comparaison, côté UI.** Mode à part, tuile sur l'accueil. Entrées prises dans le scénario courant ou dans des
    fichiers (attaquant seul ou scénario complet), dupliquées, renommées ; classement en tableau, top 3 mis en
    évidence, rondes et éliminés visibles ; ouvrir / enregistrer.
@@ -1170,7 +1182,15 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   le 2026-11-02. Prochaine étape : 1 (comparaison, côté Simulation), à préciser.
 - Phase 5, étape 1 (comparaison, côté Simulation) : précisée et validée le 2026-11-02, codée sur la branche
   `phase5/etape1-comparaison-simulation`, fusionnée dans `main`, validée par l'utilisateur le 2026-11-02. Prochaine
-  étape : 2 (rondes éliminatoires), à préciser (seuils à fixer ensemble d'après des temps mesurés). `Wh40kSim.Simulation/Comparisons/` :
+  étape : 2 (rondes éliminatoires), à préciser (seuils à fixer ensemble d'après des temps mesurés).
+- Phase 5, étape 2 (rondes éliminatoires) : précisée et validée le 2026-11-02 (seuils d'après un banc d'essai), codée
+  sur la branche `phase5/etape2-rondes-eliminatoires`, fusionnée dans `main`, validée par l'utilisateur le
+  2026-11-02. Prochaine étape : 3 (comparaison, côté UI), à préciser. `RoundPlan`, `EliminationRounds`
+  (`RoundProgress`, `RoundOutcome`, `Survivors`) ; `Comparator.Run` en rondes ; `ComparisonData.Rounds` / `Elapsed`,
+  `ComparisonEntryData` (`EliminatedInRound`) ; `ComparisonResult.Rounds` / `Finalists`, `RankedEntry.EliminatedInRound`
+  / `IsFinalist`. 622 tests verts (223 Core, 134 Simulation, 221 UI, 25 Web, 19 client web). Banc d'essai refait avec
+  `Comparator.Run` (10 RM + Sorc, M = 1 M) : top 3 identique à la référence de 3 à 100 attaquants ; 4 : 5,3 s
+  (5,7 s sans rondes), 10 : 7,2 s (16,0), 20 : 8,8 s (31,5), 100 : 17,8 s (160). `Wh40kSim.Simulation/Comparisons/` :
   `Comparison`, `ComparisonJson`, `ComparisonData`, `Comparator`, `ComparisonResult` (`Ranking`, `RankedEntry`,
   `Podium`, `PodiumBoundaryTied`, `BestScore`… `BestKillsAtLeast`, `AreTied`) ; `EfficiencyScore` ;
   `SimulationData.KillsTimesDamage` ; `SimulationResult.EfficiencyScore` / `MeanDamageShare`. 604 tests verts

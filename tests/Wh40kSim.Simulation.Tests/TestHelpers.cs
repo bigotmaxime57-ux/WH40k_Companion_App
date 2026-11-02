@@ -6,11 +6,11 @@ namespace Wh40kSim.Simulation.Tests;
 /// Enregistre les valeurs de progression dès leur arrivée. <see cref="Progress{T}"/> ne convient pas aux tests :
 /// il transmet les valeurs plus tard, via le contexte de synchronisation.
 /// </summary>
-internal sealed class RecordingProgress : IProgress<double>
+internal class RecordingProgress<T> : IProgress<T>
 {
-    private readonly List<double> _values = [];
+    private readonly List<T> _values = [];
 
-    public IReadOnlyList<double> Values
+    public IReadOnlyList<T> Values
     {
         get
         {
@@ -21,7 +21,7 @@ internal sealed class RecordingProgress : IProgress<double>
         }
     }
 
-    public void Report(double value)
+    public void Report(T value)
     {
         lock (_values)
         {
@@ -29,6 +29,8 @@ internal sealed class RecordingProgress : IProgress<double>
         }
     }
 }
+
+internal sealed class RecordingProgress : RecordingProgress<double>;
 
 internal static class Build
 {

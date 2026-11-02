@@ -1274,8 +1274,10 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   Essais écartés après coup sur les graphiques (barres opaques ; palette vive et contour des séries) : la version
   transparente est gardée. Prochaine étape : 6 (partie web), à préciser.
 - Phase 5, étape 6 (partie web) : précisée et validée le 2026-11-02, codée sur la branche
-  `phase5/etape6-comparaison-web`, fusionnée dans `main`, validée par l'utilisateur le 2026-11-02. **Reste** : tag
-  `v0.5` (avec son accord), qui déploie le site et clôt la phase 5 ; ensuite, phase 6 (optimiseur) à préciser. Simulation : `EliminationRounds.Run` / `Comparator.Run` (`maxFinalists`),
+  `phase5/etape6-comparaison-web`, fusionnée dans `main`, validée par l'utilisateur le 2026-11-02.
+- Tag **`v0.5`** posé sur `main` le 2026-11-02 avec l'accord de l'utilisateur (fin de la phase 5) : déploiement réussi
+  (19 min), site vérifié (`/health`, limites de la comparaison exposées). Prochaine phase : 6 (optimiseur du
+  séquencement des armes, #3), à préciser. Simulation : `EliminationRounds.Run` / `Comparator.Run` (`maxFinalists`),
   `ComparisonDataJson`, `ComparisonJson.EnsureComplete`. Serveur : `ComparisonEndpoints` (`POST /api/comparisons`,
   `ComparisonRequest`, `ComparisonProgress`), `ISimulationRunner.RunComparisonAsync`, `SimulationOptions`
   (`MaxComparisonVariants`, `MaxComparisonFinalists`), `SimulationLimits.MaxComparisonVariants`. Client :

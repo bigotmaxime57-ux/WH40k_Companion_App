@@ -78,10 +78,10 @@
         <MudPaper Elevation="3" Class="pa-4 wh-section" data-test="comparison-distributions">
             <CollapsibleSection Icon="@Icons.Material.Filled.BarChart" Title="@L["Comparison_Distributions"]" Help="@([L["Comparison_DistributionsHelp"]])">
                 <div class="wh-subsection-title"><MudText Typo="Typo.subtitle1">@L["Groups_Killed"]</MudText></div>
-                <ComparisonChart Series="@WinnerSeries(r => r.Kills)" Title="@L["Groups_Killed"]" ValueTitle="@L["Chart_KillsValue"]"
+                <ComparisonChart Series="@WinnerSeries(r => r.Kills)" Title="@L["Groups_Killed"]" AxisTitle="@L["Groups_Killed"]" ValueTitle="@L["Chart_KillsValue"]"
                                  UnitSize="Result.Entries[0].TotalModels" />
                 <div class="wh-subsection-title mt-4"><MudText Typo="Typo.subtitle1">@L["Groups_Damage"]</MudText></div>
-                <ComparisonChart Series="@WinnerSeries(r => r.Damage)" Title="@L["Groups_Damage"]" ValueTitle="@L["Chart_DamageValue"]"
+                <ComparisonChart Series="@WinnerSeries(r => r.Damage)" Title="@L["Groups_Damage"]" AxisTitle="@L["Groups_Damage"]" ValueTitle="@L["Chart_DamageValue"]"
                                  UnitSize="Result.Entries[0].TotalWounds" />
             </CollapsibleSection>
         </MudPaper>

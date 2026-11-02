@@ -31,8 +31,8 @@ public class ComparisonChartTests : ComponentTestContext
         for (int s = 0; s < 3; s++)
         {
             Assert.NotEmpty(chart.FindAll($"[data-test=cmp-bar-{s}]"));
-            Assert.Single(chart.FindAll($"[data-test=cmp-curve-{s}]"));
-            Assert.Single(chart.FindAll($"[data-test=cmp-mean-{s}]"));
+            Assert.Single(chart.FindAll($"[data-test=cmp-box-{s}]"));
+            Assert.Empty(chart.FindAll($"[data-test=cmp-curve-{s}]"));   // courbes « au moins k » sur demande
             Assert.Contains(Three[s].Label, chart.Find($"[data-test=cmp-legend-{s}]").TextContent);
         }
         // Valeur sans probabilité : pas de barre (le 3e ne tue jamais 3 figurines)
@@ -69,7 +69,7 @@ public class ComparisonChartTests : ComponentTestContext
 
         chart.Find("[data-test=cmp-legend-1]").Click();
         Assert.Empty(chart.FindAll("[data-test=cmp-bar-1]"));
-        Assert.Empty(chart.FindAll("[data-test=cmp-curve-1]"));
+        Assert.Empty(chart.FindAll("[data-test=cmp-box-1]"));
         Assert.Contains("wh-cmp-legend-hidden", chart.Find("[data-test=cmp-legend-1]").ClassName);
 
         chart.Find("[data-test=cmp-legend-1]").Click();
@@ -85,7 +85,7 @@ public class ComparisonChartTests : ComponentTestContext
         chart.Find("[data-test=cmp-legend-1]").Click();
         chart.Find("[data-test=cmp-legend-2]").Click();
 
-        Assert.NotEmpty(chart.FindAll("[data-test=cmp-curve-2]"));
+        Assert.NotEmpty(chart.FindAll("[data-test=cmp-box-2]"));
     }
 
     [Fact]
@@ -99,11 +99,37 @@ public class ComparisonChartTests : ComponentTestContext
     }
 
     [Fact]
+    public void The_at_least_curves_are_shown_on_demand()
+    {
+        var chart = RenderChart(Three);
+
+        chart.Find("input[data-test=cmp-show-at-least]").Change(true);
+
+        Assert.Equal(3, chart.FindAll("path.wh-cmp-curve").Count);
+    }
+
+    [Fact]
+    public void The_box_plot_spans_the_quartiles_and_the_central_range()
+    {
+        // 1er : 10 % à 1, 30 % à 2, 60 % à 3 → quartiles 2 et 3, médiane 3, 10-90 % de 1 à 3
+        var chart = RenderChart(Three);
+
+        var box = chart.Find("[data-test=cmp-box-0]");
+        var rect = box.QuerySelector("rect")!;
+        var median = box.QuerySelector("line.wh-cmp-box-median")!;
+        double width = double.Parse(rect.GetAttribute("width")!, System.Globalization.CultureInfo.InvariantCulture);
+        double medianX = double.Parse(median.GetAttribute("x1")!, System.Globalization.CultureInfo.InvariantCulture);
+        double left = double.Parse(rect.GetAttribute("x")!, System.Globalization.CultureInfo.InvariantCulture);
+        Assert.True(width > 0);
+        Assert.Equal(left + width, medianX, 1);   // médiane = 3e quartile
+    }
+
+    [Fact]
     public void Two_series_are_enough()
     {
         var chart = RenderChart(Three[..2]);
 
-        Assert.Equal(2, chart.FindAll("path.wh-cmp-curve").Count);
+        Assert.Equal(2, chart.FindAll("[data-test^=cmp-box-]").Count);
         Assert.Empty(chart.FindAll("[data-test=cmp-legend-2]"));
     }
 }

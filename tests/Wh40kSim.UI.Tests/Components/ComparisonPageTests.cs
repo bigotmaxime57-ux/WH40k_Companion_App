@@ -410,7 +410,7 @@ public class ComparisonPageTests() : ComponentTestContext(renderPopoverProvider:
     {
         var shell = OpenResults(Comparator.Run(Comparison.Of(Squad, [Attacker("A", 20), Attacker("B", 5)]), 2_000, seed: 1));
 
-        Assert.Equal(2, shell.FindAll("[data-test=comparison-distributions] [data-test=comparison-chart]")[0].QuerySelectorAll("path.wh-cmp-curve").Length);
+        Assert.Equal(2, shell.FindAll("[data-test=comparison-distributions] [data-test=comparison-chart]")[0].QuerySelectorAll("[data-test^=cmp-box-]").Length);
     }
 
     [Fact]

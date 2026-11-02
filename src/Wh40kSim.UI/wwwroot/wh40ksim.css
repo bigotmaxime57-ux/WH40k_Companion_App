@@ -446,28 +446,85 @@ rect.wh-share-5 { fill: var(--wh-share-5); }
 .wh-cmp-4 { --wh-series: var(--wh-share-4); }
 .wh-cmp-5 { --wh-series: var(--wh-share-5); }
 
+/* Barres jointives, semi-transparentes (les séries se mélangent où elles se recouvrent), fin liseré couleur du fond */
 rect.wh-cmp-bar {
     fill: var(--wh-series);
-    fill-opacity: .28;
-    stroke: var(--wh-series);
-    stroke-width: 1.5;
+    fill-opacity: .55;
+    stroke: var(--mud-palette-surface);
+    stroke-opacity: .7;
+    stroke-width: .6;
 }
 
 path.wh-cmp-curve {
     fill: none;
     stroke: var(--wh-series);
-    stroke-width: 2.5;
+    stroke-width: 1.8;
 }
 
-line.wh-cmp-mean {
-    stroke: var(--wh-series);
-    stroke-dasharray: 7 3;
-    stroke-width: 1.5;
+/* Boîtes à moustaches au-dessus des barres : quartiles, médiane, fourchette 10-90 % */
+.wh-cmp-box line {
+    stroke: var(--mud-palette-text-secondary);
+    stroke-width: 1.2;
+}
+
+.wh-cmp-box rect {
+    fill: var(--wh-series);
+    fill-opacity: .55;
+    stroke: var(--mud-palette-text-secondary);
+    stroke-width: 1;
+}
+
+.wh-cmp-box line.wh-cmp-box-median {
+    stroke: var(--mud-palette-text-primary);
+    stroke-width: 1.6;
+}
+
+/* Axes fins, sans quadrillage */
+.wh-cmp-axis-line {
+    stroke: var(--mud-palette-text-secondary);
+    stroke-opacity: .7;
+    stroke-width: 1;
+}
+
+.wh-cmp-axis-title {
+    fill: var(--mud-palette-text-primary);
+}
+
+/* Cartouche de légende en haut à droite de la zone des barres */
+.wh-cmp-legend-box {
+    background: color-mix(in srgb, var(--mud-palette-surface) 85%, transparent);
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 3px;
+    font-size: 11px;
+    padding: 3px 8px;
+    position: absolute;
+}
+
+.wh-cmp-legend-title {
+    color: var(--mud-palette-text-secondary);
+    text-align: center;
 }
 
 .wh-cmp-legend {
+    align-items: center;
+    color: var(--mud-palette-text-primary);
     cursor: pointer;
+    display: flex;
+    gap: .3rem;
     user-select: none;
+    white-space: nowrap;
+}
+
+.wh-cmp-legend-swatch {
+    background: color-mix(in srgb, var(--wh-series) 55%, transparent);
+    border: 1px solid var(--wh-series);
+    display: inline-block;
+    height: 9px;
+    width: 14px;
+}
+
+.wh-cmp-legend-mean {
+    color: var(--mud-palette-text-secondary);
 }
 
 .wh-cmp-legend-hidden {
@@ -475,9 +532,20 @@ line.wh-cmp-mean {
     text-decoration: line-through;
 }
 
-.wh-cmp-swatch-bar {
-    background: color-mix(in srgb, var(--mud-palette-text-secondary) 28%, transparent);
-    border: 1.5px solid var(--mud-palette-text-secondary);
+.wh-cmp-swatch-box {
+    background: linear-gradient(90deg, transparent 0 20%, var(--mud-palette-text-secondary) 20% 25%, transparent 25% 35%,
+        color-mix(in srgb, var(--mud-palette-text-secondary) 40%, transparent) 35% 65%, transparent 65% 75%,
+        var(--mud-palette-text-secondary) 75% 80%, transparent 80%);
+    border: none !important;
+    width: 22px !important;
+}
+
+/* Sur téléphone, la légende en cartouche passerait sur les barres : elle reprend sa place sous le graphique */
+@media (max-width: 599.98px) {
+    .wh-cmp-legend-box {
+        margin-top: 4px;
+        position: static;
+    }
 }
 
 /* Pastille de couleur d'un gagnant (tuiles du podium), comme sa série dans les graphiques */

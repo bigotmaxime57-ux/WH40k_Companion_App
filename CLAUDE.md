@@ -1286,7 +1286,8 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   `wh40ksim_data` monté en `/data`) ; `docker-entrypoint.sh` (volume confié à l'utilisateur sans privilèges, serveur
   démarré sous lui par `setpriv`) ; `docker.yml` vérifie le journal sur un volume et l'utilisateur non root. **À faire
   par l'utilisateur** avant le prochain déploiement : `fly scale count 1` et `fly volumes create wh40ksim_data` (voir
-  README). 705 tests verts (223 Core, 146 Simulation, 271 UI, 41 Web, 24 client web). Vu dans les journaux de Fly :
+  README). 705 tests verts (223 Core, 146 Simulation, 271 UI, 41 Web, 24 client web). Volume créé par l'utilisateur
+  (une machine) ; version `0.5.1` du client web et **tag `v0.5.1`** (demande de l'utilisateur), qui déploie le journal. Vu dans les journaux de Fly :
   « Trial machine stopping. To run for longer than 5m0s, add a credit card » (compte d'essai). Simulation : `EliminationRounds.Run` / `Comparator.Run` (`maxFinalists`),
   `ComparisonDataJson`, `ComparisonJson.EnsureComplete`. Serveur : `ComparisonEndpoints` (`POST /api/comparisons`,
   `ComparisonRequest`, `ComparisonProgress`), `ISimulationRunner.RunComparisonAsync`, `SimulationOptions`

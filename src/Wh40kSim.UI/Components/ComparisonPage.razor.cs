@@ -410,7 +410,12 @@ public partial class ComparisonPage
         Load(FromCurrentScenario(), null);
     }
 
-    /// <summary>Ouvre un fichier de comparaison ; un fichier de scénario (ou partiel) est refusé avec une explication.</summary>
+    /// <summary>
+    /// Bouton « Ouvrir » de la barre : une comparaison remplace tout ; un scénario complet (Quick sim, Full sim) apporte
+    /// son défenseur et sa situation, qui remplacent ceux de la comparaison, et son attaquant, qui s'ajoute aux autres ;
+    /// un fichier attaquant s'ajoute ; un fichier défenseur remplace le défenseur. Confirmation si ce qui est remplacé a
+    /// été modifié.
+    /// </summary>
     private async Task OpenAsync()
     {
         if (Running)
@@ -439,7 +444,14 @@ public partial class ComparisonPage
         }
         catch (JsonException ex)
         {
-            ShowMessage(IsScenarioFile(opened.Content) ? L["Comparison_NotAComparison", opened.FileName] : L["File_OpenError", ex.Message], Severity.Error);
+            if (ReadScenarioFile(opened.Content) is { } file)
+            {
+                await ImportAsync(file, opened.FileName);
+            }
+            else
+            {
+                ShowMessage(L["File_OpenError", ex.Message], Severity.Error);
+            }
             return;
         }
 
@@ -449,17 +461,50 @@ public partial class ComparisonPage
         }
     }
 
-    private static bool IsScenarioFile(string content)
+    private static ScenarioFile? ReadScenarioFile(string content)
     {
         try
         {
-            ScenarioJson.ReadFile(content);
-            return true;
+            return ScenarioJson.ReadFile(content);
         }
         catch (JsonException)
         {
-            return false;
+            return null;
         }
+    }
+
+    /// <summary>Scénario complet ou partiel ouvert dans la comparaison en cours (qui garde son nom de fichier).</summary>
+    private async Task ImportAsync(ScenarioFile file, string fileName)
+    {
+        if (file.Defender is not null && !await ConfirmDiscardAsync(State.DefenderDirty))
+        {
+            return;
+        }
+
+        if (file.Defender is not null)
+        {
+            Form.Defender = new DefenderForm(file.Defender);
+            State.DefenderDirty = false;
+            if (file.Kind == ScenarioFileKind.Scenario)
+            {
+                Form.Context = new ContextForm(file.Context ?? new AttackContext());
+            }
+        }
+        if (file.Attacker is not null)
+        {
+            Add(new AttackerForm(file.Attacker), expand: false);
+        }
+        else
+        {
+            OnChanged();
+        }
+
+        ShowMessage(file.Kind switch
+        {
+            ScenarioFileKind.Scenario => L["Comparison_ScenarioImported", fileName, Form.Attackers[^1].Name],
+            ScenarioFileKind.Attacker => L["Comparison_AttackerImported", fileName, Form.Attackers[^1].Name],
+            _ => L["File_DefenderLoaded", fileName],
+        }, Severity.Success);
     }
 
     private async Task SaveAsync()

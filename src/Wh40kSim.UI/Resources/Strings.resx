@@ -962,7 +962,7 @@
     <value>Nouvelle comparaison, à partir du scénario courant (son défenseur, sa situation et son attaquant)</value>
   </data>
   <data name="Comparison_OpenHelp" xml:space="preserve">
-    <value>Ouvrir une comparaison enregistrée (Ctrl+O)</value>
+    <value>Ouvrir une comparaison enregistrée ; ou un scénario, dont le défenseur et la situation remplacent ceux de la comparaison et dont l'attaquant s'ajoute ; ou un attaquant seul (ajouté) ou un défenseur seul (Ctrl+O)</value>
   </data>
   <data name="Comparison_SaveHelp" xml:space="preserve">
     <value>Enregistrer la comparaison : défenseur, situation et tous les attaquants (Ctrl+S)</value>
@@ -1018,8 +1018,8 @@
   <data name="Comparison_DefenderTaken" xml:space="preserve">
     <value>Défenseur et situation repris du scénario courant.</value>
   </data>
-  <data name="Comparison_NotAComparison" xml:space="preserve">
-    <value>{0} est un scénario (ou une partie), pas une comparaison : ajoutez son attaquant avec « Depuis des fichiers », ou son défenseur avec Ouvrir sur la carte du défenseur.</value>
+  <data name="Comparison_ScenarioImported" xml:space="preserve">
+    <value>{0} ouvert : son défenseur et sa situation remplacent ceux de la comparaison, son attaquant est ajouté ({1}).</value>
   </data>
   <data name="Comparison_Saved" xml:space="preserve">
     <value>Comparaison enregistrée : {0}</value>
@@ -1113,5 +1113,8 @@
   </data>
   <data name="Attacker_Rename" xml:space="preserve">
     <value>Renommer cet attaquant</value>
+  </data>
+  <data name="Comparison_AttackerImported" xml:space="preserve">
+    <value>Attaquant ajouté depuis {0} : {1}.</value>
   </data>
 </root>

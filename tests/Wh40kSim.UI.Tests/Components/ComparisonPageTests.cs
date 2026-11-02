@@ -251,15 +251,37 @@ public class ComparisonPageTests() : ComponentTestContext(renderPopoverProvider:
     }
 
     [Fact]
-    public void Opening_a_scenario_file_explains_it_is_not_a_comparison()
+    public void Opening_a_scenario_brings_its_defender_and_situation_and_adds_its_attacker()
     {
         var shell = OpenComparison();
-        Files.ToOpen = FakeScenarioFileService.File("scenario.json", new Scenario { Attacker = Attacker("A", 3), Defender = Squad });
+        var other = new DefenderUnit { Name = "Terminators", Groups = [new ModelGroup { Name = "Terminators", Count = 5, Wounds = 3, Toughness = 5, Save = 2 }] };
+        Files.ToOpen = FakeScenarioFileService.File("full sim.json",
+            new Scenario { Attacker = Attacker("Plasma", 4), Defender = other, Context = new AttackContext { HalfRange = true } });
 
         shell.Find("[data-test=open]").Click();
 
-        Assert.Contains("pas une comparaison", shell.Find("[data-test=message]").TextContent);
-        Assert.Equal(["Rubrics"], AttackerNames(shell));
+        Assert.Equal(["Rubrics", "Plasma"], AttackerNames(shell));
+        Assert.Equal("Terminators", Session.Comparison.Form!.Defender.Name);
+        Assert.True(Session.Comparison.Form.Context.HalfRange);
+        Assert.Contains("full sim.json", shell.Find("[data-test=message]").TextContent);
+        Assert.False(shell.Find("[data-test=run]").HasAttribute("disabled"));
+        // Fichier de comparaison inchangé, mais la comparaison est modifiée
+        Assert.Contains("Nouvelle comparaison *", shell.Find("[data-test=file-name]").TextContent);
+    }
+
+    [Fact]
+    public void Opening_an_attacker_file_adds_it_and_a_defender_file_replaces_the_defender()
+    {
+        var shell = OpenComparison();
+
+        Files.ToOpen = FakeScenarioFileService.File("rubrics.json", Attacker("Rubrics", 5));
+        shell.Find("[data-test=open]").Click();
+        Assert.Equal(["Rubrics", "Rubrics (2)"], AttackerNames(shell));
+
+        Files.ToOpen = FakeScenarioFileService.File("horde.json", Squad with { Name = "Horde" });
+        shell.Find("[data-test=open]").Click();
+        Assert.Equal("Horde", Session.Comparison.Form!.Defender.Name);
+        Assert.Equal(["Rubrics", "Rubrics (2)"], AttackerNames(shell));
     }
 
     [Fact]

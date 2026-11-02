@@ -5,6 +5,7 @@
 *@
 @page "/"
 @inject ScreenNavigator Screens
+@inject ISimulationService Simulations
 
 <MudStack Spacing="4" Class="pa-6 wh-page">
     <MudText Typo="Typo.h5" Class="wh-brand">@L["Home_Title"]</MudText>
@@ -24,6 +25,17 @@
                 <MudText Typo="Typo.body2">@L["Home_FullSimDescription"]</MudText>
             </MudPaper>
         </a>
+        @* Comparateur : seulement si l'hôte sait comparer (le client web, pas avant la phase 5, étape 6) *@
+        @if (Simulations.SupportsComparison)
+        {
+            <a href="@AppRoutes.Comparison" class="wh-home-tile" @onclick="() => Screens.OpenAsync(AppRoutes.Comparison)"
+               @onclick:preventDefault data-test="tile-comparison">
+                <MudPaper Elevation="3" Class="pa-5 wh-section">
+                    <SectionHeader Icon="@Icons.Material.Filled.EmojiEvents" Title="@L["Mode_Comparison"]" />
+                    <MudText Typo="Typo.body2">@L["Home_ComparisonDescription"]</MudText>
+                </MudPaper>
+            </a>
+        }
     </MudStack>
 
     @if (Version is not null)

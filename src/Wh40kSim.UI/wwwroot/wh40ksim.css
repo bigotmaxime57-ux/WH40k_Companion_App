@@ -1087,6 +1087,24 @@ rect.wh-chart-bar-neutral {
     color: var(--mud-palette-error);
 }
 
+/* Classement du comparateur : en-têtes cliquables (tri), attaquants éliminés estompés, défilement dans le cadre */
+.wh-sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.wh-sortable:hover {
+    color: var(--mud-palette-primary);
+}
+
+.wh-eliminated {
+    opacity: 0.55;
+}
+
+.wh-table-scroll {
+    overflow-x: auto;
+}
+
 .wh-bar-cell {
     min-width: 7rem;
 }

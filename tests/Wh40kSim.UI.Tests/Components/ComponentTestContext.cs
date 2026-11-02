@@ -5,6 +5,7 @@ using MudBlazor;
 using Wh40kSim.Core.Model;
 using Wh40kSim.Core.Serialization;
 using Wh40kSim.Simulation;
+using Wh40kSim.Simulation.Comparisons;
 using Wh40kSim.UI.Services;
 using Wh40kSim.UI.Theme;
 
@@ -129,6 +130,33 @@ public sealed class FakeSimulationService : ISimulationService
         }
         return Simulator.Run(scenario, TestIterations, seed ?? 1, cancellationToken: cancellationToken);
     }
+
+    /// <summary>Le comparateur est proposé (comme en desktop) ; faux pour tester l'hôte web.</summary>
+    public bool SupportsComparison { get; set; } = true;
+
+    public int ComparisonCalls { get; private set; }
+
+    /// <summary>Comparaison réelle, en peu de simulations ; même porte que la simulation simple.</summary>
+    public async Task<ComparisonResult> RunComparisonAsync(
+        Comparison comparison,
+        int iterations,
+        int? seed = null,
+        IProgress<RoundProgress>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        ComparisonCalls++;
+        LastIterations = iterations;
+        if (Gate is not null)
+        {
+            await Gate.Task.WaitAsync(cancellationToken);
+        }
+        if (Error is not null)
+        {
+            throw Error;
+        }
+        progress?.Report(new RoundProgress(1, 1, 0));
+        return Comparator.Run(comparison, TestIterations, seed ?? 1, cancellationToken: cancellationToken);
+    }
 }
 
 /// <summary>Fichiers en mémoire : prochain fichier « choisi » par l'utilisateur, contenus écrits.</summary>
@@ -145,6 +173,12 @@ public sealed class FakeScenarioFileService : IScenarioFileService
 
     public Task<OpenedFile?> OpenAsync(CancellationToken cancellationToken = default) =>
         OpenError is not null ? Task.FromException<OpenedFile?>(OpenError) : Task.FromResult(ToOpen);
+
+    /// <summary>Résultat de la prochaine ouverture multiple (vide = l'utilisateur annule).</summary>
+    public List<OpenedFile> ToOpenMany { get; } = [];
+
+    public Task<IReadOnlyList<OpenedFile>> OpenManyAsync(CancellationToken cancellationToken = default) =>
+        Task.FromResult<IReadOnlyList<OpenedFile>>(ToOpenMany.ToList());
 
     public Task<string?> SaveAsync(string content, string suggestedFileName, CancellationToken cancellationToken = default)
     {

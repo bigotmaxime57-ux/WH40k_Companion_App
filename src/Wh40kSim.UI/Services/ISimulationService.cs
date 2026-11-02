@@ -1,5 +1,6 @@
 using Wh40kSim.Core.Model;
 using Wh40kSim.Simulation;
+using Wh40kSim.Simulation.Comparisons;
 
 namespace Wh40kSim.UI.Services;
 
@@ -26,6 +27,24 @@ public interface ISimulationService
         IProgress<double>? progress = null,
         CancellationToken cancellationToken = default,
         IProgress<int>? queuePosition = null);
+
+    /// <summary>
+    /// L'hôte sait lancer une comparaison (<see cref="RunComparisonAsync"/>) : le desktop oui, le client web pas avant la
+    /// phase 5, étape 6 (la tuile du comparateur y est masquée).
+    /// </summary>
+    bool SupportsComparison => false;
+
+    /// <summary>Lance une comparaison en rondes éliminatoires (voir <see cref="Comparator.Run"/>).</summary>
+    /// <param name="progress">Ronde en cours et son avancement.</param>
+    /// <exception cref="OperationCanceledException">Si <paramref name="cancellationToken"/> est annulé.</exception>
+    /// <exception cref="NotSupportedException">Si l'hôte ne sait pas comparer (<see cref="SupportsComparison"/>).</exception>
+    Task<ComparisonResult> RunComparisonAsync(
+        Comparison comparison,
+        int iterations,
+        int? seed = null,
+        IProgress<RoundProgress>? progress = null,
+        CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException("Comparaison indisponible sur cet hôte.");
 }
 
 /// <summary>

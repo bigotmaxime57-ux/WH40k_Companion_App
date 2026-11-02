@@ -15,6 +15,11 @@ public interface IScenarioFileService
     /// <exception cref="System.IO.IOException">Si le fichier ne peut pas être lu.</exception>
     Task<OpenedFile?> OpenAsync(CancellationToken cancellationToken = default);
 
+    /// <summary>Demande un ou plusieurs fichiers JSON à l'utilisateur (sélection multiple) et lit leur contenu.</summary>
+    /// <returns>Les fichiers lus, dans l'ordre donné par la boîte de dialogue ; vide si l'utilisateur a annulé.</returns>
+    /// <exception cref="System.IO.IOException">Si un fichier ne peut pas être lu.</exception>
+    Task<IReadOnlyList<OpenedFile>> OpenManyAsync(CancellationToken cancellationToken = default);
+
     /// <summary>Demande où enregistrer (en proposant <paramref name="suggestedFileName"/>) et écrit <paramref name="content"/>.</summary>
     /// <returns>Le nom du fichier écrit, ou null si l'utilisateur a annulé.</returns>
     /// <exception cref="System.IO.IOException">Si le fichier ne peut pas être écrit.</exception>

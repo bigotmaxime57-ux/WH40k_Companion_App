@@ -25,16 +25,14 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
 
     /// <summary>Progression minimale entre deux rafraîchissements de la barre (1 %).</summary>
     private const double ProgressStep = 0.01;
-    private const string ShortcutsModule = "./_content/Wh40kSim.UI/wh40ksim.js";
 
     private Scenario? _scenario;          // scénario saisi, null tant qu'une expression de dés est invalide
     private CancellationTokenSource? _cancellation;
     private QueueStatus? _queue;          // attente du lancement en cours dans la file du serveur
     private IDialogReference? _queueDialog;
+    private readonly KeyboardShortcuts _shortcuts;
 
-    private IJSObjectReference? _shortcutsModule;
-    private IJSObjectReference? _shortcuts;
-    private DotNetObjectReference<ScenarioEditorPage>? _self;
+    protected ScenarioEditorPage() => _shortcuts = new KeyboardShortcuts(OnShortcut);
 
     [Inject]
     private ISimulationService SimulationService { get; set; } = null!;
@@ -114,58 +112,22 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender)
+        if (firstRender)
         {
-            return;
-        }
-
-        // Raccourcis clavier à l'échelle du document (module JavaScript de Wh40kSim.UI, chargé à la demande)
-        try
-        {
-            _self = DotNetObjectReference.Create(this);
-            _shortcutsModule = await JS.InvokeAsync<IJSObjectReference>("import", ShortcutsModule);
-            if (_shortcutsModule is not null)
-            {
-                _shortcuts = await _shortcutsModule.InvokeAsync<IJSObjectReference>("registerShortcuts", _self);
-            }
-        }
-        catch (JSException)
-        {
-            // Raccourcis indisponibles : la page reste utilisable à la souris
+            await _shortcuts.RegisterAsync(JS);
         }
     }
 
     /// <summary>Fait défiler la page jusqu'à <paramref name="element"/>, sur téléphone seulement (module JavaScript).</summary>
-    protected async Task ScrollIntoViewOnPhoneAsync(ElementReference element)
-    {
-        try
-        {
-            if (_shortcutsModule is not null) await _shortcutsModule.InvokeVoidAsync("scrollIntoViewOnPhone", element);
-        }
-        catch (JSException)
-        {
-            // Défilement impossible : les résultats restent accessibles plus bas
-        }
-    }
+    protected Task ScrollIntoViewOnPhoneAsync(ElementReference element) => _shortcuts.ScrollIntoViewOnPhoneAsync(element);
 
     public async ValueTask DisposeAsync()
     {
         _cancellation?.Cancel();
-        try
-        {
-            if (_shortcuts is not null) await _shortcuts.InvokeVoidAsync("dispose");
-            if (_shortcuts is not null) await _shortcuts.DisposeAsync();
-            if (_shortcutsModule is not null) await _shortcutsModule.DisposeAsync();
-        }
-        catch (JSDisconnectedException)
-        {
-            // L'interface est déjà fermée : rien à détacher
-        }
-        _self?.Dispose();
+        await _shortcuts.DisposeAsync();
     }
 
-    /// <summary>Appelé par le module JavaScript : « enter », « s » ou « o » avec Ctrl.</summary>
-    [JSInvokable]
+    /// <summary>Raccourci clavier (<see cref="KeyboardShortcuts"/>) : « enter », « s » ou « o » avec Ctrl.</summary>
     public Task OnShortcut(string key) => InvokeAsync(async () =>
     {
         switch (key)
@@ -410,7 +372,7 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
         if (CanSaveAttacker)
         {
             var attacker = Form.Attacker.ToAttackerUnit();
-            if (await WriteAsync(ScenarioJson.Serialize(attacker), SuggestedFileName(attacker.Name, L["File_DefaultAttacker"]),
+            if (await WriteAsync(ScenarioJson.Serialize(attacker), FileNames.ForUnit(attacker.Name, L["File_DefaultAttacker"]),
                     name => L["File_AttackerSaved", name]) is not null)
             {
                 Session.AttackerDirty = false;
@@ -423,7 +385,7 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
         if (!Running)
         {
             var defender = Form.Defender.ToDefenderUnit();
-            if (await WriteAsync(ScenarioJson.Serialize(defender), SuggestedFileName(defender.Name, L["File_DefaultDefender"]),
+            if (await WriteAsync(ScenarioJson.Serialize(defender), FileNames.ForUnit(defender.Name, L["File_DefaultDefender"]),
                     name => L["File_DefenderSaved", name]) is not null)
             {
                 Session.DefenderDirty = false;
@@ -448,20 +410,6 @@ public abstract class ScenarioEditorPage : ComponentBase, IAsyncDisposable
             ShowMessage(L["File_SaveError", ex.Message], Severity.Error);
             return null;
         }
-    }
-
-    /// <summary>
-    /// Caractères retirés des noms de fichier proposés : ceux que Windows interdit, quel que soit le système (Linux et le
-    /// navigateur en acceptent davantage, mais les fichiers doivent pouvoir être ouverts partout).
-    /// </summary>
-    private static readonly char[] ForbiddenFileNameChars =
-        ['<', '>', ':', '"', '/', '\\', '|', '?', '*', .. Enumerable.Range(0, 32).Select(c => (char)c)];
-
-    /// <summary>Nom proposé pour une partie : le nom de l'unité sans les caractères interdits, à défaut un nom générique.</summary>
-    private static string SuggestedFileName(string unitName, string fallback)
-    {
-        string name = string.Concat(unitName.Split(ForbiddenFileNameChars)).Trim();
-        return (name.Length > 0 ? name : fallback) + ".json";
     }
 
     protected async Task RunAsync()

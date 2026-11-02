@@ -43,6 +43,9 @@ public sealed class ScenarioSession
     /// <summary>Réglages et résultat du Full sim, séparés de ceux du Quick sim (décision de l'utilisateur).</summary>
     public SimulationRun FullSim { get; } = new();
 
+    /// <summary>Comparateur : sa comparaison, son fichier, ses réglages et son résultat, indépendants du scénario courant.</summary>
+    public ComparisonState Comparison { get; } = new();
+
     /// <summary>
     /// Choix retenu dans l'avertissement des résultats périmés du Full sim (« Retenir ce choix »), réappliqué sans
     /// redemander ; null = demander. Vaut jusqu'à la fermeture de l'application, n'est pas mémorisé.

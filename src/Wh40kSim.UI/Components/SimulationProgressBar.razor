@@ -6,7 +6,7 @@
 
 <div>
     <MudProgressLinear Color="Color.Primary" Min="0" Max="1" Value="State.Value" data-test="progress" />
-    <MudText Typo="Typo.caption" data-test="progress-text">@State.Value.ToString("P0")</MudText>
+    <MudText Typo="Typo.caption" data-test="progress-text">@(State.Label is null ? "" : State.Label + " · ")@State.Value.ToString("P0")</MudText>
 </div>
 
 @code {

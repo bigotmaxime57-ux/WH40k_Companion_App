@@ -15,4 +15,10 @@ public static class AppRoutes
 
     /// <summary>Résultats du Full sim (onglets de graphiques).</summary>
     public const string FullSimResults = "full-sim/results";
+
+    /// <summary>Saisie du comparateur.</summary>
+    public const string Comparison = "comparison";
+
+    /// <summary>Résultats du comparateur (podium et classement).</summary>
+    public const string ComparisonResults = "comparison/results";
 }

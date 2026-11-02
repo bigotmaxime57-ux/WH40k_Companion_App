@@ -1,6 +1,7 @@
 using System.Runtime.Versioning;
 using Wh40kSim.Core.Model;
 using Wh40kSim.Simulation;
+using Wh40kSim.Simulation.Comparisons;
 
 namespace Wh40kSim.UI.Services;
 
@@ -35,6 +36,27 @@ public sealed class LocalSimulationService : ISimulationService
         // Lancé lui-même sur ces threads : le thread qui attend la fin du calcul y participe, en priorité basse lui aussi
         return Task.Factory.StartNew(
             () => Simulator.Run(scenario, iterations, seed, progress, cancellationToken, new SimulationThreads(Workers, scheduler)),
+            cancellationToken, TaskCreationOptions.None, scheduler);
+    }
+
+    public bool SupportsComparison => true;
+
+    /// <summary>Comparaison sur les mêmes threads en priorité basse qu'une simulation (un cœur laissé libre).</summary>
+    public Task<ComparisonResult> RunComparisonAsync(
+        Comparison comparison,
+        int iterations,
+        int? seed = null,
+        IProgress<RoundProgress>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (OperatingSystem.IsBrowser())
+        {
+            return Task.Run(() => Comparator.Run(comparison, iterations, seed, progress, cancellationToken), cancellationToken);
+        }
+
+        var scheduler = LowPriorityScheduler();
+        return Task.Factory.StartNew(
+            () => Comparator.Run(comparison, iterations, seed, progress, cancellationToken, new SimulationThreads(Workers, scheduler)),
             cancellationToken, TaskCreationOptions.None, scheduler);
     }
 

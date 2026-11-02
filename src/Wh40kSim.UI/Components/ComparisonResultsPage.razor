@@ -1,0 +1,252 @@
+@*
+    Résultats du comparateur : retour à la saisie et en-tête, podium des 3 gagnants (score ± bruit, ses trois parts dans
+    une bulle « ? », mention si le 4e est à égalité), puis le classement de tous les attaquants, triable, meilleure valeur
+    de chaque colonne en gras (finalistes seulement), éliminés grisés. Menu par ligne : analyser au Full sim, enregistrer
+    l'attaquant ou le scénario complet. Lit Session.Comparison.Result sans aucun calcul ; sans résultat, renvoie à la saisie.
+    Les graphiques arrivent à l'étape 4.
+*@
+@page "/comparison/results"
+@using System.Globalization
+@using Wh40kSim.Core.Serialization
+@using Wh40kSim.Simulation
+@using Wh40kSim.Simulation.Comparisons
+@inject ScenarioSession Session
+@inject NavigationManager Navigation
+@inject IScenarioFileService FileService
+@inject IDialogService DialogService
+
+<MudStack Spacing="3" Class="pa-4 wh-page wh-report">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="3" Wrap="Wrap.Wrap">
+        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.ArrowBack" OnClick="BackToEntry"
+                   data-test="back-to-entry">@L["FullSim_BackToEntry"]</MudButton>
+        @if (Result is not null)
+        {
+            <MudText Typo="Typo.body2" data-test="results-header">
+                @L["Comparison_ResultsHeader", Result.Defender.Name, Result.Entries.Count, Result.Iterations.ToString("N0"), Result.Rounds.Count,
+                    Result.Seed, Result.Elapsed.TotalSeconds.ToString("F1")]
+            </MudText>
+        }
+    </MudStack>
+
+    @if (Message is not null)
+    {
+        <MudAlert Severity="MessageSeverity" ShowCloseIcon="true" CloseIconClicked="() => Message = null" data-test="message">@Message</MudAlert>
+    }
+
+    @if (Result is null)
+    {
+        <MudAlert Severity="Severity.Info" data-test="no-result">@L["Comparison_NoResult"]</MudAlert>
+    }
+    else
+    {
+        @if (Session.Comparison.IsStale)
+        {
+            <MudAlert Severity="Severity.Warning" data-test="stale-results-banner">@L["Comparison_StaleBanner"]</MudAlert>
+        }
+
+        <MudPaper Elevation="3" Class="pa-4 wh-section">
+            <SectionHeader Icon="@Icons.Material.Filled.EmojiEvents" Title="@L["Comparison_Podium"]" Help="@([L["Comparison_PodiumHelp"]])" />
+            <div class="wh-tiles my-3" data-test="podium">
+                @foreach (var entry in Result.Podium)
+                {
+                    var score = entry.Result.EfficiencyScore;
+                    <StatTile Label="@L["Comparison_PodiumPlace", entry.Rank, entry.Name]" Value="@ScoreText(score)"
+                              Tone="@(entry.Rank == 1 ? StatTile.TileTone.Good : StatTile.TileTone.Neutral)" data-test="@($"podium-{entry.Rank}")">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                            <MudText Typo="Typo.caption">@L["Comparison_ScoreLabel"]</MudText>
+                            <HelpBubble Lines="@ScoreParts(score)" />
+                            @if (entry.TiedWithPrevious)
+                            {
+                                <MudText Typo="Typo.caption" data-test="podium-tied">@L["Comparison_TiedWithPrevious"]</MudText>
+                            }
+                        </MudStack>
+                    </StatTile>
+                }
+            </div>
+            @if (Result.PodiumBoundaryTied)
+            {
+                <MudAlert Severity="Severity.Info" Dense="true" data-test="podium-boundary-tied">
+                    @L["Comparison_FourthTied", Result.Ranking[ComparisonResult.PodiumSize].Name]
+                </MudAlert>
+            }
+        </MudPaper>
+
+        <MudPaper Elevation="3" Class="pa-4 wh-section">
+            <SectionHeader Icon="@Icons.Material.Filled.FormatListNumbered" Title="@L["Comparison_Ranking"]" Help="@([L["Comparison_RankingHelp"]])" />
+            <div class="wh-table-scroll">
+                <MudSimpleTable Dense="true" Striped="true" data-test="ranking-table">
+                    <thead>
+                        <tr>
+                            @foreach (var column in Columns)
+                            {
+                                <th class="@(column.Numeric ? "wh-number wh-sortable" : "wh-sortable")" @onclick="() => SortBy(column.Key)"
+                                    data-test="@($"sort-{column.Key}")">
+                                    @column.Title@(_sort == column.Key ? (_descending ? " ▼" : " ▲") : "")
+                                </th>
+                            }
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var entry in SortedRows)
+                        {
+                            var r = entry.Result;
+                            <tr class="@(entry.IsFinalist ? null : "wh-eliminated")" data-test="@($"ranking-row-{entry.Index}")">
+                                <td data-test="rank">
+                                    @entry.Rank
+                                    @if (entry.TiedWithPrevious)
+                                    {
+                                        <MudTooltip Text="@L["Comparison_TiedWithPrevious"]"><span data-test="tied">≈</span></MudTooltip>
+                                    }
+                                </td>
+                                <td data-test="name">@entry.Name</td>
+                                <td class="@Best(Result.BestScore, entry)" data-test="score">@ScoreText(r.EfficiencyScore)</td>
+                                <td class="@Best(Result.BestMeanKills, entry)" data-test="kills">@r.Kills.Mean.ToString("F2")</td>
+                                <td class="@Best(Result.BestMeanDamage, entry)" data-test="damage">@L["Comparison_DamageAndShare", r.Damage.Mean.ToString("F2"), r.MeanDamageShare.ToString("P0")]</td>
+                                <td class="@Best(Result.BestWipe, entry)" data-test="wipe">@r.ProbabilityWipe.ToString("P1")</td>
+                                <td data-test="status">@StatusText(entry)</td>
+                                <td>
+                                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" Dense="true" AriaLabel="@L["Comparison_RowActions"]"
+                                             data-test="row-actions">
+                                        <MudMenuItem Icon="@Icons.Material.Filled.Insights" OnClick="() => AnalyseAsync(entry)" data-test="analyse">@L["Comparison_Analyse"]</MudMenuItem>
+                                        <MudMenuItem Icon="@Icons.Material.Filled.Save" OnClick="() => SaveAttackerAsync(entry)" data-test="save-attacker">@L["Comparison_SaveAttacker"]</MudMenuItem>
+                                        <MudMenuItem Icon="@Icons.Material.Filled.SaveAs" OnClick="() => SaveScenarioAsync(entry)" data-test="save-scenario">@L["Comparison_SaveScenario"]</MudMenuItem>
+                                    </MudMenu>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </MudSimpleTable>
+            </div>
+        </MudPaper>
+    }
+</MudStack>
+
+@code {
+    private string _sort = "rank";
+    private bool _descending;
+
+    private string? Message { get; set; }
+
+    private Severity MessageSeverity { get; set; }
+
+    private ComparisonResult? Result => Session.Comparison.Result;
+
+    private sealed record Column(string Key, string Title, bool Numeric, Func<RankedEntry, double> Value);
+
+    private IReadOnlyList<Column> Columns =>
+    [
+        new("rank", L["Comparison_Rank"], false, e => e.Rank),
+        new("name", L["Comparison_Name"], false, e => 0),
+        new("score", L["Comparison_Score"], true, e => e.Result.EfficiencyScore.Mean),
+        new("kills", L["Groups_Killed"], true, e => e.Result.Kills.Mean),
+        new("damage", L["Groups_Damage"], true, e => e.Result.Damage.Mean),
+        new("wipe", L["Comparison_Wipe"], true, e => e.Result.ProbabilityWipe),
+        new("status", L["Comparison_Status"], false, e => e.EliminatedInRound ?? int.MaxValue),
+    ];
+
+    /// <summary>
+    /// Lignes dans l'ordre choisi : rang par défaut (finalistes puis éliminés) ; un clic sur une colonne trie par elle
+    /// (valeurs : la plus forte d'abord), un second clic inverse ; le rang départage.
+    /// </summary>
+    private IEnumerable<RankedEntry> SortedRows
+    {
+        get
+        {
+            var ranking = Result!.Ranking;
+            if (_sort == "name")
+            {
+                var byName = ranking.OrderBy(e => e.Name, StringComparer.CurrentCultureIgnoreCase).ThenBy(e => e.Rank);
+                return _descending ? byName.Reverse() : byName;
+            }
+            var column = Columns.First(c => c.Key == _sort);
+            return _descending ? ranking.OrderByDescending(column.Value).ThenBy(e => e.Rank) : ranking.OrderBy(column.Value).ThenBy(e => e.Rank);
+        }
+    }
+
+    /// <summary>Premier clic : rang et nom croissants, valeurs décroissantes ; clic suivant sur la même colonne : inverse.</summary>
+    private void SortBy(string key)
+    {
+        if (_sort == key)
+        {
+            _descending = !_descending;
+        }
+        else
+        {
+            _sort = key;
+            _descending = Columns.First(c => c.Key == key).Numeric || key == "status";
+        }
+    }
+
+    private static string? Best(IReadOnlyList<int> best, RankedEntry entry) => best.Contains(entry.Index) ? "wh-number wh-top" : "wh-number";
+
+    private static string ScoreText(EfficiencyScore score) =>
+        $"{score.Mean.ToString("F1", CultureInfo.CurrentCulture)} ± {score.StandardError.ToString(score.StandardError < 0.1 ? "F2" : "F1", CultureInfo.CurrentCulture)}";
+
+    private IReadOnlyList<string> ScoreParts(EfficiencyScore score) =>
+    [
+        L["Comparison_ScoreHelp"],
+        L["Comparison_ScoreParts", score.DamagePart.ToString("F1"), score.KillsPart.ToString("F1"), score.WipePart.ToString("F1")],
+    ];
+
+    private string StatusText(RankedEntry entry) => entry.EliminatedInRound is int round
+        ? L["Comparison_Eliminated", round, entry.Result.Iterations.ToString("N0")]
+        : L["Comparison_Finalist"];
+
+    private void BackToEntry() => Navigation.NavigateTo(AppRoutes.Comparison);
+
+    /// <summary>
+    /// Charge cet attaquant, le défenseur et la situation de la comparaison dans le scénario courant (confirmation si sa
+    /// saisie est modifiée), puis ouvre le Full sim pour l'analyser en détail.
+    /// </summary>
+    private async Task AnalyseAsync(RankedEntry entry)
+    {
+        if (Session.IsDirty)
+        {
+            bool? discard = await DialogService.ShowMessageBoxAsync(
+                L["Confirm_Title"], L["Confirm_Message"], yesText: L["Confirm_Discard"], cancelText: L["Confirm_Cancel"]);
+            if (discard != true)
+            {
+                return;
+            }
+        }
+
+        Session.Form = new ScenarioForm(entry.Result.Scenario);
+        Session.FileName = null;
+        Session.IsDirty = true;   // pas encore enregistré
+        Session.AttackerDirty = false;
+        Session.DefenderDirty = false;
+        Session.ClearResults();
+        Navigation.NavigateTo(AppRoutes.FullSim);
+    }
+
+    private Task SaveAttackerAsync(RankedEntry entry)
+    {
+        var attacker = entry.Result.Scenario.Attacker;
+        return WriteAsync(ScenarioJson.Serialize(attacker), FileNames.ForUnit(attacker.Name, L["File_DefaultAttacker"]), name => L["File_AttackerSaved", name]);
+    }
+
+    private Task SaveScenarioAsync(RankedEntry entry)
+    {
+        var scenario = entry.Result.Scenario;
+        return WriteAsync(ScenarioJson.Serialize(scenario), FileNames.ForUnit(L["Comparison_ScenarioFileName", scenario.Attacker.Name, scenario.Defender.Name], "scenario"),
+            name => L["File_Saved", name]);
+    }
+
+    private async Task WriteAsync(string content, string suggestedFileName, Func<string, string> savedMessage)
+    {
+        try
+        {
+            if (await FileService.SaveAsync(content, suggestedFileName) is { } written)
+            {
+                Message = savedMessage(written);
+                MessageSeverity = Severity.Success;
+            }
+        }
+        catch (IOException ex)
+        {
+            Message = L["File_SaveError", ex.Message];
+            MessageSeverity = Severity.Error;
+        }
+    }
+}

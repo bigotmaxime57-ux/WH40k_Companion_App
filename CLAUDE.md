@@ -275,15 +275,44 @@ Chaque étape sera précisée et validée avant d'être codée :
 **Objectif** : « comparaison de plusieurs profils côte à côte » (qui tue le mieux l'adversaire) ; formulation reprise
 de l'Objectif d'origine de la phase 3 (2026-10-30). Mode à part, avec sa tuile sur l'accueil.
 
-1. **Comparaison, côté Simulation.** Deux sens (#1) : N attaquants contre une cible, ou un attaquant contre N cibles ;
-   situation commune. Même graine pour toutes les entrées (tirages partagés : écarts plus fiables). Indicateurs :
-   moyennes, P(détruire l'unité), P(≥ k), % de l'unité détruite et points détruits (comparables entre cibles
-   différentes) ; meilleure entrée pour chaque indicateur, ex æquo compris. JSON d'une comparaison (sérialisable :
-   contrat de l'API) ; console.
-2. **Comparaison, côté UI.** Entrées prises dans le scénario courant ou dans des fichiers (partiels ou complets),
-   dupliquées, renommées ; distributions superposées ; tableau côte à côte, meilleure entrée mise en évidence ;
-   ouvrir / enregistrer.
-3. **Partie web** : comparaison dans l'API et le client.
+Découpage revu avec l'utilisateur le 2026-11-02. Décisions :
+- **But : un top 3** de plusieurs **attaquants** contre un même défenseur, situation commune, avec une comparaison
+  graphique. Un attaquant contre plusieurs cibles (#1) est reporté (ticket laissé ouvert).
+- **Score d'efficacité** (0 à 100), critère du classement et de l'élimination : calculé à chaque simulation,
+  100 × (0,4 × part des PV retirés + 0,3 × part des figurines tuées + 0,3 × unité détruite), **poids fixes** ; le score
+  affiché est sa moyenne. Une seule distribution, donc une erreur type exacte : **ex æquo** quand l'écart n'est pas
+  significatif (environ 2 erreurs types). Ses trois parts détaillées dans une bulle « ? » ; le tableau garde les
+  métriques, triables.
+- **Pas de maximum** sur le nombre d'attaquants (au moins 2) ; au-delà d'un seuil, **rondes éliminatoires**.
+- **Même graine** pour toutes les entrées, moteur inchangé (pas de graine par simulation : les tirages ne sont donc
+  presque pas partagés, la graine sert à la reproductibilité).
+- **Points** (points détruits, rendement) : pas dans la comparaison, traités avec les unités (phase 9).
+- **Console** inchangée (outil de debug, pas de comparaison).
+- **Armes à plusieurs profils dans le comparateur seulement** : Quick sim, Full sim et Core inchangés (le joueur y
+  choisit son profil ; s'il hésite, le comparateur est fait pour ça).
+
+1. **Comparaison, côté Simulation.** `Comparison` : un défenseur, une situation, au moins 2 attaquants (le nom de
+   l'attaquant désigne l'entrée, unique). Lancement entrée après entrée (`Simulator.Run`, même graine), progression
+   globale, annulation. Indicateurs : score d'efficacité, figurines tuées et PV retirés en moyenne, P(unité détruite),
+   % de l'unité détruite, P(≥ k) ; meilleure entrée pour chacun, ex æquo compris. Résultat sérialisable (un
+   `SimulationData` par entrée : contrat de l'API) ; JSON d'une comparaison, lecture stricte. Aucun dé en plus
+   (non-régression au bit près).
+2. **Rondes éliminatoires, côté Simulation.** Façon Raidbots : une ronde courte sur toutes les entrées, puis une plus
+   longue sur les meilleures, puis éventuellement une troisième ; élimination sur le score d'efficacité ; progression
+   par ronde ; éliminés gardés avec leur ronde. Mécanisme **générique**, repris par l'optimiseur (phase 6). **Seuils**
+   (quand faire une, deux ou trois rondes, simulations par ronde) **à fixer avec l'utilisateur** en début d'étape,
+   d'après des temps mesurés.
+3. **Comparaison, côté UI.** Mode à part, tuile sur l'accueil. Entrées prises dans le scénario courant ou dans des
+   fichiers (attaquant seul ou scénario complet), dupliquées, renommées ; classement en tableau, top 3 mis en
+   évidence, rondes et éliminés visibles ; ouvrir / enregistrer.
+4. **Graphiques de la comparaison.** Histogrammes superposés et courbes P(≥ k) des **3 gagnants seulement** (lisibilité),
+   quel que soit le nombre d'attaquants au départ.
+5. **Armes à plusieurs profils.** Dans la définition d'une comparaison seulement : une arme peut porter plusieurs
+   profils ; la comparaison déplie **toutes les combinaisons** en variantes (attaquants ordinaires), départagées par
+   les rondes ; le profil retenu pour chaque arme des gagnants est indiqué. Hazardous non géré (phase 8), sans
+   avertissement.
+6. **Partie web** : comparaison, rondes et profils dans l'API et le client ; plafond de simulations par lancement à
+   adapter (plusieurs entrées, plusieurs rondes).
 
 ### Phase 6 : optimiseur du séquencement des armes
 
@@ -298,6 +327,7 @@ pool sont lancées ensemble), avec les statistiques du Full sim. Décisions de l
   (garder tout ordre qui chevauche le meilleur, avec un plafond) plutôt qu'une proportion fixe, et sur les trois
   métriques (un ordre reste s'il est parmi les meilleurs sur l'une d'elles) ; même graine pour tous les ordres
   (écarts plus fiables, comme la comparaison) ; avertissement ou plafond au-delà de ~6 pools (720 ordres).
+  Mécanisme des rondes et score d'efficacité repris de la phase 5 (étape 2, décision du 2026-11-02).
 - **Tableau des 10 meilleurs ordres**, trié par défaut par P(unité détruite), triable par % de kill, PV retirés,
   figurines tuées ; meilleur de chaque colonne mis en évidence.
 - **Export JSON** de l'ordre choisi, réutilisable au Quick sim et au Full sim : le format « attaquant seul » (ou
@@ -349,6 +379,8 @@ de codes.
    fiches d'unité). Onglet du Full sim, dans l'esprit des onglets Groupes et Armes.
    - Points portés par la fiche d'unité (et par chaque leader), repris dans le scénario composé ; saisie au Full sim
      pour un scénario hors bibliothèque : à préciser. Points détruits et rendement de la phase 3, étape 4.
+   - Comparateur (phase 5) : points détruits et rendement ajoutés ici, avec la gestion des points dans toute
+     l'application (décision du 2026-11-02).
    - **Kill threat** (décision de l'utilisateur, 2026-10-28 : rentabilité) : distribution des points détruits par
      simulation (au prorata des PV, en points entiers arrondis à l'inférieur : exact pour P(≥ son coût)),
      P(détruire au moins sa propre valeur).
@@ -1110,6 +1142,10 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   (tuiles en colonne, onglets dans une liste, barre de lancement compacte à choix rapides). **Tag `v0.4.1`** (accord de
   l'utilisateur), qui redéploie le site. 572 tests verts (223 Core, 84 Simulation, 221 UI, 25 Web, 19 client web).
   Prochaine phase : 5 (comparaison), à préciser.
+- Phase 5 découpée avec l'utilisateur le 2026-11-02 (branche `docs/phase5-decoupage`) : top 3 de N attaquants contre
+  un défenseur, score d'efficacité (40 / 30 / 30), rondes éliminatoires, interface, histogrammes superposés des
+  3 gagnants, armes à plusieurs profils (comparateur seulement), web ; #1 (N cibles) reporté, points en phase 9,
+  console inchangée. Prochaine étape : 1 (comparaison, côté Simulation), à préciser.
 
 Points notés pour la suite :
 - Raccourcis clavier : Ctrl+S / Ctrl+O sont interceptés par `wh40ksim.js` (action du navigateur empêchée) ; à revérifier

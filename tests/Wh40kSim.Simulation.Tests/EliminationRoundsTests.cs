@@ -129,7 +129,7 @@ public class EliminationRoundsTests
         var attackers = new[] { Attacker("Fort", 20), Attacker("Bon", 16), Attacker("Moyen", 12) }
             .Concat(Enumerable.Range(1, 7).Select(i => Attacker($"Faible {i}", 1)))
             .ToArray();
-        var comparison = new Comparison { Defender = Squad, Attackers = attackers };
+        var comparison = Comparison.Of(Squad, attackers);
 
         var result = Comparator.Run(comparison, 100_000, seed: 5);
 
@@ -156,7 +156,7 @@ public class EliminationRoundsTests
     public void Eliminated_entries_are_ranked_from_the_latest_rounds_then_by_score()
     {
         var attackers = new[] { Attacker("A", 20), Attacker("B", 16), Attacker("C", 12), Attacker("D", 1), Attacker("E", 3) };
-        var result = Comparator.Run(new Comparison { Defender = Squad, Attackers = attackers }, 100_000, seed: 5);
+        var result = Comparator.Run(Comparison.Of(Squad, attackers), 100_000, seed: 5);
 
         Assert.Equal([10_000, 100_000], result.Rounds);
         Assert.Equal(["A", "B", "C", "E", "D"], result.Ranking.Select(r => r.Name));
@@ -169,7 +169,7 @@ public class EliminationRoundsTests
     public void Data_inconsistent_with_the_rounds_are_rejected()
     {
         var attackers = new[] { Attacker("A", 20), Attacker("B", 16), Attacker("C", 12), Attacker("D", 1) };
-        var data = Comparator.Run(new Comparison { Defender = Squad, Attackers = attackers }, 100_000, seed: 5).Data;
+        var data = Comparator.Run(Comparison.Of(Squad, attackers), 100_000, seed: 5).Data;
         var entries = data.Entries.ToList();
 
         string Errors(ComparisonData d) => string.Join(" | ", d.Validate());

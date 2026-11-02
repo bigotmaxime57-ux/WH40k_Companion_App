@@ -24,7 +24,7 @@ public class ComparisonTests
         Weapons = [new WeaponGroup { ModelCount = 1, Weapon = new WeaponProfile { Name = "Bolter", Type = type, Attacks = attacks, Skill = 3, Strength = 4 } }],
     };
 
-    private static Comparison Of(params AttackerUnit[] attackers) => new() { Defender = Squad, Attackers = attackers };
+    private static Comparison Of(params AttackerUnit[] attackers) => Comparison.Of(Squad, attackers);
 
     // Validation
 
@@ -70,20 +70,43 @@ public class ComparisonTests
     public void Warnings_of_an_entry_are_prefixed_with_its_name()
     {
         var mixed = Attacker("Mixte", 5) with { Weapons = [.. Attacker("x", 5).Weapons, .. Attacker("y", 3, WeaponType.Melee).Weapons] };
-        var comparison = Of(Attacker("A", 5), mixed) with { Context = new AttackContext { SnapShooting = true } };
+        var comparison = Of(Attacker("A", 5), mixed) with { SnapShooting = true };
 
         var warning = Assert.Single(comparison.Warnings());
         Assert.StartsWith("Mixte : ", warning);
     }
 
     [Fact]
-    public void Each_scenario_shares_the_defender_and_the_situation()
+    public void Each_scenario_has_its_own_situation_and_the_common_overwatch()
     {
-        var context = new AttackContext { HalfRange = true };
-        var scenarios = (Of(Attacker("A", 5), Attacker("B", 10)) with { Context = context }).ToScenarios();
+        var comparison = new Comparison
+        {
+            Defender = Squad,
+            SnapShooting = true,
+            Entries =
+            [
+                new ComparisonEntry { Attacker = Attacker("A", 5), Context = new AttackContext { HalfRange = true } },
+                new ComparisonEntry { Attacker = Attacker("B", 10) },
+            ],
+        };
+
+        var scenarios = comparison.ToScenarios();
 
         Assert.Equal(["A", "B"], scenarios.Select(s => s.Attacker.Name));
-        Assert.All(scenarios, s => Assert.Same(context, s.Context));
+        Assert.Equal([true, false], scenarios.Select(s => s.Context.HalfRange));
+        Assert.All(scenarios, s => Assert.True(s.Context.SnapShooting));
+        Assert.All(scenarios, s => Assert.Equal("Gardes", s.Defender.Groups[0].Name));
+    }
+
+    [Fact]
+    public void Overwatch_in_the_situation_of_an_entry_is_rejected()
+    {
+        var comparison = Of(Attacker("A", 5), Attacker("B", 10));
+        comparison = comparison with { Entries = [comparison.Entries[0] with { Context = new AttackContext { SnapShooting = true } }, comparison.Entries[1]] };
+
+        var error = Assert.Single(comparison.Validate());
+        Assert.StartsWith("A : ", error);
+        Assert.Contains("commun", error);
     }
 
     // JSON
@@ -91,28 +114,35 @@ public class ComparisonTests
     [Fact]
     public void Json_round_trip_keeps_the_comparison()
     {
-        var comparison = Of(Attacker("A", 5), Attacker("B", 10)) with { Context = new AttackContext { HalfRange = true } };
+        var comparison = Of(Attacker("A", 5), Attacker("B", 10)) with { SnapShooting = true };
+        comparison = comparison with { Entries = [comparison.Entries[0] with { Context = new AttackContext { Charged = true } }, comparison.Entries[1]] };
         string json = ComparisonJson.Serialize(comparison);
 
         var copy = ComparisonJson.Deserialize(json);
 
         Assert.Equal(json, ComparisonJson.Serialize(copy));
+        Assert.True(copy.SnapShooting);
+        Assert.True(copy.Entries[0].Context.Charged);
         var root = JsonNode.Parse(json)!.AsObject();
-        Assert.Equal(["defender", "context", "attackers"], root.Select(p => p.Key));
+        Assert.Equal(["defender", "snapShooting", "entries"], root.Select(p => p.Key));
+        Assert.Equal(["attacker", "context"], root["entries"]![0]!.AsObject().Select(p => p.Key));
     }
 
     [Fact]
-    public void The_situation_is_optional()
+    public void Overwatch_and_situations_are_optional()
     {
         var root = JsonNode.Parse(ComparisonJson.Serialize(Of(Attacker("A", 5), Attacker("B", 10))))!.AsObject();
-        root.Remove("context");
+        root.Remove("snapShooting");
+        root["entries"]![0]!.AsObject().Remove("context");
 
-        Assert.False(ComparisonJson.Deserialize(root.ToJsonString()).Context.SnapShooting);
+        var comparison = ComparisonJson.Deserialize(root.ToJsonString());
+        Assert.False(comparison.SnapShooting);
+        Assert.False(comparison.Entries[0].Context.HalfRange);
     }
 
     [Theory]
     [InlineData("defender")]
-    [InlineData("attackers")]
+    [InlineData("entries")]
     public void A_missing_section_is_rejected(string section)
     {
         var root = JsonNode.Parse(ComparisonJson.Serialize(Of(Attacker("A", 5), Attacker("B", 10))))!.AsObject();
@@ -122,11 +152,14 @@ public class ComparisonTests
     }
 
     [Fact]
-    public void Null_attackers_are_rejected()
+    public void Null_entries_or_an_entry_without_attacker_are_rejected()
     {
         var root = JsonNode.Parse(ComparisonJson.Serialize(Of(Attacker("A", 5), Attacker("B", 10))))!.AsObject();
-        root["attackers"] = null;
+        root["entries"] = null;
+        Assert.Throws<JsonException>(() => ComparisonJson.Deserialize(root.ToJsonString()));
 
+        root = JsonNode.Parse(ComparisonJson.Serialize(Of(Attacker("A", 5), Attacker("B", 10))))!.AsObject();
+        root["entries"]![0]!.AsObject().Remove("attacker");
         Assert.Throws<JsonException>(() => ComparisonJson.Deserialize(root.ToJsonString()));
     }
 

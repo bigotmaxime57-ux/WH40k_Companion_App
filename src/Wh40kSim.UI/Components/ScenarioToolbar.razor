@@ -2,15 +2,15 @@
    Sur téléphone, les boutons n'affichent que leur icône et le nom du fichier passe à la ligne (wh40ksim.css). *@
 
 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Wrap="Wrap.Wrap" Class="wh-toolbar">
-    <MudTooltip Text="@L["Toolbar_NewHelp"]">
+    <MudTooltip Text="@(NewHelp ?? L["Toolbar_NewHelp"])">
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.NoteAdd" Disabled="Running" OnClick="OnNew"
                    aria-label="@L["Toolbar_New"]" data-test="new"><span class="wh-toolbar-label">@L["Toolbar_New"]</span></MudButton>
     </MudTooltip>
-    <MudTooltip Text="@L["Toolbar_OpenHelp"]">
+    <MudTooltip Text="@(OpenHelp ?? L["Toolbar_OpenHelp"])">
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.FolderOpen" Disabled="Running" OnClick="OnOpen"
                    aria-label="@L["Toolbar_Open"]" data-test="open"><span class="wh-toolbar-label">@L["Toolbar_Open"]</span></MudButton>
     </MudTooltip>
-    <MudTooltip Text="@L["Toolbar_SaveHelp"]">
+    <MudTooltip Text="@(SaveHelp ?? L["Toolbar_SaveHelp"])">
         <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Save" Disabled="@(!CanSave)" OnClick="OnSave"
                    aria-label="@L["Toolbar_Save"]" data-test="save"><span class="wh-toolbar-label">@L["Toolbar_Save"]</span></MudButton>
     </MudTooltip>
@@ -35,4 +35,14 @@
 
     [Parameter]
     public EventCallback OnSave { get; set; }
+
+    /// <summary>Bulles des boutons, si l'écran ne porte pas sur un scénario (comparateur) ; sinon celles du scénario.</summary>
+    [Parameter]
+    public string? NewHelp { get; set; }
+
+    [Parameter]
+    public string? OpenHelp { get; set; }
+
+    [Parameter]
+    public string? SaveHelp { get; set; }
 }

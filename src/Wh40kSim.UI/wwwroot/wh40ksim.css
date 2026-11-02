@@ -198,6 +198,19 @@
     order: 2;
 }
 
+/* Titre modifiable sur place (nom d'un attaquant au comparateur) : texte et stylo, ou champ pendant la saisie */
+.wh-name-title {
+    align-items: center;
+    display: inline-flex;
+    gap: .25rem;
+    min-width: 0;
+}
+
+.wh-name-title .mud-input-control {
+    margin: 0;
+    min-width: 12rem;
+}
+
 /* Bulle d'aide « ? » à côté d'un titre (explications au survol) */
 .wh-help-icon {
     color: var(--mud-palette-text-secondary);
@@ -1085,6 +1098,24 @@ rect.wh-chart-bar-neutral {
 
 .wh-top-bad {
     color: var(--mud-palette-error);
+}
+
+/* Classement du comparateur : en-têtes cliquables (tri), attaquants éliminés estompés, défilement dans le cadre */
+.wh-sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.wh-sortable:hover {
+    color: var(--mud-palette-primary);
+}
+
+.wh-eliminated {
+    opacity: 0.55;
+}
+
+.wh-table-scroll {
+    overflow-x: auto;
 }
 
 .wh-bar-cell {

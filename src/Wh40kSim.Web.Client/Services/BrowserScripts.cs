@@ -15,6 +15,10 @@ public sealed class BrowserScripts(IJSRuntime js)
     public async Task<OpenedFile?> OpenFileAsync(CancellationToken cancellationToken = default) =>
         await (await Module).InvokeAsync<OpenedFile?>("openFile", cancellationToken);
 
+    /// <summary>Sélecteur de fichiers du navigateur, sélection multiple ; vide si l'utilisateur annule.</summary>
+    public async Task<IReadOnlyList<OpenedFile>> OpenFilesAsync(CancellationToken cancellationToken = default) =>
+        await (await Module).InvokeAsync<OpenedFile[]?>("openFiles", cancellationToken) ?? [];
+
     /// <summary>Téléchargement d'un fichier sous le nom proposé.</summary>
     public async Task DownloadFileAsync(string fileName, string content, CancellationToken cancellationToken = default) =>
         await (await Module).InvokeVoidAsync("downloadFile", cancellationToken, fileName, content);

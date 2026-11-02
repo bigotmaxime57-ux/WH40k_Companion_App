@@ -1,10 +1,21 @@
+using System.Text.Json.Serialization;
 using Wh40kSim.Core.Model;
 
 namespace Wh40kSim.Simulation.Comparisons;
 
+/// <summary>Un attaquant comparé et sa propre situation (a chargé, immobile, demi-portée, cible de Precision).</summary>
+public sealed record ComparisonEntry
+{
+    public required AttackerUnit Attacker { get; init; }
+
+    /// <summary>Situation propre à cet attaquant ; le tir en overwatch, commun, est porté par la comparaison.</summary>
+    public AttackContext Context { get; init; } = new();
+}
+
 /// <summary>
-/// Comparaison de plusieurs attaquants contre un même défenseur, dans une même situation : qui fait le mieux ? Chaque
-/// attaquant forme une entrée, désignée par son nom (unique). Immuable ; JSON : <see cref="ComparisonJson"/>.
+/// Comparaison de plusieurs attaquants contre un même défenseur : qui fait le mieux ? Chaque attaquant forme une
+/// entrée, désignée par son nom (unique), avec sa propre situation ; le tir en overwatch est commun à tous (décision
+/// de l'utilisateur). Immuable ; JSON : <see cref="ComparisonJson"/>.
 /// </summary>
 public sealed record Comparison
 {
@@ -13,18 +24,32 @@ public sealed record Comparison
 
     public required DefenderUnit Defender { get; init; }
 
-    public AttackContext Context { get; init; } = new();
+    /// <summary>Tir en overwatch (snap shooting), pour tous les attaquants.</summary>
+    public bool SnapShooting { get; init; }
+
+    /// <summary>Attaquants comparés et leur situation, dans l'ordre de saisie.</summary>
+    public required IReadOnlyList<ComparisonEntry> Entries { get; init; }
 
     /// <summary>Attaquants comparés, dans l'ordre de saisie.</summary>
-    public required IReadOnlyList<AttackerUnit> Attackers { get; init; }
+    [JsonIgnore]
+    public IReadOnlyList<AttackerUnit> Attackers => Entries.Select(e => e.Attacker).ToList();
 
-    /// <summary>Un scénario par attaquant, dans l'ordre de saisie.</summary>
+    /// <summary>Comparaison d'attaquants qui ont tous la situation par défaut.</summary>
+    public static Comparison Of(DefenderUnit defender, IEnumerable<AttackerUnit> attackers, bool snapShooting = false) => new()
+    {
+        Defender = defender,
+        SnapShooting = snapShooting,
+        Entries = attackers.Select(a => new ComparisonEntry { Attacker = a }).ToList(),
+    };
+
+    /// <summary>Un scénario par attaquant, dans l'ordre de saisie : sa situation, avec le tir en overwatch commun.</summary>
     public IReadOnlyList<Scenario> ToScenarios() =>
-        Attackers.Select(attacker => new Scenario { Attacker = attacker, Defender = Defender, Context = Context }).ToList();
+        Entries.Select(e => new Scenario { Attacker = e.Attacker, Defender = Defender, Context = e.Context with { SnapShooting = SnapShooting } }).ToList();
 
     /// <summary>
-    /// Incohérences (vide si la comparaison peut être lancée) : nombre d'attaquants, noms vides ou en double, erreurs du
-    /// scénario de chaque entrée, précédées de son nom (une seule entrée invalide bloque le lancement).
+    /// Incohérences (vide si la comparaison peut être lancée) : nombre d'attaquants, noms vides ou en double, overwatch
+    /// donné dans la situation d'une entrée (il est commun), erreurs du scénario de chaque entrée, précédées de son nom
+    /// (une seule entrée invalide bloque le lancement).
     /// </summary>
     public IReadOnlyList<string> Validate()
     {
@@ -32,6 +57,10 @@ public sealed record Comparison
         var scenarios = ToScenarios();
         for (int i = 0; i < scenarios.Count; i++)
         {
+            if (Entries[i].Context.SnapShooting)
+            {
+                errors.Add($"{Label(i)} : le tir en overwatch est commun à toute la comparaison, pas propre à un attaquant.");
+            }
             errors.AddRange(scenarios[i].Validate().Select(e => $"{Label(i)} : {e}"));
         }
         return errors;
@@ -81,5 +110,5 @@ public sealed record Comparison
     }
 
     private string Label(int index) =>
-        string.IsNullOrWhiteSpace(Attackers[index].Name) ? $"Attaquant n° {index + 1}" : Attackers[index].Name;
+        string.IsNullOrWhiteSpace(Entries[index].Attacker.Name) ? $"Attaquant n° {index + 1}" : Entries[index].Attacker.Name;
 }

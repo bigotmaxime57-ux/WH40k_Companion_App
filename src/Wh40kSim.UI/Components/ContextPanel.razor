@@ -3,20 +3,44 @@
     chose pour les armes qui tirent (demi-portée, immobile, a chargé, cible de Precision). Ce choix vient du Core
     (HalfRangeMatters, RemainedStationaryMatters, ChargedMatters, PrecisionTargetMatters), aucune règle n'est écrite ici.
     Les boosts sont dans les cartes de l'attaquant et du défenseur.
+    Embedded (comparateur) : seulement les conditions, sous un sous-titre, dans la carte d'un attaquant ; rien du tout si
+    aucune ne compte pour ses armes. Le tir en overwatch, commun, est alors dans le bandeau de l'écran.
 *@
 
-<MudPaper Elevation="3" Class="pa-4 wh-section" data-test="context">
-    <SectionHeader Icon="@Icons.Material.Filled.Terrain" Title="@L["Context_Title"]" Help="@([L["Help_Context"]])" />
-
-    <div class="wh-subsection-title">
-        <MudSwitch T="bool" Label="@L["Context_SnapShooting"]" Color="Color.Primary" @bind-Value="Context.SnapShooting" @bind-Value:after="NotifyChanged"
-                   data-test="snap-shooting" />
-        <HelpBubble Lines="@([L["Help_SnapShooting"], L["Help_SnapShootingLimits"]])" />
-    </div>
-    @if (!HasConditions)
+@if (Embedded)
+{
+    @if (HasConditions)
     {
-        <MudText Typo="Typo.body2" Class="wh-muted" data-test="context-none">@L["Context_None"]</MudText>
+        <div data-test="attacker-situation">
+            <div class="wh-subsection-title mt-3">
+                <MudText Typo="Typo.subtitle1">@L["Context_Title"]</MudText>
+                <HelpBubble Lines="@([L["Help_AttackerSituation"]])" />
+            </div>
+            @Conditions
+        </div>
     }
+}
+else
+{
+    <MudPaper Elevation="3" Class="pa-4 wh-section" data-test="context">
+        <SectionHeader Icon="@Icons.Material.Filled.Terrain" Title="@L["Context_Title"]" Help="@([L["Help_Context"]])" />
+
+        <div class="wh-subsection-title">
+            <MudSwitch T="bool" Label="@L["Context_SnapShooting"]" Color="Color.Primary" @bind-Value="Context.SnapShooting" @bind-Value:after="NotifyChanged"
+                       data-test="snap-shooting" />
+            <HelpBubble Lines="@([L["Help_SnapShooting"], L["Help_SnapShootingLimits"]])" />
+        </div>
+        @if (!HasConditions)
+        {
+            <MudText Typo="Typo.body2" Class="wh-muted" data-test="context-none">@L["Context_None"]</MudText>
+        }
+        @Conditions
+    </MudPaper>
+}
+
+@code {
+    /// <summary>Conditions qui comptent pour les armes qui tirent (choix du Core).</summary>
+    private RenderFragment Conditions => @<text>
     @if (Reference.HalfRangeMatters)
     {
         <MudCheckBox T="bool" Label="@L["Context_HalfRange"]" @bind-Value="Context.HalfRange" @bind-Value:after="NotifyChanged" data-test="half-range" />
@@ -41,9 +65,12 @@
             }
         </MudSelect>
     }
-</MudPaper>
+    </text>;
 
-@code {
+    /// <summary>Dans la carte d'un attaquant (comparateur) : conditions seulement, sans l'overwatch ni le cadre.</summary>
+    [Parameter]
+    public bool Embedded { get; set; }
+
     /// <summary>Valeur de la liste déroulante pour « le premier PERSONNAGE en jeu » (le formulaire utilise null).</summary>
     private const string FirstCharacter = "";
 

@@ -23,11 +23,25 @@ public sealed class DesktopScenarioFileService(IFilePicker filePicker, IFileSave
     public async Task<OpenedFile?> OpenAsync(CancellationToken cancellationToken = default)
     {
         var file = await filePicker.PickAsync(new PickOptions { FileTypes = JsonFiles });
-        if (file is null)
-        {
-            return null;
-        }
+        return file is null ? null : await ReadAsync(file, cancellationToken);
+    }
 
+    public async Task<IReadOnlyList<OpenedFile>> OpenManyAsync(CancellationToken cancellationToken = default)
+    {
+        var files = await filePicker.PickMultipleAsync(new PickOptions { FileTypes = JsonFiles });
+        var opened = new List<OpenedFile>();
+        foreach (var file in files ?? [])
+        {
+            if (file is not null)
+            {
+                opened.Add(await ReadAsync(file, cancellationToken));
+            }
+        }
+        return opened;
+    }
+
+    private async Task<OpenedFile> ReadAsync(FileResult file, CancellationToken cancellationToken)
+    {
         string content;
         try
         {

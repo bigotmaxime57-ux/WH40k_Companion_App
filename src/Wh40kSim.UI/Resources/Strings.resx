@@ -946,4 +946,184 @@
   <data name="StaleResults_Rerun" xml:space="preserve">
     <value>Relancer la simulation</value>
   </data>
+  <data name="Mode_Comparison" xml:space="preserve">
+    <value>Comparateur</value>
+  </data>
+  <data name="Home_ComparisonDescription" xml:space="preserve">
+    <value>Plusieurs attaquants contre le même défenseur : qui fait le mieux ? Rondes éliminatoires, podium et classement.</value>
+  </data>
+  <data name="Attacker_DuplicateHelp" xml:space="preserve">
+    <value>Dupliquer cet attaquant</value>
+  </data>
+  <data name="Attacker_RemoveHelp" xml:space="preserve">
+    <value>Retirer cet attaquant de la comparaison</value>
+  </data>
+  <data name="Comparison_NewHelp" xml:space="preserve">
+    <value>Nouvelle comparaison, à partir du scénario courant (son défenseur, son overwatch, son attaquant et sa situation)</value>
+  </data>
+  <data name="Comparison_OpenHelp" xml:space="preserve">
+    <value>Ouvrir une comparaison enregistrée ; ou un scénario, dont le défenseur et l'overwatch remplacent ceux de la comparaison et dont l'attaquant s'ajoute avec sa situation ; ou un attaquant seul (ajouté) ou un défenseur seul (Ctrl+O)</value>
+  </data>
+  <data name="Comparison_SaveHelp" xml:space="preserve">
+    <value>Enregistrer la comparaison : défenseur, situation et tous les attaquants (Ctrl+S)</value>
+  </data>
+  <data name="Comparison_Untitled" xml:space="preserve">
+    <value>Nouvelle comparaison</value>
+  </data>
+  <data name="Comparison_RoundPlan" xml:space="preserve">
+    <value>{0} ronde(s) : {1} simulations</value>
+  </data>
+  <data name="Comparison_RoundsHelp" xml:space="preserve">
+    <value>Le nombre de simulations choisi est celui de la finale. À partir de 4 attaquants, des rondes plus courtes éliminent d'abord ceux qui sont nettement moins bons (2 rondes de 4 à 9 attaquants, 3 rondes dès 10) : le top 3 n'est jamais éliminé.</value>
+  </data>
+  <data name="Comparison_Round" xml:space="preserve">
+    <value>Ronde {0}/{1}</value>
+  </data>
+  <data name="Comparison_Attackers" xml:space="preserve">
+    <value>Attaquants comparés ({0})</value>
+  </data>
+  <data name="Comparison_AttackersHelp" xml:space="preserve">
+    <value>Chaque attaquant est simulé contre le même défenseur, avec sa propre situation (dans sa carte, seulement si ses armes en ont besoin). Son nom, titre de la carte, le désigne dans les résultats : il doit être unique.</value>
+  </data>
+  <data name="Comparison_AddFromScenario" xml:space="preserve">
+    <value>Depuis le scénario courant</value>
+  </data>
+  <data name="Comparison_AddFromFiles" xml:space="preserve">
+    <value>Depuis des fichiers</value>
+  </data>
+  <data name="Comparison_AddNew" xml:space="preserve">
+    <value>Nouvel attaquant</value>
+  </data>
+  <data name="Comparison_AddedFromScenario" xml:space="preserve">
+    <value>Attaquant du scénario courant ajouté : {0}.</value>
+  </data>
+  <data name="Comparison_ScenarioUnreadable" xml:space="preserve">
+    <value>Le scénario courant contient une expression de dés illisible : corrigez-la au Quick sim ou au Full sim.</value>
+  </data>
+  <data name="Comparison_FilesAdded" xml:space="preserve">
+    <value>{0} attaquant(s) ajouté(s).</value>
+  </data>
+  <data name="Comparison_FilesSkipped" xml:space="preserve">
+    <value>{0} attaquant(s) ajouté(s). Sans attaquant ou illisibles : {1}.</value>
+  </data>
+  <data name="Comparison_AttackerUnreadable" xml:space="preserve">
+    <value>{0} contient une expression de dés illisible : corrigez-la avant d'enregistrer.</value>
+  </data>
+  <data name="Comparison_DefenderFromScenario" xml:space="preserve">
+    <value>Reprendre du scénario courant</value>
+  </data>
+  <data name="Comparison_DefenderFromScenarioHelp" xml:space="preserve">
+    <value>Remplace le défenseur de la comparaison par celui du scénario courant (Quick sim / Full sim).</value>
+  </data>
+  <data name="Comparison_DefenderTaken" xml:space="preserve">
+    <value>Défenseur repris du scénario courant.</value>
+  </data>
+  <data name="Comparison_ScenarioImported" xml:space="preserve">
+    <value>{0} ouvert : son défenseur et son overwatch remplacent ceux de la comparaison, son attaquant est ajouté avec sa situation ({1}).</value>
+  </data>
+  <data name="Comparison_Saved" xml:space="preserve">
+    <value>Comparaison enregistrée : {0}</value>
+  </data>
+  <data name="Comparison_ConfirmMessage" xml:space="preserve">
+    <value>La comparaison en cours a été modifiée et n'est pas enregistrée. Abandonner ces modifications ?</value>
+  </data>
+  <data name="Comparison_ResultsHeader" xml:space="preserve">
+    <value>Contre {0} · {1} attaquants · {2} simulations en finale · {3} ronde(s) · graine {4} · {5} s</value>
+  </data>
+  <data name="Comparison_NoResult" xml:space="preserve">
+    <value>Aucune comparaison pour l'instant : revenez à la saisie et lancez-la.</value>
+  </data>
+  <data name="Comparison_StaleBanner" xml:space="preserve">
+    <value>La comparaison a été modifiée depuis ce calcul : ces résultats correspondent à l'ancienne version.</value>
+  </data>
+  <data name="Comparison_Podium" xml:space="preserve">
+    <value>Podium</value>
+  </data>
+  <data name="Comparison_PodiumHelp" xml:space="preserve">
+    <value>Les 3 meilleurs scores d'efficacité parmi les finalistes. Le score combine les PV retirés, les figurines tuées et la destruction de l'unité (détail dans la bulle de chaque gagnant).</value>
+  </data>
+  <data name="Comparison_PodiumPlace" xml:space="preserve">
+    <value>{0}. {1}</value>
+  </data>
+  <data name="Comparison_ScoreLabel" xml:space="preserve">
+    <value>Score d'efficacité</value>
+  </data>
+  <data name="Comparison_ScoreHelp" xml:space="preserve">
+    <value>Score de 0 (rien fait) à 100 (unité toujours détruite), calculé à chaque simulation : 40 % pour la part des PV retirés, 30 % pour la part des figurines tuées, 30 % pour la destruction de l'unité. Après le ± : le bruit de la simulation.</value>
+  </data>
+  <data name="Comparison_ScoreParts" xml:space="preserve">
+    <value>PV retirés {0} + figurines tuées {1} + unité détruite {2}</value>
+  </data>
+  <data name="Comparison_TiedWithPrevious" xml:space="preserve">
+    <value>À égalité avec le précédent (écart dans le bruit de la simulation)</value>
+  </data>
+  <data name="Comparison_FourthTied" xml:space="preserve">
+    <value>{0} (4e) est à égalité statistique avec le 3e : le top 3 est incertain à sa limite.</value>
+  </data>
+  <data name="Comparison_Ranking" xml:space="preserve">
+    <value>Classement</value>
+  </data>
+  <data name="Comparison_RankingHelp" xml:space="preserve">
+    <value>Finalistes d'abord, par score, puis les attaquants éliminés dans les rondes précédentes (moins de simulations). En gras : la meilleure valeur de chaque colonne parmi les finalistes, ex æquo compris. Cliquez sur un en-tête pour trier.</value>
+  </data>
+  <data name="Comparison_Rank" xml:space="preserve">
+    <value>Rang</value>
+  </data>
+  <data name="Comparison_Name" xml:space="preserve">
+    <value>Attaquant</value>
+  </data>
+  <data name="Comparison_Score" xml:space="preserve">
+    <value>Score</value>
+  </data>
+  <data name="Comparison_Wipe" xml:space="preserve">
+    <value>Unité détruite</value>
+  </data>
+  <data name="Comparison_Status" xml:space="preserve">
+    <value>Statut</value>
+  </data>
+  <data name="Comparison_DamageAndShare" xml:space="preserve">
+    <value>{0} ({1} de l'unité)</value>
+  </data>
+  <data name="Comparison_Finalist" xml:space="preserve">
+    <value>Finaliste</value>
+  </data>
+  <data name="Comparison_Eliminated" xml:space="preserve">
+    <value>Éliminé, ronde {0} ({1} simulations)</value>
+  </data>
+  <data name="Comparison_RowActions" xml:space="preserve">
+    <value>Actions sur cet attaquant</value>
+  </data>
+  <data name="Comparison_Analyse" xml:space="preserve">
+    <value>Analyser au Full sim</value>
+  </data>
+  <data name="Comparison_SaveAttacker" xml:space="preserve">
+    <value>Enregistrer l'attaquant</value>
+  </data>
+  <data name="Comparison_SaveScenario" xml:space="preserve">
+    <value>Enregistrer le scénario complet</value>
+  </data>
+  <data name="Comparison_ScenarioFileName" xml:space="preserve">
+    <value>{0} contre {1}</value>
+  </data>
+  <data name="Attacker_MoveUp" xml:space="preserve">
+    <value>Monter cet attaquant</value>
+  </data>
+  <data name="Attacker_MoveDown" xml:space="preserve">
+    <value>Descendre cet attaquant</value>
+  </data>
+  <data name="Attacker_Rename" xml:space="preserve">
+    <value>Renommer cet attaquant</value>
+  </data>
+  <data name="Comparison_AttackerImported" xml:space="preserve">
+    <value>Attaquant ajouté depuis {0} : {1}.</value>
+  </data>
+  <data name="Comparison_SnapShootingHelp" xml:space="preserve">
+    <value>Au comparateur, l'overwatch vaut pour tous les attaquants.</value>
+  </data>
+  <data name="Help_AttackerSituation" xml:space="preserve">
+    <value>Conditions propres à cet attaquant, seulement celles qui changent quelque chose pour ses armes : demi-portée (Rapid Fire, Melta), restée immobile (Heavy), a chargé (Lance), cible de Precision.</value>
+  </data>
+  <data name="Comparison_PrecisionOn" xml:space="preserve">
+    <value>Precision sur {0}</value>
+  </data>
 </root>

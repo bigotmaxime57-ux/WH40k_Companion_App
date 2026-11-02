@@ -335,9 +335,33 @@ Découpage revu avec l'utilisateur le 2026-11-02. Décisions :
      d'élimination et simulations de chaque entrée ; top 3, égalités et meilleures entrées sur les finalistes seuls.
    - Tests : seuils et rondes sautées ; élimination (nettement plus faible éliminé en première ronde, top 3 et entrées à
      égalité gardés) ; finalistes identiques à `Simulator.Run` ; progression par ronde ; annulation ; cohérence.
-3. **Comparaison, côté UI.** Mode à part, tuile sur l'accueil. Entrées prises dans le scénario courant ou dans des
-   fichiers (attaquant seul ou scénario complet), dupliquées, renommées ; classement en tableau, top 3 mis en
-   évidence, rondes et éliminés visibles ; ouvrir / enregistrer.
+3. **Comparaison, côté UI.** Précisée et validée par l'utilisateur le 2026-11-02 :
+   - **Accueil** : tuile « Comparateur » (icône podium), **masquée en web** jusqu'à l'étape 6 (décision de
+     l'utilisateur : `ISimulationService` dit si l'hôte sait comparer).
+   - **Saisie** (`/comparison`), comme le Full sim : bandeau (Nouveau / Ouvrir / Enregistrer d'un fichier de
+     comparaison, `ComparisonJson` ; nombre de simulations de la finale, graine, Lancer, Annuler ; bulle « ? » avec le
+     plan des rondes ; progression « Ronde 2/3 ») ; Situation commune (`ContextPanel`) ; Défenseur commun
+     (`DefenderPanel`, Ouvrir / Enregistrer) ; une carte repliable par attaquant (`AttackerPanel`, nom en en-tête,
+     Ouvrir / Enregistrer de l'attaquant, Dupliquer, Supprimer) ; ajout « Depuis le scénario courant », « Depuis des
+     fichiers » (**sélection multiple**, attaquant ou scénario complet ; décision de l'utilisateur) ou « Nouveau » ;
+     nom déjà pris → suffixe « (2) ». Erreurs et avertissements avec le nom de l'attaquant ; Lancer désactivé si
+     invalide ; raccourcis Ctrl+Entrée / Ctrl+S / Ctrl+O ; confirmation avant de perdre une saisie modifiée.
+   - **Défenseur et situation propres au comparateur** (décision de l'utilisateur) : repris du scénario courant à la
+     première ouverture, puis indépendants ; bouton « Reprendre le défenseur du scénario courant ». État propre dans la
+     session (formulaire, fichier, modifications, réglages, dernier résultat), conservé en changeant d'écran.
+   - **Résultats** (`/comparison/results`, graphiques à l'étape 4) : en-tête (défenseur, simulations, rondes, graine,
+     durée) ; **podium** des 3 gagnants en tuiles (score ± bruit, bulle « ? » avec ses trois parts), mention si le 4e
+     est à égalité ; **classement** triable (rang, nom, score, figurines, PV et % de l'unité, P(unité détruite),
+     statut finaliste ou éliminé avec ronde et simulations), meilleure valeur de chaque colonne en gras, égalités
+     signalées, éliminés grisés. Menu par ligne : **Analyser au Full sim** (charge l'attaquant, le défenseur et la
+     situation dans le scénario courant, confirmation si modifié) ; **Enregistrer l'attaquant** ; **Enregistrer le
+     scénario complet** (demande de l'utilisateur : garder une saisie faite à la main). Retour à la saisie ;
+     avertissement si la comparaison a changé depuis le calcul.
+   - Services : `ISimulationService` lance une comparaison (progression par ronde ; desktop : `Comparator.Run` en
+     priorité basse) ; `IScenarioFileService` ouvre plusieurs fichiers (hôtes desktop et web).
+   - Tests bUnit : tuile (masquée sans comparaison), ajouts (scénario courant, fichiers, duplication et suffixe),
+     Lancer désactivé si invalide, saisie → résultats, podium et égalité du 4e, éliminés, tri, menu d'une ligne,
+     ouvrir / enregistrer.
 4. **Graphiques de la comparaison.** Histogrammes superposés et courbes P(≥ k) des **3 gagnants seulement** (lisibilité),
    quel que soit le nombre d'attaquants au départ.
 5. **Armes à plusieurs profils.** Dans la définition d'une comparaison seulement : une arme peut porter plusieurs
@@ -1185,7 +1209,31 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   étape : 2 (rondes éliminatoires), à préciser (seuils à fixer ensemble d'après des temps mesurés).
 - Phase 5, étape 2 (rondes éliminatoires) : précisée et validée le 2026-11-02 (seuils d'après un banc d'essai), codée
   sur la branche `phase5/etape2-rondes-eliminatoires`, fusionnée dans `main`, validée par l'utilisateur le
-  2026-11-02. Prochaine étape : 3 (comparaison, côté UI), à préciser. `RoundPlan`, `EliminationRounds`
+  2026-11-02. Prochaine étape : 3 (comparaison, côté UI), à préciser.
+- Phase 5, étape 3 (comparateur, côté UI) : précisée et validée le 2026-11-02 (avec l'enregistrement d'un attaquant
+  ou du scénario complet depuis le classement, demandé par l'utilisateur), codée sur la branche
+  `phase5/etape3-comparateur-ui`, fusionnée dans `main`, validée par l'utilisateur à l'écran le 2026-11-02. Prochaine
+  étape : 4 (graphiques de la comparaison), à préciser.
+  `ComparisonPage` (`/comparison`) et `ComparisonResultsPage` (`/comparison/results`), `ComparisonForm`,
+  `ComparisonState` (`ScenarioSession.Comparison`) ; `ISimulationService.SupportsComparison` / `RunComparisonAsync`,
+  `IScenarioFileService.OpenManyAsync` (desktop : `PickMultipleAsync` ; web : `openFiles`) ; `AttackerPanel` (titre,
+  Dupliquer / Supprimer, `InitiallyExpanded`), `ScenarioToolbar` (bulles réglables), `ProgressState.Label`
+  (« Ronde 2/3 ») ; raccourcis et noms de fichier mis en commun (`KeyboardShortcuts`, `FileNames`).
+  Retours de l'utilisateur : première carte d'attaquant dépliée ; flèches Monter / Descendre sur chaque carte ; nom de
+  l'attaquant en titre de la carte, modifiable avec un stylo (Entrée ou sortie du champ : valider, Échap : annuler),
+  sans le champ « Nom » en doublon dans la carte (`AttackerPanel.NameInTitle`, `SectionHeader.TitleContent` ; Quick
+  sim et Full sim inchangés) ; **Ouvrir** de la barre accepte aussi un scénario (demande de l'utilisateur : reprendre
+  un scénario du Full sim) : son défenseur et son overwatch remplacent ceux de la comparaison, son attaquant s'ajoute
+  avec sa situation ; un fichier attaquant s'ajoute, un fichier défenseur remplace le défenseur.
+  **Situation revue** (décision de l'utilisateur, 2026-11-02 : « a chargé », « immobile », « demi-portée » décrivent
+  chaque attaquant) : la section Situation disparaît du comparateur ; **overwatch commun**, interrupteur du bandeau ;
+  **situation propre à chaque attaquant**, dans sa carte, seulement les conditions qui comptent pour ses armes (comme la
+  pêche aux critiques ; `ContextPanel.Embedded`, choix du Core), cible de Precision comprise (plus de sélecteur sur les
+  cartes du défenseur au comparateur) ; situation rappelée sous le nom dans le classement, étiquette « Overwatch ».
+  Simulation : `Comparison` = défenseur, `SnapShooting`, `Entries` (`ComparisonEntry` : attaquant et situation) ; JSON
+  `{ defender, snapShooting, entries: [ { attacker, context } ] }`, `snapShooting` refusé dans une entrée ;
+  `ComparisonData` n'exige plus que le même overwatch. 652 tests verts (223 Core, 135 Simulation, 250 UI, 25 Web,
+  19 client web ; UI stables sur 3 exécutions). `RoundPlan`, `EliminationRounds`
   (`RoundProgress`, `RoundOutcome`, `Survivors`) ; `Comparator.Run` en rondes ; `ComparisonData.Rounds` / `Elapsed`,
   `ComparisonEntryData` (`EliminatedInRound`) ; `ComparisonResult.Rounds` / `Finalists`, `RankedEntry.EliminatedInRound`
   / `IsFinalist`. 622 tests verts (223 Core, 134 Simulation, 221 UI, 25 Web, 19 client web). Banc d'essai refait avec

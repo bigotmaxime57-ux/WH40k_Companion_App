@@ -3,7 +3,14 @@
 <div class="wh-section-header">
     @Leading
     <MudIcon Icon="@Icon" />
-    <MudText Typo="Typo.h6">@Title</MudText>
+    @if (TitleContent is not null)
+    {
+        @TitleContent
+    }
+    else
+    {
+        <MudText Typo="Typo.h6">@Title</MudText>
+    }
     @if (Help is not null)
     {
         <HelpBubble Lines="Help" />
@@ -24,6 +31,10 @@
     /// <summary>Explications de la section, derrière une bulle « ? » à côté du titre.</summary>
     [Parameter]
     public IReadOnlyList<string>? Help { get; set; }
+
+    /// <summary>Remplace le texte du titre (titre modifiable sur place, comme le nom d'un attaquant au comparateur).</summary>
+    [Parameter]
+    public RenderFragment? TitleContent { get; set; }
 
     /// <summary>Élément placé avant l'icône (bouton de repli d'une section repliable).</summary>
     [Parameter]

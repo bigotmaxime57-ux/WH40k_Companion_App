@@ -8,11 +8,15 @@ public sealed class ProgressState
 {
     public double Value { get; private set; }
 
+    /// <summary>Étape en cours, affichée devant le pourcentage (« Ronde 2/3 » au comparateur) ; null sans étape.</summary>
+    public string? Label { get; private set; }
+
     public event Action? Changed;
 
-    public void Report(double value)
+    public void Report(double value, string? label = null)
     {
         Value = value;
+        Label = label;
         Changed?.Invoke();
     }
 }

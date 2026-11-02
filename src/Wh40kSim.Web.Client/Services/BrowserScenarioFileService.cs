@@ -10,6 +10,8 @@ public sealed class BrowserScenarioFileService(BrowserScripts scripts) : IScenar
 {
     public Task<OpenedFile?> OpenAsync(CancellationToken cancellationToken = default) => scripts.OpenFileAsync(cancellationToken);
 
+    public Task<IReadOnlyList<OpenedFile>> OpenManyAsync(CancellationToken cancellationToken = default) => scripts.OpenFilesAsync(cancellationToken);
+
     /// <returns>Le nom proposé : le navigateur télécharge toujours, l'utilisateur ne peut pas annuler.</returns>
     public async Task<string?> SaveAsync(string content, string suggestedFileName, CancellationToken cancellationToken = default)
     {

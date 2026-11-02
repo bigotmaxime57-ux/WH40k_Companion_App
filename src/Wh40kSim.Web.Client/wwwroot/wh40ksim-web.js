@@ -15,6 +15,22 @@ export function openFile() {
     });
 }
 
+// Sélecteur de fichiers, sélection multiple ; rend [{ fileName, content }…], vide si l'utilisateur annule.
+export function openFiles() {
+    return new Promise(resolve => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.multiple = true;
+        input.accept = '.json,application/json';
+        input.addEventListener('change', async () => {
+            const files = Array.from(input.files || []);
+            resolve(await Promise.all(files.map(async file => ({ fileName: file.name, content: await file.text() }))));
+        });
+        input.addEventListener('cancel', () => resolve([]));
+        input.click();
+    });
+}
+
 // Enregistre en téléchargeant le fichier sous le nom proposé.
 export function downloadFile(fileName, content) {
     const url = URL.createObjectURL(new Blob([content], { type: 'application/json' }));

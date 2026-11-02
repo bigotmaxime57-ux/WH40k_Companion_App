@@ -45,6 +45,7 @@ public sealed class LaunchLogTests : IDisposable
 
         string line = Assert.Single(await LinesAsync(1));
         Assert.Matches(@"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}Z \| simulation \| terminé \| ", line);
+        Assert.NotEqual(0xEF, File.ReadAllBytes(LogPath)[0]);   // pas de marqueur UTF-8 en tête (BOM)
         Assert.Contains("« Rubrics » contre « Défenseur »", line);
         Assert.Contains("| 1 arme(s) |", line);
         Assert.Contains("| 20 000 sim. |", line);

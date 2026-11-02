@@ -13,6 +13,9 @@ namespace Wh40kSim.Web;
 public sealed class LaunchLog(IOptions<SimulationOptions> options, ILogger<LaunchLog> logger)
 {
     private static readonly CultureInfo French = CultureInfo.GetCultureInfo("fr-FR");
+
+    /// <summary>UTF-8 sans marqueur en tête de fichier (il gênerait grep, tail…).</summary>
+    private static readonly UTF8Encoding Utf8 = new(encoderShouldEmitUTF8Identifier: false);
     private readonly Lock _lock = new();
 
     /// <summary>Ajoute une ligne, précédée de la date et l'heure (UTC) ; les parties sont séparées par « | ».</summary>
@@ -31,7 +34,7 @@ public sealed class LaunchLog(IOptions<SimulationOptions> options, ILogger<Launc
                 {
                     Directory.CreateDirectory(directory);
                 }
-                File.AppendAllText(path, line, Encoding.UTF8);
+                File.AppendAllText(path, line, Utf8);
             }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)

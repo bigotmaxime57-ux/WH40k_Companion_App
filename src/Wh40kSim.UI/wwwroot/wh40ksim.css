@@ -490,6 +490,11 @@ path.wh-cmp-curve {
     fill: var(--mud-palette-text-primary);
 }
 
+/* Titre d'un graphique du comparateur, centré au-dessus de lui */
+.wh-chart-title {
+    justify-content: center;
+}
+
 /* Cartouche de légende en haut à droite de la zone des barres */
 .wh-cmp-legend-box {
     background: color-mix(in srgb, var(--mud-palette-surface) 85%, transparent);

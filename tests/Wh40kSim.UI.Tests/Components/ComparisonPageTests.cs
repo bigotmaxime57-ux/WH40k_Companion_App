@@ -395,6 +395,10 @@ public class ComparisonPageTests() : ComponentTestContext(renderPopoverProvider:
 
         var section = shell.Find("[data-test=comparison-distributions]");
         Assert.Equal(2, section.QuerySelectorAll("[data-test=comparison-chart]").Length);
+        // Côte à côte sur un écran large : chacun dans sa demi-colonne de la grille
+        Assert.NotNull(section.QuerySelector("[data-test=chart-kills] [data-test=comparison-chart]"));
+        Assert.NotNull(section.QuerySelector("[data-test=chart-damage] [data-test=comparison-chart]"));
+        Assert.Contains("mud-grid-item-lg-6", section.QuerySelector("[data-test=chart-kills]")!.ClassName);
         var legend = section.QuerySelectorAll("[data-test^=cmp-legend-]").Select(e => e.TextContent).ToList();
         Assert.Equal(6, legend.Count);   // 3 gagnants × 2 graphiques
         Assert.DoesNotContain(legend, l => l.Contains("D"));

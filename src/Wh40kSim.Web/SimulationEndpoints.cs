@@ -54,6 +54,7 @@ public static class SimulationEndpoints
         ISimulationRunner runner,
         IOptions<SimulationOptions> options,
         ILoggerFactory loggers,
+        LaunchLog log,
         CancellationToken cancellationToken)
     {
         SimulationRequest? simulation;
@@ -63,10 +64,12 @@ public static class SimulationEndpoints
         }
         catch (JsonException ex)
         {
+            log.Write("simulation", "refusé : Demande illisible");
             return Problem("Demande illisible", [ex.Message]);
         }
         if (simulation is null)
         {
+            log.Write("simulation", "refusé : Demande illisible");
             return Problem("Demande illisible", ["La demande est vide."]);
         }
 
@@ -87,14 +90,24 @@ public static class SimulationEndpoints
                 (true, false) => "Scénario invalide",
                 _ => "Nombre de simulations refusé",
             };
+            log.Write(["simulation", $"refusé : {title}", .. Describe(simulation)]);
             return Problem(title, errors);
         }
 
         // Les événements sont produits par le calcul (autre thread) et envoyés au fil de l'eau
         var events = Channel.CreateUnbounded<SseItem<string>>();
-        _ = ProduceAsync(simulation, queue, runner, events.Writer, loggers.CreateLogger(typeof(SimulationEndpoints)), cancellationToken);
+        _ = ProduceAsync(simulation, queue, runner, events.Writer, loggers.CreateLogger(typeof(SimulationEndpoints)), log, cancellationToken);
         return TypedResults.ServerSentEvents(events.Reader.ReadAllAsync(cancellationToken));
     }
+
+    /// <summary>Ce qui a été demandé, pour le journal des lancements : unités, armes, simulations, graine.</summary>
+    private static string[] Describe(SimulationRequest simulation) =>
+    [
+        $"{LaunchLog.Name(simulation.Scenario.Attacker.Name)} contre {LaunchLog.Name(simulation.Scenario.Defender.Name)}",
+        $"{simulation.Scenario.Attacker.Weapons.Count} arme(s)",
+        $"{LaunchLog.Number(simulation.Iterations)} sim.",
+        LaunchLog.Seed(simulation.Seed),
+    ];
 
     private static async Task ProduceAsync(
         SimulationRequest simulation,
@@ -102,13 +115,19 @@ public static class SimulationEndpoints
         ISimulationRunner runner,
         ChannelWriter<SseItem<string>> events,
         ILogger logger,
+        LaunchLog log,
         CancellationToken cancellationToken)
     {
+        // Journal : issue, attente dans la file et durée du calcul
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        TimeSpan? waited = null;
+        string outcome = "échec";
         try
         {
             using var slot = await queue.AcquireAsync(
                 position => events.TryWrite(new SseItem<string>(position.ToString(CultureInfo.InvariantCulture), QueuedEvent)),
                 cancellationToken);
+            waited = clock.Elapsed;
 
             // Début du calcul : sort de l'état « en attente » côté client
             events.TryWrite(new SseItem<string>(Format(0), ProgressEvent));
@@ -124,10 +143,12 @@ public static class SimulationEndpoints
 
             var result = await runner.RunAsync(simulation.Scenario, simulation.Iterations, simulation.Seed, progress, cancellationToken);
             events.TryWrite(new SseItem<string>(SimulationJson.Serialize(result.Data), ResultEvent));
+            outcome = "terminé";
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             // Requête fermée par le client : rien à envoyer
+            outcome = waited is null ? "annulé pendant l'attente" : "annulé pendant le calcul";
         }
         catch (Exception ex)
         {
@@ -137,8 +158,14 @@ public static class SimulationEndpoints
         finally
         {
             events.TryComplete();
+            log.Write(["simulation", outcome, .. Describe(simulation), .. Timing(clock.Elapsed, waited)]);
         }
     }
+
+    /// <summary>Attente dans la file et durée du calcul, pour le journal (calcul absent s'il n'a pas commencé).</summary>
+    internal static string[] Timing(TimeSpan total, TimeSpan? waited) => waited is TimeSpan wait
+        ? [$"attente {LaunchLog.Seconds(wait)}", $"calcul {LaunchLog.Seconds(total - wait)}"]
+        : [$"attente {LaunchLog.Seconds(total)}"];
 
     internal static string Format(double progress) => progress.ToString("0.###", CultureInfo.InvariantCulture);
 

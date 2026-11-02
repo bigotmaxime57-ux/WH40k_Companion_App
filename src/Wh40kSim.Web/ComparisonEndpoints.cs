@@ -43,6 +43,7 @@ public static class ComparisonEndpoints
         ISimulationRunner runner,
         IOptions<SimulationOptions> options,
         ILoggerFactory loggers,
+        LaunchLog log,
         CancellationToken cancellationToken)
     {
         ComparisonRequest? comparison;
@@ -56,10 +57,12 @@ public static class ComparisonEndpoints
         }
         catch (JsonException ex)
         {
+            log.Write("comparaison", "refusé : Demande illisible");
             return SimulationEndpoints.Problem("Demande illisible", [ex.Message]);
         }
         if (comparison is null)
         {
+            log.Write("comparaison", "refusé : Demande illisible");
             return SimulationEndpoints.Problem("Demande illisible", ["La demande est vide."]);
         }
 
@@ -86,13 +89,31 @@ public static class ComparisonEndpoints
                 (true, false) => "Comparaison invalide",
                 _ => "Limites du site dépassées",
             };
+            log.Write(["comparaison", $"refusé : {title}", .. Describe(comparison)]);
             return SimulationEndpoints.Problem(title, [.. comparisonErrors, .. limitErrors]);
         }
 
         var events = Channel.CreateUnbounded<SseItem<string>>();
         _ = ProduceAsync(comparison, queue, runner, options.Value.MaxComparisonFinalists, events.Writer,
-            loggers.CreateLogger(typeof(ComparisonEndpoints)), cancellationToken);
+            loggers.CreateLogger(typeof(ComparisonEndpoints)), log, cancellationToken);
         return TypedResults.ServerSentEvents(events.Reader.ReadAllAsync(cancellationToken));
+    }
+
+    /// <summary>Ce qui a été demandé, pour le journal des lancements : attaquants, variantes, défenseur, finale, graine.</summary>
+    private static string[] Describe(ComparisonRequest request)
+    {
+        var comparison = request.Comparison;
+        int variants = comparison.Variants().Count;
+        string attackers = string.Join(", ", comparison.Attackers.Select(a => LaunchLog.Name(a.Name)));
+        string count = variants > comparison.Entries.Count
+            ? $"{comparison.Entries.Count} attaquant(s), {variants} variantes"
+            : $"{comparison.Entries.Count} attaquant(s)";
+        return
+        [
+            $"{count} : {attackers} contre {LaunchLog.Name(comparison.Defender.Name)}",
+            $"finale {LaunchLog.Number(request.Iterations)} sim.",
+            LaunchLog.Seed(request.Seed),
+        ];
     }
 
     private static async Task ProduceAsync(
@@ -102,13 +123,20 @@ public static class ComparisonEndpoints
         int maxFinalists,
         ChannelWriter<SseItem<string>> events,
         ILogger logger,
+        LaunchLog log,
         CancellationToken cancellationToken)
     {
+        // Journal : issue (avec le gagnant), rondes, attente dans la file et durée du calcul
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        TimeSpan? waited = null;
+        string outcome = "échec";
+        string[] details = [];
         try
         {
             using var slot = await queue.AcquireAsync(
                 position => events.TryWrite(new SseItem<string>(position.ToString(CultureInfo.InvariantCulture), SimulationEndpoints.QueuedEvent)),
                 cancellationToken);
+            waited = clock.Elapsed;
 
             // Début du calcul ; ensuite, un événement par ronde et par point de pourcentage
             events.TryWrite(Progress(new RoundProgress(1, 1, 0)));
@@ -125,10 +153,13 @@ public static class ComparisonEndpoints
             var result = await runner.RunComparisonAsync(
                 comparison.Comparison, comparison.Iterations, comparison.Seed, maxFinalists, progress, cancellationToken);
             events.TryWrite(new SseItem<string>(ComparisonDataJson.Serialize(result.Data), SimulationEndpoints.ResultEvent));
+            outcome = "terminé";
+            details = [$"{result.Rounds.Count} ronde(s)", $"gagnant {LaunchLog.Name(result.Ranking[0].Name)}"];
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             // Requête fermée par le client : rien à envoyer
+            outcome = waited is null ? "annulé pendant l'attente" : "annulé pendant le calcul";
         }
         catch (Exception ex)
         {
@@ -138,6 +169,7 @@ public static class ComparisonEndpoints
         finally
         {
             events.TryComplete();
+            log.Write(["comparaison", outcome, .. Describe(comparison), .. details, .. SimulationEndpoints.Timing(clock.Elapsed, waited)]);
         }
     }
 

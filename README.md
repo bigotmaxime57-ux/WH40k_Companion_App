@@ -119,6 +119,27 @@ fly logs
 
 Le flux « Image Docker » vérifie que l'image se construit et démarre, quand le `Dockerfile` ou les projets changent.
 
+**Journal des lancements** : chaque simulation ou comparaison demandée sur le site ajoute une ligne lisible (ce qui a
+été demandé, issue, attente, durée ; aucune adresse IP) au fichier `/data/lancements.log`, sur un volume Fly
+persistant (le disque de la machine est effacé à chaque redémarrage). Le volume se crée une fois (une seule machine,
+un volume par machine) :
+
+```bash
+fly scale count 1 -a wh40ksim
+```
+
+```bash
+fly volumes create wh40ksim_data --region cdg --size 1 -a wh40ksim
+```
+
+Lire le journal :
+
+```bash
+fly ssh console -a wh40ksim -C "tail -n 50 /data/lancements.log"
+```
+
+En local, pas de journal tant que `Simulation:LaunchLogPath` n'est pas réglé.
+
 **Depuis Rider** : choisir la configuration d'exécution `Wh40kSim.Desktop` (profil « Windows Machine ») puis Run.
 L'application n'est pas empaquetée (pas de Microsoft Store) : le `.exe` est dans
 `src/Wh40kSim.Desktop/bin/<Configuration>/net10.0-windows10.0.19041.0/win-x64/`. Le lancer directement demande que

@@ -388,6 +388,42 @@ public class ComparisonPageTests() : ComponentTestContext(renderPopoverProvider:
     }
 
     [Fact]
+    public void The_distributions_show_the_three_winners_between_podium_and_ranking()
+    {
+        var comparison = Comparison.Of(Squad, [Attacker("A", 20), Attacker("B", 12), Attacker("C", 6), Attacker("D", 3)]);
+        var shell = OpenResults(Comparator.Run(comparison, 2_000, seed: 1));
+
+        var section = shell.Find("[data-test=comparison-distributions]");
+        Assert.Equal(2, section.QuerySelectorAll("[data-test=comparison-chart]").Length);
+        // Côte à côte sur un écran large : chacun dans sa demi-colonne de la grille
+        Assert.NotNull(section.QuerySelector("[data-test=chart-kills] [data-test=comparison-chart]"));
+        Assert.NotNull(section.QuerySelector("[data-test=chart-damage] [data-test=comparison-chart]"));
+        Assert.Contains("mud-grid-item-lg-6", section.QuerySelector("[data-test=chart-kills]")!.ClassName);
+        var legend = section.QuerySelectorAll("[data-test^=cmp-legend-]").Select(e => e.TextContent).ToList();
+        Assert.Equal(6, legend.Count);   // 3 gagnants × 2 graphiques
+        Assert.DoesNotContain(legend, l => l.Contains("D"));
+        Assert.Equal(3, shell.FindAll("[data-test=podium-swatch]").Count);
+        // Statistiques principales sur chaque tuile : figurines, PV (part de l'unité), unité détruite
+        var stats = shell.Find("[data-test=podium-1] [data-test=tile-stats]").TextContent;
+        Assert.Contains("Figurines tuées", stats);
+        Assert.Contains("PV retirés", stats);
+        Assert.Contains("de l'unité", stats);
+        Assert.Contains("Unité détruite", stats);
+        // Ordre de la page : podium, distributions, classement
+        string markup = shell.Markup;
+        Assert.True(markup.IndexOf("data-test=\"podium\"") < markup.IndexOf("comparison-distributions"));
+        Assert.True(markup.IndexOf("comparison-distributions") < markup.IndexOf("ranking-table"));
+    }
+
+    [Fact]
+    public void With_two_finalists_the_charts_have_two_series()
+    {
+        var shell = OpenResults(Comparator.Run(Comparison.Of(Squad, [Attacker("A", 20), Attacker("B", 5)]), 2_000, seed: 1));
+
+        Assert.Equal(2, shell.FindAll("[data-test=comparison-distributions] [data-test=comparison-chart]")[0].QuerySelectorAll("[data-test^=cmp-box-]").Length);
+    }
+
+    [Fact]
     public void Eliminated_attackers_are_greyed_with_their_round()
     {
         var comparison = Comparison.Of(Squad, [Attacker("A", 20), Attacker("B", 16), Attacker("C", 12), Attacker("Faible", 1)]);

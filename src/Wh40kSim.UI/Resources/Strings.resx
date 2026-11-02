@@ -1126,4 +1126,43 @@
   <data name="Comparison_PrecisionOn" xml:space="preserve">
     <value>Precision sur {0}</value>
   </data>
+  <data name="Comparison_Distributions" xml:space="preserve">
+    <value>Distributions</value>
+  </data>
+  <data name="Comparison_DistributionsHelp" xml:space="preserve">
+    <value>Distributions des 3 gagnants, superposées : probabilité de chaque valeur exacte en barres semi-transparentes, une couleur par gagnant (la même que sa pastille sur le podium) ; au-dessus, une boîte par gagnant : la moitié centrale des simulations dans la boîte, la médiane en trait, 80 % des simulations entre les moustaches. Cliquez sur un gagnant dans la légende pour masquer ou réafficher sa série ; l'interrupteur affiche les courbes « au moins k ».</value>
+  </data>
+  <data name="Comparison_ChartTooltip" xml:space="preserve">
+    <value>exactement {0} · au moins {1}</value>
+  </data>
+  <data name="Comparison_ChartToggle" xml:space="preserve">
+    <value>Masquer ou réafficher cette série</value>
+  </data>
+  <data name="Comparison_ChartUnitLimit" xml:space="preserve">
+    <value>Limite de l'unité : à droite, unité détruite</value>
+  </data>
+  <data name="Comparison_ChartProbability" xml:space="preserve">
+    <value>Probabilité</value>
+  </data>
+  <data name="Comparison_ChartLegendTitle" xml:space="preserve">
+    <value>Attaquant</value>
+  </data>
+  <data name="Comparison_ChartMean" xml:space="preserve">
+    <value>moy. {0}</value>
+  </data>
+  <data name="Comparison_ChartBoxLegend" xml:space="preserve">
+    <value>Boîte : quartiles et médiane ; moustaches : 80 % des cas</value>
+  </data>
+  <data name="Comparison_ChartShowAtLeast" xml:space="preserve">
+    <value>Courbes « au moins k »</value>
+  </data>
+  <data name="Comparison_StatKillsHelp" xml:space="preserve">
+    <value>Figurines tuées en moyenne par activation.</value>
+  </data>
+  <data name="Comparison_StatDamageHelp" xml:space="preserve">
+    <value>PV retirés en moyenne par activation, et la part de l'unité qu'ils représentent.</value>
+  </data>
+  <data name="Comparison_StatWipeHelp" xml:space="preserve">
+    <value>Probabilité de détruire toute l'unité en une activation.</value>
+  </data>
 </root>

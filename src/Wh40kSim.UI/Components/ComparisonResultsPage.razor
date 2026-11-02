@@ -51,9 +51,11 @@
                 @foreach (var entry in Result.Podium)
                 {
                     var score = entry.Result.EfficiencyScore;
-                    <StatTile Label="@L["Comparison_PodiumPlace", entry.Rank, entry.Name]" Value="@ScoreText(score)"
+                    <StatTile Label="@L["Comparison_PodiumPlace", entry.Rank, entry.Name]" Value="@ScoreText(score)" Stats="@PodiumStats(entry.Result)"
                               Tone="@(entry.Rank == 1 ? StatTile.TileTone.Good : StatTile.TileTone.Neutral)" data-test="@($"podium-{entry.Rank}")">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                            @* Couleur du gagnant dans les graphiques *@
+                            <i class="@($"wh-podium-swatch wh-share-{(entry.Rank - 1) % 6}")" data-test="podium-swatch"></i>
                             <MudText Typo="Typo.caption">@L["Comparison_ScoreLabel"]</MudText>
                             <HelpBubble Lines="@ScoreParts(score)" />
                             @if (entry.TiedWithPrevious)
@@ -70,6 +72,25 @@
                     @L["Comparison_FourthTied", Result.Ranking[ComparisonResult.PodiumSize].Name]
                 </MudAlert>
             }
+        </MudPaper>
+
+        @* Graphiques des gagnants : leurs distributions superposées (finalistes seulement, à autant de simulations) *@
+        <MudPaper Elevation="3" Class="pa-4 wh-section" data-test="comparison-distributions">
+            <CollapsibleSection Icon="@Icons.Material.Filled.BarChart" Title="@L["Comparison_Distributions"]" Help="@([L["Comparison_DistributionsHelp"]])">
+                @* Côte à côte sur un écran large (la page est en pleine largeur : les points de rupture de la fenêtre conviennent), l'un sous l'autre sinon *@
+                <MudGrid Spacing="4">
+                    <MudItem xs="12" lg="6" data-test="chart-kills">
+                        <div class="wh-subsection-title wh-chart-title"><MudText Typo="Typo.subtitle1">@L["Groups_Killed"]</MudText></div>
+                        <ComparisonChart Series="@WinnerSeries(r => r.Kills)" Title="@L["Groups_Killed"]" AxisTitle="@L["Groups_Killed"]" ValueTitle="@L["Chart_KillsValue"]"
+                                         UnitSize="Result.Entries[0].TotalModels" />
+                    </MudItem>
+                    <MudItem xs="12" lg="6" data-test="chart-damage">
+                        <div class="wh-subsection-title wh-chart-title"><MudText Typo="Typo.subtitle1">@L["Groups_Damage"]</MudText></div>
+                        <ComparisonChart Series="@WinnerSeries(r => r.Damage)" Title="@L["Groups_Damage"]" AxisTitle="@L["Groups_Damage"]" ValueTitle="@L["Chart_DamageValue"]"
+                                         UnitSize="Result.Entries[0].TotalWounds" />
+                    </MudItem>
+                </MudGrid>
+            </CollapsibleSection>
         </MudPaper>
 
         <MudPaper Elevation="3" Class="pa-4 wh-section">
@@ -184,6 +205,19 @@
             _descending = Columns.First(c => c.Key == key).Numeric || key == "status";
         }
     }
+
+    /// <summary>Statistiques principales d'un gagnant, à droite de sa tuile : figurines tuées, PV retirés (part de l'unité), unité détruite.</summary>
+    private List<StatTile.Stat> PodiumStats(SimulationResult result) =>
+    [
+        new("⚔", L["Results_Kills"], result.Kills.Mean.ToString("F2"), L["Comparison_StatKillsHelp"]),
+        new("♥", L["Results_Damage"], L["Comparison_DamageAndShare", result.Damage.Mean.ToString("F2"), result.MeanDamageShare.ToString("P0")],
+            L["Comparison_StatDamageHelp"]),
+        new("☠", L["Comparison_Wipe"], result.ProbabilityWipe.ToString("P1"), L["Comparison_StatWipeHelp"]),
+    ];
+
+    /// <summary>Une série par gagnant (podium), dans l'ordre du classement : sa couleur suit son rang.</summary>
+    private IReadOnlyList<ComparisonChart.ChartSeries> WinnerSeries(Func<SimulationResult, DiscreteDistribution> distribution) =>
+        Result!.Podium.Select(e => new ComparisonChart.ChartSeries(L["Comparison_PodiumPlace", e.Rank, e.Name], distribution(e.Result))).ToList();
 
     private static string? Best(IReadOnlyList<int> best, RankedEntry entry) => best.Contains(entry.Index) ? "wh-number wh-top" : "wh-number";
 

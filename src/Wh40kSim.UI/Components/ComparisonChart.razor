@@ -1,0 +1,271 @@
+@*
+    Histogrammes superposés de plusieurs distributions (les gagnants du comparateur), en SVG, rendu léger (essai d'après
+    une capture fournie par l'utilisateur) : barres « exactement k » jointives, semi-transparentes, à fin liseré, les
+    séries se mélangeant là où elles se recouvrent (la dernière d'abord, la première par-dessus) ; au-dessus, une boîte à
+    moustaches par série (quartiles, médiane, fourchette 10-90 %) alignée sur l'axe des valeurs ; titres des axes ;
+    graphique en hauteur, légende dans une colonne à sa droite (dessous sur téléphone), cliquable pour masquer une série. Courbes « au moins k » (axe de droite)
+    affichées sur demande. Infobulle au survol d'une colonne avec les valeurs de chaque série. Valeurs négligeables aux
+    extrémités masquées (comme les tableaux). Couleurs des séries : palette du thème (--wh-share-n).
+*@
+@using System.Globalization
+
+<div class="wh-cmp-layout" data-test="comparison-chart">
+    <div class="wh-chart wh-cmp-chart">
+    <svg viewBox="0 0 @F(Width) @F(Height)" role="img" aria-label="@Title">
+        @* Boîtes à moustaches, une ligne par série *@
+        @foreach (int s in VisibleSeries)
+        {
+            var d = Series[s].Distribution;
+            double y = BoxY(s);
+            double p10 = ValueX(d.Percentile(0.1)), q1 = ValueX(d.Percentile(0.25)), median = ValueX(d.Median), q3 = ValueX(d.Percentile(0.75)), p90 = ValueX(d.Percentile(0.9));
+            <g class="@($"wh-cmp-box {SeriesClass(s)}")" data-test="@($"cmp-box-{s}")">
+                <line x1="@F(p10)" y1="@F(y)" x2="@F(q1)" y2="@F(y)" />
+                <line x1="@F(q3)" y1="@F(y)" x2="@F(p90)" y2="@F(y)" />
+                <line x1="@F(p10)" y1="@F(y - BoxHeight / 3)" x2="@F(p10)" y2="@F(y + BoxHeight / 3)" />
+                <line x1="@F(p90)" y1="@F(y - BoxHeight / 3)" x2="@F(p90)" y2="@F(y + BoxHeight / 3)" />
+                <rect x="@F(q1)" y="@F(y - BoxHeight / 2)" width="@F(Math.Max(q3 - q1, 1.5))" height="@F(BoxHeight)" />
+                <line class="wh-cmp-box-median" x1="@F(median)" y1="@F(y - BoxHeight / 2)" x2="@F(median)" y2="@F(y + BoxHeight / 2)" />
+            </g>
+        }
+        <line class="wh-cmp-axis-line" x1="@F(Left)" y1="@F(PlotTop - 6)" x2="@F(Width - Right)" y2="@F(PlotTop - 6)" />
+
+        @* Axe de gauche (exactement k), sans quadrillage *@
+        @foreach (double tick in _leftTicks)
+        {
+            <g>
+                <line class="wh-cmp-axis-line" x1="@F(Left - 4)" y1="@F(Y(tick / _maxExactly))" x2="@F(Left)" y2="@F(Y(tick / _maxExactly))" />
+                <text class="wh-chart-axis" x="@F(Left - 7)" y="@F(Y(tick / _maxExactly) + 4)" text-anchor="end">@tick.ToString(_leftFormat)</text>
+            </g>
+        }
+        <line class="wh-cmp-axis-line" x1="@F(Left)" y1="@F(PlotTop)" x2="@F(Left)" y2="@F(Bottom)" />
+        <line class="wh-cmp-axis-line" x1="@F(Left)" y1="@F(Bottom)" x2="@F(Width - Right)" y2="@F(Bottom)" />
+        <text class="wh-chart-axis wh-cmp-axis-title" transform="@($"translate(12 {F((PlotTop + Bottom) / 2)}) rotate(-90)")" text-anchor="middle">@L["Comparison_ChartProbability"]</text>
+        <text class="wh-chart-axis wh-cmp-axis-title" x="@F((Left + Width - Right) / 2)" y="@F(Height - 4)" text-anchor="middle">@AxisTitle</text>
+        @for (int i = 0; i < _values.Count; i++)
+        {
+            @if (ShowLabel(i))
+            {
+                <g>
+                    <line class="wh-cmp-axis-line" x1="@F(ValueX(_values[i]))" y1="@F(Bottom)" x2="@F(ValueX(_values[i]))" y2="@F(Bottom + 4)" />
+                    <text class="wh-chart-axis" x="@F(ValueX(_values[i]))" y="@F(Bottom + 16)" text-anchor="middle">@_values[i]</text>
+                </g>
+            }
+        }
+        @if (_showAtLeast)
+        {
+            @foreach (double tick in RightTicks)
+            {
+                <g><text class="wh-chart-axis wh-chart-axis-curve" x="@F(Width - Right + 6)" y="@F(Y(tick) + 4)">@tick.ToString("P0")</text></g>
+            }
+        }
+
+        @* Barres jointives : la dernière série d'abord, la première par-dessus *@
+        @foreach (int s in VisibleSeries.Reverse())
+        {
+            var series = Series[s];
+            @for (int i = 0; i < _values.Count; i++)
+            {
+                double height = Bottom - Y(series.Distribution.ProbabilityExactly(_values[i]) / _maxExactly);
+                @if (height > 0)
+                {
+                    <rect class="@($"wh-cmp-bar {SeriesClass(s)}")" x="@F(ColumnX(i))" y="@F(Bottom - height)"
+                          width="@F(ColumnWidth)" height="@F(height)" data-test="@($"cmp-bar-{s}")" />
+                }
+            }
+        }
+
+        @if (_unitColumn >= 0)
+        {
+            <line class="wh-chart-limit" x1="@F(ColumnX(_unitColumn))" y1="@F(PlotTop)" x2="@F(ColumnX(_unitColumn))" y2="@F(Bottom)" data-test="cmp-limit" />
+        }
+
+        @if (_showAtLeast)
+        {
+            @foreach (int s in VisibleSeries.Reverse())
+            {
+                <path class="@($"wh-cmp-curve {SeriesClass(s)}")" d="@_curves[s]" data-test="@($"cmp-curve-{s}")" />
+            }
+        }
+
+        @for (int i = 0; i < _values.Count; i++)
+        {
+            int index = i;
+            <rect class="wh-chart-hit" x="@F(ColumnX(i))" y="@F(PlotTop)" width="@F(ColumnWidth)" height="@F(Bottom - PlotTop)"
+                  @onmouseover="() => _hover = index" @onmouseout="() => _hover = null" data-test="chart-column" />
+        }
+    </svg>
+
+    @if (_hover is int hovered)
+    {
+        int value = _values[hovered];
+        <div class="wh-chart-tooltip" style="left: @F(Math.Clamp(ValueX(value) / Width * 100, 15, 85))%; top: @F(PlotTop / Height * 100)%" data-test="chart-tooltip">
+            <strong>@string.Format(ValueTitle, value)</strong>
+            @if (UnitSize is int size && value >= size)
+            {
+                <em> · @L["Chart_WipedTooltip"]</em>
+            }
+            @foreach (int s in VisibleSeries)
+            {
+                var distribution = Series[s].Distribution;
+                <br />
+                <span data-test="@($"chart-tooltip-{s}")"><i class="@($"wh-chart-swatch-stack wh-share-{s % 6}")"></i>@Series[s].Label :
+                    @L["Comparison_ChartTooltip", distribution.ProbabilityExactly(value).ToString("P1"), distribution.ProbabilityAtLeast(value).ToString("P1")]</span>
+            }
+        </div>
+    }
+    </div>
+
+    @* Colonne de droite : légende des attaquants (cliquable), explications, courbes sur demande ; dessous sur téléphone *@
+    <div class="wh-cmp-side">
+        <div class="wh-cmp-legend-box">
+            <div class="wh-cmp-legend-title">@L["Comparison_ChartLegendTitle"]</div>
+            @for (int s = 0; s < Series.Count; s++)
+            {
+                int index = s;
+                <div class="@(_hidden.Contains(s) ? "wh-cmp-legend wh-cmp-legend-hidden" : "wh-cmp-legend")" role="button" tabindex="0"
+                     title="@L["Comparison_ChartToggle"]" @onclick="() => Toggle(index)" data-test="@($"cmp-legend-{s}")">
+                    <i class="@($"wh-cmp-legend-swatch {SeriesClass(s)}")"></i>
+                    <span>@Series[s].Label<br /><span class="wh-cmp-legend-mean">@L["Comparison_ChartMean", Series[s].Distribution.Mean.ToString("F1")]</span></span>
+                </div>
+            }
+        </div>
+        <div class="wh-cmp-side-hints">
+            <span class="wh-cmp-legend-hint"><i class="wh-cmp-swatch-box"></i>@L["Comparison_ChartBoxLegend"]</span>
+            @if (_unitColumn >= 0)
+            {
+                <span data-test="legend-limit"><i class="wh-chart-swatch-limit"></i>@L["Comparison_ChartUnitLimit"]</span>
+            }
+        </div>
+        <MudSwitch T="bool" Size="Size.Small" Color="Color.Primary" Value="_showAtLeast" ValueChanged="ToggleAtLeast"
+                   Label="@L["Comparison_ChartShowAtLeast"]" data-test="cmp-show-at-least" />
+    </div>
+</div>
+
+@code {
+    // Repère du SVG : boîtes à moustaches en haut, puis la zone des barres, l'axe des valeurs et son titre
+    private const double Width = 640, Left = 54, Right = 40, BoxTop = 10, BoxStep = 15, BoxHeight = 9;
+    private static readonly double[] RightTicks = [0, 0.25, 0.5, 0.75, 1];
+
+    /// <summary>Une série : son nom (légende, infobulle) et sa distribution ; sa couleur suit son rang dans la liste.</summary>
+    public sealed record ChartSeries(string Label, DiscreteDistribution Distribution);
+
+    private List<int> _values = [];
+    private double _maxExactly = 1;
+    private double[] _leftTicks = [];
+    private string _leftFormat = "P0";
+    private int _unitColumn = -1;   // colonne « unité détruite » (sa limite à gauche), -1 sans
+    private string[] _curves = [];
+    private readonly HashSet<int> _hidden = [];
+    private bool _showAtLeast;
+    private int? _hover;
+
+    /// <summary>Séries à superposer, la première étant la meilleure (dessinée par-dessus, première couleur).</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<ChartSeries> Series { get; set; } = [];
+
+    /// <summary>Nom du graphique pour les lecteurs d'écran.</summary>
+    [Parameter]
+    public string Title { get; set; } = "";
+
+    /// <summary>Titre de l'axe des valeurs (« PV retirés »).</summary>
+    [Parameter]
+    public string AxisTitle { get; set; } = "";
+
+    /// <summary>Titre de l'infobulle, {0} = la valeur (« PV retirés : {0} »).</summary>
+    [Parameter]
+    public string ValueTitle { get; set; } = "{0}";
+
+    /// <summary>Valeur où l'unité est détruite (PV ou effectif de l'unité) : limite en pointillé ; null sans.</summary>
+    [Parameter]
+    public int? UnitSize { get; set; }
+
+    private IEnumerable<int> VisibleSeries => Enumerable.Range(0, Series.Count).Where(s => !_hidden.Contains(s));
+
+    /// <summary>Haut de la zone des barres : sous les boîtes à moustaches (une ligne par série).</summary>
+    private double PlotTop => BoxTop + Series.Count * BoxStep + 8;
+
+    private double Height => PlotTop + 360;
+
+    private double Bottom => Height - 36;
+
+    protected override void OnParametersSet()
+    {
+        _hidden.RemoveWhere(s => s >= Series.Count);
+        Layout();
+    }
+
+    private void Toggle(int series)
+    {
+        // Au moins une série reste affichée
+        if (!_hidden.Remove(series) && _hidden.Count < Series.Count - 1)
+        {
+            _hidden.Add(series);
+        }
+        Layout();
+    }
+
+    private void ToggleAtLeast(bool show)
+    {
+        _showAtLeast = show;
+        Layout();
+    }
+
+    /// <summary>Valeurs utiles de toutes les séries (sans trou), échelle des barres sur les séries affichées, courbes.</summary>
+    private void Layout()
+    {
+        var rows = Series.Select(s => s.Distribution.Rows()).ToList();
+        int first = rows.Min(r => r[0].Value), last = rows.Max(r => r[^1].Value);
+        _values = Enumerable.Range(first, last - first + 1).ToList();
+
+        double max = VisibleSeries.SelectMany(s => _values.Select(v => Series[s].Distribution.ProbabilityExactly(v))).DefaultIfEmpty(0).Max();
+        double step = NiceStep(max / 5);
+        _maxExactly = Math.Max(step, Math.Ceiling(max / step - 1e-9) * step);
+        _leftTicks = Enumerable.Range(0, (int)Math.Round(_maxExactly / step) + 1).Select(i => i * step).ToArray();
+        _leftFormat = step < 0.01 ? "P1" : "P0";
+        _unitColumn = UnitSize is int size ? _values.IndexOf(size) : -1;
+        _curves = Series.Select(Curve).ToArray();
+        _hover = null;
+    }
+
+    /// <summary>Courbe « au moins k » d'une série, par ses seules valeurs qui arrivent (comme HistogramChart).</summary>
+    private string Curve(ChartSeries series)
+    {
+        var columns = Enumerable.Range(0, _values.Count).Where(i => series.Distribution.ProbabilityExactly(_values[i]) > 0).ToList();
+        if (columns.Count < 2)
+        {
+            columns = Enumerable.Range(0, _values.Count).ToList();
+        }
+        return MonotoneCurve.ToSvgPath(columns.Select(i => (ValueX(_values[i]), Y(series.Distribution.ProbabilityAtLeast(_values[i])))).ToList());
+    }
+
+    private static string SeriesClass(int series) => $"wh-cmp-{series % 6}";
+
+    private double ColumnWidth => (Width - Left - Right) / _values.Count;
+
+    private double ColumnX(int i) => Left + i * ColumnWidth;
+
+    /// <summary>Centre de la colonne d'une valeur (les valeurs se suivent sans trou).</summary>
+    private double ValueX(int value) => Left + (value - _values[0] + 0.5) * ColumnWidth;
+
+    private double BoxY(int series) => BoxTop + series * BoxStep + BoxHeight / 2;
+
+    private double Y(double fraction) => Bottom - fraction * (Bottom - PlotTop);
+
+    /// <summary>Une dizaine de graduations sous l'axe au plus.</summary>
+    private bool ShowLabel(int i)
+    {
+        int every = (int)Math.Ceiling(_values.Count / 10.0);
+        every = every <= 1 ? 1 : every <= 2 ? 2 : every <= 5 ? 5 : (int)Math.Ceiling(every / 10.0) * 10;
+        return _values[i] % every == 0;
+    }
+
+    private static double NiceStep(double raw)
+    {
+        if (raw <= 0) return 0.05;
+        double magnitude = Math.Pow(10, Math.Floor(Math.Log10(raw)));
+        double n = raw / magnitude;
+        return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * magnitude;
+    }
+
+    private static string F(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+}

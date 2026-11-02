@@ -437,6 +437,178 @@ rect.wh-share-5 { fill: var(--wh-share-5); }
     color: var(--mud-palette-text-secondary);
 }
 
+/* Histogrammes superposés du comparateur (ComparisonChart) : une couleur de la palette par série ; barres
+   semi-transparentes au contour plein pour rester lisibles là où elles se recouvrent ; courbes et moyennes pleines */
+.wh-cmp-0 { --wh-series: var(--wh-share-0); }
+.wh-cmp-1 { --wh-series: var(--wh-share-1); }
+.wh-cmp-2 { --wh-series: var(--wh-share-2); }
+.wh-cmp-3 { --wh-series: var(--wh-share-3); }
+.wh-cmp-4 { --wh-series: var(--wh-share-4); }
+.wh-cmp-5 { --wh-series: var(--wh-share-5); }
+
+/* Barres jointives, semi-transparentes (les séries se mélangent où elles se recouvrent), fin liseré couleur du fond */
+rect.wh-cmp-bar {
+    fill: var(--wh-series);
+    fill-opacity: .55;
+    stroke: var(--mud-palette-surface);
+    stroke-opacity: .7;
+    stroke-width: .6;
+}
+
+path.wh-cmp-curve {
+    fill: none;
+    stroke: var(--wh-series);
+    stroke-width: 1.8;
+}
+
+/* Boîtes à moustaches au-dessus des barres : quartiles, médiane, fourchette 10-90 % */
+.wh-cmp-box line {
+    stroke: var(--mud-palette-text-secondary);
+    stroke-width: 1.2;
+}
+
+.wh-cmp-box rect {
+    fill: var(--wh-series);
+    fill-opacity: .55;
+    stroke: var(--mud-palette-text-secondary);
+    stroke-width: 1;
+}
+
+.wh-cmp-box line.wh-cmp-box-median {
+    stroke: var(--mud-palette-text-primary);
+    stroke-width: 1.6;
+}
+
+/* Axes fins, sans quadrillage */
+.wh-cmp-axis-line {
+    stroke: var(--mud-palette-text-secondary);
+    stroke-opacity: .7;
+    stroke-width: 1;
+}
+
+.wh-cmp-axis-title {
+    fill: var(--mud-palette-text-primary);
+}
+
+/* Titre d'un graphique du comparateur, centré au-dessus de lui */
+.wh-chart-title {
+    justify-content: center;
+}
+
+/* Graphique en hauteur à gauche, colonne de légende à droite (dessous sur téléphone) */
+.wh-cmp-layout {
+    align-items: flex-start;
+    display: flex;
+    gap: 12px;
+}
+
+.wh-cmp-layout > .wh-cmp-chart {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.wh-cmp-side {
+    display: flex;
+    flex: 0 0 11rem;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 2rem;
+}
+
+.wh-cmp-side-hints {
+    color: var(--mud-palette-text-secondary);
+    display: flex;
+    flex-direction: column;
+    font-size: 11px;
+    gap: 6px;
+}
+
+.wh-cmp-side-hints > span > i {
+    display: inline-block;
+    height: 12px;
+    margin-right: 6px;
+    vertical-align: -1px;
+    width: 12px;
+}
+
+/* Cartouche de légende des attaquants */
+.wh-cmp-legend-box {
+    background: color-mix(in srgb, var(--mud-palette-surface) 85%, transparent);
+    border: 1px solid var(--mud-palette-lines-default);
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+    gap: 6px;
+    padding: 6px 8px;
+}
+
+.wh-cmp-legend-title {
+    color: var(--mud-palette-text-secondary);
+    text-align: center;
+}
+
+.wh-cmp-legend {
+    align-items: flex-start;
+    color: var(--mud-palette-text-primary);
+    cursor: pointer;
+    display: flex;
+    gap: .4rem;
+    user-select: none;
+}
+
+.wh-cmp-legend > .wh-cmp-legend-swatch {
+    flex: 0 0 auto;
+    margin-top: 3px;
+}
+
+.wh-cmp-legend-swatch {
+    background: color-mix(in srgb, var(--wh-series) 55%, transparent);
+    border: 1px solid var(--wh-series);
+    display: inline-block;
+    height: 9px;
+    width: 14px;
+}
+
+.wh-cmp-legend-mean {
+    color: var(--mud-palette-text-secondary);
+}
+
+.wh-cmp-legend-hidden {
+    opacity: .45;
+    text-decoration: line-through;
+}
+
+.wh-cmp-swatch-box {
+    background: linear-gradient(90deg, transparent 0 20%, var(--mud-palette-text-secondary) 20% 25%, transparent 25% 35%,
+        color-mix(in srgb, var(--mud-palette-text-secondary) 40%, transparent) 35% 65%, transparent 65% 75%,
+        var(--mud-palette-text-secondary) 75% 80%, transparent 80%);
+    border: none !important;
+    width: 22px !important;
+}
+
+/* Sur téléphone, pas la place pour une colonne : la légende passe sous le graphique */
+@media (max-width: 599.98px) {
+    .wh-cmp-layout {
+        flex-direction: column;
+    }
+
+    .wh-cmp-side {
+        flex-basis: auto;
+        padding-top: 0;
+        width: 100%;
+    }
+}
+
+/* Pastille de couleur d'un gagnant (tuiles du podium), comme sa série dans les graphiques */
+.wh-podium-swatch {
+    border-radius: 50%;
+    display: inline-block;
+    height: 10px;
+    margin-right: .4rem;
+    width: 10px;
+}
+
 rect.wh-chart-bar-neutral {
     fill: color-mix(in srgb, var(--mud-palette-text-primary) 35%, transparent);
 }

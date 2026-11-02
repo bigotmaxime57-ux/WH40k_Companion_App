@@ -169,14 +169,15 @@ public class ComparisonTests
     [Fact]
     public void Progress_increases_up_to_one_over_all_entries()
     {
-        var progress = new RecordingProgress();
+        var progress = new RecordingProgress<RoundProgress>();
 
         Comparator.Run(Of(Attacker("A", 5), Attacker("B", 10), Attacker("C", 3)), 3 * Simulator.ChunkSize, seed: 1, progress: progress);
 
         var values = progress.Values;
         Assert.Equal(9, values.Count);
-        Assert.True(values.Zip(values.Skip(1)).All(pair => pair.Second > pair.First));
-        Assert.Equal(1.0, values[^1]);
+        Assert.All(values, v => Assert.Equal((1, 1), (v.Round, v.RoundCount)));
+        Assert.True(values.Zip(values.Skip(1)).All(pair => pair.Second.Fraction > pair.First.Fraction));
+        Assert.Equal(1.0, values[^1].Fraction);
     }
 
     [Fact]
@@ -289,11 +290,11 @@ public class ComparisonTests
         Assert.Contains("défenseur différent", Errors(result.Data.Entries[0], otherDefender.Data.Entries[1]));
         Assert.Contains("unique", Errors(result.Data.Entries[0], result.Data.Entries[0]));
         Assert.Contains("au moins 2", Errors(result.Data.Entries[0]));
-        Assert.Throws<ArgumentException>(() => new ComparisonResult(new ComparisonData { Entries = [result.Data.Entries[0]] }));
+        Assert.Throws<ArgumentException>(() => new ComparisonResult(result.Data with { Entries = [result.Data.Entries[0]] }));
     }
 
-    private static string Errors(params SimulationData[] entries) =>
-        string.Join(" | ", new ComparisonData { Entries = entries }.Validate());
+    private static string Errors(params ComparisonEntryData[] entries) =>
+        string.Join(" | ", new ComparisonData { Rounds = [1_000], Elapsed = TimeSpan.Zero, Entries = entries }.Validate());
 
     /// <summary>JSON des données sans la durée, seule à changer d'un calcul à l'autre.</summary>
     private static string Comparable(SimulationData data) => SimulationJson.Serialize(data with { Elapsed = TimeSpan.Zero });

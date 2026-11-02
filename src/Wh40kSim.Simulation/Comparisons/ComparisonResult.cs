@@ -3,22 +3,27 @@ using Wh40kSim.Core.Model;
 namespace Wh40kSim.Simulation.Comparisons;
 
 /// <summary>
-/// Place d'une entrée dans le classement par score d'efficacité moyen.
+/// Place d'une entrée dans le classement : les finalistes par score d'efficacité moyen, puis les éliminés.
 /// </summary>
 /// <param name="Rank">Rang, de 1 au nombre d'entrées (pas de rang partagé : les égalités sont signalées à part).</param>
 /// <param name="Index">Indice de l'entrée dans l'ordre de saisie (<see cref="ComparisonResult.Entries"/>).</param>
+/// <param name="Result">Résultat de sa dernière ronde (moins de simulations pour une entrée éliminée).</param>
+/// <param name="EliminatedInRound">Ronde où l'entrée a été éliminée, à partir de 1 ; null pour un finaliste.</param>
 /// <param name="TiedWithPrevious">
-/// L'écart de score avec l'entrée classée juste devant n'est pas significatif (dans le bruit de la simulation) ;
-/// toujours faux pour la première.
+/// L'écart de score avec le finaliste classé juste devant n'est pas significatif (dans le bruit de la simulation) ;
+/// toujours faux pour le premier et pour les éliminés.
 /// </param>
-public sealed record RankedEntry(int Rank, int Index, SimulationResult Result, bool TiedWithPrevious)
+public sealed record RankedEntry(int Rank, int Index, SimulationResult Result, int? EliminatedInRound, bool TiedWithPrevious)
 {
     public string Name => Result.Scenario.Attacker.Name;
+
+    public bool IsFinalist => EliminatedInRound is null;
 }
 
 /// <summary>
-/// Résultat d'une comparaison : une simulation complète par attaquant, classement par score d'efficacité, top 3 et
-/// meilleure(s) entrée(s) pour chaque indicateur. Deux valeurs sont à égalité quand leur écart ne dépasse pas
+/// Résultat d'une comparaison en rondes éliminatoires : le dernier résultat de chaque attaquant, classement (finalistes
+/// par score d'efficacité, puis éliminés), top 3 et meilleure(s) entrée(s) pour chaque indicateur, parmi les finalistes
+/// (tous simulés autant de fois). Deux valeurs sont à égalité quand leur écart ne dépasse pas
 /// <see cref="SignificanceThreshold"/> erreurs types (entrées simulées indépendamment). Immuable, calculé depuis les
 /// compteurs bruts (<see cref="Data"/>).
 /// </summary>
@@ -41,21 +46,26 @@ public sealed class ComparisonResult
         }
 
         Data = data;
-        Entries = data.Entries.Select(d => new SimulationResult(d)).ToList();
+        Entries = data.Entries.Select(e => new SimulationResult(e.Simulation)).ToList();
         var first = Entries[0].Scenario;
         Comparison = new Comparison { Defender = first.Defender, Context = first.Context, Attackers = Entries.Select(e => e.Scenario.Attacker).ToList() };
+        _finalists = Enumerable.Range(0, Entries.Count).Where(i => data.Entries[i].EliminatedInRound is null).ToList();
 
+        // Finalistes d'abord (round = nombre de rondes + 1), puis éliminés des dernières rondes aux premières ; par score dans chaque groupe
         var ordered = Entries
-            .Select((result, index) => (result, index))
-            .OrderByDescending(e => e.result.EfficiencyScore.Mean)
+            .Select((result, index) => (result, index, round: data.Entries[index].EliminatedInRound ?? int.MaxValue))
+            .OrderByDescending(e => e.round)
+            .ThenByDescending(e => e.result.EfficiencyScore.Mean)
             .ThenBy(e => e.index)
             .ToList();
         Ranking = ordered
             .Select((e, rank) => new RankedEntry(
-                rank + 1, e.index, e.result,
-                rank > 0 && AreTied(ordered[rank - 1].result.EfficiencyScore, e.result.EfficiencyScore)))
+                rank + 1, e.index, e.result, data.Entries[e.index].EliminatedInRound,
+                rank > 0 && e.round == int.MaxValue && AreTied(ordered[rank - 1].result.EfficiencyScore, e.result.EfficiencyScore)))
             .ToList();
     }
+
+    private readonly IReadOnlyList<int> _finalists;
 
     /// <summary>Compteurs bruts d'où ce résultat est calculé.</summary>
     public ComparisonData Data { get; }
@@ -68,19 +78,28 @@ public sealed class ComparisonResult
     /// <summary>Graine commune à toutes les entrées.</summary>
     public int Seed => Entries[0].Seed;
 
-    /// <summary>Nombre de simulations de chaque entrée.</summary>
-    public long Iterations => Entries[0].Iterations;
+    /// <summary>Nombre de simulations de chaque finaliste (celui de la finale).</summary>
+    public long Iterations => Data.Rounds[^1];
 
-    /// <summary>Durée totale du calcul.</summary>
-    public TimeSpan Elapsed => TimeSpan.FromTicks(Entries.Sum(e => e.Elapsed.Ticks));
+    /// <summary>Simulations de chaque ronde, de la première à la finale.</summary>
+    public IReadOnlyList<int> Rounds => Data.Rounds;
 
-    /// <summary>Résultat complet de chaque entrée, dans l'ordre de saisie.</summary>
+    /// <summary>Durée totale du calcul, toutes rondes comprises.</summary>
+    public TimeSpan Elapsed => Data.Elapsed;
+
+    /// <summary>Dernier résultat de chaque entrée, dans l'ordre de saisie (moins de simulations pour une entrée éliminée).</summary>
     public IReadOnlyList<SimulationResult> Entries { get; }
 
-    /// <summary>Toutes les entrées, de la meilleure à la moins bonne (score d'efficacité moyen ; ordre de saisie si égalité exacte).</summary>
+    /// <summary>Indices des finalistes (ordre de saisie) : seules entrées comparées entre elles pour les indicateurs.</summary>
+    public IReadOnlyList<int> Finalists => _finalists;
+
+    /// <summary>
+    /// Toutes les entrées, de la meilleure à la moins bonne : finalistes par score d'efficacité moyen (ordre de saisie si
+    /// égalité exacte), puis éliminés, des dernières rondes aux premières, par score.
+    /// </summary>
     public IReadOnlyList<RankedEntry> Ranking { get; }
 
-    /// <summary>Les gagnants : les <see cref="PodiumSize"/> premiers du classement (toutes les entrées s'il y en a moins).</summary>
+    /// <summary>Les gagnants : les <see cref="PodiumSize"/> premiers du classement (toutes les entrées s'il y en a moins), tous finalistes.</summary>
     public IReadOnlyList<RankedEntry> Podium => Ranking.Take(PodiumSize).ToList();
 
     /// <summary>
@@ -89,7 +108,7 @@ public sealed class ComparisonResult
     /// </summary>
     public bool PodiumBoundaryTied => Ranking.Count > PodiumSize && Ranking[PodiumSize].TiedWithPrevious;
 
-    /// <summary>Meilleur(s) score(s) d'efficacité moyen(s) : indices des entrées (ordre de saisie), ex æquo compris.</summary>
+    /// <summary>Meilleur(s) score(s) d'efficacité moyen(s) parmi les finalistes : indices des entrées (ordre de saisie), ex æquo compris.</summary>
     public IReadOnlyList<int> BestScore => Best(r => (r.EfficiencyScore.Mean, r.EfficiencyScore.StandardError));
 
     /// <summary>Le plus de figurines tuées en moyenne.</summary>
@@ -118,10 +137,11 @@ public sealed class ComparisonResult
 
     private IReadOnlyList<int> Best(Func<SimulationResult, (double Value, double Error)> indicator)
     {
-        var values = Entries.Select(indicator).ToList();
-        var best = values.MaxBy(v => v.Value);
-        return Enumerable.Range(0, values.Count)
-            .Where(i => AreTied(best.Value, best.Error, values[i].Value, values[i].Error))
+        var values = _finalists.Select(i => (Index: i, Indicator: indicator(Entries[i]))).ToList();
+        var best = values.MaxBy(v => v.Indicator.Value).Indicator;
+        return values
+            .Where(v => AreTied(best.Value, best.Error, v.Indicator.Value, v.Indicator.Error))
+            .Select(v => v.Index)
             .ToList();
     }
 

@@ -150,6 +150,74 @@ public class ComparisonPageTests() : ComponentTestContext(renderPopoverProvider:
     }
 
     [Fact]
+    public void The_first_card_is_expanded_and_attackers_added_from_the_scenario_are_collapsed()
+    {
+        var shell = OpenComparison();
+
+        shell.Find("[data-test=add-from-scenario]").Click();
+
+        var contents = shell.FindAll("[data-test=comparison-attacker] [data-test=attacker-content]");
+        Assert.False(contents[0].HasAttribute("hidden"));
+        Assert.True(contents[1].HasAttribute("hidden"));
+    }
+
+    [Fact]
+    public void Attackers_can_be_moved_up_and_down()
+    {
+        var shell = OpenComparison();
+        shell.Find("[data-test=add-from-scenario]").Click();
+
+        Assert.True(shell.FindAll("[data-test=move-attacker-up]")[0].HasAttribute("disabled"));
+        Assert.True(shell.FindAll("[data-test=move-attacker-down]")[1].HasAttribute("disabled"));
+        shell.FindAll("[data-test=move-attacker-down]")[0].Click();
+
+        Assert.Equal(["Rubrics (2)", "Rubrics"], AttackerNames(shell));
+        Assert.Contains("*", shell.Find("[data-test=file-name]").TextContent);
+    }
+
+    [Fact]
+    public void The_name_is_the_card_title_and_is_edited_with_the_pen()
+    {
+        var shell = OpenComparison();
+        var card = () => shell.Find("[data-test=comparison-attacker]");
+
+        // Pas de champ « Nom » dans la carte : le nom est le titre
+        Assert.Equal("Rubrics", card().QuerySelector("[data-test=attacker-name]")!.TextContent);
+        Assert.DoesNotContain(card().QuerySelectorAll("label"), l => l.TextContent == "Nom de l'attaquant");
+
+        shell.Find("[data-test=rename-attacker]").Click();
+        shell.Find("input[data-test=attacker-name-input]").Input("Rubrics flammes");
+        shell.Find("input[data-test=attacker-name-input]").KeyDown("Enter");
+
+        Assert.Equal(["Rubrics flammes"], AttackerNames(shell));
+        Assert.Equal("Rubrics flammes", card().QuerySelector("[data-test=attacker-name]")!.TextContent);
+    }
+
+    [Fact]
+    public void Escape_cancels_a_rename()
+    {
+        var shell = OpenComparison();
+
+        shell.Find("[data-test=rename-attacker]").Click();
+        shell.Find("input[data-test=attacker-name-input]").Input("Autre");
+        shell.Find("input[data-test=attacker-name-input]").KeyDown("Escape");
+
+        Assert.Equal(["Rubrics"], AttackerNames(shell));
+        Assert.Empty(shell.FindAll("input[data-test=attacker-name-input]"));
+    }
+
+    [Fact]
+    public void The_scenario_screens_keep_the_name_field_in_the_card()
+    {
+        var shell = Render<AppShell>();
+        Navigation.NavigateTo(AppRoutes.FullSim);
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimPage>()));
+
+        Assert.Empty(shell.FindAll("[data-test=rename-attacker]"));
+        Assert.Contains(shell.Find("[data-test=attacker-panel]").QuerySelectorAll("label"), l => l.TextContent == "Nom de l'attaquant");
+    }
+
+    [Fact]
     public void The_round_plan_follows_the_number_of_attackers()
     {
         var shell = OpenComparison();

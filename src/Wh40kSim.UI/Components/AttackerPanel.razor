@@ -1,15 +1,27 @@
 @*
     Attaquant : nom, boosts (pour toutes ses armes) et profils d'armes, résolus dans l'ordre de la liste. Boutons
-    Ouvrir / Enregistrer de l'attaquant seul dans l'en-tête, si la page les fournit, ainsi que Dupliquer / Supprimer
-    (comparateur, une carte par attaquant). Repliable sans perdre l'état des cartes qu'il contient.
+    Ouvrir / Enregistrer de l'attaquant seul dans l'en-tête, si la page les fournit, ainsi que Monter / Descendre,
+    Dupliquer / Supprimer (comparateur, une carte par attaquant). Au comparateur, le nom est le titre de la carte,
+    modifiable sur place (stylo) au lieu d'un champ dans la carte. Repliable sans perdre l'état des cartes qu'il contient.
 *@
 
 <MudPaper Elevation="3" Class="pa-4 wh-section wh-attacker" data-test="attacker-panel">
-    <SectionHeader Icon="@Icons.Material.Filled.GpsFixed" Title="@(Title ?? L["Attacker_Title"])">
+    <SectionHeader Icon="@Icons.Material.Filled.GpsFixed" Title="@L["Attacker_Title"]" TitleContent="@(NameInTitle ? NameTitle : null)">
         <Leading>
             <CollapseToggle @bind-Expanded="_expanded" data-test="toggle-attacker" />
         </Leading>
         <ChildContent>
+            @if (OnMoveUp.HasDelegate)
+            {
+                <MudTooltip Text="@L["Attacker_MoveUp"]">
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" Size="Size.Small" Disabled="@(FileActionsDisabled || !CanMoveUp)"
+                                   OnClick="OnMoveUp" aria-label="@L["Attacker_MoveUp"]" data-test="move-attacker-up" />
+                </MudTooltip>
+                <MudTooltip Text="@L["Attacker_MoveDown"]">
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" Size="Size.Small" Disabled="@(FileActionsDisabled || !CanMoveDown)"
+                                   OnClick="OnMoveDown" aria-label="@L["Attacker_MoveDown"]" data-test="move-attacker-down" />
+                </MudTooltip>
+            }
             @if (OnOpen.HasDelegate)
             {
                 <PartFileActions OpenHelp="@L["Attacker_OpenHelp"]" SaveHelp="@L["Attacker_SaveHelp"]" Disabled="FileActionsDisabled"
@@ -33,7 +45,10 @@
     </SectionHeader>
     @* Contenu masqué plutôt que retiré : les cartes d'arme et de groupe gardent leur état replié ou déplié *@
     <div hidden="@(!_expanded)" data-test="attacker-content">
-        <MudTextField T="string" Label="@L["Attacker_Name"]" @bind-Value="Attacker.Name" @bind-Value:after="NotifyChanged" />
+        @if (!NameInTitle)
+        {
+            <MudTextField T="string" Label="@L["Attacker_Name"]" @bind-Value="Attacker.Name" @bind-Value:after="NotifyChanged" />
+        }
 
         <AttackerBoostsEditor Boosts="Attacker.Boosts" SnapShooting="SnapShooting" Changed="NotifyChanged" />
 
@@ -97,9 +112,77 @@
     [Parameter]
     public bool SnapShooting { get; set; }
 
-    /// <summary>Titre de la carte (le nom de l'attaquant au comparateur) ; par défaut « Attaquant ».</summary>
+    /// <summary>
+    /// Le nom de l'attaquant sert de titre, modifiable sur place avec le stylo (comparateur, une carte par attaquant) ;
+    /// sinon le titre est « Attaquant » et le nom se saisit dans la carte.
+    /// </summary>
     [Parameter]
-    public string? Title { get; set; }
+    public bool NameInTitle { get; set; }
+
+    /// <summary>Boutons Monter / Descendre dans l'en-tête, si fournis (ordre des attaquants au comparateur).</summary>
+    [Parameter]
+    public EventCallback OnMoveUp { get; set; }
+
+    [Parameter]
+    public EventCallback OnMoveDown { get; set; }
+
+    [Parameter]
+    public bool CanMoveUp { get; set; }
+
+    [Parameter]
+    public bool CanMoveDown { get; set; }
+
+    private bool _editingName;
+    private string _nameDraft = "";
+
+    /// <summary>Titre-nom : texte et stylo, ou champ de saisie pendant la modification (Entrée ou sortie du champ : valider ; Échap : annuler).</summary>
+    private RenderFragment NameTitle => @<span class="wh-name-title" data-test="attacker-name-title">
+        @if (_editingName)
+        {
+            <MudTextField T="string" @bind-Value="_nameDraft" Immediate="true" AutoFocus="true" Variant="Variant.Outlined" Margin="Margin.Dense"
+                          Placeholder="@L["Attacker_Name"]" OnBlur="CommitName" OnKeyDown="OnNameKeyDown" data-test="attacker-name-input" />
+        }
+        else
+        {
+            <MudText Typo="Typo.h6" data-test="attacker-name">@(string.IsNullOrWhiteSpace(Attacker.Name) ? L["Attacker_Title"] : Attacker.Name)</MudText>
+            <MudTooltip Text="@L["Attacker_Rename"]">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Disabled="FileActionsDisabled" OnClick="StartRename"
+                               aria-label="@L["Attacker_Rename"]" data-test="rename-attacker" />
+            </MudTooltip>
+        }
+    </span>;
+
+    private void StartRename()
+    {
+        _nameDraft = Attacker.Name;
+        _editingName = true;
+    }
+
+    private async Task CommitName()
+    {
+        if (!_editingName)
+        {
+            return;
+        }
+        _editingName = false;
+        if (_nameDraft != Attacker.Name)
+        {
+            Attacker.Name = _nameDraft.Trim();
+            await NotifyChanged();
+        }
+    }
+
+    private async Task OnNameKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await CommitName();
+        }
+        else if (e.Key == "Escape")
+        {
+            _editingName = false;
+        }
+    }
 
     /// <summary>Carte dépliée à sa première apparition (au comparateur, seul un attaquant ajouté à la main l'est).</summary>
     [Parameter]

@@ -1217,8 +1217,12 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   `ComparisonState` (`ScenarioSession.Comparison`) ; `ISimulationService.SupportsComparison` / `RunComparisonAsync`,
   `IScenarioFileService.OpenManyAsync` (desktop : `PickMultipleAsync` ; web : `openFiles`) ; `AttackerPanel` (titre,
   Dupliquer / Supprimer, `InitiallyExpanded`), `ScenarioToolbar` (bulles réglables), `ProgressState.Label`
-  (« Ronde 2/3 ») ; raccourcis et noms de fichier mis en commun (`KeyboardShortcuts`, `FileNames`). 641 tests verts
-  (223 Core, 134 Simulation, 240 UI, 25 Web, 19 client web ; UI stables sur 3 exécutions). `RoundPlan`, `EliminationRounds`
+  (« Ronde 2/3 ») ; raccourcis et noms de fichier mis en commun (`KeyboardShortcuts`, `FileNames`).
+  Retours de l'utilisateur : première carte d'attaquant dépliée ; flèches Monter / Descendre sur chaque carte ; nom de
+  l'attaquant en titre de la carte, modifiable avec un stylo (Entrée ou sortie du champ : valider, Échap : annuler),
+  sans le champ « Nom » en doublon dans la carte (`AttackerPanel.NameInTitle`, `SectionHeader.TitleContent` ; Quick
+  sim et Full sim inchangés). 646 tests verts (223 Core, 134 Simulation, 245 UI, 25 Web, 19 client web ; UI stables
+  sur 3 exécutions). `RoundPlan`, `EliminationRounds`
   (`RoundProgress`, `RoundOutcome`, `Survivors`) ; `Comparator.Run` en rondes ; `ComparisonData.Rounds` / `Elapsed`,
   `ComparisonEntryData` (`EliminatedInRound`) ; `ComparisonResult.Rounds` / `Finalists`, `RankedEntry.EliminatedInRound`
   / `IsFinalist`. 622 tests verts (223 Core, 134 Simulation, 221 UI, 25 Web, 19 client web). Banc d'essai refait avec

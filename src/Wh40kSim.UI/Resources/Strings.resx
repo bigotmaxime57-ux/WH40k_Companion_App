@@ -1105,4 +1105,13 @@
   <data name="Comparison_ScenarioFileName" xml:space="preserve">
     <value>{0} contre {1}</value>
   </data>
+  <data name="Attacker_MoveUp" xml:space="preserve">
+    <value>Monter cet attaquant</value>
+  </data>
+  <data name="Attacker_MoveDown" xml:space="preserve">
+    <value>Descendre cet attaquant</value>
+  </data>
+  <data name="Attacker_Rename" xml:space="preserve">
+    <value>Renommer cet attaquant</value>
+  </data>
 </root>

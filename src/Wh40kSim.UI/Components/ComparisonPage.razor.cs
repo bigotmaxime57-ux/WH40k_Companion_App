@@ -165,9 +165,6 @@ public partial class ComparisonPage
         }
     }
 
-    private string AttackerTitle(AttackerForm attacker) =>
-        string.IsNullOrWhiteSpace(attacker.Name) ? L["Attacker_Title"] : attacker.Name;
-
     // Modifications
 
     private void OnChanged()
@@ -299,6 +296,18 @@ public partial class ComparisonPage
         var copy = new AttackerForm(attacker.ToAttackerUnit());
         copy.Name = Form.UniqueName(attacker.Name);
         Form.Attackers.Insert(Form.Attackers.IndexOf(attacker) + 1, copy);
+        OnChanged();
+    }
+
+    /// <summary>Change l'ordre des attaquants (ordre de saisie : départage des égalités exactes et ordre du fichier).</summary>
+    private void Move(int index, int offset)
+    {
+        int target = index + offset;
+        if (target < 0 || target >= Form.Attackers.Count)
+        {
+            return;
+        }
+        (Form.Attackers[index], Form.Attackers[target]) = (Form.Attackers[target], Form.Attackers[index]);
         OnChanged();
     }
 

@@ -46,13 +46,17 @@
                     <MudText Typo="Typo.h6">@L["Comparison_Attackers", Form.Attackers.Count]</MudText>
                     <HelpBubble Lines="@([L["Comparison_AttackersHelp"]])" />
                 </div>
-                @foreach (var attacker in Form.Attackers)
+                @for (int i = 0; i < Form.Attackers.Count; i++)
                 {
-                    var current = attacker;
+                    int index = i;
+                    var current = Form.Attackers[index];
+                    @* Dépliée : la première carte (celle de départ) et celles ajoutées à la main *@
                     <div @key="current" data-test="comparison-attacker">
-                        <AttackerPanel Attacker="current" Title="@AttackerTitle(current)" InitiallyExpanded="_expandOnAdd.Contains(current)"
+                        <AttackerPanel Attacker="current" NameInTitle="true" InitiallyExpanded="@(index == 0 || _expandOnAdd.Contains(current))"
                                        Changed="() => OnAttackerChanged(current)" EditKeywords="EditKeywords"
                                        OnOpen="() => OpenAttackerAsync(current)" OnSave="() => SaveAttackerAsync(current)"
+                                       CanMoveUp="index > 0" CanMoveDown="index < Form.Attackers.Count - 1"
+                                       OnMoveUp="() => Move(index, -1)" OnMoveDown="() => Move(index, 1)"
                                        OnDuplicate="() => Duplicate(current)" OnRemove="() => Remove(current)"
                                        FileActionsDisabled="Running" SnapShooting="Form.Context.SnapShooting" />
                     </div>

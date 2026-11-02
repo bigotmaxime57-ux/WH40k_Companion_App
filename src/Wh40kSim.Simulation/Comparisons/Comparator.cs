@@ -27,12 +27,14 @@ public static class Comparator
         comparison.EnsureValid();
 
         var stopwatch = Stopwatch.StartNew();
-        var plan = RoundPlan.For(comparison.Attackers.Count, iterations);
-        var outcomes = EliminationRounds.Run(
-            comparison.ToScenarios(), plan, seed ?? Random.Shared.Next(), progress, cancellationToken, threads);
+        // Les variantes (combinaisons de profils) s'affrontent : le plan des rondes les compte toutes
+        var scenarios = comparison.ToScenarios();
+        var plan = RoundPlan.For(scenarios.Count, iterations);
+        var outcomes = EliminationRounds.Run(scenarios, plan, seed ?? Random.Shared.Next(), progress, cancellationToken, threads);
         stopwatch.Stop();
         return new ComparisonResult(new ComparisonData
         {
+            Comparison = comparison,
             Rounds = plan,
             Elapsed = stopwatch.Elapsed,
             Entries = outcomes.Select(o => new ComparisonEntryData { Simulation = o.Result.Data, EliminatedInRound = o.EliminatedInRound }).ToList(),

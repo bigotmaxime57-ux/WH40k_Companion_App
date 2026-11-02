@@ -20,7 +20,8 @@ public static class ComparisonJson
         var comparison = JsonSerializer.Deserialize<Comparison>(json, ScenarioJson.Options)
                          ?? throw new JsonException("Le fichier de comparaison est vide.");
         // Présents mais écrits null : refusés comme s'ils manquaient
-        if (comparison.Defender is null || comparison.Entries is null || comparison.Entries.Any(e => e?.Attacker is null || e.Context is null))
+        if (comparison.Defender is null || comparison.Entries is null
+            || comparison.Entries.Any(e => e?.Attacker is null || e.Context is null || e.Alternatives is null || e.Alternatives.Any(a => a?.Profiles is null || a.Profiles.Any(p => p is null))))
         {
             throw new JsonException("Le fichier de comparaison doit contenir un défenseur et une liste d'entrées, chacune avec son attaquant.");
         }

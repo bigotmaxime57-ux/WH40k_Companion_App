@@ -66,6 +66,22 @@
                     </StatTile>
                 }
             </div>
+            @* Attaquants à profils de rechange : les profils de leur variante la mieux classée *@
+            @if (Result.BestProfilesByAttacker.Count > 0)
+            {
+                <div class="wh-subsection-title mt-2" data-test="best-profiles">
+                    <MudText Typo="Typo.subtitle1">@L["Comparison_BestProfiles"]</MudText>
+                    <HelpBubble Lines="@([L["Comparison_BestProfilesHelp"]])" />
+                </div>
+                @foreach (var best in Result.BestProfilesByAttacker)
+                {
+                    <MudText Typo="Typo.body2" data-test="@($"best-profiles-{best.Entry}")">
+                        <strong>@best.AttackerName</strong> :
+                        @string.Join(" · ", best.Choices.Select(c => L["Comparison_BestProfileLine", c.WeaponName, c.Profile].Value))
+                        <span class="wh-muted">(@L["Comparison_BestVariantRank", best.Best.Rank])</span>
+                    </MudText>
+                }
+            }
             @if (Result.PodiumBoundaryTied)
             {
                 <MudAlert Severity="Severity.Info" Dense="true" data-test="podium-boundary-tied">

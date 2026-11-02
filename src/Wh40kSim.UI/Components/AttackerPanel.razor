@@ -67,12 +67,13 @@
         {
             int index = i;
             var weapon = Attacker.Weapons[index];
-            <WeaponEditor @key="weapon" Weapon="weapon" Changed="NotifyChanged"
+            <WeaponEditor @key="weapon" Weapon="weapon" Changed="() => OnWeaponChanged(weapon)"
                           CanMoveUp="index > 0" CanMoveDown="index < Attacker.Weapons.Count - 1"
                           OnMoveUp="() => Move(index, -1)" OnMoveDown="() => Move(index, 1)"
                           OnDuplicate="() => Duplicate(weapon)" OnRemove="() => Remove(weapon)"
                           OnEditKeywords="() => EditKeywords.InvokeAsync(weapon)"
-                          Boosts="boosts" Context="context" />
+                          Boosts="boosts" Context="context" HasAlternatives="@(ProfilesOf(weapon).Count > 0)"
+                          Profiles="@(Alternatives is null ? null : AlternativeProfiles(weapon, boosts, context))" />
         }
 
         <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Text" Color="Color.Primary" OnClick="Add"
@@ -121,6 +122,69 @@
     [Parameter]
     public bool NameInTitle { get; set; }
 
+    /// <summary>
+    /// Profils de rechange par arme (comparateur seulement ; null : pas de profils, Quick sim et Full sim). La carte
+    /// d'une arme les affiche alors sous son premier profil, les uns sous les autres, chacun avec un bandeau fléché
+    /// (comme sur l'application Warhammer), puis « Ajouter un profil ».
+    /// </summary>
+    [Parameter]
+    public Dictionary<WeaponForm, List<WeaponForm>>? Alternatives { get; set; }
+
+    private IReadOnlyList<WeaponForm> ProfilesOf(WeaponForm weapon) => Alternatives?.GetValueOrDefault(weapon) ?? [];
+
+    private RenderFragment AlternativeProfiles(WeaponForm weapon, AttackerBoosts boosts, AttackContext context) => @<div data-test="alternative-profiles">
+        @foreach (var profile in ProfilesOf(weapon))
+        {
+            var current = profile;
+            <WeaponEditor @key="current" Weapon="current" IsAlternative="true" Changed="NotifyChanged"
+                          OnRemove="() => RemoveProfile(weapon, current)" OnEditKeywords="() => EditKeywords.InvokeAsync(current)"
+                          Boosts="boosts" Context="context" />
+        }
+        <MudTooltip Text="@L["Weapon_AddProfileHelp"]">
+            <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircleOutline"
+                       OnClick="() => AddProfile(weapon)" data-test="add-profile">@L["Weapon_AddProfile"]</MudButton>
+        </MudTooltip>
+    </div>;
+
+    /// <summary>Nouveau profil de rechange, sous les autres : copie du dernier profil, sous un nom libre.</summary>
+    private Task AddProfile(WeaponForm weapon)
+    {
+        var profiles = Alternatives!.TryGetValue(weapon, out var list) ? list : Alternatives[weapon] = [];
+        var copy = (profiles.Count > 0 ? profiles[^1] : weapon).Clone();
+        var taken = profiles.Select(p => p.Name.Trim()).Prepend(weapon.Name.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        int suffix = profiles.Count + 2;
+        while (taken.Contains($"{weapon.Name.Trim()} ({suffix})")) suffix++;
+        copy.Name = $"{weapon.Name.Trim()} ({suffix})";
+        copy.ModelCount = weapon.ModelCount;
+        copy.Type = weapon.Type;
+        profiles.Add(copy);
+        return NotifyChanged();
+    }
+
+    private Task RemoveProfile(WeaponForm weapon, WeaponForm profile)
+    {
+        Alternatives!.GetValueOrDefault(weapon)?.Remove(profile);
+        return NotifyChanged();
+    }
+
+    /// <summary>
+    /// Modification de l'arme : son nombre de porteurs et son type valent pour tous ses profils (on choisit le profil,
+    /// pas la répartition ni la nature de l'arme), reportés sur ses profils de rechange.
+    /// </summary>
+    private Task OnWeaponChanged(WeaponForm weapon)
+    {
+        foreach (var profile in ProfilesOf(weapon))
+        {
+            profile.ModelCount = weapon.ModelCount;
+            profile.Type = weapon.Type;
+        }
+        return NotifyChanged();
+    }
+
+    /// <summary>Note après le nom dans le titre (comparateur : nombre de variantes) ; null : aucune.</summary>
+    [Parameter]
+    public string? TitleNote { get; set; }
+
     /// <summary>Situation propre à l'attaquant, sous ses boosts (comparateur : seulement les conditions qui comptent).</summary>
     [Parameter]
     public RenderFragment? Situation { get; set; }
@@ -151,6 +215,10 @@
         else
         {
             <MudText Typo="Typo.h6" data-test="attacker-name">@(string.IsNullOrWhiteSpace(Attacker.Name) ? L["Attacker_Title"] : Attacker.Name)</MudText>
+            @if (TitleNote is not null)
+            {
+                <MudText Typo="Typo.caption" Class="wh-muted" data-test="attacker-title-note">@TitleNote</MudText>
+            }
             <MudTooltip Text="@L["Attacker_Rename"]">
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Disabled="FileActionsDisabled" OnClick="StartRename"
                                aria-label="@L["Attacker_Rename"]" data-test="rename-attacker" />

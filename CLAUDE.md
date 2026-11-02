@@ -1212,7 +1212,8 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   2026-11-02. Prochaine étape : 3 (comparaison, côté UI), à préciser.
 - Phase 5, étape 3 (comparateur, côté UI) : précisée et validée le 2026-11-02 (avec l'enregistrement d'un attaquant
   ou du scénario complet depuis le classement, demandé par l'utilisateur), codée sur la branche
-  `phase5/etape3-comparateur-ui`, **en attente de validation** (à vérifier à l'écran par l'utilisateur).
+  `phase5/etape3-comparateur-ui`, fusionnée dans `main`, validée par l'utilisateur à l'écran le 2026-11-02. Prochaine
+  étape : 4 (graphiques de la comparaison), à préciser.
   `ComparisonPage` (`/comparison`) et `ComparisonResultsPage` (`/comparison/results`), `ComparisonForm`,
   `ComparisonState` (`ScenarioSession.Comparison`) ; `ISimulationService.SupportsComparison` / `RunComparisonAsync`,
   `IScenarioFileService.OpenManyAsync` (desktop : `PickMultipleAsync` ; web : `openFiles`) ; `AttackerPanel` (titre,

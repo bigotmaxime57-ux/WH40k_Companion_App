@@ -1169,7 +1169,8 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   console inchangée. Avec la CI ignorant les push de documentation seule (`*.md`, `.claude/`). Fusionnée dans `main`
   le 2026-11-02. Prochaine étape : 1 (comparaison, côté Simulation), à préciser.
 - Phase 5, étape 1 (comparaison, côté Simulation) : précisée et validée le 2026-11-02, codée sur la branche
-  `phase5/etape1-comparaison-simulation`, **en attente de validation**. `Wh40kSim.Simulation/Comparisons/` :
+  `phase5/etape1-comparaison-simulation`, fusionnée dans `main`, validée par l'utilisateur le 2026-11-02. Prochaine
+  étape : 2 (rondes éliminatoires), à préciser (seuils à fixer ensemble d'après des temps mesurés). `Wh40kSim.Simulation/Comparisons/` :
   `Comparison`, `ComparisonJson`, `ComparisonData`, `Comparator`, `ComparisonResult` (`Ranking`, `RankedEntry`,
   `Podium`, `PodiumBoundaryTied`, `BestScore`… `BestKillsAtLeast`, `AreTied`) ; `EfficiencyScore` ;
   `SimulationData.KillsTimesDamage` ; `SimulationResult.EfficiencyScore` / `MeanDamageShare`. 604 tests verts

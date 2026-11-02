@@ -67,14 +67,13 @@
         {
             int index = i;
             var weapon = Attacker.Weapons[index];
-            @* Comparateur : la carte montre le profil choisi dans la barre des profils (le premier, ou un profil de rechange) *@
-            var shown = ShownProfile(weapon);
-            <WeaponEditor @key="weapon" Weapon="shown" Changed="() => OnWeaponChanged(weapon, shown)"
+            <WeaponEditor @key="weapon" Weapon="weapon" Changed="() => OnWeaponChanged(weapon)"
                           CanMoveUp="index > 0" CanMoveDown="index < Attacker.Weapons.Count - 1"
                           OnMoveUp="() => Move(index, -1)" OnMoveDown="() => Move(index, 1)"
                           OnDuplicate="() => Duplicate(weapon)" OnRemove="() => Remove(weapon)"
-                          OnEditKeywords="() => EditKeywords.InvokeAsync(shown)"
-                          Boosts="boosts" Context="context" Profiles="@(Alternatives is null ? null : ProfileBar(weapon))" />
+                          OnEditKeywords="() => EditKeywords.InvokeAsync(weapon)"
+                          Boosts="boosts" Context="context" HasAlternatives="@(ProfilesOf(weapon).Count > 0)"
+                          Profiles="@(Alternatives is null ? null : AlternativeProfiles(weapon, boosts, context))" />
         }
 
         <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Text" Color="Color.Primary" OnClick="Add"
@@ -125,33 +124,21 @@
 
     /// <summary>
     /// Profils de rechange par arme (comparateur seulement ; null : pas de profils, Quick sim et Full sim). La carte
-    /// d'une arme a alors une barre de profils : un onglet par profil, « Ajouter un profil », suppression d'un profil de
-    /// rechange.
+    /// d'une arme les affiche alors sous son premier profil, les uns sous les autres, chacun avec un bandeau fléché
+    /// (comme sur l'application Warhammer), puis « Ajouter un profil ».
     /// </summary>
     [Parameter]
     public Dictionary<WeaponForm, List<WeaponForm>>? Alternatives { get; set; }
 
-    private readonly Dictionary<WeaponForm, WeaponForm> _shownProfile = [];
+    private IReadOnlyList<WeaponForm> ProfilesOf(WeaponForm weapon) => Alternatives?.GetValueOrDefault(weapon) ?? [];
 
-    /// <summary>Profil affiché dans la carte d'une arme : celui choisi dans la barre, sinon l'arme elle-même (premier profil).</summary>
-    private WeaponForm ShownProfile(WeaponForm weapon) =>
-        _shownProfile.GetValueOrDefault(weapon) is { } shown && Alternatives?.GetValueOrDefault(weapon)?.Contains(shown) == true ? shown : weapon;
-
-    private RenderFragment ProfileBar(WeaponForm weapon) => @<div class="wh-profile-bar" data-test="profile-bar">
-        @{
-            var profiles = Alternatives!.GetValueOrDefault(weapon) ?? [];
-            var shown = ShownProfile(weapon);
-        }
-        @if (profiles.Count > 0)
+    private RenderFragment AlternativeProfiles(WeaponForm weapon, AttackerBoosts boosts, AttackContext context) => @<div data-test="alternative-profiles">
+        @foreach (var profile in ProfilesOf(weapon))
         {
-            <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="@(shown == weapon ? Variant.Filled : Variant.Outlined)"
-                     OnClick="() => Show(weapon, weapon)" data-test="profile-tab">@weapon.Name</MudChip>
-            @foreach (var profile in profiles)
-            {
-                var current = profile;
-                <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="@(shown == current ? Variant.Filled : Variant.Outlined)"
-                         OnClick="() => Show(weapon, current)" OnClose="_ => RemoveProfile(weapon, current)" data-test="profile-tab">@current.Name</MudChip>
-            }
+            var current = profile;
+            <WeaponEditor @key="current" Weapon="current" IsAlternative="true" Changed="NotifyChanged"
+                          OnRemove="() => RemoveProfile(weapon, current)" OnEditKeywords="() => EditKeywords.InvokeAsync(current)"
+                          Boosts="boosts" Context="context" />
         }
         <MudTooltip Text="@L["Weapon_AddProfileHelp"]">
             <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AddCircleOutline"
@@ -159,46 +146,37 @@
         </MudTooltip>
     </div>;
 
-    private void Show(WeaponForm weapon, WeaponForm profile) => _shownProfile[weapon] = profile;
-
-    /// <summary>Nouveau profil de rechange : copie du profil affiché, sous un nom libre, affiché aussitôt.</summary>
+    /// <summary>Nouveau profil de rechange, sous les autres : copie du dernier profil, sous un nom libre.</summary>
     private Task AddProfile(WeaponForm weapon)
     {
         var profiles = Alternatives!.TryGetValue(weapon, out var list) ? list : Alternatives[weapon] = [];
-        var copy = ShownProfile(weapon).Clone();
+        var copy = (profiles.Count > 0 ? profiles[^1] : weapon).Clone();
         var taken = profiles.Select(p => p.Name.Trim()).Prepend(weapon.Name.Trim()).ToHashSet(StringComparer.OrdinalIgnoreCase);
         int suffix = profiles.Count + 2;
         while (taken.Contains($"{weapon.Name.Trim()} ({suffix})")) suffix++;
         copy.Name = $"{weapon.Name.Trim()} ({suffix})";
         copy.ModelCount = weapon.ModelCount;
+        copy.Type = weapon.Type;
         profiles.Add(copy);
-        _shownProfile[weapon] = copy;
         return NotifyChanged();
     }
 
     private Task RemoveProfile(WeaponForm weapon, WeaponForm profile)
     {
         Alternatives!.GetValueOrDefault(weapon)?.Remove(profile);
-        if (_shownProfile.GetValueOrDefault(weapon) == profile)
-        {
-            _shownProfile.Remove(weapon);
-        }
         return NotifyChanged();
     }
 
     /// <summary>
-    /// Modification d'une carte : le nombre de porteurs est celui de l'arme, commun à tous ses profils (on choisit le
-    /// profil, pas la répartition) ; modifié dans un profil de rechange, il est reporté sur l'arme et ses autres profils.
+    /// Modification de l'arme : son nombre de porteurs et son type valent pour tous ses profils (on choisit le profil,
+    /// pas la répartition ni la nature de l'arme), reportés sur ses profils de rechange.
     /// </summary>
-    private Task OnWeaponChanged(WeaponForm weapon, WeaponForm shown)
+    private Task OnWeaponChanged(WeaponForm weapon)
     {
-        if (Alternatives?.GetValueOrDefault(weapon) is { } profiles)
+        foreach (var profile in ProfilesOf(weapon))
         {
-            weapon.ModelCount = shown.ModelCount;
-            foreach (var profile in profiles)
-            {
-                profile.ModelCount = weapon.ModelCount;
-            }
+            profile.ModelCount = weapon.ModelCount;
+            profile.Type = weapon.Type;
         }
         return NotifyChanged();
     }

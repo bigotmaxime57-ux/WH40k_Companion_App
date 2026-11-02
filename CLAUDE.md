@@ -396,9 +396,12 @@ Découpage revu avec l'utilisateur le 2026-11-02. Décisions :
      l'utilisateur), attaquant et profils choisis indiqués ; **meilleur profil pour chaque arme** de chaque attaquant
      (sa meilleure variante) ; enregistrer / analyser au Full sim = la **variante concrète**. `ComparisonData` garde la
      comparaison (définition) pour retrouver les variantes.
-   - Interface : sur la carte d'une arme, « Ajouter un profil », puis un onglet par profil (au nom du profil), profil de
-     rechange supprimable ; nombre de variantes sur la carte de l'attaquant et dans le plan des rondes ; un attaquant
-     enregistré depuis sa carte ne garde que le premier profil (bulle « ? »).
+   - Interface : sur la carte d'une arme, « Ajouter un profil » ; les profils de rechange s'affichent **les uns sous les
+     autres** dans la carte, chacun avec un bandeau marqué d'une **flèche** (nom, suppression) puis ses lignes, et la
+     même flèche devant le nom du premier profil (retour de l'utilisateur : comme sur l'application Warhammer, au lieu
+     des onglets d'abord codés) ; nombre de porteurs et type de l'arme communs à tous ses profils ; nombre de variantes
+     sur la carte de l'attaquant et dans le plan des rondes ; un attaquant enregistré depuis sa carte ne garde que le
+     premier profil (bulle « ? »).
    - Tests : dépliage, validation, JSON, rondes sur les variantes, meilleur profil, variante concrète, interface.
 6. **Partie web** : comparaison, rondes et profils dans l'API et le client ; plafond de simulations par lancement à
    adapter (plusieurs entrées, plusieurs rondes).
@@ -1255,10 +1258,10 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   `ComparisonVariant`, `Comparison.Variants()` (les scénarios simulés sont ceux des variantes) ;
   `ComparisonData.Comparison` (définition gardée, une entrée par variante, scénario vérifié) ; `RankedEntry.Variant`,
   `ComparisonResult.Variants` / `BestProfilesByAttacker`. Interface : `ComparisonEntryForm.Alternatives` /
-  `VariantCount` / `Clone()`, barre des profils sur la carte d'arme (`AttackerPanel.Alternatives`,
-  `WeaponEditor.Profiles` ; nombre de porteurs commun à tous les profils), nombre de variantes (`TitleNote`, plan des
-  rondes), « Meilleur profil par arme » sous le podium. 671 tests verts (223 Core, 142 Simulation, 267 UI, 25 Web,
-  19 client web ; UI stables sur 3 exécutions).
+  `VariantCount` / `Clone()`, profils de rechange sous le premier dans la carte d'arme (`AttackerPanel.Alternatives`,
+  `WeaponEditor.Profiles` / `IsAlternative` / `HasAlternatives` ; nombre de porteurs et type communs), nombre de
+  variantes (`TitleNote`, plan des rondes), « Meilleur profil par arme » sous le podium. 677 tests verts (223 Core,
+  142 Simulation, 268 UI, 25 Web, 19 client web).
   `ComparisonChart` (`ChartSeries`), section « Distributions » de `ComparisonResultsPage` (figurines, PV), pastilles
   et statistiques du podium ; CSS `wh-cmp-*`. Rendu plus léger de la branche d'essai repris dans l'étape (fusionnée
   dans la branche de l'étape, puis supprimée). Corrigé au passage : le test des fichiers de `scenarios/` accepte les

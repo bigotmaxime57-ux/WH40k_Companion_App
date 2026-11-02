@@ -294,27 +294,45 @@ public class ComparisonPageTests() : ComponentTestContext(renderPopoverProvider:
         var weapon = entry.Attacker.Weapons[0];
         var profile = Assert.Single(entry.ProfilesOf(weapon));
         Assert.Equal("Bolter (2)", profile.Name);
-        Assert.Equal(2, shell.FindAll("[data-test=profile-tab]").Count);
+        // Le profil de rechange s'affiche sous le premier, avec sa flèche ; le premier a la même
+        var alternative = Assert.Single(shell.FindAll("[data-test=weapon] [data-test=weapon-profile-alt]"));
+        Assert.Equal("Bolter (2)", alternative.QuerySelector("input[data-test=profile-name]")!.GetAttribute("value"));
+        Assert.Single(shell.FindAll("[data-test=profile-arrow]"));
         Assert.Contains("2 variantes", shell.Find("[data-test=attacker-title-note]").TextContent);
         Assert.StartsWith("2 variantes", shell.Find("[data-test=round-plan]").TextContent);
         Assert.False(shell.Find("[data-test=run]").HasAttribute("disabled"));
     }
 
     [Fact]
-    public void The_card_edits_the_profile_chosen_in_its_bar()
+    public void Each_profile_is_edited_in_its_own_lines_and_can_be_removed()
     {
         var shell = OpenComparison();
-        shell.Find("[data-test=add-profile]").Click();   // le nouveau profil est affiché
+        shell.Find("[data-test=add-profile]").Click();
 
-        shell.Find("input[data-test=attacks]").Change("20");
+        shell.Find("[data-test=weapon-profile-alt] input[data-test=attacks]").Change("20");
 
         var entry = Session.Comparison.Form!.Entries[0];
         var weapon = entry.Attacker.Weapons[0];
         Assert.Equal("20", entry.ProfilesOf(weapon)[0].Attacks);
         Assert.Equal("10", weapon.Attacks);
+        Assert.Equal(2, shell.FindAll("[data-test=weapon] input[data-test=attacks]").Count);
 
-        shell.FindAll("[data-test=profile-tab]")[0].Click();
-        Assert.Equal("10", shell.Find("input[data-test=attacks]").GetAttribute("value"));
+        shell.Find("[data-test=remove-profile]").Click();
+        Assert.Empty(entry.ProfilesOf(weapon));
+        Assert.Empty(shell.FindAll("[data-test=weapon-profile-alt]"));
+        Assert.Empty(shell.FindAll("[data-test=profile-arrow]"));
+    }
+
+    [Fact]
+    public void The_model_count_of_the_weapon_applies_to_its_profiles()
+    {
+        var shell = OpenComparison();
+        shell.Find("[data-test=add-profile]").Click();
+
+        shell.Find("[data-test=weapon] .wh-card-count input").Change("4");
+
+        var entry = Session.Comparison.Form!.Entries[0];
+        Assert.Equal(4, entry.ProfilesOf(entry.Attacker.Weapons[0])[0].ModelCount);
     }
 
     [Fact]

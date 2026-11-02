@@ -490,13 +490,32 @@ path.wh-cmp-curve {
     fill: var(--mud-palette-text-primary);
 }
 
-/* Barre des profils d'une arme (comparateur) : un onglet par profil, puis « Ajouter un profil » */
-.wh-profile-bar {
+/* Profils de rechange d'une arme (comparateur) : les uns sous les autres dans sa carte, chacun avec un bandeau
+   fléché (nom, suppression), comme sur l'application Warhammer ; même flèche devant le nom du premier profil */
+.wh-profile-alt {
+    border-top: 1px dashed var(--mud-palette-lines-default);
+    margin-top: 10px;
+    padding-top: 8px;
+}
+
+.wh-profile-header {
     align-items: center;
+    background: color-mix(in srgb, var(--wh-accent) 16%, transparent);
+    border-left: 3px solid var(--wh-accent);
+    border-radius: 3px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
+    gap: .4rem;
     margin-bottom: 6px;
+    padding: 2px 6px;
+}
+
+.wh-profile-header > .wh-card-name {
+    flex: 1 1 auto;
+}
+
+.wh-profile-arrow {
+    color: var(--wh-accent);
+    flex: 0 0 auto;
 }
 
 /* Titre d'un graphique du comparateur, centré au-dessus de lui */

@@ -6,9 +6,31 @@
     Repliable : une fois replié, une ligne de résumé (Describe du Core). Les mots-clés actifs sont des étiquettes ; le
     bouton « Mots-clés » ouvre le sélecteur (panneau latéral). Ligne « Relances » (pêche aux critiques à la touche, à la
     blessure) seulement quand le Core la juge utile pour cette arme.
+    Comparateur : les profils de rechange s'affichent sous le profil de l'arme, chacun avec un bandeau marqué d'une
+    flèche (nom, suppression) puis ses lignes, comme sur l'application Warhammer (IsAlternative) ; le premier profil a
+    alors la même flèche devant son nom.
 *@
 @using Wh40kSim.UI.Keywords
 
+@if (IsAlternative)
+{
+    @* Profil de rechange, dans la carte de son arme : bandeau fléché, puis les mêmes lignes que le premier profil *@
+    <div class="wh-profile-alt" data-test="weapon-profile-alt">
+        <div class="wh-profile-header">
+            <MudIcon Icon="@Icons.Material.Filled.PlayArrow" Size="Size.Small" Class="wh-profile-arrow" />
+            <div class="wh-card-name">
+                <MudTextField T="string" Label="@L["Weapon_ProfileName"]" @bind-Value="Weapon.Name" @bind-Value:after="NotifyChanged"
+                              data-test="profile-name" />
+            </div>
+            <MudTooltip Text="@L["Weapon_RemoveProfile"]">
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Class="wh-delete" OnClick="OnRemove" data-test="remove-profile" />
+            </MudTooltip>
+        </div>
+        @ProfileRows
+    </div>
+}
+else
+{
 <MudPaper Outlined="true" Class="my-3 wh-subcard wh-weapon-card" data-test="weapon">
     @* Bandeau du type d'arme : toute la hauteur de la carte, fond plein couleur du camp, pictogramme centré *@
     <div class="wh-weapon-band">
@@ -18,13 +40,15 @@
         </MudTooltip>
     </div>
     <div class="wh-weapon-body pa-3">
-        @* Comparateur : barre des profils de l'arme (onglets, ajout), au-dessus du profil affiché *@
-        @Profiles
         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="wh-card-header">
             <CollapseToggle @bind-Expanded="_expanded" data-test="toggle-weapon" />
             @if (_expanded)
             {
-                @* Identité de l'arme : nom, type et nombre de porteurs *@
+                @* Identité de l'arme : nom, type et nombre de porteurs ; flèche de profil si l'arme a des profils de rechange *@
+                @if (HasAlternatives)
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.PlayArrow" Size="Size.Small" Class="wh-profile-arrow" data-test="profile-arrow" />
+                }
                 <div class="wh-card-name">
                     <MudTextField T="string" Label="@L["Weapon_Name"]" @bind-Value="Weapon.Name" @bind-Value:after="NotifyChanged" />
                 </div>
@@ -59,6 +83,20 @@
 
         @if (_expanded)
         {
+            @ProfileRows
+            @* Comparateur : profils de rechange de l'arme, les uns sous les autres (comme sur l'application Warhammer) *@
+            @Profiles
+        }
+    </div>
+</MudPaper>
+}
+
+@code {
+    /// <summary>
+    /// Lignes d'un profil : caractéristiques (A, CT/CC, F, PA, D), mots-clés, et pêche aux critiques si elle a un sens.
+    /// Communes à la carte d'une arme et à ses profils de rechange.
+    /// </summary>
+    private RenderFragment ProfileRows => @<text>
             @* Ligne de profil, comme sur une fiche : cinq caractéristiques de même largeur *@
             <div class="wh-card-row">
                 <MudText Typo="Typo.subtitle2" Class="wh-card-row-label">@L["Weapon_Profile"]</MudText>
@@ -114,11 +152,8 @@
                     </div>
                 </div>
             }
-        }
-    </div>
-</MudPaper>
+    </text>;
 
-@code {
     private static readonly int[] TwoToSix = [2, 3, 4, 5, 6];
 
     private bool _expanded = true;
@@ -159,9 +194,23 @@
     [Parameter]
     public AttackContext Context { get; set; } = new();
 
-    /// <summary>Barre des profils de l'arme (comparateur seulement), affichée en tête de la carte ; null : aucune.</summary>
+    /// <summary>
+    /// Profils de rechange de l'arme et bouton d'ajout (comparateur seulement), affichés sous le premier profil quand la
+    /// carte est dépliée ; null : aucun.
+    /// </summary>
     [Parameter]
     public RenderFragment? Profiles { get; set; }
+
+    /// <summary>L'arme a des profils de rechange : flèche de profil devant son nom, comme devant chacun d'eux.</summary>
+    [Parameter]
+    public bool HasAlternatives { get; set; }
+
+    /// <summary>
+    /// Profil de rechange, affiché dans la carte de son arme : bandeau fléché (nom, suppression par OnRemove) puis les
+    /// lignes du profil, sans type, nombre de porteurs ni boutons d'ordre (ceux de l'arme).
+    /// </summary>
+    [Parameter]
+    public bool IsAlternative { get; set; }
 
     /// <summary>Pêche aux critiques possible à la touche, à la blessure (Core) ; rien tant qu'une expression de dés est invalide.</summary>
     private (bool Hits, bool Wounds) Fishing

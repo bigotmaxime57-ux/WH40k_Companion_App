@@ -1189,4 +1189,10 @@
   <data name="Comparison_BestVariantRank" xml:space="preserve">
     <value>variante classée {0}e</value>
   </data>
+  <data name="Weapon_ProfileName" xml:space="preserve">
+    <value>Nom du profil</value>
+  </data>
+  <data name="Weapon_RemoveProfile" xml:space="preserve">
+    <value>Retirer ce profil</value>
+  </data>
 </root>

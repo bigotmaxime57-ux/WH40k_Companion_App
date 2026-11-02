@@ -12,6 +12,7 @@ public static class Comparator
     /// graine égale. Chaque attaquant est simulé à son tour, sur tous les cœurs.
     /// </summary>
     /// <param name="progress">Ronde en cours et son avancement ; appelée depuis les threads de calcul.</param>
+    /// <param name="maxFinalists">Plafond de finalistes (serveur web, voir <see cref="EliminationRounds.Run"/>) ; null : aucun.</param>
     /// <exception cref="ArgumentException">Si la comparaison est invalide.</exception>
     /// <exception cref="OperationCanceledException">Si le calcul est annulé (aucun résultat partiel).</exception>
     public static ComparisonResult Run(
@@ -20,7 +21,8 @@ public static class Comparator
         int? seed = null,
         IProgress<RoundProgress>? progress = null,
         CancellationToken cancellationToken = default,
-        SimulationThreads? threads = null)
+        SimulationThreads? threads = null,
+        int? maxFinalists = null)
     {
         ArgumentNullException.ThrowIfNull(comparison);
         ArgumentOutOfRangeException.ThrowIfLessThan(iterations, 1);
@@ -30,7 +32,7 @@ public static class Comparator
         // Les variantes (combinaisons de profils) s'affrontent : le plan des rondes les compte toutes
         var scenarios = comparison.ToScenarios();
         var plan = RoundPlan.For(scenarios.Count, iterations);
-        var outcomes = EliminationRounds.Run(scenarios, plan, seed ?? Random.Shared.Next(), progress, cancellationToken, threads);
+        var outcomes = EliminationRounds.Run(scenarios, plan, seed ?? Random.Shared.Next(), progress, cancellationToken, threads, maxFinalists);
         stopwatch.Stop();
         return new ComparisonResult(new ComparisonData
         {

@@ -78,6 +78,7 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapHealthChecks("/health");
 app.MapSimulationEndpoints();
+app.MapComparisonEndpoints();
 // Adresses des écrans (accueil, Quick sim, Full sim…) : composants routés de Wh40kSim.UI, affichés par le client
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()

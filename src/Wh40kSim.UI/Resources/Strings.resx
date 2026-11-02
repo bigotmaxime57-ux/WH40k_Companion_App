@@ -1195,4 +1195,10 @@
   <data name="Weapon_RemoveProfile" xml:space="preserve">
     <value>Retirer ce profil</value>
   </data>
+  <data name="Comparison_LimitIterations" xml:space="preserve">
+    <value>Sur le site, la finale compte au plus {0} simulations : réduisez le nombre de simulations pour lancer.</value>
+  </data>
+  <data name="Comparison_LimitVariants" xml:space="preserve">
+    <value>Sur le site, une comparaison compte au plus {0} variantes (attaquants et combinaisons de profils) ; celle-ci en a {1} : retirez des attaquants ou des profils pour lancer.</value>
+  </data>
 </root>

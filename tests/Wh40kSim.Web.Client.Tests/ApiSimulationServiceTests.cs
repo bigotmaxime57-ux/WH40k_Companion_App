@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json.Nodes;
 using Wh40kSim.Core.Model;
 using Wh40kSim.Simulation;
+using Wh40kSim.Simulation.Comparisons;
 using Wh40kSim.UI.Services;
 using Wh40kSim.Web.Client.Services;
 
@@ -163,6 +164,94 @@ public class ApiSimulationServiceTests
         await service.LoadLimitsAsync();
 
         Assert.Null(service.MaxIterations);
+    }
+
+    [Fact]
+    public async Task The_comparison_limit_is_asked_with_the_others()
+    {
+        var (service, _) = Create((_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("""{"maxIterations":1000000,"maxComparisonVariants":50}""", Encoding.UTF8, "application/json"),
+        }));
+
+        await service.LoadLimitsAsync();
+
+        Assert.Equal(50, service.MaxComparisonVariants);
+        Assert.True(service.SupportsComparison);
+    }
+
+    // Comparaison
+
+    private static Comparison Duel() => Comparison.Of(Scenario().Defender,
+    [
+        new AttackerUnit { Name = "A", Weapons = [new WeaponGroup { Weapon = new WeaponProfile { Attacks = 10, Skill = 3 } }] },
+        new AttackerUnit { Name = "B", Weapons = [new WeaponGroup { Weapon = new WeaponProfile { Attacks = 3, Skill = 3 } }] },
+    ]);
+
+    [Fact]
+    public async Task A_comparison_forwards_queue_round_progress_and_result()
+    {
+        var expected = Comparator.Run(Duel(), 2_000, seed: 4);
+        var (service, handler) = Create((_, _) => Task.FromResult(EventStream(Sse(
+            ("queued", "1"),
+            ("progress", """{"round":1,"roundCount":2,"fraction":0}"""),
+            ("progress", """{"round":2,"roundCount":2,"fraction":0.5}"""),
+            ("result", ComparisonDataJson.Serialize(expected.Data))))));
+        var positions = new List<int>();
+        var progress = new List<RoundProgress>();
+
+        var result = await service.RunComparisonAsync(Duel(), 2_000, seed: 4, new SyncProgress<RoundProgress>(progress.Add),
+            queuePosition: new SyncProgress<int>(positions.Add));
+
+        Assert.Equal([1], positions);
+        Assert.Equal([new RoundProgress(1, 2, 0), new RoundProgress(2, 2, 0.5), new RoundProgress(2, 2, 1)], progress);
+        Assert.Equal(expected.Ranking.Select(r => r.Name), result.Ranking.Select(r => r.Name));
+        Assert.Equal("http://serveur/api/comparisons", handler.Request!.RequestUri!.ToString());
+        var body = JsonNode.Parse(handler.Body!)!;
+        Assert.Equal(2_000, body["iterations"]!.GetValue<int>());
+        Assert.Equal(4, body["seed"]!.GetValue<int>());
+        Assert.Equal("A", body["comparison"]!["entries"]![0]!["attacker"]!["name"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task A_refused_comparison_becomes_a_service_exception()
+    {
+        var (service, _) = Create((_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.BadRequest)
+        {
+            Content = new StringContent("""{"title":"Limites du site dépassées","errors":["Variantes : au plus 50 sur le site (51 demandées)."]}""",
+                Encoding.UTF8, "application/problem+json"),
+        }));
+
+        var error = await Assert.ThrowsAsync<SimulationServiceException>(() => service.RunComparisonAsync(Duel(), 1_000));
+
+        Assert.Equal("Limites du site dépassées", error.Title);
+        Assert.Contains("51", Assert.Single(error.Errors));
+    }
+
+    [Fact]
+    public async Task A_comparison_error_event_becomes_a_service_exception()
+    {
+        var (service, _) = Create((_, _) => Task.FromResult(EventStream(Sse(("error", "Le calcul a échoué sur le serveur.")))));
+
+        var error = await Assert.ThrowsAsync<SimulationServiceException>(() => service.RunComparisonAsync(Duel(), 1_000));
+
+        Assert.Equal("Échec du calcul", error.Title);
+    }
+
+    [Fact]
+    public async Task Cancelling_a_comparison_closes_the_request()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var (service, _) = Create(async (_, token) =>
+        {
+            await Task.Delay(Timeout.Infinite, token);
+            return EventStream("");
+        });
+
+        var run = service.RunComparisonAsync(Duel(), 10, cancellationToken: cancellation.Token);
+        cancellation.Cancel();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => run);
     }
 
     /// <summary>Faux serveur : répond par la fonction donnée et garde la dernière demande et son corps.</summary>

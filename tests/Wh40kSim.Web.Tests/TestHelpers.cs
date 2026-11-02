@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Wh40kSim.Core.Model;
 using Wh40kSim.Core.Serialization;
 using Wh40kSim.Simulation;
+using Wh40kSim.Simulation.Comparisons;
 
 namespace Wh40kSim.Web.Tests;
 
@@ -45,13 +46,46 @@ internal static class Api
     }
 
     /// <summary>Envoie une demande sans attendre la fin de la réponse (flux SSE).</summary>
-    public static Task<HttpResponseMessage> PostAsync(HttpClient client, string body, CancellationToken cancellationToken = default)
+    public static Task<HttpResponseMessage> PostAsync(HttpClient client, string body, CancellationToken cancellationToken = default) =>
+        PostToAsync(client, "/api/simulations", body, cancellationToken);
+
+    /// <summary>Envoie une demande de comparaison sans attendre la fin de la réponse (flux SSE).</summary>
+    public static Task<HttpResponseMessage> PostComparisonAsync(HttpClient client, string body, CancellationToken cancellationToken = default) =>
+        PostToAsync(client, "/api/comparisons", body, cancellationToken);
+
+    private static Task<HttpResponseMessage> PostToAsync(HttpClient client, string path, string body, CancellationToken cancellationToken)
     {
-        var request = new HttpRequestMessage(HttpMethod.Post, "/api/simulations")
+        var request = new HttpRequestMessage(HttpMethod.Post, path)
         {
             Content = new StringContent(body, Encoding.UTF8, "application/json"),
         };
         return client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+    }
+
+    /// <summary>Attaquant nommé, tireurs en nombre <paramref name="attacks"/>, contre le défenseur de <see cref="Scenario"/>.</summary>
+    public static AttackerUnit Attacker(string name, int attacks) => new()
+    {
+        Name = name,
+        Weapons = [new WeaponGroup { ModelCount = 1, Weapon = new WeaponProfile { Attacks = attacks, Skill = 3 } }],
+    };
+
+    /// <summary>Comparaison valide et rapide : deux attaquants contre le défenseur de <see cref="Scenario"/>.</summary>
+    public static Comparison ComparisonOf(params AttackerUnit[] attackers) =>
+        Simulation.Comparisons.Comparison.Of(Scenario().Defender, attackers.Length > 0 ? attackers : [Attacker("A", 10), Attacker("B", 3)]);
+
+    /// <summary>Corps d'une demande de comparaison, la comparaison au format des fichiers.</summary>
+    public static string ComparisonBody(Comparison comparison, int iterations, int? seed = null)
+    {
+        var body = new JsonObject
+        {
+            ["comparison"] = JsonNode.Parse(ComparisonJson.Serialize(comparison)),
+            ["iterations"] = iterations,
+        };
+        if (seed is int value)
+        {
+            body["seed"] = value;
+        }
+        return body.ToJsonString();
     }
 
     /// <summary>Détails d'un refus : titre et liste des erreurs.</summary>
@@ -146,6 +180,30 @@ internal sealed class ControlledRunner : ISimulationRunner
         }
         progress.Report(0.5);
         return Simulator.Run(scenario, iterations, seed, progress, cancellationToken);
+    }
+
+    /// <summary>Plafond de finalistes reçu par la dernière comparaison.</summary>
+    public int? LastMaxFinalists { get; private set; }
+
+    public async Task<ComparisonResult> RunComparisonAsync(
+        Comparison comparison, int iterations, int? seed, int maxFinalists, IProgress<RoundProgress> progress, CancellationToken cancellationToken)
+    {
+        LastMaxFinalists = maxFinalists;
+        Started.Release();
+        try
+        {
+            await _gate.WaitAsync(cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            Cancelled.Release();
+            throw;
+        }
+        if (Fail)
+        {
+            throw new InvalidOperationException("Panne simulée");
+        }
+        return Comparator.Run(comparison, iterations, seed, progress, cancellationToken, maxFinalists: maxFinalists);
     }
 }
 

@@ -47,7 +47,8 @@ public sealed class LocalSimulationService : ISimulationService
         int iterations,
         int? seed = null,
         IProgress<RoundProgress>? progress = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IProgress<int>? queuePosition = null)
     {
         if (OperatingSystem.IsBrowser())
         {

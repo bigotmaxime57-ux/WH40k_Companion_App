@@ -49,11 +49,8 @@ public partial class ComparisonPage
     /// <summary>Comparaison en cours d'édition (créée depuis le scénario courant à la première ouverture).</summary>
     public ComparisonForm Form => State.Form!;
 
-    /// <summary>
-    /// Scénario de référence pour les options de situation et la cible de Precision : le défenseur et la situation, avec
-    /// toutes les armes de tous les attaquants (une option qui compte pour l'un d'eux est proposée).
-    /// </summary>
-    private Scenario Reference { get; set; } = new();
+    /// <summary>Dernier scénario lisible de chaque attaquant : décide des conditions affichées sur sa carte.</summary>
+    private readonly Dictionary<ComparisonEntryForm, Scenario> _references = [];
 
     private IReadOnlyList<string> Errors { get; set; } = [];
 
@@ -82,7 +79,7 @@ public partial class ComparisonPage
     {
         get
         {
-            var plan = RoundPlan.For(Math.Max(1, Form.Attackers.Count), Math.Max(1, State.Iterations));
+            var plan = RoundPlan.For(Math.Max(1, Form.Entries.Count), Math.Max(1, State.Iterations));
             return L["Comparison_RoundPlan", plan.Count, string.Join(" · ", plan.Select(r => r.ToString("N0")))];
         }
     }
@@ -120,15 +117,21 @@ public partial class ComparisonPage
     });
 
     /// <summary>
-    /// Comparaison de départ : défenseur, situation et attaquant du scénario courant (copiés : les modifier ici ne touche
-    /// pas au Quick sim). Une saisie de dés illisible dans le scénario courant donne une comparaison vierge.
+    /// Comparaison de départ : défenseur, overwatch et attaquant (avec sa situation) du scénario courant, copiés : les
+    /// modifier ici ne touche pas au Quick sim. Une saisie de dés illisible dans le scénario courant donne une comparaison
+    /// vierge.
     /// </summary>
     private ComparisonForm FromCurrentScenario()
     {
         try
         {
             var scenario = Session.Form.ToScenario();
-            return new ComparisonForm(new Comparison { Defender = scenario.Defender, Context = scenario.Context, Attackers = [scenario.Attacker] });
+            return new ComparisonForm(new Comparison
+            {
+                Defender = scenario.Defender,
+                SnapShooting = scenario.Context.SnapShooting,
+                Entries = [new ComparisonEntry { Attacker = scenario.Attacker, Context = scenario.Context with { SnapShooting = false } }],
+            });
         }
         catch (FormatException)
         {
@@ -141,12 +144,13 @@ public partial class ComparisonPage
         try
         {
             _comparison = Form.ToComparison();
-            Reference = new Scenario
+            // Scénario de chaque attaquant : décide des conditions à afficher sur sa carte (gardé pendant une saisie de dés invalide)
+            var scenarios = _comparison.ToScenarios();
+            _references.Clear();
+            for (int i = 0; i < Form.Entries.Count; i++)
             {
-                Attacker = new AttackerUnit { Weapons = _comparison.Attackers.SelectMany(a => a.Weapons).ToList() },
-                Defender = _comparison.Defender,
-                Context = _comparison.Context,
-            };
+                _references[Form.Entries[i]] = scenarios[i];
+            }
             Errors = _comparison.Validate();
             Warnings = _comparison.Warnings();
             HasDiceErrors = false;
@@ -191,22 +195,25 @@ public partial class ComparisonPage
         }
     }
 
-    /// <summary>Défenseur modifié ; une cible de Precision qui n'est plus un PERSONNAGE revient au choix par défaut.</summary>
+    /// <summary>
+    /// Défenseur modifié ; la cible de Precision d'un attaquant qui n'est plus un PERSONNAGE du défenseur revient au
+    /// choix par défaut (le premier PERSONNAGE).
+    /// </summary>
     private void OnDefenderChanged()
     {
         State.DefenderDirty = true;
-        if (Form.Context.PrecisionTarget is string target && !Form.Defender.Groups.Any(g => g.IsCharacter && g.Name == target))
+        foreach (var entry in Form.Entries)
         {
-            Form.Context.PrecisionTarget = null;
+            if (entry.Context.PrecisionTarget is string target && !Form.Defender.Groups.Any(g => g.IsCharacter && g.Name == target))
+            {
+                entry.Context.PrecisionTarget = null;
+            }
         }
         OnChanged();
     }
 
-    private void OnPrecisionTargetChanged(string? target)
-    {
-        Form.Context.PrecisionTarget = target;
-        OnChanged();
-    }
+    /// <summary>Scénario d'un attaquant (dernier lisible), pour les conditions de sa carte.</summary>
+    private Scenario ReferenceOf(ComparisonEntryForm entry) => _references.GetValueOrDefault(entry) ?? new Scenario();
 
     private void EditKeywords(WeaponForm weapon) => KeywordWeapon = weapon;
 
@@ -214,24 +221,29 @@ public partial class ComparisonPage
 
     // Attaquants
 
-    private void Add(AttackerForm attacker, bool expand)
+    /// <summary>Ajoute un attaquant et sa situation (sans l'overwatch, commun), sous un nom libre.</summary>
+    private void Add(AttackerUnit attacker, AttackContext? context, bool expand)
     {
-        attacker.Name = Form.UniqueName(string.IsNullOrWhiteSpace(attacker.Name) ? L["Attacker_Title"] : attacker.Name);
-        Form.Attackers.Add(attacker);
+        var entry = new ComparisonEntryForm(new AttackerForm(attacker), new ContextForm((context ?? new AttackContext()) with { SnapShooting = false }));
+        entry.Attacker.Name = Form.UniqueName(string.IsNullOrWhiteSpace(attacker.Name) ? L["Attacker_Title"] : attacker.Name);
+        Form.Entries.Add(entry);
         if (expand)
         {
-            _expandOnAdd.Add(attacker);
+            _expandOnAdd.Add(entry.Attacker);
         }
         OnChanged();
     }
 
-    /// <summary>Copie de l'attaquant du scénario courant (Quick sim / Full sim).</summary>
+    private string LastName => Form.Entries[^1].Attacker.Name;
+
+    /// <summary>Copie de l'attaquant du scénario courant (Quick sim / Full sim), avec sa situation.</summary>
     private void AddFromScenario()
     {
         try
         {
-            Add(new AttackerForm(Session.Form.Attacker.ToAttackerUnit()), expand: false);
-            ShowMessage(L["Comparison_AddedFromScenario", Form.Attackers[^1].Name], Severity.Success);
+            var scenario = Session.Form.ToScenario();
+            Add(scenario.Attacker, scenario.Context, expand: false);
+            ShowMessage(L["Comparison_AddedFromScenario", LastName], Severity.Success);
         }
         catch (FormatException)
         {
@@ -259,11 +271,11 @@ public partial class ComparisonPage
         {
             try
             {
-                if (ScenarioJson.ReadFile(file.Content).Attacker is { } attacker)
+                var read = ScenarioJson.ReadFile(file.Content);
+                if (read.Attacker is { } attacker)
                 {
-                    Add(new AttackerForm(attacker), expand: false);
-                    State.DirtyAttackers.Remove(Form.Attackers[^1]);
-                    added.Add(Form.Attackers[^1].Name);
+                    Add(attacker, read.Context, expand: false);
+                    added.Add(LastName);
                     continue;
                 }
             }
@@ -286,16 +298,26 @@ public partial class ComparisonPage
 
     private void AddNew()
     {
-        var attacker = new AttackerForm();
-        attacker.Weapons.Add(new WeaponForm());
-        Add(attacker, expand: true);
+        var weapon = new WeaponForm().ToWeaponGroup();
+        Add(new AttackerUnit { Weapons = [weapon] }, null, expand: true);
     }
 
-    private void Duplicate(AttackerForm attacker)
+    /// <summary>Copie d'un attaquant et de sa situation, juste après lui.</summary>
+    private void Duplicate(ComparisonEntryForm entry)
     {
-        var copy = new AttackerForm(attacker.ToAttackerUnit());
-        copy.Name = Form.UniqueName(attacker.Name);
-        Form.Attackers.Insert(Form.Attackers.IndexOf(attacker) + 1, copy);
+        AttackerUnit attacker;
+        try
+        {
+            attacker = entry.Attacker.ToAttackerUnit();
+        }
+        catch (FormatException)
+        {
+            ShowMessage(L["Comparison_AttackerUnreadable", entry.Attacker.Name], Severity.Warning);
+            return;
+        }
+        var copy = new ComparisonEntryForm(new AttackerForm(attacker), new ContextForm(entry.Context.ToAttackContext()));
+        copy.Attacker.Name = Form.UniqueName(entry.Attacker.Name);
+        Form.Entries.Insert(Form.Entries.IndexOf(entry) + 1, copy);
         OnChanged();
     }
 
@@ -303,25 +325,28 @@ public partial class ComparisonPage
     private void Move(int index, int offset)
     {
         int target = index + offset;
-        if (target < 0 || target >= Form.Attackers.Count)
+        if (target < 0 || target >= Form.Entries.Count)
         {
             return;
         }
-        (Form.Attackers[index], Form.Attackers[target]) = (Form.Attackers[target], Form.Attackers[index]);
+        (Form.Entries[index], Form.Entries[target]) = (Form.Entries[target], Form.Entries[index]);
         OnChanged();
     }
 
-    private void Remove(AttackerForm attacker)
+    private void Remove(ComparisonEntryForm entry)
     {
-        Form.Attackers.Remove(attacker);
-        State.DirtyAttackers.Remove(attacker);
+        Form.Entries.Remove(entry);
+        State.DirtyAttackers.Remove(entry.Attacker);
         OnChanged();
     }
 
-    /// <summary>Remplace un attaquant par celui d'un fichier (attaquant seul ou scénario complet), à la même place.</summary>
-    private async Task OpenAttackerAsync(AttackerForm attacker)
+    /// <summary>
+    /// Remplace un attaquant par celui d'un fichier (attaquant seul ou scénario complet, dont la situation est reprise),
+    /// à la même place.
+    /// </summary>
+    private async Task OpenAttackerAsync(ComparisonEntryForm entry)
     {
-        if (Running || !await ConfirmDiscardAsync(State.DirtyAttackers.Contains(attacker)) || await PickFileAsync() is not var (fileName, file))
+        if (Running || !await ConfirmDiscardAsync(State.DirtyAttackers.Contains(entry.Attacker)) || await PickFileAsync() is not var (fileName, file))
         {
             return;
         }
@@ -331,10 +356,14 @@ public partial class ComparisonPage
             return;
         }
 
+        State.DirtyAttackers.Remove(entry.Attacker);
         var loaded = new AttackerForm(file.Attacker);
-        loaded.Name = Form.UniqueName(loaded.Name, except: attacker);
-        Form.Attackers[Form.Attackers.IndexOf(attacker)] = loaded;
-        State.DirtyAttackers.Remove(attacker);
+        loaded.Name = Form.UniqueName(loaded.Name, except: entry.Attacker);
+        entry.Attacker = loaded;
+        if (file.Context is { } context)
+        {
+            entry.Context = new ContextForm(context with { SnapShooting = false });
+        }
         ShowMessage(L["File_AttackerLoaded", fileName], Severity.Success);
         OnChanged();
     }
@@ -393,7 +422,6 @@ public partial class ComparisonPage
             return;
         }
         Form.Defender = new DefenderForm(Session.Form.Defender.ToDefenderUnit());
-        Form.Context = new ContextForm(Session.Form.Context.ToAttackContext());
         State.DefenderDirty = false;
         ShowMessage(L["Comparison_DefenderTaken"], Severity.Success);
         OnChanged();
@@ -412,9 +440,9 @@ public partial class ComparisonPage
 
     /// <summary>
     /// Bouton « Ouvrir » de la barre : une comparaison remplace tout ; un scénario complet (Quick sim, Full sim) apporte
-    /// son défenseur et sa situation, qui remplacent ceux de la comparaison, et son attaquant, qui s'ajoute aux autres ;
-    /// un fichier attaquant s'ajoute ; un fichier défenseur remplace le défenseur. Confirmation si ce qui est remplacé a
-    /// été modifié.
+    /// son défenseur et son overwatch, qui remplacent ceux de la comparaison, et son attaquant avec sa situation, qui
+    /// s'ajoute aux autres ; un fichier attaquant s'ajoute ; un fichier défenseur remplace le défenseur. Confirmation si
+    /// ce qui est remplacé a été modifié.
     /// </summary>
     private async Task OpenAsync()
     {
@@ -487,12 +515,12 @@ public partial class ComparisonPage
             State.DefenderDirty = false;
             if (file.Kind == ScenarioFileKind.Scenario)
             {
-                Form.Context = new ContextForm(file.Context ?? new AttackContext());
+                Form.SnapShooting = file.Context?.SnapShooting ?? false;
             }
         }
         if (file.Attacker is not null)
         {
-            Add(new AttackerForm(file.Attacker), expand: false);
+            Add(file.Attacker, file.Context, expand: false);
         }
         else
         {
@@ -501,8 +529,8 @@ public partial class ComparisonPage
 
         ShowMessage(file.Kind switch
         {
-            ScenarioFileKind.Scenario => L["Comparison_ScenarioImported", fileName, Form.Attackers[^1].Name],
-            ScenarioFileKind.Attacker => L["Comparison_AttackerImported", fileName, Form.Attackers[^1].Name],
+            ScenarioFileKind.Scenario => L["Comparison_ScenarioImported", fileName, LastName],
+            ScenarioFileKind.Attacker => L["Comparison_AttackerImported", fileName, LastName],
             _ => L["File_DefenderLoaded", fileName],
         }, Severity.Success);
     }

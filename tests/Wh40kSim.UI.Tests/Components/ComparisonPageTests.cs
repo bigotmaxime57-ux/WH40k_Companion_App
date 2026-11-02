@@ -144,7 +144,7 @@ public class ComparisonPageTests() : ComponentTestContext(renderPopoverProvider:
 
         shell.Find("[data-test=add-new-attacker]").Click();
 
-        var added = shell.FindComponent<ComparisonPage>().Instance.Form.Attackers[^1];
+        var added = shell.FindComponent<ComparisonPage>().Instance.Form.Entries[^1].Attacker;
         Assert.Equal("Attaquant", added.Name);
         Assert.Single(added.Weapons);
     }
@@ -217,6 +217,59 @@ public class ComparisonPageTests() : ComponentTestContext(renderPopoverProvider:
         Assert.Contains(shell.Find("[data-test=attacker-panel]").QuerySelectorAll("label"), l => l.TextContent == "Nom de l'attaquant");
     }
 
+    private static AttackerUnit Lancer(string name) => new()
+    {
+        Name = name,
+        Weapons = [new WeaponGroup { Weapon = new WeaponProfile { Name = "Lance", Type = WeaponType.Melee, Attacks = 3, Skill = 3, Strength = 6, Abilities = new WeaponAbilities { Lance = true } } }],
+    };
+
+    [Fact]
+    public void Overwatch_is_a_common_switch_of_the_banner()
+    {
+        var shell = OpenComparison();
+
+        Assert.Empty(shell.FindAll("[data-test=context]"));
+        shell.Find("[data-test=banner] input[data-test=snap-shooting]").Change(true);
+
+        Assert.True(Session.Comparison.Form!.SnapShooting);
+    }
+
+    [Fact]
+    public void Each_card_shows_only_the_conditions_its_weapons_need()
+    {
+        Session.Comparison.Form = new ComparisonForm(Comparison.Of(Squad, [Attacker("Bolters", 10), Lancer("Cavalerie")]));
+        var shell = OpenComparison();
+        var cards = shell.FindAll("[data-test=comparison-attacker]");
+
+        Assert.Null(cards[0].QuerySelector("[data-test=attacker-situation]"));
+        Assert.NotNull(cards[1].QuerySelector("[data-test=charged]"));
+        Assert.Null(cards[1].QuerySelector("[data-test=half-range]"));
+
+        shell.FindAll("[data-test=comparison-attacker]")[1].QuerySelector("input[data-test=charged]")!.Change(true);
+
+        Assert.Equal([false, true], Session.Comparison.Form.Entries.Select(e => e.Context.Charged));
+    }
+
+    [Fact]
+    public void The_ranking_recalls_each_attacker_situation_and_the_overwatch()
+    {
+        var comparison = Comparison.Of(Squad, [Attacker("Bolters", 10), Lancer("Cavalerie")]);
+        comparison = comparison with { Entries = [comparison.Entries[0], comparison.Entries[1] with { Context = new AttackContext { Charged = true } }] };
+        var shell = OpenResults(Comparator.Run(comparison, 2_000, seed: 1));
+
+        Assert.Equal("A chargé ce tour", shell.Find("[data-test=ranking-row-1] [data-test=situation]").TextContent);
+        Assert.Empty(shell.FindAll("[data-test=ranking-row-0] [data-test=situation]"));
+        Assert.Empty(shell.FindAll("[data-test=overwatch-chip]"));
+    }
+
+    [Fact]
+    public void An_overwatch_comparison_is_marked_on_the_results()
+    {
+        var shell = OpenResults(Comparator.Run(Comparison.Of(Squad, [Attacker("A", 10), Attacker("B", 5)], snapShooting: true), 2_000, seed: 1));
+
+        Assert.NotEmpty(shell.FindAll("[data-test=overwatch-chip]"));
+    }
+
     [Fact]
     public void The_round_plan_follows_the_number_of_attackers()
     {
@@ -243,7 +296,7 @@ public class ComparisonPageTests() : ComponentTestContext(renderPopoverProvider:
         Assert.Equal(["Rubrics", "Rubrics (2)"], saved.Attackers.Select(a => a.Name));
         Assert.DoesNotContain("*", shell.Find("[data-test=file-name]").TextContent);
 
-        Files.ToOpen = new OpenedFile("autre.json", ComparisonJson.Serialize(saved with { Attackers = [Attacker("A", 3), Attacker("B", 5)] }));
+        Files.ToOpen = new OpenedFile("autre.json", ComparisonJson.Serialize(Comparison.Of(saved.Defender, [Attacker("A", 3), Attacker("B", 5)])));
         shell.Find("[data-test=open]").Click();
 
         Assert.Equal(["A", "B"], AttackerNames(shell));
@@ -262,7 +315,7 @@ public class ComparisonPageTests() : ComponentTestContext(renderPopoverProvider:
 
         Assert.Equal(["Rubrics", "Plasma"], AttackerNames(shell));
         Assert.Equal("Terminators", Session.Comparison.Form!.Defender.Name);
-        Assert.True(Session.Comparison.Form.Context.HalfRange);
+        Assert.True(Session.Comparison.Form.Entries[1].Context.HalfRange);
         Assert.Contains("full sim.json", shell.Find("[data-test=message]").TextContent);
         Assert.False(shell.Find("[data-test=run]").HasAttribute("disabled"));
         // Fichier de comparaison inchangé, mais la comparaison est modifiée
@@ -324,7 +377,7 @@ public class ComparisonPageTests() : ComponentTestContext(renderPopoverProvider:
     [Fact]
     public void The_podium_holds_three_winners_and_reports_a_fourth_tied_with_the_third()
     {
-        var comparison = new Comparison { Defender = Squad, Attackers = [Attacker("A", 20), Attacker("B", 12), Attacker("C", 6), Attacker("C bis", 6)] };
+        var comparison = Comparison.Of(Squad, [Attacker("A", 20), Attacker("B", 12), Attacker("C", 6), Attacker("C bis", 6)]);
         var shell = OpenResults(Comparator.Run(comparison, 2_000, seed: 1));
 
         Assert.Contains("A", shell.Find("[data-test=podium-1]").TextContent);
@@ -337,7 +390,7 @@ public class ComparisonPageTests() : ComponentTestContext(renderPopoverProvider:
     [Fact]
     public void Eliminated_attackers_are_greyed_with_their_round()
     {
-        var comparison = new Comparison { Defender = Squad, Attackers = [Attacker("A", 20), Attacker("B", 16), Attacker("C", 12), Attacker("Faible", 1)] };
+        var comparison = Comparison.Of(Squad, [Attacker("A", 20), Attacker("B", 16), Attacker("C", 12), Attacker("Faible", 1)]);
         var shell = OpenResults(Comparator.Run(comparison, 100_000, seed: 1));
 
         var row = shell.Find("[data-test=ranking-row-3]");
@@ -351,7 +404,7 @@ public class ComparisonPageTests() : ComponentTestContext(renderPopoverProvider:
     [Fact]
     public void The_ranking_can_be_sorted_by_column()
     {
-        var comparison = new Comparison { Defender = Squad, Attackers = [Attacker("Moyen", 8), Attacker("Fort", 20), Attacker("Faible", 3)] };
+        var comparison = Comparison.Of(Squad, [Attacker("Moyen", 8), Attacker("Fort", 20), Attacker("Faible", 3)]);
         var shell = OpenResults(Comparator.Run(comparison, 2_000, seed: 1));
         string[] Names() => shell.FindAll("[data-test^=ranking-row-] [data-test=name]").Select(e => e.TextContent).ToArray();
 
@@ -370,7 +423,7 @@ public class ComparisonPageTests() : ComponentTestContext(renderPopoverProvider:
     [Fact]
     public void A_row_can_save_its_attacker_or_its_scenario()
     {
-        var comparison = new Comparison { Defender = Squad, Attackers = [Attacker("Fort", 20), Attacker("Faible", 3)] };
+        var comparison = Comparison.Of(Squad, [Attacker("Fort", 20), Attacker("Faible", 3)]);
         var shell = OpenResults(Comparator.Run(comparison, 2_000, seed: 1));
 
         OpenRowMenu(shell, 1);
@@ -390,7 +443,7 @@ public class ComparisonPageTests() : ComponentTestContext(renderPopoverProvider:
     [Fact]
     public void A_row_can_be_analysed_in_the_full_sim()
     {
-        var comparison = new Comparison { Defender = Squad, Attackers = [Attacker("Fort", 20), Attacker("Faible", 3)] };
+        var comparison = Comparison.Of(Squad, [Attacker("Fort", 20), Attacker("Faible", 3)]);
         var shell = OpenResults(Comparator.Run(comparison, 2_000, seed: 1));
 
         OpenRowMenu(shell, 1);

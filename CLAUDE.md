@@ -1222,9 +1222,17 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   l'attaquant en titre de la carte, modifiable avec un stylo (Entrée ou sortie du champ : valider, Échap : annuler),
   sans le champ « Nom » en doublon dans la carte (`AttackerPanel.NameInTitle`, `SectionHeader.TitleContent` ; Quick
   sim et Full sim inchangés) ; **Ouvrir** de la barre accepte aussi un scénario (demande de l'utilisateur : reprendre
-  un scénario du Full sim) : son défenseur et sa situation remplacent ceux de la comparaison, son attaquant s'ajoute ;
-  un fichier attaquant s'ajoute, un fichier défenseur remplace le défenseur. 647 tests verts (223 Core,
-  134 Simulation, 246 UI, 25 Web, 19 client web ; UI stables sur 3 exécutions). `RoundPlan`, `EliminationRounds`
+  un scénario du Full sim) : son défenseur et son overwatch remplacent ceux de la comparaison, son attaquant s'ajoute
+  avec sa situation ; un fichier attaquant s'ajoute, un fichier défenseur remplace le défenseur.
+  **Situation revue** (décision de l'utilisateur, 2026-11-02 : « a chargé », « immobile », « demi-portée » décrivent
+  chaque attaquant) : la section Situation disparaît du comparateur ; **overwatch commun**, interrupteur du bandeau ;
+  **situation propre à chaque attaquant**, dans sa carte, seulement les conditions qui comptent pour ses armes (comme la
+  pêche aux critiques ; `ContextPanel.Embedded`, choix du Core), cible de Precision comprise (plus de sélecteur sur les
+  cartes du défenseur au comparateur) ; situation rappelée sous le nom dans le classement, étiquette « Overwatch ».
+  Simulation : `Comparison` = défenseur, `SnapShooting`, `Entries` (`ComparisonEntry` : attaquant et situation) ; JSON
+  `{ defender, snapShooting, entries: [ { attacker, context } ] }`, `snapShooting` refusé dans une entrée ;
+  `ComparisonData` n'exige plus que le même overwatch. 652 tests verts (223 Core, 135 Simulation, 250 UI, 25 Web,
+  19 client web ; UI stables sur 3 exécutions). `RoundPlan`, `EliminationRounds`
   (`RoundProgress`, `RoundOutcome`, `Survivors`) ; `Comparator.Run` en rondes ; `ComparisonData.Rounds` / `Elapsed`,
   `ComparisonEntryData` (`EliminatedInRound`) ; `ComparisonResult.Rounds` / `Finalists`, `RankedEntry.EliminatedInRound`
   / `IsFinalist`. 622 tests verts (223 Core, 134 Simulation, 221 UI, 25 Web, 19 client web). Banc d'essai refait avec

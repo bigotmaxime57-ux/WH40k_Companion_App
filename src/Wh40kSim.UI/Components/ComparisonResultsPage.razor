@@ -24,6 +24,7 @@
             <MudText Typo="Typo.body2" data-test="results-header">
                 @L["Comparison_ResultsHeader", Result.Defender.Name, Result.Entries.Count, Result.Iterations.ToString("N0"), Result.Rounds.Count,
                     Result.Seed, Result.Elapsed.TotalSeconds.ToString("F1")]
+                <OverwatchChip Result="Result.Entries[0]" />
             </MudText>
         }
     </MudStack>
@@ -99,7 +100,13 @@
                                         <MudTooltip Text="@L["Comparison_TiedWithPrevious"]"><span data-test="tied">≈</span></MudTooltip>
                                     }
                                 </td>
-                                <td data-test="name">@entry.Name</td>
+                                <td>
+                                    <span data-test="name">@entry.Name</span>
+                                    @if (SituationText(r.Scenario) is { } situation)
+                                    {
+                                        <MudText Typo="Typo.caption" Class="wh-muted d-block" data-test="situation">@situation</MudText>
+                                    }
+                                </td>
                                 <td class="@Best(Result.BestScore, entry)" data-test="score">@ScoreText(r.EfficiencyScore)</td>
                                 <td class="@Best(Result.BestMeanKills, entry)" data-test="kills">@r.Kills.Mean.ToString("F2")</td>
                                 <td class="@Best(Result.BestMeanDamage, entry)" data-test="damage">@L["Comparison_DamageAndShare", r.Damage.Mean.ToString("F2"), r.MeanDamageShare.ToString("P0")]</td>
@@ -188,6 +195,21 @@
         L["Comparison_ScoreHelp"],
         L["Comparison_ScoreParts", score.DamagePart.ToString("F1"), score.KillsPart.ToString("F1"), score.WipePart.ToString("F1")],
     ];
+
+    /// <summary>
+    /// Situation propre d'un attaquant, rappelée sous son nom : les conditions retenues qui comptent pour ses armes (choix
+    /// du Core) et sa cible de Precision ; null s'il n'en a aucune.
+    /// </summary>
+    private string? SituationText(Scenario scenario)
+    {
+        var context = scenario.Context;
+        var parts = new List<string>();
+        if (scenario.HalfRangeMatters && context.HalfRange) parts.Add(L["Context_HalfRange"]);
+        if (scenario.RemainedStationaryMatters && context.RemainedStationary) parts.Add(L["Context_RemainedStationary"]);
+        if (scenario.ChargedMatters && context.Charged) parts.Add(L["Context_Charged"]);
+        if (scenario.UsesPrecision && context.PrecisionTarget is string target) parts.Add(L["Comparison_PrecisionOn", target]);
+        return parts.Count > 0 ? string.Join(" · ", parts) : null;
+    }
 
     private string StatusText(RankedEntry entry) => entry.EliminatedInRound is int round
         ? L["Comparison_Eliminated", round, entry.Result.Iterations.ToString("N0")]

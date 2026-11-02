@@ -3,35 +3,69 @@ using Wh40kSim.Simulation.Comparisons;
 
 namespace Wh40kSim.UI.Forms;
 
-/// <summary>Version modifiable d'une <see cref="Comparison"/> : défenseur et situation communs, attaquants comparés.</summary>
+/// <summary>Version modifiable d'une <see cref="ComparisonEntry"/> : un attaquant et sa propre situation.</summary>
+public sealed class ComparisonEntryForm
+{
+    public ComparisonEntryForm(AttackerForm attacker, ContextForm? context = null)
+    {
+        Attacker = attacker;
+        Context = context ?? new ContextForm();
+    }
+
+    public ComparisonEntryForm(ComparisonEntry entry)
+        : this(new AttackerForm(entry.Attacker), new ContextForm(entry.Context))
+    {
+    }
+
+    public AttackerForm Attacker { get; set; }
+
+    /// <summary>Situation propre à cet attaquant (le tir en overwatch, commun, est sur la comparaison).</summary>
+    public ContextForm Context { get; set; }
+
+    /// <exception cref="FormatException">Si une expression de dés saisie est invalide.</exception>
+    public ComparisonEntry ToComparisonEntry() => new()
+    {
+        Attacker = Attacker.ToAttackerUnit(),
+        Context = Context.ToAttackContext() with { SnapShooting = false },
+    };
+}
+
+/// <summary>
+/// Version modifiable d'une <see cref="Comparison"/> : défenseur commun, tir en overwatch commun, attaquants comparés
+/// avec leur situation.
+/// </summary>
 public sealed class ComparisonForm
 {
-    /// <summary>Formulaire vierge : défenseur et situation par défaut du Core, aucun attaquant.</summary>
+    /// <summary>Formulaire vierge : défenseur par défaut du Core, aucun attaquant.</summary>
     public ComparisonForm()
-        : this(new Comparison { Defender = new DefenderUnit(), Attackers = [] })
+        : this(new Comparison { Defender = new DefenderUnit(), Entries = [] })
     {
     }
 
     public ComparisonForm(Comparison comparison)
     {
         Defender = new DefenderForm(comparison.Defender);
-        Context = new ContextForm(comparison.Context);
-        Attackers = comparison.Attackers.Select(a => new AttackerForm(a)).ToList();
+        SnapShooting = comparison.SnapShooting;
+        Entries = comparison.Entries.Select(e => new ComparisonEntryForm(e)).ToList();
     }
 
     public DefenderForm Defender { get; set; }
 
-    public ContextForm Context { get; set; }
+    /// <summary>Tir en overwatch, pour tous les attaquants.</summary>
+    public bool SnapShooting { get; set; }
+
+    /// <summary>Attaquants comparés et leur situation, dans l'ordre de saisie.</summary>
+    public List<ComparisonEntryForm> Entries { get; set; }
 
     /// <summary>Attaquants comparés, dans l'ordre de saisie.</summary>
-    public List<AttackerForm> Attackers { get; set; }
+    public IEnumerable<AttackerForm> Attackers => Entries.Select(e => e.Attacker);
 
     /// <exception cref="FormatException">Si une expression de dés saisie est invalide.</exception>
     public Comparison ToComparison() => new()
     {
         Defender = Defender.ToDefenderUnit(),
-        Context = Context.ToAttackContext(),
-        Attackers = Attackers.Select(a => a.ToAttackerUnit()).ToList(),
+        SnapShooting = SnapShooting,
+        Entries = Entries.Select(e => e.ToComparisonEntry()).ToList(),
     };
 
     /// <summary>

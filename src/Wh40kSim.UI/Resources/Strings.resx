@@ -959,10 +959,10 @@
     <value>Retirer cet attaquant de la comparaison</value>
   </data>
   <data name="Comparison_NewHelp" xml:space="preserve">
-    <value>Nouvelle comparaison, à partir du scénario courant (son défenseur, sa situation et son attaquant)</value>
+    <value>Nouvelle comparaison, à partir du scénario courant (son défenseur, son overwatch, son attaquant et sa situation)</value>
   </data>
   <data name="Comparison_OpenHelp" xml:space="preserve">
-    <value>Ouvrir une comparaison enregistrée ; ou un scénario, dont le défenseur et la situation remplacent ceux de la comparaison et dont l'attaquant s'ajoute ; ou un attaquant seul (ajouté) ou un défenseur seul (Ctrl+O)</value>
+    <value>Ouvrir une comparaison enregistrée ; ou un scénario, dont le défenseur et l'overwatch remplacent ceux de la comparaison et dont l'attaquant s'ajoute avec sa situation ; ou un attaquant seul (ajouté) ou un défenseur seul (Ctrl+O)</value>
   </data>
   <data name="Comparison_SaveHelp" xml:space="preserve">
     <value>Enregistrer la comparaison : défenseur, situation et tous les attaquants (Ctrl+S)</value>
@@ -983,7 +983,7 @@
     <value>Attaquants comparés ({0})</value>
   </data>
   <data name="Comparison_AttackersHelp" xml:space="preserve">
-    <value>Chaque attaquant est simulé contre le même défenseur, dans la même situation. Son nom le désigne dans les résultats : il doit être unique.</value>
+    <value>Chaque attaquant est simulé contre le même défenseur, avec sa propre situation (dans sa carte, seulement si ses armes en ont besoin). Son nom, titre de la carte, le désigne dans les résultats : il doit être unique.</value>
   </data>
   <data name="Comparison_AddFromScenario" xml:space="preserve">
     <value>Depuis le scénario courant</value>
@@ -1013,13 +1013,13 @@
     <value>Reprendre du scénario courant</value>
   </data>
   <data name="Comparison_DefenderFromScenarioHelp" xml:space="preserve">
-    <value>Remplace le défenseur et la situation de la comparaison par ceux du scénario courant (Quick sim / Full sim).</value>
+    <value>Remplace le défenseur de la comparaison par celui du scénario courant (Quick sim / Full sim).</value>
   </data>
   <data name="Comparison_DefenderTaken" xml:space="preserve">
-    <value>Défenseur et situation repris du scénario courant.</value>
+    <value>Défenseur repris du scénario courant.</value>
   </data>
   <data name="Comparison_ScenarioImported" xml:space="preserve">
-    <value>{0} ouvert : son défenseur et sa situation remplacent ceux de la comparaison, son attaquant est ajouté ({1}).</value>
+    <value>{0} ouvert : son défenseur et son overwatch remplacent ceux de la comparaison, son attaquant est ajouté avec sa situation ({1}).</value>
   </data>
   <data name="Comparison_Saved" xml:space="preserve">
     <value>Comparaison enregistrée : {0}</value>
@@ -1116,5 +1116,14 @@
   </data>
   <data name="Comparison_AttackerImported" xml:space="preserve">
     <value>Attaquant ajouté depuis {0} : {1}.</value>
+  </data>
+  <data name="Comparison_SnapShootingHelp" xml:space="preserve">
+    <value>Au comparateur, l'overwatch vaut pour tous les attaquants.</value>
+  </data>
+  <data name="Help_AttackerSituation" xml:space="preserve">
+    <value>Conditions propres à cet attaquant, seulement celles qui changent quelque chose pour ses armes : demi-portée (Rapid Fire, Melta), restée immobile (Heavy), a chargé (Lance), cible de Precision.</value>
+  </data>
+  <data name="Comparison_PrecisionOn" xml:space="preserve">
+    <value>Precision sur {0}</value>
   </data>
 </root>

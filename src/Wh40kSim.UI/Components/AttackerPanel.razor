@@ -52,6 +52,8 @@
 
         <AttackerBoostsEditor Boosts="Attacker.Boosts" SnapShooting="SnapShooting" Changed="NotifyChanged" />
 
+        @Situation
+
         <div class="wh-subsection-title mt-4" data-test="weapons-title">
             <MudText Typo="Typo.subtitle1">@L["Attacker_Weapons"]</MudText>
             <HelpBubble Lines="@([L["Attacker_WeaponsHelp"]])" />
@@ -118,6 +120,10 @@
     /// </summary>
     [Parameter]
     public bool NameInTitle { get; set; }
+
+    /// <summary>Situation propre à l'attaquant, sous ses boosts (comparateur : seulement les conditions qui comptent).</summary>
+    [Parameter]
+    public RenderFragment? Situation { get; set; }
 
     /// <summary>Boutons Monter / Descendre dans l'en-tête, si fournis (ordre des attaquants au comparateur).</summary>
     [Parameter]

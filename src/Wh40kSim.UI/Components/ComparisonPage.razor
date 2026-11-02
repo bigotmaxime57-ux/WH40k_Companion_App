@@ -1,8 +1,9 @@
 @*
-    Saisie du comparateur, construite comme le Full sim : bandeau (fichier de comparaison, puis réglages et lancement),
-    Situation commune en pleine largeur, puis les attaquants comparés (une carte repliable chacun) et le défenseur
-    commun côte à côte. Défenseur et situation propres au comparateur (Session.Comparison), repris du scénario courant
-    à la première ouverture. À la fin du calcul, l'écran des résultats s'ouvre ; annulé, on reste ici.
+    Saisie du comparateur, construite comme le Full sim : bandeau (fichier de comparaison, puis réglages et lancement,
+    dont le tir en overwatch, commun à tous), puis les attaquants comparés (une carte repliable chacun, avec sa propre
+    situation, seulement les conditions qui comptent pour ses armes) et le défenseur commun côte à côte. Comparaison
+    propre au comparateur (Session.Comparison), reprise du scénario courant à la première ouverture. À la fin du calcul,
+    l'écran des résultats s'ouvre ; annulé, on reste ici.
 *@
 @page "/comparison"
 @implements IAsyncDisposable
@@ -27,6 +28,12 @@
             <MudText Typo="Typo.body2" data-test="round-plan">@RoundPlanLabel</MudText>
             <HelpBubble Lines="@([L["Comparison_RoundsHelp"]])" />
         </MudStack>
+        @* Tir en overwatch : commun à tous les attaquants (décision de l'utilisateur) *@
+        <div class="wh-subsection-title">
+            <MudSwitch T="bool" Label="@L["Context_SnapShooting"]" Color="Color.Primary" Disabled="Running"
+                       @bind-Value="Form.SnapShooting" @bind-Value:after="OnChanged" data-test="snap-shooting" />
+            <HelpBubble Lines="@([L["Help_SnapShooting"], L["Help_SnapShootingLimits"], L["Comparison_SnapShootingHelp"]])" />
+        </div>
     </MudPaper>
     <PhoneRunBar @bind-Iterations="State.Iterations" CanRun="CanRun" Running="Running" Progress="Progress" OnRun="RunAsync" OnCancel="Cancel" />
 
@@ -37,28 +44,30 @@
     <ScenarioErrors Errors="Errors" Warnings="Warnings" HasDiceErrors="HasDiceErrors" />
 
     <MudGrid Spacing="3">
-        <MudItem xs="12">
-            <ContextPanel Context="Form.Context" Reference="Reference" Changed="OnChanged" />
-        </MudItem>
         <MudItem xs="12" md="7">
             <MudStack Spacing="3" data-test="comparison-attackers">
                 <div class="wh-subsection-title">
-                    <MudText Typo="Typo.h6">@L["Comparison_Attackers", Form.Attackers.Count]</MudText>
+                    <MudText Typo="Typo.h6">@L["Comparison_Attackers", Form.Entries.Count]</MudText>
                     <HelpBubble Lines="@([L["Comparison_AttackersHelp"]])" />
                 </div>
-                @for (int i = 0; i < Form.Attackers.Count; i++)
+                @for (int i = 0; i < Form.Entries.Count; i++)
                 {
                     int index = i;
-                    var current = Form.Attackers[index];
+                    var entry = Form.Entries[index];
+                    var current = entry.Attacker;
                     @* Dépliée : la première carte (celle de départ) et celles ajoutées à la main *@
-                    <div @key="current" data-test="comparison-attacker">
+                    <div @key="entry" data-test="comparison-attacker">
                         <AttackerPanel Attacker="current" NameInTitle="true" InitiallyExpanded="@(index == 0 || _expandOnAdd.Contains(current))"
                                        Changed="() => OnAttackerChanged(current)" EditKeywords="EditKeywords"
-                                       OnOpen="() => OpenAttackerAsync(current)" OnSave="() => SaveAttackerAsync(current)"
-                                       CanMoveUp="index > 0" CanMoveDown="index < Form.Attackers.Count - 1"
+                                       OnOpen="() => OpenAttackerAsync(entry)" OnSave="() => SaveAttackerAsync(current)"
+                                       CanMoveUp="index > 0" CanMoveDown="index < Form.Entries.Count - 1"
                                        OnMoveUp="() => Move(index, -1)" OnMoveDown="() => Move(index, 1)"
-                                       OnDuplicate="() => Duplicate(current)" OnRemove="() => Remove(current)"
-                                       FileActionsDisabled="Running" SnapShooting="Form.Context.SnapShooting" />
+                                       OnDuplicate="() => Duplicate(entry)" OnRemove="() => Remove(entry)"
+                                       FileActionsDisabled="Running" SnapShooting="Form.SnapShooting">
+                            <Situation>
+                                <ContextPanel Embedded="true" Context="entry.Context" Reference="ReferenceOf(entry)" Changed="OnChanged" />
+                            </Situation>
+                        </AttackerPanel>
                     </div>
                 }
                 <MudStack Row="true" Spacing="2" Wrap="Wrap.Wrap">
@@ -73,10 +82,9 @@
         </MudItem>
         <MudItem xs="12" md="5">
             <MudStack Spacing="2">
-                <DefenderPanel Defender="Form.Defender" Changed="OnDefenderChanged" SnapShooting="Form.Context.SnapShooting"
-                               OnOpen="OpenDefenderAsync" OnSave="SaveDefenderAsync" FileActionsDisabled="Running"
-                               ShowPrecisionTargets="Reference.PrecisionTargetGroup is not null" PrecisionTarget="@Form.Context.PrecisionTarget"
-                               PrecisionTargetChanged="OnPrecisionTargetChanged" />
+                @* Cible de Precision : choisie par chaque attaquant (sa situation), pas sur les cartes du défenseur *@
+                <DefenderPanel Defender="Form.Defender" Changed="OnDefenderChanged" SnapShooting="Form.SnapShooting"
+                               OnOpen="OpenDefenderAsync" OnSave="SaveDefenderAsync" FileActionsDisabled="Running" />
                 <div>
                     <MudButton Variant="Variant.Text" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Sync" Disabled="Running"
                                OnClick="TakeDefenderFromScenarioAsync" data-test="defender-from-scenario">@L["Comparison_DefenderFromScenario"]</MudButton>

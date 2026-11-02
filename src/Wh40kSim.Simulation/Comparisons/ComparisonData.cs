@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Wh40kSim.Core.Serialization;
 
 namespace Wh40kSim.Simulation.Comparisons;
@@ -20,7 +19,7 @@ public sealed record ComparisonData
 
     /// <summary>
     /// Incohérences (vide si les données sont utilisables) : plan des rondes, nombre d'entrées et noms, données de chaque
-    /// entrée, ronde d'élimination et nombre de simulations accordés au plan, même défenseur, même situation et même
+    /// entrée, ronde d'élimination et nombre de simulations accordés au plan, même défenseur, même overwatch et même
     /// graine partout.
     /// </summary>
     public IReadOnlyList<string> Validate()
@@ -51,13 +50,13 @@ public sealed record ComparisonData
 
         var first = Entries[0].Simulation;
         string defender = ScenarioJson.Serialize(first.Scenario.Defender);
-        string context = JsonSerializer.Serialize(first.Scenario.Context, ScenarioJson.Options);
+        bool snapShooting = first.Scenario.Context.SnapShooting;
         foreach (var entry in Entries)
         {
             var data = entry.Simulation;
             string label = $"Entrée '{data.Scenario.Attacker.Name}'";
             if (ScenarioJson.Serialize(data.Scenario.Defender) != defender) errors.Add($"{label} : défenseur différent des autres entrées.");
-            if (JsonSerializer.Serialize(data.Scenario.Context, ScenarioJson.Options) != context) errors.Add($"{label} : situation différente des autres entrées.");
+            if (data.Scenario.Context.SnapShooting != snapShooting) errors.Add($"{label} : tir en overwatch différent des autres entrées (il est commun).");
             if (data.Seed != first.Seed) errors.Add($"{label} : graine différente des autres entrées.");
             int expected = Rounds[(entry.EliminatedInRound ?? Rounds.Count) - 1];
             if (data.Iterations != expected) errors.Add($"{label} : {data.Iterations} simulations au lieu des {expected} de sa dernière ronde.");

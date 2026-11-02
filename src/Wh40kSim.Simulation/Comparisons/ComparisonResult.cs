@@ -48,7 +48,12 @@ public sealed class ComparisonResult
         Data = data;
         Entries = data.Entries.Select(e => new SimulationResult(e.Simulation)).ToList();
         var first = Entries[0].Scenario;
-        Comparison = new Comparison { Defender = first.Defender, Context = first.Context, Attackers = Entries.Select(e => e.Scenario.Attacker).ToList() };
+        Comparison = new Comparison
+        {
+            Defender = first.Defender,
+            SnapShooting = first.Context.SnapShooting,
+            Entries = Entries.Select(e => new ComparisonEntry { Attacker = e.Scenario.Attacker, Context = e.Scenario.Context with { SnapShooting = false } }).ToList(),
+        };
         _finalists = Enumerable.Range(0, Entries.Count).Where(i => data.Entries[i].EliminatedInRound is null).ToList();
 
         // Finalistes d'abord (round = nombre de rondes + 1), puis éliminés des dernières rondes aux premières ; par score dans chaque groupe

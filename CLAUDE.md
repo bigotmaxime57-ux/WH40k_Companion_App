@@ -1253,7 +1253,9 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   `phase5/etape4-graphiques-comparaison`, fusionnée dans `main`, validée par l'utilisateur à l'écran le 2026-11-02.
   Prochaine étape : 5 (armes à plusieurs profils), à préciser.
 - Phase 5, étape 5 (armes à plusieurs profils) : précisée et validée le 2026-11-02, codée sur la branche
-  `phase5/etape5-armes-multiprofils`, **en attente de validation** (à vérifier à l'écran par l'utilisateur).
+  `phase5/etape5-armes-multiprofils`, fusionnée dans `main`, validée par l'utilisateur à l'écran le 2026-11-02.
+  Essais écartés après coup sur les graphiques (barres opaques ; palette vive et contour des séries) : la version
+  transparente est gardée. Prochaine étape : 6 (partie web), à préciser.
   Simulation : `WeaponAlternatives`, `ComparisonEntry.Alternatives` / `Variants()`, `ProfileChoice`,
   `ComparisonVariant`, `Comparison.Variants()` (les scénarios simulés sont ceux des variantes) ;
   `ComparisonData.Comparison` (définition gardée, une entrée par variante, scénario vérifié) ; `RankedEntry.Variant`,

@@ -1184,7 +1184,8 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   `phase5/etape1-comparaison-simulation`, fusionnée dans `main`, validée par l'utilisateur le 2026-11-02. Prochaine
   étape : 2 (rondes éliminatoires), à préciser (seuils à fixer ensemble d'après des temps mesurés).
 - Phase 5, étape 2 (rondes éliminatoires) : précisée et validée le 2026-11-02 (seuils d'après un banc d'essai), codée
-  sur la branche `phase5/etape2-rondes-eliminatoires`, **en attente de validation**. `RoundPlan`, `EliminationRounds`
+  sur la branche `phase5/etape2-rondes-eliminatoires`, fusionnée dans `main`, validée par l'utilisateur le
+  2026-11-02. Prochaine étape : 3 (comparaison, côté UI), à préciser. `RoundPlan`, `EliminationRounds`
   (`RoundProgress`, `RoundOutcome`, `Survivors`) ; `Comparator.Run` en rondes ; `ComparisonData.Rounds` / `Elapsed`,
   `ComparisonEntryData` (`EliminatedInRound`) ; `ComparisonResult.Rounds` / `Finalists`, `RankedEntry.EliminatedInRound`
   / `IsFinalist`. 622 tests verts (223 Core, 134 Simulation, 221 UI, 25 Web, 19 client web). Banc d'essai refait avec

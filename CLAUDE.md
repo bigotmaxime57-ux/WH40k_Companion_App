@@ -1234,7 +1234,8 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
   `phase5/etape3-comparateur-ui`, fusionnée dans `main`, validée par l'utilisateur à l'écran le 2026-11-02. Prochaine
   étape : 4 (graphiques de la comparaison), à préciser.
 - Phase 5, étape 4 (graphiques de la comparaison) : précisée et validée le 2026-11-02, codée sur la branche
-  `phase5/etape4-graphiques-comparaison`, **en attente de validation** (à vérifier à l'écran par l'utilisateur).
+  `phase5/etape4-graphiques-comparaison`, fusionnée dans `main`, validée par l'utilisateur à l'écran le 2026-11-02.
+  Prochaine étape : 5 (armes à plusieurs profils), à préciser.
   `ComparisonChart` (`ChartSeries`), section « Distributions » de `ComparisonResultsPage` (figurines, PV), pastilles
   et statistiques du podium ; CSS `wh-cmp-*`. Rendu plus léger de la branche d'essai repris dans l'étape (fusionnée
   dans la branche de l'étape, puis supprimée). Corrigé au passage : le test des fichiers de `scenarios/` accepte les

@@ -51,7 +51,7 @@
                 @foreach (var entry in Result.Podium)
                 {
                     var score = entry.Result.EfficiencyScore;
-                    <StatTile Label="@L["Comparison_PodiumPlace", entry.Rank, entry.Name]" Value="@ScoreText(score)"
+                    <StatTile Label="@L["Comparison_PodiumPlace", entry.Rank, entry.Name]" Value="@ScoreText(score)" Stats="@PodiumStats(entry.Result)"
                               Tone="@(entry.Rank == 1 ? StatTile.TileTone.Good : StatTile.TileTone.Neutral)" data-test="@($"podium-{entry.Rank}")">
                         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
                             @* Couleur du gagnant dans les graphiques *@
@@ -205,6 +205,15 @@
             _descending = Columns.First(c => c.Key == key).Numeric || key == "status";
         }
     }
+
+    /// <summary>Statistiques principales d'un gagnant, à droite de sa tuile : figurines tuées, PV retirés (part de l'unité), unité détruite.</summary>
+    private List<StatTile.Stat> PodiumStats(SimulationResult result) =>
+    [
+        new("⚔", L["Results_Kills"], result.Kills.Mean.ToString("F2"), L["Comparison_StatKillsHelp"]),
+        new("♥", L["Results_Damage"], L["Comparison_DamageAndShare", result.Damage.Mean.ToString("F2"), result.MeanDamageShare.ToString("P0")],
+            L["Comparison_StatDamageHelp"]),
+        new("☠", L["Comparison_Wipe"], result.ProbabilityWipe.ToString("P1"), L["Comparison_StatWipeHelp"]),
+    ];
 
     /// <summary>Une série par gagnant (podium), dans l'ordre du classement : sa couleur suit son rang.</summary>
     private IReadOnlyList<ComparisonChart.ChartSeries> WinnerSeries(Func<SimulationResult, DiscreteDistribution> distribution) =>

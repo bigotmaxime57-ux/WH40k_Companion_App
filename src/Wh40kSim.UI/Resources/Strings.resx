@@ -1156,4 +1156,13 @@
   <data name="Comparison_ChartShowAtLeast" xml:space="preserve">
     <value>Courbes « au moins k »</value>
   </data>
+  <data name="Comparison_StatKillsHelp" xml:space="preserve">
+    <value>Figurines tuées en moyenne par activation.</value>
+  </data>
+  <data name="Comparison_StatDamageHelp" xml:space="preserve">
+    <value>PV retirés en moyenne par activation, et la part de l'unité qu'ils représentent.</value>
+  </data>
+  <data name="Comparison_StatWipeHelp" xml:space="preserve">
+    <value>Probabilité de détruire toute l'unité en une activation.</value>
+  </data>
 </root>

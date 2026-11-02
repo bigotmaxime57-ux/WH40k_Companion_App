@@ -403,6 +403,12 @@ public class ComparisonPageTests() : ComponentTestContext(renderPopoverProvider:
         Assert.Equal(6, legend.Count);   // 3 gagnants × 2 graphiques
         Assert.DoesNotContain(legend, l => l.Contains("D"));
         Assert.Equal(3, shell.FindAll("[data-test=podium-swatch]").Count);
+        // Statistiques principales sur chaque tuile : figurines, PV (part de l'unité), unité détruite
+        var stats = shell.Find("[data-test=podium-1] [data-test=tile-stats]").TextContent;
+        Assert.Contains("Figurines tuées", stats);
+        Assert.Contains("PV retirés", stats);
+        Assert.Contains("de l'unité", stats);
+        Assert.Contains("Unité détruite", stats);
         // Ordre de la page : podium, distributions, classement
         string markup = shell.Markup;
         Assert.True(markup.IndexOf("data-test=\"podium\"") < markup.IndexOf("comparison-distributions"));

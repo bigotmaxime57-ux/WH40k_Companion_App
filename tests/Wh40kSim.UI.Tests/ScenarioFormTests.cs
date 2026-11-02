@@ -1,6 +1,7 @@
 using Wh40kSim.Core.Dice;
 using Wh40kSim.Core.Model;
 using Wh40kSim.Core.Serialization;
+using Wh40kSim.Simulation.Comparisons;
 using Wh40kSim.UI.Forms;
 
 namespace Wh40kSim.UI.Tests;
@@ -169,10 +170,18 @@ public class ScenarioFormTests
         string[] files = Directory.GetFiles(Path.Combine(FindRepositoryRoot(), "scenarios"), "*.json");
         Assert.NotEmpty(files);
 
-        // Scénarios complets et fichiers partiels (attaquant seul, défenseur seul) : chaque partie fait l'aller-retour
+        // Scénarios complets et fichiers partiels (attaquant seul, défenseur seul) : chaque partie fait l'aller-retour ;
+        // une comparaison (enregistrée par le comparateur dans le même dossier) passe par son propre formulaire
         foreach (string file in files)
         {
-            var content = ScenarioJson.ReadFile(File.ReadAllText(file));
+            string json = File.ReadAllText(file);
+            if (System.Text.Json.Nodes.JsonNode.Parse(json, documentOptions: new() { CommentHandling = System.Text.Json.JsonCommentHandling.Skip, AllowTrailingCommas = true })?["entries"] is not null)
+            {
+                var comparison = ComparisonJson.Deserialize(json);
+                Assert.Equal(ComparisonJson.Serialize(comparison), ComparisonJson.Serialize(new ComparisonForm(comparison).ToComparison()));
+                continue;
+            }
+            var content = ScenarioJson.ReadFile(json);
             if (content.Attacker is not null)
             {
                 Assert.Equal(ScenarioJson.Serialize(content.Attacker), ScenarioJson.Serialize(new AttackerForm(content.Attacker).ToAttackerUnit()));

@@ -437,6 +437,58 @@ rect.wh-share-5 { fill: var(--wh-share-5); }
     color: var(--mud-palette-text-secondary);
 }
 
+/* Histogrammes superposés du comparateur (ComparisonChart) : une couleur de la palette par série ; barres
+   semi-transparentes au contour plein pour rester lisibles là où elles se recouvrent ; courbes et moyennes pleines */
+.wh-cmp-0 { --wh-series: var(--wh-share-0); }
+.wh-cmp-1 { --wh-series: var(--wh-share-1); }
+.wh-cmp-2 { --wh-series: var(--wh-share-2); }
+.wh-cmp-3 { --wh-series: var(--wh-share-3); }
+.wh-cmp-4 { --wh-series: var(--wh-share-4); }
+.wh-cmp-5 { --wh-series: var(--wh-share-5); }
+
+rect.wh-cmp-bar {
+    fill: var(--wh-series);
+    fill-opacity: .28;
+    stroke: var(--wh-series);
+    stroke-width: 1.5;
+}
+
+path.wh-cmp-curve {
+    fill: none;
+    stroke: var(--wh-series);
+    stroke-width: 2.5;
+}
+
+line.wh-cmp-mean {
+    stroke: var(--wh-series);
+    stroke-dasharray: 7 3;
+    stroke-width: 1.5;
+}
+
+.wh-cmp-legend {
+    cursor: pointer;
+    user-select: none;
+}
+
+.wh-cmp-legend-hidden {
+    opacity: .45;
+    text-decoration: line-through;
+}
+
+.wh-cmp-swatch-bar {
+    background: color-mix(in srgb, var(--mud-palette-text-secondary) 28%, transparent);
+    border: 1.5px solid var(--mud-palette-text-secondary);
+}
+
+/* Pastille de couleur d'un gagnant (tuiles du podium), comme sa série dans les graphiques */
+.wh-podium-swatch {
+    border-radius: 50%;
+    display: inline-block;
+    height: 10px;
+    margin-right: .4rem;
+    width: 10px;
+}
+
 rect.wh-chart-bar-neutral {
     fill: color-mix(in srgb, var(--mud-palette-text-primary) 35%, transparent);
 }

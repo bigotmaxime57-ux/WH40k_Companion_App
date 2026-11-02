@@ -1126,4 +1126,19 @@
   <data name="Comparison_PrecisionOn" xml:space="preserve">
     <value>Precision sur {0}</value>
   </data>
+  <data name="Comparison_Distributions" xml:space="preserve">
+    <value>Distributions</value>
+  </data>
+  <data name="Comparison_DistributionsHelp" xml:space="preserve">
+    <value>Distributions des 3 gagnants, superposées : barres « exactement k » semi-transparentes (axe de gauche), courbes « au moins k » (axe de droite) et moyennes, une couleur par gagnant (la même que sa pastille sur le podium). Cliquez sur un gagnant dans la légende pour masquer ou réafficher sa série.</value>
+  </data>
+  <data name="Comparison_ChartTooltip" xml:space="preserve">
+    <value>exactement {0} · au moins {1}</value>
+  </data>
+  <data name="Comparison_ChartToggle" xml:space="preserve">
+    <value>Masquer ou réafficher cette série</value>
+  </data>
+  <data name="Comparison_ChartUnitLimit" xml:space="preserve">
+    <value>Limite de l'unité : à droite, unité détruite</value>
+  </data>
 </root>

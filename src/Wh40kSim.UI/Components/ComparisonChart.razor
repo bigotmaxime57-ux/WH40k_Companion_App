@@ -1,0 +1,211 @@
+@*
+    Histogrammes superposés de plusieurs distributions (les gagnants du comparateur), en SVG : pour chaque valeur k, les
+    barres « exactement k » de chaque série dessinées les unes sur les autres, remplissage semi-transparent et contour
+    plein de sa couleur (décision de l'utilisateur), la dernière série d'abord et la première par-dessus ; une courbe
+    « au moins k » lissée par série (axe de droite, 0 à 100 %) et la moyenne de chaque série en trait de sa couleur.
+    Infobulle au survol d'une colonne avec les valeurs de chaque série ; légende cliquable pour masquer une série. Valeurs
+    négligeables aux extrémités masquées (comme les tableaux). Couleurs des séries : palette du thème (--wh-share-n).
+    Même repère et mêmes conventions que HistogramChart.
+*@
+@using System.Globalization
+
+<div class="wh-chart" data-test="comparison-chart">
+    <svg viewBox="0 0 @F(Width) @F(Height)" role="img" aria-label="@Title">
+        @foreach (double tick in _minorTicks)
+        {
+            <line class="wh-chart-grid-minor" x1="@F(Left)" y1="@F(Y(tick / _maxExactly))" x2="@F(Width - Right)" y2="@F(Y(tick / _maxExactly))" />
+        }
+        @foreach (double tick in _leftTicks)
+        {
+            <g>
+                <line class="wh-chart-grid" x1="@F(Left)" y1="@F(Y(tick / _maxExactly))" x2="@F(Width - Right)" y2="@F(Y(tick / _maxExactly))" />
+                <text class="wh-chart-axis" x="@F(Left - 6)" y="@F(Y(tick / _maxExactly) + 4)" text-anchor="end">@tick.ToString("P0")</text>
+            </g>
+        }
+        @foreach (double tick in RightTicks)
+        {
+            <g><text class="wh-chart-axis wh-chart-axis-curve" x="@F(Width - Right + 6)" y="@F(Y(tick) + 4)">@tick.ToString("P0")</text></g>
+        }
+        @for (int i = 0; i < _values.Count; i++)
+        {
+            @if (ShowLabel(i))
+            {
+                <g><text class="wh-chart-axis" x="@F(ColumnX(i) + ColumnWidth / 2)" y="@F(Height - 8)" text-anchor="middle">@_values[i]</text></g>
+            }
+        }
+
+        @* Barres : la dernière série d'abord, la première par-dessus *@
+        @foreach (int s in VisibleSeries.Reverse())
+        {
+            var series = Series[s];
+            @for (int i = 0; i < _values.Count; i++)
+            {
+                double height = Bottom - Y(series.Distribution.ProbabilityExactly(_values[i]) / _maxExactly);
+                @if (height > 0)
+                {
+                    <rect class="@($"wh-cmp-bar {SeriesClass(s)}")" x="@F(ColumnX(i) + ColumnWidth * 0.12)" y="@F(Bottom - height)"
+                          width="@F(ColumnWidth * 0.76)" height="@F(height)" data-test="@($"cmp-bar-{s}")" />
+                }
+            }
+        }
+
+        @if (_unitColumn >= 0)
+        {
+            <line class="wh-chart-limit" x1="@F(ColumnX(_unitColumn))" y1="@F(Top)" x2="@F(ColumnX(_unitColumn))" y2="@F(Bottom)" data-test="cmp-limit" />
+        }
+
+        @foreach (int s in VisibleSeries.Reverse())
+        {
+            <line class="@($"wh-cmp-mean {SeriesClass(s)}")" x1="@F(MeanX(s))" y1="@F(Top)" x2="@F(MeanX(s))" y2="@F(Bottom)" data-test="@($"cmp-mean-{s}")" />
+            <path class="@($"wh-cmp-curve {SeriesClass(s)}")" d="@_curves[s]" data-test="@($"cmp-curve-{s}")" />
+        }
+
+        @for (int i = 0; i < _values.Count; i++)
+        {
+            int index = i;
+            <rect class="wh-chart-hit" x="@F(ColumnX(i))" y="@F(Top)" width="@F(ColumnWidth)" height="@F(Bottom - Top)"
+                  @onmouseover="() => _hover = index" @onmouseout="() => _hover = null" data-test="chart-column" />
+        }
+    </svg>
+
+    @if (_hover is int hovered)
+    {
+        int value = _values[hovered];
+        <div class="wh-chart-tooltip" style="left: @F(Math.Clamp((ColumnX(hovered) + ColumnWidth / 2) / Width * 100, 15, 85))%" data-test="chart-tooltip">
+            <strong>@string.Format(ValueTitle, value)</strong>
+            @if (UnitSize is int size && value >= size)
+            {
+                <em> · @L["Chart_WipedTooltip"]</em>
+            }
+            @foreach (int s in VisibleSeries)
+            {
+                var distribution = Series[s].Distribution;
+                <br />
+                <span data-test="@($"chart-tooltip-{s}")"><i class="@($"wh-chart-swatch-stack wh-share-{s % 6}")"></i>@Series[s].Label :
+                    @L["Comparison_ChartTooltip", distribution.ProbabilityExactly(value).ToString("P1"), distribution.ProbabilityAtLeast(value).ToString("P1")]</span>
+            }
+        </div>
+    }
+
+    <div class="wh-chart-legend">
+        @for (int s = 0; s < Series.Count; s++)
+        {
+            int index = s;
+            <span class="@(_hidden.Contains(s) ? "wh-cmp-legend wh-cmp-legend-hidden" : "wh-cmp-legend")" role="button" tabindex="0"
+                  title="@L["Comparison_ChartToggle"]" @onclick="() => Toggle(index)" data-test="@($"cmp-legend-{s}")">
+                <i class="@($"wh-share-{s % 6}")"></i>@Series[s].Label · @L["Chart_Mean", Series[s].Distribution.Mean.ToString("F2")]
+            </span>
+        }
+        <span><i class="wh-cmp-swatch-bar"></i>@L["Chart_Exactly"]</span>
+        <span><i class="wh-chart-swatch-curve"></i>@L["Chart_AtLeastAxis"]</span>
+        @if (_unitColumn >= 0)
+        {
+            <span data-test="legend-limit"><i class="wh-chart-swatch-limit"></i>@L["Comparison_ChartUnitLimit"]</span>
+        }
+    </div>
+</div>
+
+@code {
+    // Repère du SVG, comme HistogramChart
+    private const double Width = 640, Height = 280, Left = 46, Right = 44, Top = 12, Bottom = 250;
+    private const int MinorDivisions = 5;
+    private static readonly double[] RightTicks = [0, 0.25, 0.5, 0.75, 1];
+
+    /// <summary>Une série : son nom (légende, infobulle) et sa distribution ; sa couleur suit son rang dans la liste.</summary>
+    public sealed record ChartSeries(string Label, DiscreteDistribution Distribution);
+
+    private List<int> _values = [];
+    private double _maxExactly = 1;
+    private double[] _leftTicks = [];
+    private double[] _minorTicks = [];
+    private int _unitColumn = -1;   // colonne « unité détruite » (sa limite à gauche), -1 sans
+    private string[] _curves = [];
+    private readonly HashSet<int> _hidden = [];
+    private int? _hover;
+
+    /// <summary>Séries à superposer, la première étant la meilleure (dessinée par-dessus, première couleur).</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<ChartSeries> Series { get; set; } = [];
+
+    /// <summary>Nom du graphique pour les lecteurs d'écran.</summary>
+    [Parameter]
+    public string Title { get; set; } = "";
+
+    /// <summary>Titre de l'infobulle, {0} = la valeur (« PV retirés : {0} »).</summary>
+    [Parameter]
+    public string ValueTitle { get; set; } = "{0}";
+
+    /// <summary>Valeur où l'unité est détruite (PV ou effectif de l'unité) : limite en pointillé ; null sans.</summary>
+    [Parameter]
+    public int? UnitSize { get; set; }
+
+    private IEnumerable<int> VisibleSeries => Enumerable.Range(0, Series.Count).Where(s => !_hidden.Contains(s));
+
+    protected override void OnParametersSet()
+    {
+        _hidden.RemoveWhere(s => s >= Series.Count);
+        Layout();
+    }
+
+    private void Toggle(int series)
+    {
+        // Au moins une série reste affichée
+        if (!_hidden.Remove(series) && _hidden.Count < Series.Count - 1)
+        {
+            _hidden.Add(series);
+        }
+        Layout();
+    }
+
+    /// <summary>Valeurs utiles de toutes les séries (sans trou), échelle des barres sur les séries affichées, courbes.</summary>
+    private void Layout()
+    {
+        var rows = Series.Select(s => s.Distribution.Rows()).ToList();
+        int first = rows.Min(r => r[0].Value), last = rows.Max(r => r[^1].Value);
+        _values = Enumerable.Range(first, last - first + 1).ToList();
+
+        double max = VisibleSeries.SelectMany(s => _values.Select(v => Series[s].Distribution.ProbabilityExactly(v))).DefaultIfEmpty(0).Max();
+        double step = NiceStep(max / 4);
+        _maxExactly = Math.Max(step, Math.Ceiling(max / step - 1e-9) * step);
+        _leftTicks = Enumerable.Range(0, (int)Math.Round(_maxExactly / step) + 1).Select(i => i * step).ToArray();
+        _minorTicks = _leftTicks.Skip(1)
+            .SelectMany(tick => Enumerable.Range(1, MinorDivisions - 1).Select(k => tick - step + k * step / MinorDivisions))
+            .ToArray();
+        _unitColumn = UnitSize is int size ? _values.IndexOf(size) : -1;
+        _curves = Series.Select(Curve).ToArray();
+        _hover = null;
+    }
+
+    /// <summary>Courbe « au moins k » d'une série, par ses seules valeurs qui arrivent (comme HistogramChart).</summary>
+    private string Curve(ChartSeries series)
+    {
+        var columns = Enumerable.Range(0, _values.Count).Where(i => series.Distribution.ProbabilityExactly(_values[i]) > 0).ToList();
+        if (columns.Count < 2)
+        {
+            columns = Enumerable.Range(0, _values.Count).ToList();
+        }
+        return MonotoneCurve.ToSvgPath(columns.Select(i => (ColumnX(i) + ColumnWidth / 2, Y(series.Distribution.ProbabilityAtLeast(_values[i])))).ToList());
+    }
+
+    private static string SeriesClass(int series) => $"wh-cmp-{series % 6}";
+
+    private double ColumnWidth => (Width - Left - Right) / _values.Count;
+
+    private double ColumnX(int i) => Left + i * ColumnWidth;
+
+    private double MeanX(int series) => ColumnX(0) + (Series[series].Distribution.Mean - _values[0] + 0.5) * ColumnWidth;
+
+    private static double Y(double fraction) => Bottom - fraction * (Bottom - Top);
+
+    private bool ShowLabel(int i) => i % (int)Math.Ceiling(_values.Count / 20.0) == 0;
+
+    private static double NiceStep(double raw)
+    {
+        if (raw <= 0) return 0.05;
+        double magnitude = Math.Pow(10, Math.Floor(Math.Log10(raw)));
+        double n = raw / magnitude;
+        return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * magnitude;
+    }
+
+    private static string F(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+}

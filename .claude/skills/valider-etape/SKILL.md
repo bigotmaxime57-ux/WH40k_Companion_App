@@ -24,6 +24,7 @@ Si une étape échoue (conflit, build ou test rouge), **s'arrêter** et l'expliq
 - **Intégration continue** (GitHub Actions, `.github/workflows/ci.yml`) : la dernière exécution de la branche, sur son
   dernier commit poussé, doit être verte (`gh run list --branch <branche> --limit 1`, détail avec `gh run view`). Si elle
   est rouge, s'arrêter et l'expliquer ; si elle tourne encore, attendre sa fin (`gh run watch <id>`, en arrière-plan).
+  Une branche qui ne touche que la documentation (`*.md`, `.claude/`) ne lance pas la CI : rien à vérifier (le dire).
 
 ## 2. Mettre à jour « Avancement » (sur la branche, avant la fusion)
 

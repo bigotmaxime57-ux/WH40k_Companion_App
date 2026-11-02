@@ -25,6 +25,7 @@ Voir aussi `README.md` (structure de la solution, règles de jeu implémentées,
 - **Après chaque étape** : `dotnet build` et `dotnet test` sans erreur ni avertissement, puis un commit dédié. Une fois
   la branche poussée, l'**intégration continue** (GitHub Actions, `.github/workflows/ci.yml` : tests sous Linux, build
   complet sous Windows) doit être verte avant de présenter l'étape (`gh run list --branch <branche>`, `gh run view`).
+  Un push qui ne touche que la documentation (`*.md`, `.claude/`) ne lance pas la CI (décision du 2026-11-02).
 - **En fin d'étape**, expliquer brièvement ce qui a été créé et pourquoi, en expliquant les notions C# / Blazor
   introduites (sans faire un cours).
 - **Versions de paquets** : vérifier sur NuGet la dernière version stable compatible .NET 10 avant de référencer un paquet.

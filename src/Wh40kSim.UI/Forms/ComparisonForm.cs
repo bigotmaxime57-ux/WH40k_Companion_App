@@ -3,7 +3,10 @@ using Wh40kSim.Simulation.Comparisons;
 
 namespace Wh40kSim.UI.Forms;
 
-/// <summary>Version modifiable d'une <see cref="ComparisonEntry"/> : un attaquant et sa propre situation.</summary>
+/// <summary>
+/// Version modifiable d'une <see cref="ComparisonEntry"/> : un attaquant, sa propre situation et les profils de rechange
+/// de ses armes.
+/// </summary>
 public sealed class ComparisonEntryForm
 {
     public ComparisonEntryForm(AttackerForm attacker, ContextForm? context = null)
@@ -15,6 +18,13 @@ public sealed class ComparisonEntryForm
     public ComparisonEntryForm(ComparisonEntry entry)
         : this(new AttackerForm(entry.Attacker), new ContextForm(entry.Context))
     {
+        foreach (var alternatives in entry.Alternatives.Where(a => a.Weapon >= 0 && a.Weapon < Attacker.Weapons.Count))
+        {
+            var weapon = Attacker.Weapons[alternatives.Weapon];
+            Alternatives[weapon] = alternatives.Profiles
+                .Select(p => new WeaponForm(new WeaponGroup { ModelCount = weapon.ModelCount, Weapon = p }))
+                .ToList();
+        }
     }
 
     public AttackerForm Attacker { get; set; }
@@ -22,11 +32,32 @@ public sealed class ComparisonEntryForm
     /// <summary>Situation propre à cet attaquant (le tir en overwatch, commun, est sur la comparaison).</summary>
     public ContextForm Context { get; set; }
 
+    /// <summary>
+    /// Profils de rechange, par arme de l'attaquant (la clé est l'arme de <see cref="AttackerForm.Weapons"/>, qui reste
+    /// le premier profil) ; une arme supprimée de l'attaquant est ignorée.
+    /// </summary>
+    public Dictionary<WeaponForm, List<WeaponForm>> Alternatives { get; } = [];
+
+    /// <summary>Nombre de variantes (combinaisons de profils) : 1 sans profil de rechange.</summary>
+    public int VariantCount => Attacker.Weapons.Aggregate(1, (count, weapon) => count * (1 + ProfilesOf(weapon).Count));
+
+    /// <summary>Profils de rechange d'une arme (vide s'il n'y en a pas).</summary>
+    public IReadOnlyList<WeaponForm> ProfilesOf(WeaponForm weapon) => Alternatives.GetValueOrDefault(weapon) ?? [];
+
+    /// <summary>Copie indépendante : attaquant, situation et profils de rechange.</summary>
+    /// <exception cref="FormatException">Si une expression de dés saisie est invalide.</exception>
+    public ComparisonEntryForm Clone() => new(ToComparisonEntry());
+
     /// <exception cref="FormatException">Si une expression de dés saisie est invalide.</exception>
     public ComparisonEntry ToComparisonEntry() => new()
     {
         Attacker = Attacker.ToAttackerUnit(),
         Context = Context.ToAttackContext() with { SnapShooting = false },
+        Alternatives = Attacker.Weapons
+            .Select((weapon, index) => (index, profiles: ProfilesOf(weapon)))
+            .Where(w => w.profiles.Count > 0)
+            .Select(w => new WeaponAlternatives { Weapon = w.index, Profiles = w.profiles.Select(p => p.ToWeaponGroup().Weapon).ToList() })
+            .ToList(),
     };
 }
 

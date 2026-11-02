@@ -383,10 +383,23 @@ Découpage revu avec l'utilisateur le 2026-11-02. Décisions :
    - Tests bUnit : séries selon le nombre de finalistes, éliminés absents, infobulle, légende cliquable, boîtes à
      moustaches, courbes sur demande, limite de l'unité, disposition (colonne de légende, côte à côte), statistiques du
      podium.
-5. **Armes à plusieurs profils.** Dans la définition d'une comparaison seulement : une arme peut porter plusieurs
-   profils ; la comparaison déplie **toutes les combinaisons** en variantes (attaquants ordinaires), départagées par
-   les rondes ; le profil retenu pour chaque arme des gagnants est indiqué. Hazardous non géré (phase 8), sans
-   avertissement.
+5. **Armes à plusieurs profils.** Précisée et validée par l'utilisateur le 2026-11-02 :
+   - Comparateur seulement (Core, Quick sim, Full sim et formats d'attaquant inchangés). `ComparisonEntry.Alternatives`
+     (`WeaponAlternatives` : numéro de l'arme, profils de rechange ; le profil de l'attaquant reste le premier choix,
+     même nombre de figurines). JSON : `"alternatives": [ { "weapon": 0, "profiles": [ … ] } ]`, facultatif.
+     Validation : arme existante, au moins un profil, noms distincts entre les profils d'une arme, chaque profil valide.
+   - **Variantes** : chaque entrée dépliée en **toutes les combinaisons** ; variante = attaquant ordinaire, situation de
+     l'entrée, nommée « Attaquant · profils choisis » (nom inchangé sans profil de rechange). Rondes sur les variantes
+     (le plan compte les variantes ; un seul attaquant avec des profils suffit s'il donne au moins 2 variantes).
+     **Ni plafond ni avertissement** sur le nombre de combinaisons (décision de l'utilisateur). Hazardous non géré.
+   - Résultat : classement et **podium libres** (plusieurs variantes d'un même attaquant possibles, décision de
+     l'utilisateur), attaquant et profils choisis indiqués ; **meilleur profil pour chaque arme** de chaque attaquant
+     (sa meilleure variante) ; enregistrer / analyser au Full sim = la **variante concrète**. `ComparisonData` garde la
+     comparaison (définition) pour retrouver les variantes.
+   - Interface : sur la carte d'une arme, « Ajouter un profil », puis un onglet par profil (au nom du profil), profil de
+     rechange supprimable ; nombre de variantes sur la carte de l'attaquant et dans le plan des rondes ; un attaquant
+     enregistré depuis sa carte ne garde que le premier profil (bulle « ? »).
+   - Tests : dépliage, validation, JSON, rondes sur les variantes, meilleur profil, variante concrète, interface.
 6. **Partie web** : comparaison, rondes et profils dans l'API et le client ; plafond de simulations par lancement à
    adapter (plusieurs entrées, plusieurs rondes).
 
@@ -1236,6 +1249,16 @@ Règles communes aux étapes 6 à 8 (décisions du 2026-10-28, à reprendre pour
 - Phase 5, étape 4 (graphiques de la comparaison) : précisée et validée le 2026-11-02, codée sur la branche
   `phase5/etape4-graphiques-comparaison`, fusionnée dans `main`, validée par l'utilisateur à l'écran le 2026-11-02.
   Prochaine étape : 5 (armes à plusieurs profils), à préciser.
+- Phase 5, étape 5 (armes à plusieurs profils) : précisée et validée le 2026-11-02, codée sur la branche
+  `phase5/etape5-armes-multiprofils`, **en attente de validation** (à vérifier à l'écran par l'utilisateur).
+  Simulation : `WeaponAlternatives`, `ComparisonEntry.Alternatives` / `Variants()`, `ProfileChoice`,
+  `ComparisonVariant`, `Comparison.Variants()` (les scénarios simulés sont ceux des variantes) ;
+  `ComparisonData.Comparison` (définition gardée, une entrée par variante, scénario vérifié) ; `RankedEntry.Variant`,
+  `ComparisonResult.Variants` / `BestProfilesByAttacker`. Interface : `ComparisonEntryForm.Alternatives` /
+  `VariantCount` / `Clone()`, barre des profils sur la carte d'arme (`AttackerPanel.Alternatives`,
+  `WeaponEditor.Profiles` ; nombre de porteurs commun à tous les profils), nombre de variantes (`TitleNote`, plan des
+  rondes), « Meilleur profil par arme » sous le podium. 671 tests verts (223 Core, 142 Simulation, 267 UI, 25 Web,
+  19 client web ; UI stables sur 3 exécutions).
   `ComparisonChart` (`ChartSeries`), section « Distributions » de `ComparisonResultsPage` (figurines, PV), pastilles
   et statistiques du podium ; CSS `wh-cmp-*`. Rendu plus léger de la branche d'essai repris dans l'étape (fusionnée
   dans la branche de l'étape, puis supprimée). Corrigé au passage : le test des fichiers de `scenarios/` accepte les

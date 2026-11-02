@@ -270,6 +270,88 @@ public class ComparisonPageTests() : ComponentTestContext(renderPopoverProvider:
         Assert.NotEmpty(shell.FindAll("[data-test=overwatch-chip]"));
     }
 
+    // Armes à plusieurs profils
+
+    [Fact]
+    public void Only_the_comparator_offers_alternative_profiles()
+    {
+        var shell = OpenComparison();
+        Assert.Single(shell.FindAll("[data-test=comparison-attacker] [data-test=add-profile]"));
+
+        Navigation.NavigateTo(AppRoutes.FullSim);
+        shell.WaitForAssertion(() => Assert.NotNull(shell.FindComponent<FullSimPage>()));
+        Assert.Empty(shell.FindAll("[data-test=add-profile]"));
+    }
+
+    [Fact]
+    public void Adding_a_profile_makes_variants_and_a_single_attacker_can_run()
+    {
+        var shell = OpenComparison();
+
+        shell.Find("[data-test=add-profile]").Click();
+
+        var entry = Session.Comparison.Form!.Entries[0];
+        var weapon = entry.Attacker.Weapons[0];
+        var profile = Assert.Single(entry.ProfilesOf(weapon));
+        Assert.Equal("Bolter (2)", profile.Name);
+        Assert.Equal(2, shell.FindAll("[data-test=profile-tab]").Count);
+        Assert.Contains("2 variantes", shell.Find("[data-test=attacker-title-note]").TextContent);
+        Assert.StartsWith("2 variantes", shell.Find("[data-test=round-plan]").TextContent);
+        Assert.False(shell.Find("[data-test=run]").HasAttribute("disabled"));
+    }
+
+    [Fact]
+    public void The_card_edits_the_profile_chosen_in_its_bar()
+    {
+        var shell = OpenComparison();
+        shell.Find("[data-test=add-profile]").Click();   // le nouveau profil est affiché
+
+        shell.Find("input[data-test=attacks]").Change("20");
+
+        var entry = Session.Comparison.Form!.Entries[0];
+        var weapon = entry.Attacker.Weapons[0];
+        Assert.Equal("20", entry.ProfilesOf(weapon)[0].Attacks);
+        Assert.Equal("10", weapon.Attacks);
+
+        shell.FindAll("[data-test=profile-tab]")[0].Click();
+        Assert.Equal("10", shell.Find("input[data-test=attacks]").GetAttribute("value"));
+    }
+
+    [Fact]
+    public void A_comparison_keeps_its_profiles_but_an_attacker_file_keeps_the_first_one()
+    {
+        var shell = OpenComparison();
+        shell.Find("[data-test=add-profile]").Click();
+
+        shell.Find("[data-test=save]").Click();
+        shell.Find("[data-test=comparison-attacker] [data-test=save-attacker]").Click();
+
+        var comparison = ComparisonJson.Deserialize(Files.Saved[0].Content);
+        Assert.Equal("Bolter (2)", Assert.Single(Assert.Single(comparison.Entries[0].Alternatives).Profiles).Name);
+        var attacker = ScenarioJson.ReadFile(Files.Saved[1].Content).Attacker!;
+        Assert.Equal(["Bolter"], attacker.Weapons.Select(w => w.Weapon.Name));
+    }
+
+    [Fact]
+    public void The_results_give_the_best_profile_of_each_weapon_and_save_the_concrete_variant()
+    {
+        var entry = new ComparisonEntry
+        {
+            Attacker = Attacker("Escouade", 3),
+            Alternatives = [new WeaponAlternatives { Weapon = 0, Profiles = [new WeaponProfile { Name = "Bolter (rafale)", Attacks = 15, Skill = 3, Strength = 4 }] }],
+        };
+        var shell = OpenResults(Comparator.Run(new Comparison { Defender = Squad, Entries = [entry, new ComparisonEntry { Attacker = Attacker("Autre", 1) }] }, 2_000, seed: 1));
+
+        Assert.Contains("Bolter → Bolter (rafale)", shell.Find("[data-test=best-profiles-0]").TextContent);
+        Assert.Equal("Escouade · Bolter (rafale)", shell.Find("[data-test=ranking-row-1] [data-test=name]").TextContent);
+
+        OpenRowMenu(shell, 1);
+        ClickMenuItem(shell, "save-attacker");
+        shell.WaitForAssertion(() => Assert.Single(Files.Saved));
+        var saved = ScenarioJson.ReadFile(Files.Saved[0].Content).Attacker!;
+        Assert.Equal(["Bolter (rafale)"], saved.Weapons.Select(w => w.Weapon.Name));
+    }
+
     [Fact]
     public void The_round_plan_follows_the_number_of_attackers()
     {

@@ -58,6 +58,7 @@
                     @* Dépliée : la première carte (celle de départ) et celles ajoutées à la main *@
                     <div @key="entry" data-test="comparison-attacker">
                         <AttackerPanel Attacker="current" NameInTitle="true" InitiallyExpanded="@(index == 0 || _expandOnAdd.Contains(current))"
+                                       Alternatives="entry.Alternatives" TitleNote="@VariantNote(entry)"
                                        Changed="() => OnAttackerChanged(current)" EditKeywords="EditKeywords"
                                        OnOpen="() => OpenAttackerAsync(entry)" OnSave="() => SaveAttackerAsync(current)"
                                        CanMoveUp="index > 0" CanMoveDown="index < Form.Entries.Count - 1"

@@ -13,11 +13,23 @@ namespace Wh40kSim.Simulation.Comparisons;
 /// L'écart de score avec le finaliste classé juste devant n'est pas significatif (dans le bruit de la simulation) ;
 /// toujours faux pour le premier et pour les éliminés.
 /// </param>
-public sealed record RankedEntry(int Rank, int Index, SimulationResult Result, int? EliminatedInRound, bool TiedWithPrevious)
+/// <param name="Variant">Variante classée : son attaquant d'origine et les profils choisis.</param>
+public sealed record RankedEntry(int Rank, int Index, SimulationResult Result, int? EliminatedInRound, bool TiedWithPrevious, ComparisonVariant Variant)
 {
     public string Name => Result.Scenario.Attacker.Name;
 
     public bool IsFinalist => EliminatedInRound is null;
+}
+
+/// <summary>
+/// Meilleurs profils d'un attaquant qui a des profils de rechange : ceux de sa variante la mieux classée.
+/// </summary>
+/// <param name="Entry">Numéro de l'attaquant dans la comparaison.</param>
+/// <param name="AttackerName">Nom de l'attaquant (sans les profils).</param>
+/// <param name="Best">Sa variante la mieux classée.</param>
+public sealed record BestProfiles(int Entry, string AttackerName, RankedEntry Best)
+{
+    public IReadOnlyList<ProfileChoice> Choices => Best.Variant.Choices;
 }
 
 /// <summary>
@@ -47,13 +59,8 @@ public sealed class ComparisonResult
 
         Data = data;
         Entries = data.Entries.Select(e => new SimulationResult(e.Simulation)).ToList();
-        var first = Entries[0].Scenario;
-        Comparison = new Comparison
-        {
-            Defender = first.Defender,
-            SnapShooting = first.Context.SnapShooting,
-            Entries = Entries.Select(e => new ComparisonEntry { Attacker = e.Scenario.Attacker, Context = e.Scenario.Context with { SnapShooting = false } }).ToList(),
-        };
+        Comparison = data.Comparison;
+        Variants = Comparison.Variants();
         _finalists = Enumerable.Range(0, Entries.Count).Where(i => data.Entries[i].EliminatedInRound is null).ToList();
 
         // Finalistes d'abord (round = nombre de rondes + 1), puis éliminés des dernières rondes aux premières ; par score dans chaque groupe
@@ -66,16 +73,31 @@ public sealed class ComparisonResult
         Ranking = ordered
             .Select((e, rank) => new RankedEntry(
                 rank + 1, e.index, e.result, data.Entries[e.index].EliminatedInRound,
-                rank > 0 && e.round == int.MaxValue && AreTied(ordered[rank - 1].result.EfficiencyScore, e.result.EfficiencyScore)))
+                rank > 0 && e.round == int.MaxValue && AreTied(ordered[rank - 1].result.EfficiencyScore, e.result.EfficiencyScore),
+                Variants[e.index]))
+            .ToList();
+        BestProfilesByAttacker = Comparison.Entries
+            .Select((entry, index) => (entry, index))
+            .Where(e => e.entry.Alternatives.Count > 0)
+            .Select(e => new BestProfiles(e.index, e.entry.Attacker.Name, Ranking.First(r => r.Variant.Entry == e.index)))
             .ToList();
     }
+
+    /// <summary>Variante de chaque entrée (dans le même ordre que <see cref="Entries"/>) : attaquant d'origine, profils choisis.</summary>
+    public IReadOnlyList<ComparisonVariant> Variants { get; }
+
+    /// <summary>
+    /// Pour chaque attaquant qui a des profils de rechange, dans l'ordre de saisie : les profils de sa variante la mieux
+    /// classée (le meilleur profil pour chaque arme).
+    /// </summary>
+    public IReadOnlyList<BestProfiles> BestProfilesByAttacker { get; }
 
     private readonly IReadOnlyList<int> _finalists;
 
     /// <summary>Compteurs bruts d'où ce résultat est calculé.</summary>
     public ComparisonData Data { get; }
 
-    /// <summary>Définition comparée (défenseur, situation, attaquants dans l'ordre de saisie).</summary>
+    /// <summary>Définition comparée (défenseur, overwatch, attaquants avec leur situation et leurs profils de rechange).</summary>
     public Comparison Comparison { get; }
 
     public DefenderUnit Defender => Comparison.Defender;
@@ -92,7 +114,7 @@ public sealed class ComparisonResult
     /// <summary>Durée totale du calcul, toutes rondes comprises.</summary>
     public TimeSpan Elapsed => Data.Elapsed;
 
-    /// <summary>Dernier résultat de chaque entrée, dans l'ordre de saisie (moins de simulations pour une entrée éliminée).</summary>
+    /// <summary>Dernier résultat de chaque variante, dans l'ordre de <see cref="Comparison.Variants"/> (moins de simulations pour une variante éliminée).</summary>
     public IReadOnlyList<SimulationResult> Entries { get; }
 
     /// <summary>Indices des finalistes (ordre de saisie) : seules entrées comparées entre elles pour les indicateurs.</summary>

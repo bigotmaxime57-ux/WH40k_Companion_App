@@ -490,6 +490,15 @@ path.wh-cmp-curve {
     fill: var(--mud-palette-text-primary);
 }
 
+/* Barre des profils d'une arme (comparateur) : un onglet par profil, puis « Ajouter un profil » */
+.wh-profile-bar {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+
 /* Titre d'un graphique du comparateur, centré au-dessus de lui */
 .wh-chart-title {
     justify-content: center;

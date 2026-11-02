@@ -983,7 +983,7 @@
     <value>Attaquants comparés ({0})</value>
   </data>
   <data name="Comparison_AttackersHelp" xml:space="preserve">
-    <value>Chaque attaquant est simulé contre le même défenseur, avec sa propre situation (dans sa carte, seulement si ses armes en ont besoin). Son nom, titre de la carte, le désigne dans les résultats : il doit être unique.</value>
+    <value>Chaque attaquant est simulé contre le même défenseur, avec sa propre situation (dans sa carte, seulement si ses armes en ont besoin). Son nom, titre de la carte, le désigne dans les résultats : il doit être unique. « Ajouter un profil » sur une arme lui donne des profils de rechange : chaque combinaison de profils devient une variante, comparée comme un attaquant. Enregistrer l'attaquant depuis sa carte ne garde que le premier profil de chaque arme (le fichier de comparaison les garde tous).</value>
   </data>
   <data name="Comparison_AddFromScenario" xml:space="preserve">
     <value>Depuis le scénario courant</value>
@@ -1164,5 +1164,29 @@
   </data>
   <data name="Comparison_StatWipeHelp" xml:space="preserve">
     <value>Probabilité de détruire toute l'unité en une activation.</value>
+  </data>
+  <data name="Comparison_RoundPlanVariants" xml:space="preserve">
+    <value>{0} variantes · {1}</value>
+  </data>
+  <data name="Comparison_VariantCount" xml:space="preserve">
+    <value>· {0} variantes</value>
+  </data>
+  <data name="Weapon_AddProfile" xml:space="preserve">
+    <value>Ajouter un profil</value>
+  </data>
+  <data name="Weapon_AddProfileHelp" xml:space="preserve">
+    <value>Profil de rechange de cette arme (même nombre de porteurs) : chaque combinaison de profils est comparée comme une variante de l'attaquant. Le nom du profil le désigne dans les résultats.</value>
+  </data>
+  <data name="Comparison_BestProfiles" xml:space="preserve">
+    <value>Meilleur profil par arme</value>
+  </data>
+  <data name="Comparison_BestProfilesHelp" xml:space="preserve">
+    <value>Pour chaque attaquant qui a des profils de rechange : les profils de sa variante la mieux classée.</value>
+  </data>
+  <data name="Comparison_BestProfileLine" xml:space="preserve">
+    <value>{0} → {1}</value>
+  </data>
+  <data name="Comparison_BestVariantRank" xml:space="preserve">
+    <value>variante classée {0}e</value>
   </data>
 </root>

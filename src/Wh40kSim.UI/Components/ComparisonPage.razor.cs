@@ -74,15 +74,28 @@ public partial class ComparisonPage
 
     private string FileLabel => (State.FileName ?? L["Comparison_Untitled"]) + (State.IsDirty ? " *" : "");
 
-    /// <summary>« 12 attaquants : 3 rondes (10 000 · 100 000 · 1 000 000) ».</summary>
+    /// <summary>
+    /// « 3 ronde(s) : 10 000 · 100 000 · 1 000 000 simulations », précédé du nombre de variantes quand des profils de
+    /// rechange en ajoutent (ce sont elles que les rondes comptent).
+    /// </summary>
     private string RoundPlanLabel
     {
         get
         {
-            var plan = RoundPlan.For(Math.Max(1, Form.Entries.Count), Math.Max(1, State.Iterations));
-            return L["Comparison_RoundPlan", plan.Count, string.Join(" · ", plan.Select(r => r.ToString("N0")))];
+            int variants = Form.Entries.Sum(e => e.VariantCount);
+            var plan = RoundPlan.For(Math.Max(1, variants), Math.Max(1, State.Iterations));
+            string rounds = L["Comparison_RoundPlan", plan.Count, string.Join(" · ", plan.Select(r => r.ToString("N0")))];
+            return variants > Form.Entries.Count ? L["Comparison_RoundPlanVariants", variants, rounds] : rounds;
         }
     }
+
+    /// <summary>« 4 variantes » sur la carte d'un attaquant à profils de rechange ; null sans.</summary>
+    private string? VariantNote(ComparisonEntryForm entry) =>
+        entry.VariantCount > 1 ? L["Comparison_VariantCount", entry.VariantCount].Value : null;
+
+    /// <summary>Attaquant (et entrée) auquel appartient une arme ou un profil de rechange ; null s'il n'existe plus.</summary>
+    private ComparisonEntryForm? OwnerOf(WeaponForm weapon) =>
+        Form.Entries.FirstOrDefault(e => e.Attacker.Weapons.Contains(weapon) || e.Alternatives.Values.Any(p => p.Contains(weapon)));
 
     protected override void OnInitialized()
     {
@@ -163,7 +176,8 @@ public partial class ComparisonPage
             HasDiceErrors = true;
         }
 
-        if (KeywordWeapon is not null && !Form.Attackers.Any(a => a.Weapons.Contains(KeywordWeapon)))
+        // L'arme (ou le profil de rechange) dont les mots-clés étaient ouverts a été supprimée
+        if (KeywordWeapon is not null && OwnerOf(KeywordWeapon) is null)
         {
             KeywordWeapon = null;
         }
@@ -185,9 +199,9 @@ public partial class ComparisonPage
 
     private void OnKeywordsChanged()
     {
-        if (Form.Attackers.FirstOrDefault(a => KeywordWeapon is not null && a.Weapons.Contains(KeywordWeapon)) is { } owner)
+        if (KeywordWeapon is not null && OwnerOf(KeywordWeapon) is { } owner)
         {
-            OnAttackerChanged(owner);
+            OnAttackerChanged(owner.Attacker);
         }
         else
         {
@@ -302,20 +316,19 @@ public partial class ComparisonPage
         Add(new AttackerUnit { Weapons = [weapon] }, null, expand: true);
     }
 
-    /// <summary>Copie d'un attaquant et de sa situation, juste après lui.</summary>
+    /// <summary>Copie d'un attaquant, de sa situation et de ses profils de rechange, juste après lui.</summary>
     private void Duplicate(ComparisonEntryForm entry)
     {
-        AttackerUnit attacker;
+        ComparisonEntryForm copy;
         try
         {
-            attacker = entry.Attacker.ToAttackerUnit();
+            copy = entry.Clone();
         }
         catch (FormatException)
         {
             ShowMessage(L["Comparison_AttackerUnreadable", entry.Attacker.Name], Severity.Warning);
             return;
         }
-        var copy = new ComparisonEntryForm(new AttackerForm(attacker), new ContextForm(entry.Context.ToAttackContext()));
         copy.Attacker.Name = Form.UniqueName(entry.Attacker.Name);
         Form.Entries.Insert(Form.Entries.IndexOf(entry) + 1, copy);
         OnChanged();
@@ -360,6 +373,7 @@ public partial class ComparisonPage
         var loaded = new AttackerForm(file.Attacker);
         loaded.Name = Form.UniqueName(loaded.Name, except: entry.Attacker);
         entry.Attacker = loaded;
+        entry.Alternatives.Clear();   // profils de rechange de l'ancien attaquant, sans objet
         if (file.Context is { } context)
         {
             entry.Context = new ContextForm(context with { SnapShooting = false });

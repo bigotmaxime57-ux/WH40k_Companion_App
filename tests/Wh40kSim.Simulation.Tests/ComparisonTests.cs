@@ -125,7 +125,7 @@ public class ComparisonTests
         Assert.True(copy.Entries[0].Context.Charged);
         var root = JsonNode.Parse(json)!.AsObject();
         Assert.Equal(["defender", "snapShooting", "entries"], root.Select(p => p.Key));
-        Assert.Equal(["attacker", "context"], root["entries"]![0]!.AsObject().Select(p => p.Key));
+        Assert.Equal(["attacker", "context", "alternatives"], root["entries"]![0]!.AsObject().Select(p => p.Key));
     }
 
     [Fact]
@@ -315,19 +315,141 @@ public class ComparisonTests
     [Fact]
     public void Inconsistent_data_are_rejected()
     {
-        var result = Comparator.Run(Of(Attacker("A", 3), Attacker("B", 20)), 1_000, seed: 7);
-        var other = Comparator.Run(Of(Attacker("A", 3), Attacker("B", 20)), 1_000, seed: 8);
-        var otherDefender = Comparator.Run(Of(Attacker("A", 3), Attacker("B", 20)) with { Defender = Build.Horde() }, 1_000, seed: 7);
+        var data = Comparator.Run(Of(Attacker("A", 3), Attacker("B", 20)), 1_000, seed: 7).Data;
+        var other = Comparator.Run(Of(Attacker("A", 3), Attacker("B", 20)), 1_000, seed: 8).Data;
+        var otherDefender = Comparator.Run(Of(Attacker("A", 3), Attacker("B", 20)) with { Defender = Build.Horde() }, 1_000, seed: 7).Data;
 
-        Assert.Contains("graine différente", Errors(result.Data.Entries[0], other.Data.Entries[1]));
-        Assert.Contains("défenseur différent", Errors(result.Data.Entries[0], otherDefender.Data.Entries[1]));
-        Assert.Contains("unique", Errors(result.Data.Entries[0], result.Data.Entries[0]));
-        Assert.Contains("au moins 2", Errors(result.Data.Entries[0]));
-        Assert.Throws<ArgumentException>(() => new ComparisonResult(result.Data with { Entries = [result.Data.Entries[0]] }));
+        Assert.Empty(data.Validate());
+        Assert.Contains("graine différente", Errors(data with { Entries = [data.Entries[0], other.Entries[1]] }));
+        Assert.Contains("scénario différent", Errors(data with { Entries = [data.Entries[0], otherDefender.Entries[1]] }));
+        Assert.Contains("une par variante", Errors(data with { Entries = [data.Entries[0]] }));
+        Assert.Contains("unique", Errors(data with { Comparison = Of(Attacker("A", 3), Attacker("A", 20)) }));
+        Assert.Throws<ArgumentException>(() => new ComparisonResult(data with { Entries = [data.Entries[0]] }));
     }
 
-    private static string Errors(params ComparisonEntryData[] entries) =>
-        string.Join(" | ", new ComparisonData { Rounds = [1_000], Elapsed = TimeSpan.Zero, Entries = entries }.Validate());
+    private static string Errors(ComparisonData data) => string.Join(" | ", data.Validate());
+
+    // Armes à plusieurs profils
+
+    private static WeaponProfile Profile(string name, int attacks, int strength = 4) => new() { Name = name, Attacks = attacks, Skill = 3, Strength = strength };
+
+    /// <summary>Attaquant à deux armes : Plasma (2 profils de rechange) et Pistolet (1 profil de rechange).</summary>
+    private static ComparisonEntry Hellblasters => new()
+    {
+        Attacker = new AttackerUnit
+        {
+            Name = "Hellblasters",
+            Weapons =
+            [
+                new WeaponGroup { ModelCount = 5, Weapon = Profile("Plasma", 2, 7) },
+                new WeaponGroup { ModelCount = 1, Weapon = Profile("Pistolet", 1) },
+            ],
+        },
+        Context = new AttackContext { HalfRange = true },
+        Alternatives =
+        [
+            new WeaponAlternatives { Weapon = 0, Profiles = [Profile("Plasma (surchargé)", 2, 8), Profile("Plasma (rafale)", 3, 7)] },
+            new WeaponAlternatives { Weapon = 1, Profiles = [Profile("Pistolet (surchargé)", 1, 8)] },
+        ],
+    };
+
+    [Fact]
+    public void An_entry_unfolds_into_every_combination_of_profiles()
+    {
+        var comparison = new Comparison { Defender = Squad, Entries = [Hellblasters, new ComparisonEntry { Attacker = Attacker("Bolters", 10) }] };
+
+        var variants = comparison.Variants();
+
+        Assert.Equal(7, variants.Count);   // 3 × 2 combinaisons + Bolters
+        Assert.Equal("Hellblasters · Plasma, Pistolet", variants[0].Name);
+        Assert.Equal("Hellblasters · Plasma (rafale), Pistolet (surchargé)", variants[5].Name);
+        Assert.Equal("Bolters", variants[6].Name);
+        Assert.Equal(["Plasma (rafale)", "Pistolet (surchargé)"], variants[5].Scenario.Attacker.Weapons.Select(w => w.Weapon.Name));
+        Assert.Equal([5, 1], variants[5].Scenario.Attacker.Weapons.Select(w => w.ModelCount));
+        Assert.All(variants.Take(6), v => Assert.Equal(0, v.Entry));
+        Assert.All(variants.Take(6), v => Assert.True(v.Scenario.Context.HalfRange));
+        Assert.Equal([new ProfileChoice(0, "Plasma", "Plasma (rafale)"), new ProfileChoice(1, "Pistolet", "Pistolet (surchargé)")], variants[5].Choices);
+        Assert.Empty(variants[6].Choices);
+        Assert.Empty(comparison.Validate());
+    }
+
+    [Fact]
+    public void A_single_attacker_with_alternative_profiles_is_enough()
+    {
+        Assert.Empty(new Comparison { Defender = Squad, Entries = [Hellblasters] }.Validate());
+        Assert.Contains("au moins 2", Assert.Single(Of(Attacker("A", 3)).Validate()));
+    }
+
+    [Fact]
+    public void Invalid_alternative_profiles_are_rejected()
+    {
+        var entry = Hellblasters;
+        string Errors(params WeaponAlternatives[] alternatives) =>
+            string.Join(" | ", new Comparison { Defender = Squad, Entries = [entry with { Alternatives = alternatives }] }.Validate());
+
+        Assert.Contains("n'existe pas", Errors(new WeaponAlternatives { Weapon = 5, Profiles = [Profile("X", 1)] }));
+        Assert.Contains("aucun", Errors(new WeaponAlternatives { Weapon = 0, Profiles = [] }));
+        Assert.Contains("s'appellent 'Plasma'", Errors(new WeaponAlternatives { Weapon = 0, Profiles = [Profile("plasma ", 3)] }));
+        Assert.Contains("CT/CC", Errors(new WeaponAlternatives { Weapon = 0, Profiles = [Profile("Plasma (cassé)", 2) with { Skill = 9 }] }));
+        Assert.Contains("plusieurs fois", Errors(
+            new WeaponAlternatives { Weapon = 0, Profiles = [Profile("P2", 1)] }, new WeaponAlternatives { Weapon = 0, Profiles = [Profile("P3", 1)] }));
+    }
+
+    [Fact]
+    public void Alternative_profiles_survive_the_json_round_trip()
+    {
+        var comparison = new Comparison { Defender = Squad, Entries = [Hellblasters] };
+        string json = ComparisonJson.Serialize(comparison);
+
+        var copy = ComparisonJson.Deserialize(json);
+
+        Assert.Equal(json, ComparisonJson.Serialize(copy));
+        Assert.Equal(6, copy.Variants().Count);
+        var root = JsonNode.Parse(json)!.AsObject();
+        Assert.Equal(2, root["entries"]![0]!["alternatives"]!.AsArray().Count);
+    }
+
+    [Fact]
+    public void Alternative_profiles_are_optional_in_json()
+    {
+        var root = JsonNode.Parse(ComparisonJson.Serialize(Of(Attacker("A", 5), Attacker("B", 10))))!.AsObject();
+        root["entries"]![0]!.AsObject().Remove("alternatives");
+
+        Assert.Empty(ComparisonJson.Deserialize(root.ToJsonString()).Entries[0].Alternatives);
+    }
+
+    [Fact]
+    public void Variants_compete_and_the_best_profile_of_each_weapon_is_given()
+    {
+        var entry = new ComparisonEntry
+        {
+            Attacker = Attacker("Escouade", 3),
+            Alternatives = [new WeaponAlternatives { Weapon = 0, Profiles = [Profile("Bolter (rafale)", 12), Profile("Bolter (lourd)", 6)] }],
+        };
+        var comparison = new Comparison { Defender = Squad, Entries = [entry, new ComparisonEntry { Attacker = Attacker("Autre", 1) }] };
+
+        var result = Comparator.Run(comparison, Iterations, seed: 7);
+
+        Assert.Equal(4, result.Entries.Count);
+        Assert.Equal("Escouade · Bolter (rafale)", result.Ranking[0].Name);
+        Assert.Equal(["Escouade · Bolter (rafale)", "Escouade · Bolter (lourd)", "Escouade · Bolter"], result.Podium.Select(r => r.Name));
+        var best = Assert.Single(result.BestProfilesByAttacker);
+        Assert.Equal("Escouade", best.AttackerName);
+        Assert.Equal("Bolter (rafale)", Assert.Single(best.Choices).Profile);
+        Assert.Equal(1, result.Ranking.Single(r => r.Name == "Autre").Variant.Entry);
+        // Données refaites à l'identique depuis le JSON de la définition
+        Assert.Equal(result.Ranking.Select(r => r.Name), new ComparisonResult(result.Data).Ranking.Select(r => r.Name));
+    }
+
+    [Fact]
+    public void The_round_plan_counts_the_variants()
+    {
+        var comparison = new Comparison { Defender = Squad, Entries = [Hellblasters] };   // 6 variantes
+
+        var result = Comparator.Run(comparison, 100_000, seed: 7);
+
+        Assert.Equal([10_000, 100_000], result.Rounds);
+    }
 
     /// <summary>JSON des données sans la durée, seule à changer d'un calcul à l'autre.</summary>
     private static string Comparable(SimulationData data) => SimulationJson.Serialize(data with { Elapsed = TimeSpan.Zero });
